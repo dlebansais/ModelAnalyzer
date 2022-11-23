@@ -122,4 +122,43 @@ class Program
 }
 ");
     }
+
+    [TestMethod]
+    public async Task ClassWithNoMembers_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+}
+");
+    }
+
+    [TestMethod]
+    public async Task ClassWithFieldMember_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+}
+");
+    }
+
+    [TestMethod]
+    public async Task ClassWithTwoFieldMembers_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+    int Y;
+}
+");
+    }
 }
