@@ -47,14 +47,10 @@ public class ClassModelCodeFixProvider : CodeFixProvider
             diagnostic);
     }
 
-    private static int Session = 0;
-
     private static async Task<Document> ClassModelAsync(Document document,
         ClassDeclarationSyntax classDeclaration,
         CancellationToken cancellationToken)
     {
-        int LocalSession = Session++;
-
         // Add a comment to the leading trivia.
         SyntaxToken firstToken = classDeclaration.GetFirstToken();
         SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
