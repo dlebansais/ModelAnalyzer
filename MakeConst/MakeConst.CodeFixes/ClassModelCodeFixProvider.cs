@@ -62,16 +62,6 @@ public class ClassModelCodeFixProvider : CodeFixProvider
         SyntaxTrivia endOfLineTrivia = SyntaxFactory.EndOfLine(string.Empty);
         SyntaxTriviaList modifiedTrivia = leadingTrivia.Add(commentTrivia).Add(endOfLineTrivia);
 
-        foreach (SyntaxTrivia Trivia in leadingTrivia)
-        {
-            Logger.Log($"#{LocalSession} Old: {Trivia.Kind()}");
-        }
-
-        foreach (SyntaxTrivia Trivia in modifiedTrivia)
-        {
-            Logger.Log($"#{LocalSession} New: {Trivia.Kind()}");
-        }
-
         ClassDeclarationSyntax newClassDeclaration = classDeclaration.ReplaceToken(
             firstToken, firstToken.WithLeadingTrivia(modifiedTrivia));
 
