@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class Identifier
+public class Parameter
 {
     public required string Name { get; set; }
 }

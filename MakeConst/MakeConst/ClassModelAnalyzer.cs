@@ -1,6 +1,8 @@
 ﻿namespace DemoAnalyzer;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,8 +38,16 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        if (IsClassDeclarationSupported(classDeclaration) && AreAllMembersSupported(classDeclaration))
+        string Name = classDeclaration.Identifier.ValueText;
+        Debug.Assert(Name != string.Empty);
+
+        ClassModel ClassModel = new() { Name = Name };
+
+        if (IsClassDeclarationSupported(classDeclaration) && AreAllMembersSupported(classDeclaration, ClassModel))
+        {
+            ClassModelManager.Instance.Update(ClassModel);
             return;
+        }
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }
@@ -66,7 +76,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         foreach (SyntaxToken Modifier in classDeclaration.Modifiers)
         {
             SyntaxKind Kind = Modifier.Kind();
-            if (Kind != SyntaxKind.PrivateKeyword && Kind != SyntaxKind.PublicKeyword && Kind != SyntaxKind.PartialKeyword)
+            if (Kind != SyntaxKind.PrivateKeyword && Kind != SyntaxKind.PublicKeyword && Kind != SyntaxKind.InternalKeyword && Kind != SyntaxKind.PartialKeyword)
                 return false;
         }
 
@@ -82,29 +92,29 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         return true;
     }
 
-    private static bool AreAllMembersSupported(ClassDeclarationSyntax classDeclaration)
+    private static bool AreAllMembersSupported(ClassDeclarationSyntax classDeclaration, ClassModel classModel)
     {
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
-            if (!IsMemberSupported(Member))
+            if (!IsMemberSupported(Member, classModel))
                 return false;
 
         return true;
     }
 
-    private static bool IsMemberSupported(MemberDeclarationSyntax member)
+    private static bool IsMemberSupported(MemberDeclarationSyntax member, ClassModel classModel)
     {
         switch (member)
         {
             case FieldDeclarationSyntax AsField:
-                return IsFieldSupported(AsField);
+                return IsFieldSupported(AsField, classModel);
             case MethodDeclarationSyntax AsMethod:
-                return IsMethodSupported(AsMethod);
+                return IsMethodSupported(AsMethod, classModel);
             default:
                 return false;
         }
     }
 
-    private static bool IsFieldSupported(FieldDeclarationSyntax field)
+    private static bool IsFieldSupported(FieldDeclarationSyntax field, ClassModel classModel)
     {
         if (field.AttributeLists.Count > 0)
             return false;
@@ -116,13 +126,29 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
                 return false;
         }
 
-        if (!IsTypeSupported(field.Declaration.Type))
+        if (!IsTypeSupported(field.Declaration.Type, out bool IsVoid))
             return false;
+
+        VariableDeclarationSyntax Declaration = field.Declaration;
+
+        foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
+        {
+            string Name = Variable.Identifier.ValueText;
+
+            if (Variable.ArgumentList is BracketedArgumentListSyntax BracketedArgumentList && BracketedArgumentList.Arguments.Count > 0)
+                return false;
+
+            if (Variable.Initializer is not null)
+                return false;
+
+            Field NewField = new() { Name = new FieldName(Name) };
+            classModel.FieldTable.Add(NewField.Name, NewField);
+        }
 
         return true;
     }
 
-    private static bool IsMethodSupported(MethodDeclarationSyntax method)
+    private static bool IsMethodSupported(MethodDeclarationSyntax method, ClassModel classModel)
     {
         if (method.AttributeLists.Count > 0)
             return false;
@@ -130,29 +156,40 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         foreach (SyntaxToken Modifier in method.Modifiers)
         {
             SyntaxKind Kind = Modifier.Kind();
-            if (Kind != SyntaxKind.PrivateKeyword && Kind != SyntaxKind.PublicKeyword)
+            if (Kind != SyntaxKind.PrivateKeyword && Kind != SyntaxKind.PublicKeyword && Kind != SyntaxKind.InternalKeyword)
                 return false;
         }
 
-        if (!IsTypeSupported(method.ReturnType))
+        if (!IsTypeSupported(method.ReturnType, out bool IsVoidReturn))
             return false;
 
-        if (!AreAllMethodParametersSupported(method))
+        List<string> ParameterNameList = new();
+
+        if (!AreAllMethodParametersSupported(method, ParameterNameList))
             return false;
+
+        string Name = method.Identifier.ValueText;
+
+        Dictionary<string, Parameter> ParameterTable = new();
+        foreach (string ParameterName in ParameterNameList)
+            ParameterTable.Add(ParameterName, new Parameter() { Name = ParameterName });
+
+        Method NewMethod = new() { Name = new MethodName(Name), HasReturnValue = !IsVoidReturn, ParameterTable = ParameterTable };
+        classModel.MethodTable.Add(NewMethod.Name, NewMethod);
 
         return true;
     }
 
-    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method)
+    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, List<string> parameterNameList)
     {
         foreach (ParameterSyntax Parameter in method.ParameterList.Parameters)
-            if (!IsParameterSupported(Parameter))
+            if (!IsParameterSupported(Parameter, parameterNameList))
                 return false;
 
         return true;
     }
 
-    private static bool IsParameterSupported(ParameterSyntax parameter)
+    private static bool IsParameterSupported(ParameterSyntax parameter, List<string> parameterNameList)
     {
         if (parameter.AttributeLists.Count > 0)
             return false;
@@ -160,14 +197,19 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (parameter.Modifiers.Count > 0)
             return false;
 
-        if (!IsTypeSupported(parameter.Type))
+        if (!IsTypeSupported(parameter.Type, out _))
             return false;
+
+        string Name = parameter.Identifier.ValueText;
+        parameterNameList.Add(Name);
 
         return true;
     }
 
-    private static bool IsTypeSupported(TypeSyntax type)
+    private static bool IsTypeSupported(TypeSyntax type, out bool isVoid)
     {
+        isVoid = false;
+
         if (type is not PredefinedTypeSyntax AsPredefinedType)
             return false;
 
@@ -175,6 +217,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (TypeKind != SyntaxKind.IntKeyword && TypeKind != SyntaxKind.VoidKeyword)
             return false;
 
+        isVoid = TypeKind == SyntaxKind.VoidKeyword;
         return true;
     }
 }

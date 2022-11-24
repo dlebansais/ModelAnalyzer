@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 
-public class ClassModel
+public record ClassModel
 {
-    public List<Identifier> FieldIdentifierList { get; set; } = new();
+    public required string Name { get; init; }
+    public Dictionary<FieldName, Field> FieldTable { get; } = new();
+    public Dictionary<MethodName, Method> MethodTable { get; } = new();
 }

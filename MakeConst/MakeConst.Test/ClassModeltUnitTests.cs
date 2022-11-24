@@ -143,6 +143,42 @@ class Program
     }
 
     [TestMethod]
+    public async Task ClassWithPublicModifier_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+public class Program
+{
+}
+");
+    }
+
+    [TestMethod]
+    public async Task ClassWithInternalModifier_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+internal class Program
+{
+}
+");
+    }
+
+    [TestMethod]
+    public async Task ClassWithPartialModifier_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+partial class Program
+{
+}
+");
+    }
+
+    [TestMethod]
     public async Task ClassWithUnsupportedModifierCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -277,7 +313,7 @@ class Program
     }
 
     [TestMethod]
-    public async Task ClassWithSupportedFieldModifier_NoDiagnostic()
+    public async Task ClassWithPrivateFieldModifier_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -405,6 +441,35 @@ class Program
     }
 
     [TestMethod]
+    public async Task ClassWithMethodAttributeCouldHaveAModel_Diagnostic()
+    {
+        await VerifyCS.VerifyCodeFixAsync(@"
+using System;
+
+class [|Program|]
+{
+    [MTAThread]
+    int Read()
+    {
+        return 0;
+    }
+}
+", @"
+using System;
+
+// No model
+class Program
+{
+    [MTAThread]
+    int Read()
+    {
+        return 0;
+    }
+}
+");
+    }
+
+    [TestMethod]
     public async Task ClassWithPrivateMethodMember_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -437,27 +502,14 @@ class Program
     }
 
     [TestMethod]
-    public async Task ClassWithMethodAttributeCouldHaveAModel_Diagnostic()
+    public async Task ClassWithInternalMethodMember_NoDiagnostic()
     {
-        await VerifyCS.VerifyCodeFixAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program|]
-{
-    [MTAThread]
-    int Read()
-    {
-        return 0;
-    }
-}
-", @"
-using System;
-
-// No model
 class Program
 {
-    [MTAThread]
-    int Read()
+    internal int Read()
     {
         return 0;
     }
