@@ -129,6 +129,18 @@
     <value>Class can be modeled</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="InvariantViolationAnalyzerDescription" xml:space="preserve">
+    <value>Class invariant is violated</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="InvariantViolationAnalyzerMessageFormat" xml:space="preserve">
+    <value>Class '{0}' invariant is violated</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="InvariantViolationAnalyzerTitle" xml:space="preserve">
+    <value>Class invariant is violated</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="MakeConstAnalyzerDescription" xml:space="preserve">
     <value>Variables that are not modified should be made constants.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>

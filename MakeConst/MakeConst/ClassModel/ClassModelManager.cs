@@ -1,7 +1,7 @@
 ﻿namespace DemoAnalyzer;
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 public class ClassModelManager
@@ -9,6 +9,7 @@ public class ClassModelManager
     public static ClassModelManager Instance = new();
 
     private Dictionary<string, ClassModel> ClassTable = new();
+    private Dictionary<string, bool> ViolationTable = new();
     private Thread? ModelThread = null;
     private bool ThreadShouldBeRestarted;
 
@@ -32,38 +33,61 @@ public class ClassModelManager
 
     private void ExecuteThread()
     {
-        List<ClassModel> ClassModelList = new();
-
-        lock (ClassTable)
+        try
         {
-            foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
+            List<ClassModel> ClassModelList = new();
+
+            lock (ClassTable)
             {
-                ClassModel Original = Entry.Value;
-                ClassModel Clone = Original with { };
+                foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
+                {
+                    ClassModel Original = Entry.Value;
+                    ClassModel Clone = Original with { };
 
-                Debug.Assert(Original != Clone);
-
-                ClassModelList.Add(Clone);
+                    ClassModelList.Add(Clone);
+                }
             }
+
+            foreach (ClassModel Item in ClassModelList)
+                Item.Verify();
+
+            Thread.Sleep(1000);
+
+            bool Restart = false;
+
+            lock (ClassTable)
+            {
+                ModelThread = null;
+
+                if (ThreadShouldBeRestarted)
+                    Restart = true;
+            }
+
+            if (Restart)
+                StartThread();
         }
-
-        foreach (ClassModel Item in ClassModelList)
-            Item.Verify();
-
-        Thread.Sleep(1000);
-
-        bool Restart = false;
-
-        lock (ClassTable)
+        catch (Exception e)
         {
-            ModelThread = null;
-
-            if (ThreadShouldBeRestarted)
-                Restart = true;
+            Logger.Log(e.Message);
+            Logger.Log(e.StackTrace);
         }
+    }
 
-        if (Restart)
-            StartThread();
+    public bool IsInvariantViolated(string name)
+    {
+        lock (ViolationTable)
+        {
+            return ViolationTable.ContainsKey(name) && ViolationTable[name] == true;
+        }
+    }
+
+    public void SetIsInvariantViolated(string name, bool isInvariantViolated)
+    {
+        lock (ViolationTable)
+        {
+            if (ViolationTable.ContainsKey(name))
+                ViolationTable[name] = isInvariantViolated;
+        }
     }
 
     public void Update(ClassModel classModel)
@@ -92,6 +116,7 @@ public class ClassModelManager
             if (!IsFound)
             {
                 ClassTable.Add(classModel.Name, classModel);
+                ViolationTable.Add(classModel.Name, false);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -32,14 +33,27 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
-        var classDeclaration = (ClassDeclarationSyntax)context.Node;
+        try
+        {
+            var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
+            AnalyzeClass(context, ClassDeclaration);
+        }
+        catch (Exception e)
+        {
+            Logger.Log(e.Message);
+            Logger.Log(e.StackTrace);
+        }
+    }
 
+    private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    {
         // Check whether the class can be modeled
         if (IsClassIgnoredForModeling(classDeclaration))
             return;
 
         string Name = classDeclaration.Identifier.ValueText;
-        Debug.Assert(Name != string.Empty);
+        if (Name == string.Empty)
+            return;
 
         ClassModel ClassModel = new() { Name = Name };
 

@@ -8,15 +8,18 @@ public record ClassModel
     public Dictionary<FieldName, Field> FieldTable { get; } = new();
     public Dictionary<MethodName, Method> MethodTable { get; } = new();
 
-    public bool IsValid { get; private set; }
-
     public void Verify()
     {
-        IsValid = true;
+        bool IsInvariantViolated = false;
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Name == "XYZ")
-                IsValid = false;
+            {
+                IsInvariantViolated = true;
+                break;
+            }
+
+        ClassModelManager.Instance.SetIsInvariantViolated(Name, IsInvariantViolated);
     }
 
     public override string ToString()

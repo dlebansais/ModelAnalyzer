@@ -39,7 +39,7 @@ namespace DemoAnalyzer {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MakeConst.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DemoAnalyzer.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -84,6 +84,33 @@ namespace DemoAnalyzer {
         internal static string ClassModelAnalyzerTitle {
             get {
                 return ResourceManager.GetString("ClassModelAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class invariant is violated.
+        /// </summary>
+        internal static string InvariantViolationAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("InvariantViolationAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class &apos;{0}&apos; invariant is violated.
+        /// </summary>
+        internal static string InvariantViolationAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("InvariantViolationAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class invariant is violated.
+        /// </summary>
+        internal static string InvariantViolationAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("InvariantViolationAnalyzerTitle", resourceCulture);
             }
         }
         
