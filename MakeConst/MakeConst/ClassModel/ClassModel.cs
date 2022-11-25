@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.CodeAnalysis.Text;
+using System.Xml.Linq;
 
 public record ClassModel
 {
@@ -45,7 +47,7 @@ public record ClassModel
             CheckUnsupportedMembers(classDeclaration, ref IsSupported);
             FieldTable = ParseFields(classDeclaration, ref IsSupported);
             MethodTable = ParseMethods(classDeclaration, ref IsSupported);
-            InvariantList = ParseInvariants(classDeclaration, ref IsSupported);
+            InvariantList = ParseInvariants(classDeclaration, FieldTable, ref IsSupported);
         }
 
         return new ClassModel
@@ -213,7 +215,7 @@ public record ClassModel
         return true;
     }
 
-    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
+    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, ref bool isSupported)
     {
         List<IInvariant> InvariantList = new();
 
@@ -223,19 +225,19 @@ public record ClassModel
         if (LastToken.HasTrailingTrivia)
         {
             SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
-            AddInvariantsInTrivia(InvariantList, TrailingTrivia, ref isSupported);
+            AddInvariantsInTrivia(InvariantList, fieldTable, TrailingTrivia, ref isSupported);
             Location = TrailingTrivia.Last().GetLocation();
         }
 
         var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
 
         if (NextToken.HasLeadingTrivia)
-            AddInvariantsInTrivia(InvariantList, NextToken.LeadingTrivia, ref isSupported);
+            AddInvariantsInTrivia(InvariantList, fieldTable, NextToken.LeadingTrivia, ref isSupported);
 
         return InvariantList;
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, SyntaxTriviaList triviaList, ref bool isSupported)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTriviaList triviaList, ref bool isSupported)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -244,27 +246,33 @@ public record ClassModel
                 string Pattern = $"// {Modeling.Invariant}";
 
                 if (Comment.StartsWith(Pattern))
-                    AddInvariantsInTrivia(invariantList, Trivia, Comment.Substring(Pattern.Length), ref isSupported);
+                    AddInvariantsInTrivia(invariantList, fieldTable, Trivia, Comment, Pattern, ref isSupported);
             }
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, SyntaxTrivia trivia, string text, ref bool isSupported)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTrivia trivia, string comment, string pattern, ref bool isSupported)
     {
+        string Text = comment.Substring(pattern.Length);
+
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
+        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {Text};", Options);
         var Diagnostics = SyntaxTree.GetDiagnostics();
         List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(SyntaxTree, out string FieldName, out string Operator, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out string FieldName, out string Operator, out int ConstantValue))
         {
-            NewInvariant = new Invariant { Text = text, FieldName = FieldName, Operator = Operator, ConstantValue = ConstantValue };
+            NewInvariant = new Invariant { Text = Text, FieldName = FieldName, Operator = Operator, ConstantValue = ConstantValue };
         }
         else
         {
-            Location Location = trivia.GetLocation();
-            NewInvariant = new UnsupportedInvariant { Text = text, Location = Location };
+            Location FullLocation = trivia.GetLocation();
+            TextSpan FullSpan = FullLocation.SourceSpan;
+            TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);
+            Location Location = Location.Create(FullLocation.SourceTree!, InvariantSpan);
+
+            NewInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
             isSupported = false;
         }
 
@@ -272,7 +280,7 @@ public record ClassModel
         isSupported = false;
     }
 
-    private static bool IsValidInvariantSyntaxTree(SyntaxTree syntaxTree, out string fieldName, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out string fieldName, out string operatorText, out int constantValue)
     {
         fieldName = string.Empty;
         operatorText = string.Empty;
@@ -288,10 +296,10 @@ public record ClassModel
             return false;
 
         ExpressionSyntax Expression = AssignmentExpression.Right;
-        return IsValidInvariantExpression(Expression, out fieldName, out operatorText, out constantValue);
+        return IsValidInvariantExpression(fieldTable,  Expression, out fieldName, out operatorText, out constantValue);
     }
 
-    private static bool IsValidInvariantExpression(ExpressionSyntax expression, out string fieldName, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out string fieldName, out string operatorText, out int constantValue)
     {
         fieldName = string.Empty;
         operatorText = string.Empty;
@@ -311,6 +319,16 @@ public record ClassModel
             return false;
 
         fieldName = IdentifierName.Identifier.ValueText;
+
+        bool IsFound = false;
+        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
+            if (Entry.Value is Field ValidField && ValidField.Name.Name == fieldName)
+            {
+                IsFound = true;
+                break;
+            }
+        if (!IsFound)
+            return false;
 
         if (!Operator.IsKind(SyntaxKind.EqualsEqualsToken) &&
             !Operator.IsKind(SyntaxKind.ExclamationEqualsToken) &&
