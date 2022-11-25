@@ -11,14 +11,13 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Simplification;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ClassModelCodeFixProvider)), Shared]
 public class ClassModelCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds
     {
-        get { return ImmutableArray.Create(ClassModelAnalyzer.DiagnosticId); }
+        get { return ImmutableArray.Create(ClassModelAnalyzer.ClassModelDiagnosticId); }
     }
 
     public sealed override FixAllProvider GetFixAllProvider()

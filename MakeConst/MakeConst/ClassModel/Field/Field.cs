@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class Field
+public class Field : IField
 {
     public required FieldName Name { get; init; }
 }

@@ -61,6 +61,33 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bad invariant..
+        /// </summary>
+        internal static string BadInvariantAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadInvariantAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invariant &apos;{0}&apos; is invalid.
+        /// </summary>
+        internal static string BadInvariantAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadInvariantAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class invariant is invalid.
+        /// </summary>
+        internal static string BadInvariantAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadInvariantAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Class should support a model..
         /// </summary>
         internal static string ClassModelAnalyzerDescription {

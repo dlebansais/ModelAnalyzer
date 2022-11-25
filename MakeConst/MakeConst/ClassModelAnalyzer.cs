@@ -3,8 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,16 +11,21 @@ using Microsoft.CodeAnalysis.Diagnostics;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassModelAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "ClassModel";
-
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
     private const string Category = "Design";
 
-    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+    public const string ClassModelDiagnosticId = "ClassModel";
+    private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString ClassModelMessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString ClassModelDescription = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor ClassModelRule = new DiagnosticDescriptor(ClassModelDiagnosticId, ClassModelTitle, ClassModelMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: ClassModelDescription);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
+    {
+        get
+        {
+            return ImmutableArray.Create(ClassModelRule);
+        }
+    }
 
     public override void Initialize(AnalysisContext context)
     {
@@ -48,44 +51,22 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Check whether the class can be modeled
-        if (IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        string Name = classDeclaration.Identifier.ValueText;
-        if (Name == string.Empty)
-            return;
-
-        List<string> InvariantList = ParseInvariants(classDeclaration);
-        ClassModel ClassModel = new() { Name = Name, InvariantList = InvariantList };
-
-        if (IsClassDeclarationSupported(classDeclaration) && AreAllMembersSupported(classDeclaration, ClassModel))
+        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
+        if (NewClassModel.IsSupported)
         {
-            ClassModelManager.Instance.Update(ClassModel);
+            ClassModelManager.Instance.Update(NewClassModel);
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
+        context.ReportDiagnostic(Diagnostic.Create(ClassModelRule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }
 
-    private static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
+    private static List<Invariant> ParseInvariants(ClassDeclarationSyntax classDeclaration)
     {
-        SyntaxToken firstToken = classDeclaration.GetFirstToken();
-        SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
-
-        foreach (SyntaxTrivia Trivia in leadingTrivia)
-            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
-            {
-                string Comment = Trivia.ToFullString();
-                if (Comment.StartsWith($"// {Modeling.None}"))
-                    return true;
-            }
-
-        return false;
-    }
-
-    private static List<string> ParseInvariants(ClassDeclarationSyntax classDeclaration)
-    {
-        List<string> InvariantList = new();
+        List<Invariant> InvariantList = new();
 
         SyntaxToken LastToken = classDeclaration.GetLastToken();
         var Location = LastToken.GetLocation();
@@ -105,7 +86,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         return InvariantList;
     }
 
-    private static void AddInvariantsInTrivia(List<string> invariantList, SyntaxTriviaList triviaList)
+    private static void AddInvariantsInTrivia(List<Invariant> invariantList, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -114,7 +95,11 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
                 string Pattern = $"// {Modeling.Invariant}";
 
                 if (Comment.StartsWith(Pattern))
-                    invariantList.Add(Comment.Substring(Pattern.Length));
+                {
+                    Location Location = Trivia.GetLocation();
+                    Invariant NewInvariant = new() { Text = Comment.Substring(Pattern.Length), Location = Location };
+                    invariantList.Add(NewInvariant);
+                }
             }
     }
 
