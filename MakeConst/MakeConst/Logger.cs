@@ -11,9 +11,14 @@ public static class Logger
     {
         lock (Mutex)
         {
-            using FileStream Stream = new("C:\\Projects\\Temp\\analyzer.txt", FileMode.Append, FileAccess.Write);
-            using StreamWriter Writer = new(Stream);
-            Writer.WriteLine(message);
+            WriteLogSync(message);
         }
+    }
+
+    private static void WriteLogSync(string message)
+    {
+        using FileStream Stream = new("C:\\Projects\\Temp\\analyzer.txt", FileMode.Append, FileAccess.Write);
+        using StreamWriter Writer = new(Stream);
+        Writer.WriteLine(message);
     }
 }
