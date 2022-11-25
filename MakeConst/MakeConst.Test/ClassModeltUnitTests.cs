@@ -729,4 +729,29 @@ class Program
 }
 ");
     }
+
+    [TestMethod]
+    public async Task ClassWithInvariant_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+
+    void Write(int x)
+    {
+        if (x >= 0)
+            X = x;
+    }
+}
+// Invariant: X >= 0
+");
+    }
 }

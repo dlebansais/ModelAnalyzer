@@ -55,7 +55,8 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (Name == string.Empty)
             return;
 
-        ClassModel ClassModel = new() { Name = Name };
+        List<string> InvariantList = ParseInvariants(classDeclaration);
+        ClassModel ClassModel = new() { Name = Name, InvariantList = InvariantList };
 
         if (IsClassDeclarationSupported(classDeclaration) && AreAllMembersSupported(classDeclaration, ClassModel))
         {
@@ -80,6 +81,63 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
             }
 
         return false;
+    }
+
+    private static List<string> ParseInvariants(ClassDeclarationSyntax classDeclaration)
+    {
+        List<string> InvariantList = new();
+        SyntaxToken NextToken = default;
+
+        SyntaxList<MemberDeclarationSyntax> Members = new();
+
+        if (classDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
+        {
+            Members = CompilationUnit.Members;
+            NextToken = CompilationUnit.EndOfFileToken;
+        }/*
+        else if (classDeclaration.Parent is FileScopedNamespaceDeclarationSyntax FileScopedNamespaceDeclaration)
+        {
+            Members = FileScopedNamespaceDeclaration.Members;
+            NextToken = default;
+        }
+        else if (classDeclaration.Parent is InterfaceDeclarationSyntax InterfaceDeclaration)
+        {
+            Members = InterfaceDeclaration.Members;
+            NextToken = default;
+        }
+        else if (classDeclaration.Parent is NamespaceDeclarationSyntax NamespaceDeclaration)
+            Members = NamespaceDeclaration.Members;
+        else if (classDeclaration.Parent is RecordDeclarationSyntax RecordDeclaration)
+            Members = RecordDeclaration.Members;
+        else if (classDeclaration.Parent is StructDeclarationSyntax StructDeclaration)
+            Members = StructDeclaration.Members;*/
+
+        int Index = Members.IndexOf(classDeclaration);
+        if (Index >= 0)
+        {
+            if (Index + 1 < Members.Count)
+            {
+                MemberDeclarationSyntax NextMember = Members[Index + 1];
+                NextToken = NextMember.GetFirstToken();
+            }
+        }
+
+        if (NextToken.HasLeadingTrivia)
+        {
+            SyntaxTriviaList LeadingTrivia = NextToken.LeadingTrivia;
+
+            foreach (SyntaxTrivia Trivia in LeadingTrivia)
+                if (Trivia.Kind() == SyntaxKind.SingleLineCommentTrivia)
+                {
+                    string Comment = Trivia.ToFullString();
+                    string Pattern = $"// {Modeling.Invariant}";
+
+                    if (Comment.StartsWith(Pattern))
+                        InvariantList.Add(Comment.Substring(Pattern.Length));
+                }
+        }
+
+        return InvariantList;
     }
 
     private static bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
