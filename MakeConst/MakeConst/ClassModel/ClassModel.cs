@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 public record ClassModel
 {
@@ -81,46 +82,6 @@ public record ClassModel
         return true;
     }
 
-    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
-    {
-        List<IInvariant> InvariantList = new();
-
-        SyntaxToken LastToken = classDeclaration.GetLastToken();
-        var Location = LastToken.GetLocation();
-
-        if (LastToken.HasTrailingTrivia)
-        {
-            SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
-            AddInvariantsInTrivia(InvariantList, TrailingTrivia, ref isSupported);
-            Location = TrailingTrivia.Last().GetLocation();
-        }
-
-        var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
-
-        if (NextToken.HasLeadingTrivia)
-            AddInvariantsInTrivia(InvariantList, NextToken.LeadingTrivia, ref isSupported);
-
-        return InvariantList;
-    }
-
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, SyntaxTriviaList triviaList, ref bool isSupported)
-    {
-        foreach (SyntaxTrivia Trivia in triviaList)
-            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
-            {
-                string Comment = Trivia.ToFullString();
-                string Pattern = $"// {Modeling.Invariant}";
-
-                if (Comment.StartsWith(Pattern))
-                {
-                    Location Location = Trivia.GetLocation();
-                    UnsupportedInvariant NewInvariant = new() { Text = Comment.Substring(Pattern.Length), Location = Location };
-                    invariantList.Add(NewInvariant);
-                    isSupported = false;
-                }
-            }
-    }
-
     private static void CheckUnsupportedMembers(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
     {
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
@@ -193,7 +154,7 @@ public record ClassModel
         List<string> ParameterNameList = new();
         IMethod NewMethod;
 
-        if (AreAllMethodParametersSupported(methodDeclaration, ParameterNameList))
+        if (IsMethodSupported && AreAllMethodParametersSupported(methodDeclaration, ParameterNameList))
         {
             Dictionary<string, Parameter> ParameterTable = new();
             foreach (string ParameterName in ParameterNameList)
@@ -252,6 +213,118 @@ public record ClassModel
         return true;
     }
 
+    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
+    {
+        List<IInvariant> InvariantList = new();
+
+        SyntaxToken LastToken = classDeclaration.GetLastToken();
+        var Location = LastToken.GetLocation();
+
+        if (LastToken.HasTrailingTrivia)
+        {
+            SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
+            AddInvariantsInTrivia(InvariantList, TrailingTrivia, ref isSupported);
+            Location = TrailingTrivia.Last().GetLocation();
+        }
+
+        var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
+
+        if (NextToken.HasLeadingTrivia)
+            AddInvariantsInTrivia(InvariantList, NextToken.LeadingTrivia, ref isSupported);
+
+        return InvariantList;
+    }
+
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, SyntaxTriviaList triviaList, ref bool isSupported)
+    {
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Invariant}";
+
+                if (Comment.StartsWith(Pattern))
+                    AddInvariantsInTrivia(invariantList, Trivia, Comment.Substring(Pattern.Length), ref isSupported);
+            }
+    }
+
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, SyntaxTrivia trivia, string text, ref bool isSupported)
+    {
+        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
+        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
+        var Diagnostics = SyntaxTree.GetDiagnostics();
+        List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
+
+        IInvariant NewInvariant;
+
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(SyntaxTree, out string FieldName, out string Operator, out int ConstantValue))
+        {
+            NewInvariant = new Invariant { Text = text, FieldName = FieldName, Operator = Operator, ConstantValue = ConstantValue };
+        }
+        else
+        {
+            Location Location = trivia.GetLocation();
+            NewInvariant = new UnsupportedInvariant { Text = text, Location = Location };
+            isSupported = false;
+        }
+
+        invariantList.Add(NewInvariant);
+        isSupported = false;
+    }
+
+    private static bool IsValidInvariantSyntaxTree(SyntaxTree syntaxTree, out string fieldName, out string operatorText, out int constantValue)
+    {
+        fieldName = string.Empty;
+        operatorText = string.Empty;
+        constantValue = 0;
+
+        CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
+        if (Root.AttributeLists.Count > 0 || Root.Usings.Count > 0 || Root.Members.Count != 1)
+            return false;
+
+        if (Root.Members[0] is not GlobalStatementSyntax GlobalStatement || 
+            GlobalStatement.Statement is not ExpressionStatementSyntax ExpressionStatement ||
+            ExpressionStatement.Expression is not AssignmentExpressionSyntax AssignmentExpression)
+            return false;
+
+        ExpressionSyntax Expression = AssignmentExpression.Right;
+        return IsValidInvariantExpression(Expression, out fieldName, out operatorText, out constantValue);
+    }
+
+    private static bool IsValidInvariantExpression(ExpressionSyntax expression, out string fieldName, out string operatorText, out int constantValue)
+    {
+        fieldName = string.Empty;
+        operatorText = string.Empty;
+        constantValue = 0;
+
+        if (expression is not BinaryExpressionSyntax BinaryExpression)
+            return false;
+
+        ExpressionSyntax LeftExpression = BinaryExpression.Left;
+        SyntaxToken Operator = BinaryExpression.OperatorToken;
+        ExpressionSyntax RightExpression = BinaryExpression.Right;
+
+        if (LeftExpression is not IdentifierNameSyntax IdentifierName ||
+            RightExpression is not LiteralExpressionSyntax LiteralExpression ||
+            !LiteralExpression.IsKind(SyntaxKind.NumericLiteralExpression) ||
+            !int.TryParse(LiteralExpression.Token.ValueText, out constantValue))
+            return false;
+
+        fieldName = IdentifierName.Identifier.ValueText;
+
+        if (!Operator.IsKind(SyntaxKind.EqualsEqualsToken) &&
+            !Operator.IsKind(SyntaxKind.ExclamationEqualsToken) &&
+            !Operator.IsKind(SyntaxKind.GreaterThanToken) &&
+            !Operator.IsKind(SyntaxKind.GreaterThanEqualsToken) &&
+            !Operator.IsKind(SyntaxKind.LessThanToken) &&
+            !Operator.IsKind(SyntaxKind.LessThanEqualsToken))
+            return false;
+
+        operatorText = Operator.ValueText;
+
+        return true;
+    }
+
     public void Verify()
     {
         bool IsInvariantViolated = false;
@@ -294,7 +367,7 @@ public record ClassModel
 ";
 
                 foreach (Invariant Invariant in InvariantList)
-                    Result += @$"  * {Invariant.FieldName} {Invariant.Operator} {Invariant.Constant}
+                    Result += @$"  * {Invariant.FieldName} {Invariant.Operator} {Invariant.ConstantValue}
 ";
             }
 

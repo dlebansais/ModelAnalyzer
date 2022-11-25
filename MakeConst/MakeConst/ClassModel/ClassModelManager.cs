@@ -93,23 +93,6 @@ public class ClassModelManager
         }
     }
 
-    public List<Invariant> GetInvariants(string className)
-    {
-        List<Invariant> InvariantList = new();
-
-        lock (ClassTable)
-        {
-            foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
-                if (Entry.Key == className)
-                {
-                    InvariantList.AddRange(Entry.Value.InvariantList);
-                    break;
-                }
-        }
-
-        return InvariantList;
-    }
-
     public void Update(ClassModel classModel)
     {
         bool IsClassChanged = false;
@@ -135,12 +118,6 @@ public class ClassModelManager
 
             if (!IsFound)
             {
-                CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-
-                SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText("_ = X >= 0;", Options);
-                var Diagnostics = SyntaxTree.GetDiagnostics();
-                List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
-
                 ClassTable.Add(classModel.Name, classModel);
                 ViolationTable.Add(classModel.Name, false);
             }

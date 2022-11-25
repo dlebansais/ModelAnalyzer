@@ -50,11 +50,16 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
-        string Name = classDeclaration.Identifier.ValueText;
-        List<Invariant> InvariantList = ClassModelManager.Instance.GetInvariants(Name);
+        // Check whether the class can be modeled
+        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+            return;
 
-        foreach (Invariant Item in InvariantList)
-            if (Item.FieldName == string.Empty)
-                context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Item.Location, Item.Text));
+        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
+        if (NewClassModel.IsSupported)
+            return;
+
+        foreach (IInvariant Item in NewClassModel.InvariantList)
+            if (Item is UnsupportedInvariant Unsupported)
+                context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Unsupported.Location, Item.Text));
     }
 }
