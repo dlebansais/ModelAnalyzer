@@ -36,15 +36,18 @@ public class ClassModelCodeFixProvider : CodeFixProvider
         var diagnosticSpan = diagnostic.Location.SourceSpan;
 
         // Find the type declaration identified by the diagnostic.
-        var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().First();
+        var declaration = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().First();
 
-        // Register a code action that will invoke the fix.
-        context.RegisterCodeFix(
-            CodeAction.Create(
-                title: CodeFixResources.ClassModelCodeFixTitle,
-                createChangedDocument: c => ClassModelAsync(context.Document, declaration, c),
-                equivalenceKey: nameof(CodeFixResources.ClassModelCodeFixTitle)),
-            diagnostic);
+        if (declaration is not null)
+        {
+            // Register a code action that will invoke the fix.
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title: CodeFixResources.ClassModelCodeFixTitle,
+                    createChangedDocument: c => ClassModelAsync(context.Document, declaration, c),
+                    equivalenceKey: nameof(CodeFixResources.ClassModelCodeFixTitle)),
+                diagnostic);
+        }
     }
 
     private static async Task<Document> ClassModelAsync(Document document,
@@ -65,10 +68,10 @@ public class ClassModelCodeFixProvider : CodeFixProvider
         ClassDeclarationSyntax formattedClassDeclaration = newClassDeclaration.WithAdditionalAnnotations(Formatter.Annotation);
 
         // Replace the old class declaration with the new class declaration.
-        SyntaxNode oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        SyntaxNode newRoot = oldRoot.ReplaceNode(classDeclaration, formattedClassDeclaration);
+        SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        SyntaxNode? newRoot = oldRoot?.ReplaceNode(classDeclaration, formattedClassDeclaration);
 
         // Return document with transformed tree.
-        return document.WithSyntaxRoot(newRoot);
+        return newRoot is not null ? document.WithSyntaxRoot(newRoot) : document;
     }
 }

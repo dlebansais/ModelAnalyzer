@@ -36,15 +36,18 @@ public class MakeConstCodeFixProvider : CodeFixProvider
         var diagnosticSpan = diagnostic.Location.SourceSpan;
 
         // Find the type declaration identified by the diagnostic.
-        var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<LocalDeclarationStatementSyntax>().First();
+        var declaration = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<LocalDeclarationStatementSyntax>().First();
 
-        // Register a code action that will invoke the fix.
-        context.RegisterCodeFix(
-            CodeAction.Create(
-                title: CodeFixResources.MakeConstCodeFixTitle,
-                createChangedDocument: c => MakeConstAsync(context.Document, declaration, c),
-                equivalenceKey: nameof(CodeFixResources.MakeConstCodeFixTitle)),
-            diagnostic);
+        if (declaration is not null)
+        {
+            // Register a code action that will invoke the fix.
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title: CodeFixResources.MakeConstCodeFixTitle,
+                    createChangedDocument: c => MakeConstAsync(context.Document, declaration, c),
+                    equivalenceKey: nameof(CodeFixResources.MakeConstCodeFixTitle)),
+                diagnostic);
+        }
     }
 
     private static async Task<Document> MakeConstAsync(Document document,
@@ -69,18 +72,18 @@ public class MakeConstCodeFixProvider : CodeFixProvider
         TypeSyntax variableTypeName = variableDeclaration.Type;
         if (variableTypeName.IsVar)
         {
-            SemanticModel semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+            SemanticModel? semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 
             // Special case: Ensure that 'var' isn't actually an alias to another type
             // (e.g. using var = System.String).
-            IAliasSymbol aliasInfo = semanticModel.GetAliasInfo(variableTypeName, cancellationToken);
-            if (aliasInfo == null)
+            IAliasSymbol? aliasInfo = semanticModel?.GetAliasInfo(variableTypeName, cancellationToken);
+            if (aliasInfo is null)
             {
                 // Retrieve the type inferred for var.
-                ITypeSymbol type = semanticModel.GetTypeInfo(variableTypeName, cancellationToken).ConvertedType;
+                ITypeSymbol? type = semanticModel.GetTypeInfo(variableTypeName, cancellationToken).ConvertedType;
 
                 // Special case: Ensure that 'var' isn't actually a type named 'var'.
-                if (type.Name != "var")
+                if (type is not null && type.Name != "var")
                 {
                     // Create a new TypeSyntax for the inferred type. Be careful
                     // to keep any leading and trailing trivia from the var keyword.
@@ -105,10 +108,10 @@ public class MakeConstCodeFixProvider : CodeFixProvider
         LocalDeclarationStatementSyntax formattedLocal = newLocal.WithAdditionalAnnotations(Formatter.Annotation);
 
         // Replace the old local declaration with the new local declaration.
-        SyntaxNode oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        SyntaxNode newRoot = oldRoot.ReplaceNode(localDeclaration, formattedLocal);
+        SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        SyntaxNode? newRoot = oldRoot?.ReplaceNode(localDeclaration, formattedLocal);
 
         // Return document with transformed tree.
-        return document.WithSyntaxRoot(newRoot);
+        return newRoot is not null ? document.WithSyntaxRoot(newRoot) : document;
     }
 }

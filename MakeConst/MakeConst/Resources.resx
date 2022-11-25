@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ClassModelAnalyzerDescription" xml:space="preserve">
-    <value>Class should support a model</value>
+    <value>Class should support a model.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="ClassModelAnalyzerMessageFormat" xml:space="preserve">
@@ -130,7 +130,7 @@
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="InvariantViolationAnalyzerDescription" xml:space="preserve">
-    <value>Class invariant is violated</value>
+    <value>Class invariant is violated.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="InvariantViolationAnalyzerMessageFormat" xml:space="preserve">

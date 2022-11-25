@@ -48,6 +48,10 @@ public record ClassModel
             string ReturnString = Method.HasReturnValue ? "int" : "void";
             Result += @$"  {ReturnString} {Method.Name.Name}({Parameters})
 ";
+
+            foreach (string Invariant in InvariantList)
+                Result += @$"  * {Invariant}
+";
         }
 
         return Result;

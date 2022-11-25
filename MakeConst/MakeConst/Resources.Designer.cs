@@ -61,7 +61,7 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class should support a model.
+        ///   Looks up a localized string similar to Class should support a model..
         /// </summary>
         internal static string ClassModelAnalyzerDescription {
             get {
@@ -88,7 +88,7 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class invariant is violated.
+        ///   Looks up a localized string similar to Class invariant is violated..
         /// </summary>
         internal static string InvariantViolationAnalyzerDescription {
             get {

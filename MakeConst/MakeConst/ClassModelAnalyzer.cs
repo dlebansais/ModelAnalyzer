@@ -73,7 +73,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
 
         foreach (SyntaxTrivia Trivia in leadingTrivia)
-            if (Trivia.Kind() == SyntaxKind.SingleLineCommentTrivia)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
                 if (Comment.StartsWith($"// {Modeling.None}"))
@@ -86,58 +86,36 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     private static List<string> ParseInvariants(ClassDeclarationSyntax classDeclaration)
     {
         List<string> InvariantList = new();
-        SyntaxToken NextToken = default;
 
-        SyntaxList<MemberDeclarationSyntax> Members = new();
+        SyntaxToken LastToken = classDeclaration.GetLastToken();
+        var Location = LastToken.GetLocation();
 
-        if (classDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
+        if (LastToken.HasTrailingTrivia)
         {
-            Members = CompilationUnit.Members;
-            NextToken = CompilationUnit.EndOfFileToken;
-        }/*
-        else if (classDeclaration.Parent is FileScopedNamespaceDeclarationSyntax FileScopedNamespaceDeclaration)
-        {
-            Members = FileScopedNamespaceDeclaration.Members;
-            NextToken = default;
+            SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
+            AddInvariantsInTrivia(InvariantList, TrailingTrivia);
+            Location = TrailingTrivia.Last().GetLocation();
         }
-        else if (classDeclaration.Parent is InterfaceDeclarationSyntax InterfaceDeclaration)
-        {
-            Members = InterfaceDeclaration.Members;
-            NextToken = default;
-        }
-        else if (classDeclaration.Parent is NamespaceDeclarationSyntax NamespaceDeclaration)
-            Members = NamespaceDeclaration.Members;
-        else if (classDeclaration.Parent is RecordDeclarationSyntax RecordDeclaration)
-            Members = RecordDeclaration.Members;
-        else if (classDeclaration.Parent is StructDeclarationSyntax StructDeclaration)
-            Members = StructDeclaration.Members;*/
 
-        int Index = Members.IndexOf(classDeclaration);
-        if (Index >= 0)
-        {
-            if (Index + 1 < Members.Count)
-            {
-                MemberDeclarationSyntax NextMember = Members[Index + 1];
-                NextToken = NextMember.GetFirstToken();
-            }
-        }
+        var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
 
         if (NextToken.HasLeadingTrivia)
-        {
-            SyntaxTriviaList LeadingTrivia = NextToken.LeadingTrivia;
-
-            foreach (SyntaxTrivia Trivia in LeadingTrivia)
-                if (Trivia.Kind() == SyntaxKind.SingleLineCommentTrivia)
-                {
-                    string Comment = Trivia.ToFullString();
-                    string Pattern = $"// {Modeling.Invariant}";
-
-                    if (Comment.StartsWith(Pattern))
-                        InvariantList.Add(Comment.Substring(Pattern.Length));
-                }
-        }
+            AddInvariantsInTrivia(InvariantList, NextToken.LeadingTrivia);
 
         return InvariantList;
+    }
+
+    private static void AddInvariantsInTrivia(List<string> invariantList, SyntaxTriviaList triviaList)
+    {
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Invariant}";
+
+                if (Comment.StartsWith(Pattern))
+                    invariantList.Add(Comment.Substring(Pattern.Length));
+            }
     }
 
     private static bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
@@ -278,14 +256,14 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsTypeSupported(TypeSyntax type, out bool isVoid)
+    private static bool IsTypeSupported(TypeSyntax? type, out bool isVoid)
     {
         isVoid = false;
 
-        if (type is not PredefinedTypeSyntax AsPredefinedType)
+        if (type is not PredefinedTypeSyntax PredefinedType)
             return false;
 
-        SyntaxKind TypeKind = AsPredefinedType.Keyword.Kind();
+        SyntaxKind TypeKind = PredefinedType.Keyword.Kind();
         if (TypeKind != SyntaxKind.IntKeyword && TypeKind != SyntaxKind.VoidKeyword)
             return false;
 
