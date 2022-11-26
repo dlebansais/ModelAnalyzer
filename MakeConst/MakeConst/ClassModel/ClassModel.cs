@@ -120,31 +120,39 @@ public partial record ClassModel
     {
         VariableDeclarationSyntax Declaration = fieldDeclaration.Declaration;
 
-        bool IsFieldSupported = (fieldDeclaration.AttributeLists.Count == 0 &&
-                                 fieldDeclaration.Modifiers.All(modifier => modifier.IsKind(SyntaxKind.PrivateKeyword)) &&
-                                 IsTypeSupported(Declaration.Type, out _));
-
-        foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
+        if (fieldDeclaration.AttributeLists.Count > 0 ||
+            fieldDeclaration.Modifiers.Any(modifier => !modifier.IsKind(SyntaxKind.PrivateKeyword)) ||
+            !IsTypeSupported(Declaration.Type, out _))
         {
-            FieldName FieldName = new(Variable.Identifier.ValueText);
-            IField NewField;
+            Logger.Log("Bad field declaration");
 
-            if (IsFieldSupported &&
-                (Variable.ArgumentList is not BracketedArgumentListSyntax BracketedArgumentList || BracketedArgumentList.Arguments.Count == 0) &&
-                Variable.Initializer is null)
+            Location Location = Declaration.GetLocation();
+            UnsupportedField NewField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
+            isSupported = false;
+        }
+        else
+        {
+            foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
             {
-                NewField = new Field { FieldName = FieldName };
-            }
-            else
-            {
-                Logger.Log($"Bad field: {FieldName.Name}");
+                FieldName FieldName = new(Variable.Identifier.ValueText);
+                IField NewField;
 
-                Location Location = Variable.Identifier.GetLocation();
-                NewField = new UnsupportedField { FieldName = FieldName, Location = Location };
-                isSupported = false;
-            }
+                if ((Variable.ArgumentList is not BracketedArgumentListSyntax BracketedArgumentList || BracketedArgumentList.Arguments.Count == 0) &&
+                    Variable.Initializer is null)
+                {
+                    NewField = new Field { FieldName = FieldName };
+                }
+                else
+                {
+                    Logger.Log($"Bad field: {FieldName.Name}");
 
-            fieldTable.Add(NewField.FieldName, NewField);
+                    Location Location = Variable.Identifier.GetLocation();
+                    NewField = new UnsupportedField { FieldName = FieldName, Location = Location };
+                    isSupported = false;
+                }
+
+                fieldTable.Add(NewField.FieldName, NewField);
+            }
         }
     }
 
