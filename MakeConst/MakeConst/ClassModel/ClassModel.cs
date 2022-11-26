@@ -172,7 +172,8 @@ public partial record ClassModel
         MethodName MethodName = new(methodDeclaration.Identifier.ValueText);
         IMethod NewMethod;
 
-        if (IsMethodSupported(methodDeclaration, fieldTable, out bool HasReturnValue, out Dictionary<ParameterName, IParameter> ParameterTable, out List<IStatement> StatementList))
+        if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue) &&
+            IsMethodSupported(methodDeclaration, fieldTable, out Dictionary<ParameterName, IParameter> ParameterTable, out List<IStatement> StatementList))
         {
             NewMethod = new Method { MethodName = MethodName, HasReturnValue = HasReturnValue, ParameterTable = ParameterTable, StatementList = StatementList };
         }
@@ -188,23 +189,27 @@ public partial record ClassModel
         methodTable.Add(NewMethod.MethodName, NewMethod);
     }
 
-    private static bool IsMethodSupported(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, out bool HasReturnValue, out Dictionary<ParameterName, IParameter> parameterTable, out List<IStatement> statementList)
+    private static bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out bool HasReturnValue)
     {
         HasReturnValue = false;
-        parameterTable = null!;
-        statementList = null!;
 
         if (!IsTypeSupported(methodDeclaration.ReturnType, out bool IsVoidReturn) ||
             methodDeclaration.AttributeLists.Count > 0 ||
             methodDeclaration.Modifiers.Any(modifier => !modifier.IsKind(SyntaxKind.PrivateKeyword) && !modifier.IsKind(SyntaxKind.PublicKeyword) && !modifier.IsKind(SyntaxKind.InternalKeyword)))
             return false;
 
-        if (!AreAllMethodParametersSupported(methodDeclaration, out parameterTable))
+        HasReturnValue = !IsVoidReturn;
+        return true;
+    }
+
+    private static bool IsMethodSupported(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, out Dictionary<ParameterName, IParameter> parameterTable, out List<IStatement> statementList)
+    {
+        statementList = null!;
+
+        if (!AreAllMethodParametersSupported(methodDeclaration, fieldTable, out parameterTable))
             return false;
 
-        HasReturnValue = !IsVoidReturn;
-
-        if (HasReturnValue && methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
+        if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
         {
             if (!IsExpressionSupported(fieldTable, parameterTable, ArrowExpressionClause.Expression, out IExpression Expression))
                 return false;
@@ -221,24 +226,23 @@ public partial record ClassModel
         return true;
     }
 
-    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, out Dictionary<ParameterName, IParameter> parameterTable)
+    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, Dictionary<FieldName, IField> fieldTable, out Dictionary<ParameterName, IParameter> parameterTable)
     {
         parameterTable = new Dictionary<ParameterName, IParameter>();
 
         foreach (ParameterSyntax Parameter in method.ParameterList.Parameters)
-            if (!IsParameterSupported(Parameter))
+            if (!IsParameterSupported(Parameter, fieldTable, out ParameterName ParameterName))
                 return false;
             else
-            {
-                ParameterName ParameterName = new(Parameter.Identifier.ValueText);
                 parameterTable.Add(ParameterName, new Parameter() { ParameterName = ParameterName });
-            }
 
         return true;
     }
 
-    private static bool IsParameterSupported(ParameterSyntax parameter)
+    private static bool IsParameterSupported(ParameterSyntax parameter, Dictionary<FieldName, IField> fieldTable, out ParameterName parameterName)
     {
+        parameterName = null!;
+
         if (parameter.AttributeLists.Count > 0)
             return false;
 
@@ -248,6 +252,12 @@ public partial record ClassModel
         if (!IsTypeSupported(parameter.Type, out _))
             return false;
 
+        string Name = parameter.Identifier.ValueText;
+
+        if (TryFindFieldByName(fieldTable, Name, out _))
+            return false;
+
+        parameterName = new(Name);
         return true;
     }
 
