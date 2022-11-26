@@ -5,11 +5,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
 using Microsoft.CodeAnalysis.Text;
-using System.Xml.Linq;
 
-public record ClassModel
+public partial record ClassModel
 {
     public required string Name { get; init; }
     public required bool IsSupported { get; init; }
@@ -278,9 +276,9 @@ public record ClassModel
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out string FieldName, out string Operator, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out Field Field, out string Operator, out int ConstantValue))
         {
-            NewInvariant = new Invariant { Text = Text, FieldName = FieldName, Operator = Operator, ConstantValue = ConstantValue };
+            NewInvariant = new Invariant { Text = Text, Field = Field, Operator = Operator, ConstantValue = ConstantValue };
         }
         else
         {
@@ -297,9 +295,9 @@ public record ClassModel
         invariantList.Add(NewInvariant);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out string fieldName, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out Field field, out string operatorText, out int constantValue)
     {
-        fieldName = string.Empty;
+        field = null!;
         operatorText = string.Empty;
         constantValue = 0;
 
@@ -313,12 +311,12 @@ public record ClassModel
             return false;
 
         ExpressionSyntax Expression = AssignmentExpression.Right;
-        return IsValidInvariantExpression(fieldTable,  Expression, out fieldName, out operatorText, out constantValue);
+        return IsValidInvariantExpression(fieldTable,  Expression, out field, out operatorText, out constantValue);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out string fieldName, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out Field field, out string operatorText, out int constantValue)
     {
-        fieldName = string.Empty;
+        field = null!;
         operatorText = string.Empty;
         constantValue = 0;
 
@@ -329,22 +327,8 @@ public record ClassModel
         SyntaxToken Operator = BinaryExpression.OperatorToken;
         ExpressionSyntax RightExpression = BinaryExpression.Right;
 
-        if (LeftExpression is not IdentifierNameSyntax IdentifierName ||
-            RightExpression is not LiteralExpressionSyntax LiteralExpression ||
-            !LiteralExpression.IsKind(SyntaxKind.NumericLiteralExpression) ||
-            !int.TryParse(LiteralExpression.Token.ValueText, out constantValue))
-            return false;
-
-        fieldName = IdentifierName.Identifier.ValueText;
-
-        bool IsFound = false;
-        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
-            if (Entry.Value is Field ValidField && ValidField.Name.Name == fieldName)
-            {
-                IsFound = true;
-                break;
-            }
-        if (!IsFound)
+        if (LeftExpression is not IdentifierNameSyntax IdentifierName || 
+            !TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out field))
             return false;
 
         if (!Operator.IsKind(SyntaxKind.EqualsEqualsToken) &&
@@ -357,21 +341,26 @@ public record ClassModel
 
         operatorText = Operator.ValueText;
 
+        if (RightExpression is not LiteralExpressionSyntax LiteralExpression ||
+            !LiteralExpression.IsKind(SyntaxKind.NumericLiteralExpression) ||
+            !int.TryParse(LiteralExpression.Token.ValueText, out constantValue))
+            return false;
+
         return true;
     }
 
-    public void Verify()
+    private static bool TryFindFieldByName(Dictionary<FieldName, IField> fieldTable, string fieldName, out Field field)
     {
-        bool IsInvariantViolated = false;
-
-        foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
-            if (Entry.Key.Name == "XYZ")
+        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
+            if (Entry.Value is Field ValidField && ValidField.Name.Name == fieldName)
             {
-                IsInvariantViolated = true;
-                break;
+                field = ValidField;
+                return true;
             }
 
-        ClassModelManager.Instance.SetIsInvariantViolated(Name, IsInvariantViolated);
+
+        field = null!;
+        return false;
     }
 
     public override string ToString()
