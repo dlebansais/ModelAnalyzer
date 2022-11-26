@@ -1,6 +1,7 @@
 ﻿namespace DemoAnalyzer;
 
-public class Field : IField
+public class Field : IField, IVariable
 {
-    public required FieldName Name { get; init; }
+    public required FieldName FieldName { get; init; }
+    public string Name { get { return FieldName.Name; } }
 }

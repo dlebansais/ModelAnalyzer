@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public interface IField
+public interface IField : IVariable
 {
-    FieldName Name { get; }
+    FieldName FieldName { get; }
 }

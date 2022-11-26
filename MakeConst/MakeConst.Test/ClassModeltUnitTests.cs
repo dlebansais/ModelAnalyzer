@@ -729,4 +729,26 @@ class Program
 }
 ");
     }
+
+    [TestMethod]
+    public async Task ClassWithValidInstructions_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    int Read(int x, int y)
+    {
+        X = x + y;
+        if (X >= x || 0 < y)
+            X = y;
+
+        return X;
+    }
+}
+");
+    }
 }

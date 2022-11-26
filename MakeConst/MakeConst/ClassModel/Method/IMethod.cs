@@ -2,5 +2,5 @@
 
 public interface IMethod
 {
-    MethodName Name { get; }
+    MethodName MethodName { get; }
 }

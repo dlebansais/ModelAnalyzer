@@ -44,7 +44,7 @@ public partial record ClassModel
             IsSupported = true;
             CheckUnsupportedMembers(classDeclaration, ref IsSupported);
             FieldTable = ParseFields(classDeclaration, ref IsSupported);
-            MethodTable = ParseMethods(classDeclaration, ref IsSupported);
+            MethodTable = ParseMethods(classDeclaration, FieldTable, ref IsSupported);
             InvariantList = ParseInvariants(classDeclaration, FieldTable);
         }
 
@@ -126,79 +126,110 @@ public partial record ClassModel
 
         foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
         {
-            FieldName Name = new(Variable.Identifier.ValueText);
+            FieldName FieldName = new(Variable.Identifier.ValueText);
             IField NewField;
 
             if (IsFieldSupported &&
                 (Variable.ArgumentList is not BracketedArgumentListSyntax BracketedArgumentList || BracketedArgumentList.Arguments.Count == 0) &&
                 Variable.Initializer is null)
             {
-                NewField = new Field { Name = Name };
+                NewField = new Field { FieldName = FieldName };
             }
             else
             {
-                Logger.Log($"Bad field: {Name.Name}");
+                Logger.Log($"Bad field: {FieldName.Name}");
 
                 Location Location = Variable.Identifier.GetLocation();
-                NewField = new UnsupportedField { Name = Name, Location = Location };
+                NewField = new UnsupportedField { FieldName = FieldName, Location = Location };
                 isSupported = false;
             }
 
-            fieldTable.Add(NewField.Name, NewField);
+            fieldTable.Add(NewField.FieldName, NewField);
         }
     }
 
-    private static Dictionary<MethodName, IMethod> ParseMethods(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
+    private static Dictionary<MethodName, IMethod> ParseMethods(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, ref bool isSupported)
     {
         Dictionary<MethodName, IMethod> MethodTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is MethodDeclarationSyntax MethodDeclaration)
-                AddMethod(MethodDeclaration, MethodTable, ref isSupported);
+                AddMethod(MethodDeclaration, fieldTable, MethodTable, ref isSupported);
 
         return MethodTable;
     }
 
-    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, Dictionary<MethodName, IMethod> methodTable, ref bool isSupported)
+    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<MethodName, IMethod> methodTable, ref bool isSupported)
     {
-        bool IsMethodSupported = (IsTypeSupported(methodDeclaration.ReturnType, out bool IsVoidReturn) &&
-                                  methodDeclaration.AttributeLists.Count == 0 &&
-                                  methodDeclaration.Modifiers.All(modifier => modifier.IsKind(SyntaxKind.PrivateKeyword) || modifier.IsKind(SyntaxKind.PublicKeyword) || modifier.IsKind(SyntaxKind.InternalKeyword)));
-
-        MethodName Name = new(methodDeclaration.Identifier.ValueText);
-        List<string> ParameterNameList = new();
+        MethodName MethodName = new(methodDeclaration.Identifier.ValueText);
         IMethod NewMethod;
 
-        if (IsMethodSupported && AreAllMethodParametersSupported(methodDeclaration, ParameterNameList))
+        if (IsMethodSupported(methodDeclaration, fieldTable, out bool HasReturnValue, out Dictionary<ParameterName, IParameter> ParameterTable, out List<IStatement> StatementList))
         {
-            Dictionary<string, Parameter> ParameterTable = new();
-            foreach (string ParameterName in ParameterNameList)
-                ParameterTable.Add(ParameterName, new Parameter() { Name = ParameterName });
-
-            NewMethod = new Method { Name = Name, HasReturnValue = !IsVoidReturn, ParameterTable = ParameterTable };
+            NewMethod = new Method { MethodName = MethodName, HasReturnValue = HasReturnValue, ParameterTable = ParameterTable, StatementList = StatementList };
         }
         else
         {
-            Logger.Log($"Bad method: {Name.Name}");
+            Logger.Log($"Bad method: {MethodName.Name}");
 
             Location Location = methodDeclaration.Identifier.GetLocation();
-            NewMethod = new UnsupportedMethod { Name = Name, Location = Location };
+            NewMethod = new UnsupportedMethod { MethodName = MethodName, Location = Location };
             isSupported = false;
         }
 
-        methodTable.Add(NewMethod.Name, NewMethod);
+        methodTable.Add(NewMethod.MethodName, NewMethod);
     }
 
-    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, List<string> parameterNameList)
+    private static bool IsMethodSupported(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, out bool HasReturnValue, out Dictionary<ParameterName, IParameter> parameterTable, out List<IStatement> statementList)
     {
-        foreach (ParameterSyntax Parameter in method.ParameterList.Parameters)
-            if (!IsParameterSupported(Parameter, parameterNameList))
+        HasReturnValue = false;
+        parameterTable = null!;
+        statementList = null!;
+
+        if (!IsTypeSupported(methodDeclaration.ReturnType, out bool IsVoidReturn) ||
+            methodDeclaration.AttributeLists.Count > 0 ||
+            methodDeclaration.Modifiers.Any(modifier => !modifier.IsKind(SyntaxKind.PrivateKeyword) && !modifier.IsKind(SyntaxKind.PublicKeyword) && !modifier.IsKind(SyntaxKind.InternalKeyword)))
+            return false;
+
+        if (!AreAllMethodParametersSupported(methodDeclaration, out parameterTable))
+            return false;
+
+        HasReturnValue = !IsVoidReturn;
+
+        if (HasReturnValue && methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
+        {
+            if (!IsExpressionSupported(fieldTable, parameterTable, ArrowExpressionClause.Expression, out IExpression Expression))
                 return false;
+
+            ReturnStatement Statement = new() { Expression = Expression };
+            statementList = new List<IStatement>() { Statement };
+        }
+        else if (methodDeclaration.Body is BlockSyntax Block)
+        {
+            if (!IsBlockSupported(fieldTable, parameterTable, Block, out statementList))
+                return false;
+        }
 
         return true;
     }
 
-    private static bool IsParameterSupported(ParameterSyntax parameter, List<string> parameterNameList)
+    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, out Dictionary<ParameterName, IParameter> parameterTable)
+    {
+        parameterTable = new Dictionary<ParameterName, IParameter>();
+
+        foreach (ParameterSyntax Parameter in method.ParameterList.Parameters)
+            if (!IsParameterSupported(Parameter))
+                return false;
+            else
+            {
+                ParameterName ParameterName = new(Parameter.Identifier.ValueText);
+                parameterTable.Add(ParameterName, new Parameter() { ParameterName = ParameterName });
+            }
+
+        return true;
+    }
+
+    private static bool IsParameterSupported(ParameterSyntax parameter)
     {
         if (parameter.AttributeLists.Count > 0)
             return false;
@@ -209,10 +240,104 @@ public partial record ClassModel
         if (!IsTypeSupported(parameter.Type, out _))
             return false;
 
-        string Name = parameter.Identifier.ValueText;
-        parameterNameList.Add(Name);
+        return true;
+    }
+
+    private static bool IsExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, ExpressionSyntax expressionNode, out IExpression expression)
+    {
+        if (expressionNode is BinaryExpressionSyntax BinaryExpression)
+            return IsBinaryExpressionSupported(fieldTable, parameterTable, BinaryExpression, out expression);
+        else if (expressionNode is IdentifierNameSyntax IdentifierName && TryFindVariableByName(fieldTable, parameterTable, IdentifierName.Identifier.ValueText, out IVariable Variable))
+        {
+            expression = new VariableValueExpression { Variable = Variable };
+            return true;
+        }
+
+        expression = null!;
+        return false;
+    }
+
+    private static bool IsAssignmentExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, AssignmentExpressionSyntax expressionNode, out IField destination, out IExpression expression)
+    {
+        if (expressionNode.Left is IdentifierNameSyntax IdentifierName &&
+            TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out destination) &&
+            IsExpressionSupported(fieldTable, parameterTable, expressionNode.Right, out expression))
+            return true;
+
+        destination = null!;
+        expression = null!;
+        return false;
+    }
+
+    private static bool IsBinaryExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, BinaryExpressionSyntax expressionNode, out IExpression expression)
+    {
+        if (IsExpressionSupported(fieldTable, parameterTable, expressionNode.Left, out IExpression Left) &&
+            IsExpressionSupported(fieldTable, parameterTable, expressionNode.Right, out IExpression Right))
+        {
+            string OperatorText;
+
+            if (IsBinaryOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            {
+                expression = new BinaryExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+                return true;
+            }
+            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            {
+                expression = new ComparisonExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+                return true;
+            }
+        }
+
+        expression = null!;
+        return false;
+    }
+
+    private static bool IsBinaryOperatorSupported(SyntaxToken token, out string operatorText)
+    {
+        operatorText = token.ValueText;
+
+        return token.IsKind(SyntaxKind.PlusToken) ||
+               token.IsKind(SyntaxKind.MinusToken)
+               ;
+    }
+
+    private static bool IsComparisonOperatorSupported(SyntaxToken token, out string operatorText)
+    {
+        operatorText = token.ValueText;
+
+        return token.IsKind(SyntaxKind.EqualsEqualsToken) ||
+               token.IsKind(SyntaxKind.ExclamationEqualsToken) ||
+               token.IsKind(SyntaxKind.GreaterThanToken) ||
+               token.IsKind(SyntaxKind.GreaterThanEqualsToken) ||
+               token.IsKind(SyntaxKind.LessThanToken) ||
+               token.IsKind(SyntaxKind.LessThanEqualsToken);
+    }
+
+    private static bool IsBlockSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, BlockSyntax block, out List<IStatement> statementList)
+    {
+        statementList = new List<IStatement>();
+
+        foreach (StatementSyntax Item in block.Statements)
+            if (!IsStatementSupported(fieldTable, parameterTable, Item, out IStatement Statement))
+                return false;
+            else
+                statementList.Add(Statement);
 
         return true;
+    }
+
+    private static bool IsStatementSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, StatementSyntax node, out IStatement statement)
+    {
+        if (node is ExpressionStatementSyntax ExpressionStatement &&
+            ExpressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression &&
+            IsAssignmentExpressionSupported(fieldTable, parameterTable, AssignmentExpression, out IField Destination, out IExpression Expression))
+        {
+            statement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+            return true;
+        }
+
+        statement = null!;
+        return false;
     }
 
     private static bool IsTypeSupported(TypeSyntax? type, out bool isVoid)
@@ -276,7 +401,7 @@ public partial record ClassModel
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out Field Field, out string Operator, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out string Operator, out int ConstantValue))
         {
             NewInvariant = new Invariant { Text = Text, Field = Field, Operator = Operator, ConstantValue = ConstantValue };
         }
@@ -295,7 +420,7 @@ public partial record ClassModel
         invariantList.Add(NewInvariant);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out Field field, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out IField field, out string operatorText, out int constantValue)
     {
         field = null!;
         operatorText = string.Empty;
@@ -314,7 +439,7 @@ public partial record ClassModel
         return IsValidInvariantExpression(fieldTable,  Expression, out field, out operatorText, out constantValue);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out Field field, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out IField field, out string operatorText, out int constantValue)
     {
         field = null!;
         operatorText = string.Empty;
@@ -331,15 +456,8 @@ public partial record ClassModel
             !TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out field))
             return false;
 
-        if (!Operator.IsKind(SyntaxKind.EqualsEqualsToken) &&
-            !Operator.IsKind(SyntaxKind.ExclamationEqualsToken) &&
-            !Operator.IsKind(SyntaxKind.GreaterThanToken) &&
-            !Operator.IsKind(SyntaxKind.GreaterThanEqualsToken) &&
-            !Operator.IsKind(SyntaxKind.LessThanToken) &&
-            !Operator.IsKind(SyntaxKind.LessThanEqualsToken))
+        if (!IsComparisonOperatorSupported(Operator, out operatorText))
             return false;
-
-        operatorText = Operator.ValueText;
 
         if (RightExpression is not LiteralExpressionSyntax LiteralExpression ||
             !LiteralExpression.IsKind(SyntaxKind.NumericLiteralExpression) ||
@@ -349,10 +467,28 @@ public partial record ClassModel
         return true;
     }
 
-    private static bool TryFindFieldByName(Dictionary<FieldName, IField> fieldTable, string fieldName, out Field field)
+    private static bool TryFindVariableByName(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, string variableName, out IVariable variable)
+    {
+        if (TryFindFieldByName(fieldTable, variableName, out IField Field))
+        {
+            variable = Field;
+            return true;
+        }
+
+        if (TryFindParameterByName(parameterTable, variableName, out IParameter Parameter))
+        {
+            variable = Parameter;
+            return true;
+        }
+
+        variable = null!;
+        return false;
+    }
+
+    private static bool TryFindFieldByName(Dictionary<FieldName, IField> fieldTable, string fieldName, out IField field)
     {
         foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
-            if (Entry.Value is Field ValidField && ValidField.Name.Name == fieldName)
+            if (Entry.Value is Field ValidField && ValidField.FieldName.Name == fieldName)
             {
                 field = ValidField;
                 return true;
@@ -363,6 +499,20 @@ public partial record ClassModel
         return false;
     }
 
+    private static bool TryFindParameterByName(Dictionary<ParameterName, IParameter> parameterTable, string parameterName, out IParameter parameter)
+    {
+        foreach (KeyValuePair<ParameterName, IParameter> Entry in parameterTable)
+            if (Entry.Value is Parameter ValidParameter && ValidParameter.ParameterName.Name == parameterName)
+            {
+                parameter = ValidParameter;
+                return true;
+            }
+
+
+        parameter = null!;
+        return false;
+    }
+
     public override string ToString()
     {
         string Result = @$"{Name}
@@ -370,7 +520,7 @@ public partial record ClassModel
 
         foreach (KeyValuePair<FieldName, IField> FieldEntry in FieldTable)
             if (FieldEntry.Value is Field Field)
-                Result += @$"  int {Field.Name.Name}
+                Result += @$"  int {Field.Name}
 ";
 
         foreach (KeyValuePair<MethodName, IMethod> MethodEntry in MethodTable)
@@ -378,16 +528,16 @@ public partial record ClassModel
             {
                 string Parameters = string.Empty;
 
-                foreach (KeyValuePair<string, Parameter> ParameterEntry in Method.ParameterTable)
+                foreach (KeyValuePair<ParameterName, IParameter> ParameterEntry in Method.ParameterTable)
                 {
                     if (Parameters.Length > 0)
                         Parameters += ", ";
 
-                    Parameters += ParameterEntry.Key;
+                    Parameters += ParameterEntry.Key.Name;
                 }
 
                 string ReturnString = Method.HasReturnValue ? "int" : "void";
-                Result += @$"  {ReturnString} {Method.Name.Name}({Parameters})
+                Result += @$"  {ReturnString} {Method.MethodName.Name}({Parameters})
 ";
 
                 foreach (Invariant Invariant in InvariantList)
