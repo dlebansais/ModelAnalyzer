@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.Text;
+using System.Linq.Expressions;
 
 public partial record ClassModel
 {
@@ -39,7 +40,9 @@ public partial record ClassModel
         List<IInvariant> InvariantList = new();
         Unsupported Unsupported = new();
 
-        if (Name != string.Empty && IsClassDeclarationSupported(classDeclaration))
+        if (Name == string.Empty || !IsClassDeclarationSupported(classDeclaration))
+            Unsupported.InvalidDeclaration = true;
+        else
         {
             Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(classDeclaration);
             FieldTable = ParseFields(classDeclaration, Unsupported);
@@ -274,81 +277,56 @@ public partial record ClassModel
 
     private static List<IStatement> ParseExpressionBody(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
-        List<IStatement> StatementList = new();
-        IStatement NewStatement;
+        IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionBody);
+        return new List<IStatement>() { new ReturnStatement { Expression = Expression } };
+    }
 
-        if (IsExpressionSupported(fieldTable, parameterTable, expressionBody, out IExpression Expression))
-        {
-            NewStatement = new ReturnStatement { Expression = Expression };
-        }
+    private static IExpression ParseExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode)
+    {
+        IExpression NewExpression;
+
+        if (expressionNode is BinaryExpressionSyntax BinaryExpression)
+            NewExpression = ParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression);
+        else if (expressionNode is IdentifierNameSyntax IdentifierName && TryFindVariableByName(fieldTable, parameterTable, IdentifierName.Identifier.ValueText, out IVariable Variable))
+            NewExpression = new VariableValueExpression { Variable = Variable };
+        else if (expressionNode is LiteralExpressionSyntax LiteralExpression && int.TryParse(LiteralExpression.Token.ValueText, out int Value))
+            NewExpression = new LiteralValueExpression { Value = Value };
         else
         {
-            Location Location = expressionBody.GetLocation();
-            NewStatement = new UnsupportedStatement { Location = Location };
+            Location Location = expressionNode.GetLocation();
+            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
+            unsupported.Expressions.Add(UnsupportedExpression);
+
+            NewExpression = UnsupportedExpression;
         }
 
-        StatementList.Add(NewStatement);
-
-        return StatementList;
+        return NewExpression;
     }
 
-    private static bool IsExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, ExpressionSyntax expressionNode, out IExpression expression)
+    private static IExpression ParseBinaryExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
     {
-        if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            return IsBinaryExpressionSupported(fieldTable, parameterTable, BinaryExpression, out expression);
-        else if (expressionNode is IdentifierNameSyntax IdentifierName && TryFindVariableByName(fieldTable, parameterTable, IdentifierName.Identifier.ValueText, out IVariable Variable))
+        IExpression NewExpression;
+
+        IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
+        IExpression Right = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
+        string OperatorText;
+
+        if (IsBinaryOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            NewExpression = new BinaryExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            NewExpression = new ComparisonExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            NewExpression = new BinaryLogicalExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        else
         {
-            expression = new VariableValueExpression { Variable = Variable };
-            return true;
-        }
-        else if (expressionNode is LiteralExpressionSyntax LiteralExpression && int.TryParse(LiteralExpression.Token.ValueText, out int Value))
-        {
-            expression = new LiteralValueExpression { Value = Value };
-            return true;
-        }
+            Location Location = expressionNode.OperatorToken.GetLocation();
+            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
+            unsupported.Expressions.Add(UnsupportedExpression);
 
-        expression = null!;
-        return false;
-    }
-
-    private static bool IsAssignmentExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, AssignmentExpressionSyntax expressionNode, out IField destination, out IExpression expression)
-    {
-        if (expressionNode.Left is IdentifierNameSyntax IdentifierName &&
-            TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out destination) &&
-            IsExpressionSupported(fieldTable, parameterTable, expressionNode.Right, out expression))
-            return true;
-
-        destination = null!;
-        expression = null!;
-        return false;
-    }
-
-    private static bool IsBinaryExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, BinaryExpressionSyntax expressionNode, out IExpression expression)
-    {
-        if (IsExpressionSupported(fieldTable, parameterTable, expressionNode.Left, out IExpression Left) &&
-            IsExpressionSupported(fieldTable, parameterTable, expressionNode.Right, out IExpression Right))
-        {
-            string OperatorText;
-
-            if (IsBinaryOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            {
-                expression = new BinaryExpression { Left = Left, OperatorText = OperatorText, Right = Right };
-                return true;
-            }
-            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            {
-                expression = new ComparisonExpression { Left = Left, OperatorText = OperatorText, Right = Right };
-                return true;
-            }
-            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            {
-                expression = new BinaryLogicalExpression { Left = Left, OperatorText = OperatorText, Right = Right };
-                return true;
-            }
+            NewExpression = UnsupportedExpression;
         }
 
-        expression = null!;
-        return false;
+        return NewExpression;
     }
 
     private static bool IsBinaryOperatorSupported(SyntaxToken token, out string operatorText)
@@ -436,8 +414,10 @@ public partial record ClassModel
         IStatement NewStatement;
 
         if (node.Expression is AssignmentExpressionSyntax AssignmentExpression &&
-            IsAssignmentExpressionSupported(fieldTable, parameterTable, AssignmentExpression, out IField Destination, out IExpression Expression))
+            AssignmentExpression.Left is IdentifierNameSyntax IdentifierName &&
+            TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
         {
+            IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right);
             NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
         }
         else
@@ -454,51 +434,28 @@ public partial record ClassModel
 
     private static IStatement ParseIfStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, IfStatementSyntax node)
     {
-        IStatement NewStatement;
+        IExpression Condition = ParseExpression(fieldTable, parameterTable, unsupported, node.Condition);
+        List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, node.Statement);
+        List<IStatement> WhenFalseStatementList;
 
-        if (IsExpressionSupported(fieldTable, parameterTable, node.Condition, out IExpression Condition))
-        {
-            List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, node.Statement);
-            List<IStatement> WhenFalseStatementList;
-
-            if (node.Else is ElseClauseSyntax ElseClause)
-                WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
-            else
-                WhenFalseStatementList = new();
-
-            NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
-        }
+        if (node.Else is ElseClauseSyntax ElseClause)
+            WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
         else
-        {
-            Location Location = node.GetLocation();
-            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.Statements.Add(UnsupportedStatement);
+            WhenFalseStatementList = new();
 
-            NewStatement = UnsupportedStatement;
-        }
-
-        return NewStatement;
+        return new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
     }
 
     private static IStatement ParseReturnStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ReturnStatementSyntax node)
     {
-        IStatement NewStatement;
-        IExpression? ReturnExpression = null;
+        IExpression? ReturnExpression;
 
-        if (node.Expression is null || IsExpressionSupported(fieldTable, parameterTable, node.Expression, out ReturnExpression))
-        {
-            NewStatement = new ReturnStatement { Expression = ReturnExpression };
-        }
+        if (node.Expression is not null)
+            ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, node.Expression);
         else
-        {
-            Location Location = node.GetLocation();
-            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.Statements.Add(UnsupportedStatement);
+            ReturnExpression = null;
 
-            NewStatement = UnsupportedStatement;
-        }
-
-        return NewStatement;
+        return new ReturnStatement { Expression = ReturnExpression };
     }
 
     private static bool IsTypeSupported(TypeSyntax? type, out bool isVoid)
