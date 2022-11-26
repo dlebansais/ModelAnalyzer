@@ -55,7 +55,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
             return;
 
         ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        if (NewClassModel.IsSupported)
+        if (NewClassModel.Unsupported.IsEmpty)
         {
             ClassModelManager.Instance.Update(NewClassModel);
             return;

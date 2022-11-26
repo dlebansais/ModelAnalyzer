@@ -10,10 +10,10 @@ using Microsoft.CodeAnalysis.Text;
 public partial record ClassModel
 {
     public required string Name { get; init; }
-    public required bool IsSupported { get; init; }
     public required Dictionary<FieldName, IField> FieldTable { get; init; }
     public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
+    public required Unsupported Unsupported { get; init; }
 
     public static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
     {
@@ -34,27 +34,26 @@ public partial record ClassModel
     public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration)
     {
         string Name = classDeclaration.Identifier.ValueText;
-        bool IsSupported = false;
         Dictionary<FieldName, IField> FieldTable = new();
         Dictionary<MethodName, IMethod> MethodTable = new();
         List<IInvariant> InvariantList = new();
+        Unsupported Unsupported = new();
 
         if (Name != string.Empty && IsClassDeclarationSupported(classDeclaration))
         {
-            IsSupported = true;
-            CheckUnsupportedMembers(classDeclaration, ref IsSupported);
-            FieldTable = ParseFields(classDeclaration, ref IsSupported);
-            MethodTable = ParseMethods(classDeclaration, FieldTable, ref IsSupported);
+            Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(classDeclaration);
+            FieldTable = ParseFields(classDeclaration, Unsupported);
+            MethodTable = ParseMethods(classDeclaration, FieldTable, Unsupported);
             InvariantList = ParseInvariants(classDeclaration, FieldTable);
         }
 
         return new ClassModel
         {
             Name = Name,
-            IsSupported = IsSupported,
             FieldTable = FieldTable,
             MethodTable = MethodTable,
             InvariantList = InvariantList,
+            Unsupported = Unsupported,
         };
     }
 
@@ -94,29 +93,32 @@ public partial record ClassModel
         return true;
     }
 
-    private static void CheckUnsupportedMembers(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
+    private static bool CheckUnsupportedMembers(ClassDeclarationSyntax classDeclaration)
     {
+        bool HasUnsupportedNode = false;
+
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is not FieldDeclarationSyntax && Member is not MethodDeclarationSyntax)
             {
                 Logger.Log($"{Member.GetType()} not supported");
-                isSupported = false;
-                break;
+                HasUnsupportedNode = true;
             }
+
+        return HasUnsupportedNode;
     }
 
-    private static Dictionary<FieldName, IField> ParseFields(ClassDeclarationSyntax classDeclaration, ref bool isSupported)
+    private static Dictionary<FieldName, IField> ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
     {
         Dictionary<FieldName, IField> FieldTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is FieldDeclarationSyntax FieldDeclaration)
-                AddField(FieldDeclaration, FieldTable, ref isSupported);
+                AddField(FieldDeclaration, FieldTable, unsupported);
     
         return FieldTable;
     }
 
-    private static void AddField(FieldDeclarationSyntax fieldDeclaration, Dictionary<FieldName, IField> fieldTable, ref bool isSupported)
+    private static void AddField(FieldDeclarationSyntax fieldDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
     {
         VariableDeclarationSyntax Declaration = fieldDeclaration.Declaration;
 
@@ -127,8 +129,8 @@ public partial record ClassModel
             Logger.Log("Bad field declaration");
 
             Location Location = Declaration.GetLocation();
-            UnsupportedField NewField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
-            isSupported = false;
+            UnsupportedField UnsupportedField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
+            unsupported.Fields.Add(UnsupportedField);
         }
         else
         {
@@ -147,8 +149,10 @@ public partial record ClassModel
                     Logger.Log($"Bad field: {FieldName.Name}");
 
                     Location Location = Variable.Identifier.GetLocation();
-                    NewField = new UnsupportedField { FieldName = FieldName, Location = Location };
-                    isSupported = false;
+                    UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
+                    unsupported.Fields.Add(UnsupportedField);
+
+                    NewField = UnsupportedField;
                 }
 
                 fieldTable.Add(NewField.FieldName, NewField);
@@ -156,34 +160,39 @@ public partial record ClassModel
         }
     }
 
-    private static Dictionary<MethodName, IMethod> ParseMethods(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, ref bool isSupported)
+    private static Dictionary<MethodName, IMethod> ParseMethods(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
     {
         Dictionary<MethodName, IMethod> MethodTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is MethodDeclarationSyntax MethodDeclaration)
-                AddMethod(MethodDeclaration, fieldTable, MethodTable, ref isSupported);
+                AddMethod(MethodDeclaration, fieldTable, MethodTable, unsupported);
 
         return MethodTable;
     }
 
-    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<MethodName, IMethod> methodTable, ref bool isSupported)
+    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<MethodName, IMethod> methodTable, Unsupported unsupported)
     {
         MethodName MethodName = new(methodDeclaration.Identifier.ValueText);
         IMethod NewMethod;
 
-        if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue) &&
-            IsMethodSupported(methodDeclaration, fieldTable, out Dictionary<ParameterName, IParameter> ParameterTable, out List<IStatement> StatementList))
+        if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue))
         {
-            NewMethod = new Method { MethodName = MethodName, HasReturnValue = HasReturnValue, ParameterTable = ParameterTable, StatementList = StatementList };
+            bool IsSupported = true;
+            Dictionary<ParameterName, IParameter> ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
+            List<IStatement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
+
+            NewMethod = new Method { MethodName = MethodName, IsSupported = IsSupported, HasReturnValue = HasReturnValue, ParameterTable = ParameterTable, StatementList = StatementList };
         }
         else
         {
             Logger.Log($"Bad method: {MethodName.Name}");
 
             Location Location = methodDeclaration.Identifier.GetLocation();
-            NewMethod = new UnsupportedMethod { MethodName = MethodName, Location = Location };
-            isSupported = false;
+            UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
+            unsupported.Methods.Add(UnsupportedMethod);
+
+            NewMethod = UnsupportedMethod;
         }
 
         methodTable.Add(NewMethod.MethodName, NewMethod);
@@ -202,41 +211,31 @@ public partial record ClassModel
         return true;
     }
 
-    private static bool IsMethodSupported(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, out Dictionary<ParameterName, IParameter> parameterTable, out List<IStatement> statementList)
+    private static Dictionary<ParameterName, IParameter> ParseParameters(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
     {
-        statementList = null!;
+        Dictionary<ParameterName, IParameter> ParameterTable = new();
 
-        if (!AreAllMethodParametersSupported(methodDeclaration, fieldTable, out parameterTable))
-            return false;
-
-        if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
+        foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
-            if (!IsExpressionSupported(fieldTable, parameterTable, ArrowExpressionClause.Expression, out IExpression Expression))
-                return false;
+            IParameter NewParameter;
 
-            ReturnStatement Statement = new() { Expression = Expression };
-            statementList = new List<IStatement>() { Statement };
-        }
-        else if (methodDeclaration.Body is BlockSyntax Block)
-        {
-            if (!IsBlockSupported(fieldTable, parameterTable, Block, out statementList))
-                return false;
-        }
-
-        return true;
-    }
-
-    private static bool AreAllMethodParametersSupported(MethodDeclarationSyntax method, Dictionary<FieldName, IField> fieldTable, out Dictionary<ParameterName, IParameter> parameterTable)
-    {
-        parameterTable = new Dictionary<ParameterName, IParameter>();
-
-        foreach (ParameterSyntax Parameter in method.ParameterList.Parameters)
-            if (!IsParameterSupported(Parameter, fieldTable, out ParameterName ParameterName))
-                return false;
+            if (IsParameterSupported(Parameter, fieldTable, out ParameterName ParameterName))
+            {
+                NewParameter = new Parameter() { ParameterName = ParameterName };
+            }
             else
-                parameterTable.Add(ParameterName, new Parameter() { ParameterName = ParameterName });
+            {
+                Location Location = Parameter.GetLocation();
+                UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { ParameterName = ParameterName, Location = Location };
+                unsupported.Parameters.Add(UnsupportedParameter);
 
-        return true;
+                NewParameter = UnsupportedParameter;
+            }
+
+            ParameterTable.Add(ParameterName, NewParameter);
+        }
+
+        return ParameterTable;
     }
 
     private static bool IsParameterSupported(ParameterSyntax parameter, Dictionary<FieldName, IField> fieldTable, out ParameterName parameterName)
@@ -259,6 +258,38 @@ public partial record ClassModel
 
         parameterName = new(Name);
         return true;
+    }
+
+    private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    {
+        List<IStatement> StatementList = new();
+
+        if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
+            StatementList = ParseExpressionBody(fieldTable, parameterTable, unsupported, ArrowExpressionClause.Expression);
+        else if (methodDeclaration.Body is BlockSyntax Block)
+            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block);
+
+        return StatementList;
+    }
+
+    private static List<IStatement> ParseExpressionBody(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
+    {
+        List<IStatement> StatementList = new();
+        IStatement NewStatement;
+
+        if (IsExpressionSupported(fieldTable, parameterTable, expressionBody, out IExpression Expression))
+        {
+            NewStatement = new ReturnStatement { Expression = Expression };
+        }
+        else
+        {
+            Location Location = expressionBody.GetLocation();
+            NewStatement = new UnsupportedStatement { Location = Location };
+        }
+
+        StatementList.Add(NewStatement);
+
+        return StatementList;
     }
 
     private static bool IsExpressionSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, ExpressionSyntax expressionNode, out IExpression expression)
@@ -350,66 +381,124 @@ public partial record ClassModel
                ;
     }
 
-    private static bool IsStatementOrBlockSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, StatementSyntax node, out List<IStatement> statementList)
+    private static List<IStatement> ParseStatementOrBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
     {
+        List<IStatement> StatementList;
+
         if (node is BlockSyntax Block)
-            return IsBlockSupported(fieldTable, parameterTable, Block, out statementList);
-        else if (IsStatementSupported(fieldTable, parameterTable, node, out IStatement Statement))
+            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block);
+        else
         {
-            statementList = new List<IStatement> { Statement };
-            return true;
+            IStatement Statement = ParseStatement(fieldTable, parameterTable, unsupported, node);
+            StatementList = new List<IStatement> { Statement };
         }
 
-        statementList = null!;
-        return false;
+        return StatementList;
     }
 
-    private static bool IsBlockSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, BlockSyntax block, out List<IStatement> statementList)
+    private static List<IStatement> ParseBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BlockSyntax block)
     {
-        statementList = new List<IStatement>();
+        List<IStatement> StatementList = new();
 
         foreach (StatementSyntax Item in block.Statements)
-            if (!IsStatementSupported(fieldTable, parameterTable, Item, out IStatement Statement))
-                return false;
-            else
-                statementList.Add(Statement);
+        {
+            IStatement NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, Item);
+            StatementList.Add(NewStatement);
+        }
 
-        return true;
+        return StatementList;
     }
 
-    private static bool IsStatementSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, StatementSyntax node, out IStatement statement)
+    private static IStatement ParseStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
     {
-        if (node is ExpressionStatementSyntax ExpressionStatement &&
-            ExpressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression &&
+        IStatement NewStatement;
+
+        if (node is ExpressionStatementSyntax ExpressionStatement)
+            NewStatement = ParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
+        else if (node is IfStatementSyntax IfStatement)
+            NewStatement = ParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
+        else if (node is ReturnStatementSyntax ReturnStatement)
+            NewStatement = ParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
+        else
+        {
+            Location Location = node.GetLocation();
+            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
+            unsupported.Statements.Add(UnsupportedStatement);
+
+            NewStatement = UnsupportedStatement;
+        }
+
+        return NewStatement;
+    }
+
+    private static IStatement ParseAssignmentStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionStatementSyntax node)
+    {
+        IStatement NewStatement;
+
+        if (node.Expression is AssignmentExpressionSyntax AssignmentExpression &&
             IsAssignmentExpressionSupported(fieldTable, parameterTable, AssignmentExpression, out IField Destination, out IExpression Expression))
         {
-            statement = new AssignmentStatement { Destination = Destination, Expression = Expression };
-            return true;
+            NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
         }
-        else if (node is IfStatementSyntax IfStatement &&
-            IsExpressionSupported(fieldTable, parameterTable, IfStatement.Condition, out IExpression Condition) &&
-            IsStatementOrBlockSupported(fieldTable, parameterTable, IfStatement.Statement, out List<IStatement> WhenTrueStatementList))
+        else
         {
-            List<IStatement> WhenFalseStatementList = new();
-            if (IfStatement.Else is not ElseClauseSyntax ElseClause || IsStatementOrBlockSupported(fieldTable, parameterTable, ElseClause.Statement, out WhenFalseStatementList))
-            {
-                statement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
-                return true;
-            }
-        }
-        else if (node is ReturnStatementSyntax ReturnStatement)
-        {
-            IExpression? ReturnExpression = null;
+            Location Location = node.GetLocation();
+            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
+            unsupported.Statements.Add(UnsupportedStatement);
 
-            if (ReturnStatement.Expression is null || IsExpressionSupported(fieldTable, parameterTable, ReturnStatement.Expression, out ReturnExpression))
-            {
-                statement = new ReturnStatement { Expression = ReturnExpression };
-                return true;
-            }
+            NewStatement = UnsupportedStatement;
         }
 
-        statement = null!;
-        return false;
+        return NewStatement;
+    }
+
+    private static IStatement ParseIfStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, IfStatementSyntax node)
+    {
+        IStatement NewStatement;
+
+        if (IsExpressionSupported(fieldTable, parameterTable, node.Condition, out IExpression Condition))
+        {
+            List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, node.Statement);
+            List<IStatement> WhenFalseStatementList;
+
+            if (node.Else is ElseClauseSyntax ElseClause)
+                WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
+            else
+                WhenFalseStatementList = new();
+
+            NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+        }
+        else
+        {
+            Location Location = node.GetLocation();
+            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
+            unsupported.Statements.Add(UnsupportedStatement);
+
+            NewStatement = UnsupportedStatement;
+        }
+
+        return NewStatement;
+    }
+
+    private static IStatement ParseReturnStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ReturnStatementSyntax node)
+    {
+        IStatement NewStatement;
+        IExpression? ReturnExpression = null;
+
+        if (node.Expression is null || IsExpressionSupported(fieldTable, parameterTable, node.Expression, out ReturnExpression))
+        {
+            NewStatement = new ReturnStatement { Expression = ReturnExpression };
+        }
+        else
+        {
+            Location Location = node.GetLocation();
+            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
+            unsupported.Statements.Add(UnsupportedStatement);
+
+            NewStatement = UnsupportedStatement;
+        }
+
+        return NewStatement;
     }
 
     private static bool IsTypeSupported(TypeSyntax? type, out bool isVoid)
