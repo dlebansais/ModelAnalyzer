@@ -88,6 +88,33 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bad parameter..
+        /// </summary>
+        internal static string BadParameterAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadParameterAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter &apos;{0}&apos; is invalid.
+        /// </summary>
+        internal static string BadParameterAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadParameterAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter is invalid.
+        /// </summary>
+        internal static string BadParameterAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadParameterAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Class should support a model..
         /// </summary>
         internal static string ClassModelAnalyzerDescription {

@@ -631,31 +631,6 @@ class Program
     }
 
     [TestMethod]
-    public async Task ClassWithParameterAttributeCouldHaveAModel_Diagnostic()
-    {
-        await VerifyCS.VerifyCodeFixAsync(@"
-using System;
-
-class [|Program|]
-{
-    void Write([System.Runtime.InteropServices.In] int x)
-    {
-    }
-}
-", @"
-using System;
-
-// No model
-class Program
-{
-    void Write([System.Runtime.InteropServices.In] int x)
-    {
-    }
-}
-");
-    }
-
-    [TestMethod]
     public async Task ClassWithParameterModifierCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"

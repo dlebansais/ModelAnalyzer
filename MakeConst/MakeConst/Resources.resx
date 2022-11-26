@@ -129,6 +129,18 @@
     <value>Class invariant is invalid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="BadParameterAnalyzerDescription" xml:space="preserve">
+    <value>Bad parameter.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadParameterAnalyzerMessageFormat" xml:space="preserve">
+    <value>Parameter '{0}' is invalid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadParameterAnalyzerTitle" xml:space="preserve">
+    <value>Parameter is invalid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="ClassModelAnalyzerDescription" xml:space="preserve">
     <value>Class should support a model.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>

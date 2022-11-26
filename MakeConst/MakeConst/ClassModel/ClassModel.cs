@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.Text;
 using System.Linq.Expressions;
+using System.Reflection.Metadata;
 
 public partial record ClassModel
 {
@@ -220,9 +221,10 @@ public partial record ClassModel
 
         foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
+            ParameterName ParameterName = new(Parameter.Identifier.ValueText);
             IParameter NewParameter;
 
-            if (IsParameterSupported(Parameter, fieldTable, out ParameterName ParameterName))
+            if (IsParameterSupported(Parameter, fieldTable))
             {
                 NewParameter = new Parameter() { ParameterName = ParameterName };
             }
@@ -241,10 +243,8 @@ public partial record ClassModel
         return ParameterTable;
     }
 
-    private static bool IsParameterSupported(ParameterSyntax parameter, Dictionary<FieldName, IField> fieldTable, out ParameterName parameterName)
+    private static bool IsParameterSupported(ParameterSyntax parameter, Dictionary<FieldName, IField> fieldTable)
     {
-        parameterName = null!;
-
         if (parameter.AttributeLists.Count > 0)
             return false;
 
@@ -254,12 +254,9 @@ public partial record ClassModel
         if (!IsTypeSupported(parameter.Type, out _))
             return false;
 
-        string Name = parameter.Identifier.ValueText;
-
-        if (TryFindFieldByName(fieldTable, Name, out _))
+        if (TryFindFieldByName(fieldTable, parameter.Identifier.ValueText, out _))
             return false;
 
-        parameterName = new(Name);
         return true;
     }
 
