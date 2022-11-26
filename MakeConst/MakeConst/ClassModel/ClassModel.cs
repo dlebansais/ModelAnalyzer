@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis.Text;
 using System.Linq.Expressions;
 using System.Reflection.Metadata;
+using System;
 
 public partial record ClassModel
 {
@@ -386,15 +387,19 @@ public partial record ClassModel
 
     private static IStatement ParseStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
     {
-        IStatement NewStatement;
+        IStatement? NewStatement = null;
 
-        if (node is ExpressionStatementSyntax ExpressionStatement)
-            NewStatement = ParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
-        else if (node is IfStatementSyntax IfStatement)
-            NewStatement = ParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
-        else if (node is ReturnStatementSyntax ReturnStatement)
-            NewStatement = ParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
-        else
+        if (node.AttributeLists.Count == 0)
+        {
+            if (node is ExpressionStatementSyntax ExpressionStatement)
+                NewStatement = ParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
+            else if (node is IfStatementSyntax IfStatement)
+                NewStatement = ParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
+            else if (node is ReturnStatementSyntax ReturnStatement)
+                NewStatement = ParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
+        }
+
+        if (NewStatement is null)
         {
             Location Location = node.GetLocation();
             UnsupportedStatement UnsupportedStatement = new() { Location = Location };

@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BadExpressionAnalyzerDescription" xml:space="preserve">
+    <value>Bad expression.</value>
+  </data>
+  <data name="BadExpressionAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad expression</value>
+  </data>
+  <data name="BadExpressionAnalyzerTitle" xml:space="preserve">
+    <value>Bad expression</value>
+  </data>
   <data name="BadInvariantAnalyzerDescription" xml:space="preserve">
     <value>Bad invariant.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
@@ -139,6 +148,18 @@
   </data>
   <data name="BadParameterAnalyzerTitle" xml:space="preserve">
     <value>Parameter is invalid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="BadStatementAnalyzerDescription" xml:space="preserve">
+    <value>Bad statement.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadStatementAnalyzerMessageFormat" xml:space="preserve">
+    <value>Statement is invalid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadStatementAnalyzerTitle" xml:space="preserve">
+    <value>Statement is invalid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="ClassModelAnalyzerDescription" xml:space="preserve">

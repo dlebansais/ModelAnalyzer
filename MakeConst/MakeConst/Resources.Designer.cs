@@ -61,6 +61,33 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bad expression..
+        /// </summary>
+        internal static string BadExpressionAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadExpressionAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad expression.
+        /// </summary>
+        internal static string BadExpressionAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadExpressionAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad expression.
+        /// </summary>
+        internal static string BadExpressionAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadExpressionAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad invariant..
         /// </summary>
         internal static string BadInvariantAnalyzerDescription {
@@ -111,6 +138,33 @@ namespace DemoAnalyzer {
         internal static string BadParameterAnalyzerTitle {
             get {
                 return ResourceManager.GetString("BadParameterAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad statement..
+        /// </summary>
+        internal static string BadStatementAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadStatementAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Statement is invalid.
+        /// </summary>
+        internal static string BadStatementAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadStatementAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Statement is invalid.
+        /// </summary>
+        internal static string BadStatementAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadStatementAnalyzerTitle", resourceCulture);
             }
         }
         
