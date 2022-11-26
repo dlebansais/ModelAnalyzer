@@ -252,6 +252,11 @@ public partial record ClassModel
             expression = new VariableValueExpression { Variable = Variable };
             return true;
         }
+        else if (expressionNode is LiteralExpressionSyntax LiteralExpression && int.TryParse(LiteralExpression.Token.ValueText, out int Value))
+        {
+            expression = new LiteralValueExpression { Value = Value };
+            return true;
+        }
 
         expression = null!;
         return false;
@@ -286,6 +291,11 @@ public partial record ClassModel
                 expression = new ComparisonExpression { Left = Left, OperatorText = OperatorText, Right = Right };
                 return true;
             }
+            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorText))
+            {
+                expression = new BinaryLogicalExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+                return true;
+            }
         }
 
         expression = null!;
@@ -313,6 +323,29 @@ public partial record ClassModel
                token.IsKind(SyntaxKind.LessThanEqualsToken);
     }
 
+    private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out string operatorText)
+    {
+        operatorText = token.ValueText;
+
+        return token.IsKind(SyntaxKind.BarBarToken) ||
+               token.IsKind(SyntaxKind.AmpersandAmpersandToken)
+               ;
+    }
+
+    private static bool IsStatementOrBlockSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, StatementSyntax node, out List<IStatement> statementList)
+    {
+        if (node is BlockSyntax Block)
+            return IsBlockSupported(fieldTable, parameterTable, Block, out statementList);
+        else if (IsStatementSupported(fieldTable, parameterTable, node, out IStatement Statement))
+        {
+            statementList = new List<IStatement> { Statement };
+            return true;
+        }
+
+        statementList = null!;
+        return false;
+    }
+
     private static bool IsBlockSupported(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, BlockSyntax block, out List<IStatement> statementList)
     {
         statementList = new List<IStatement>();
@@ -334,6 +367,27 @@ public partial record ClassModel
         {
             statement = new AssignmentStatement { Destination = Destination, Expression = Expression };
             return true;
+        }
+        else if (node is IfStatementSyntax IfStatement &&
+            IsExpressionSupported(fieldTable, parameterTable, IfStatement.Condition, out IExpression Condition) &&
+            IsStatementOrBlockSupported(fieldTable, parameterTable, IfStatement.Statement, out List<IStatement> WhenTrueStatementList))
+        {
+            List<IStatement> WhenFalseStatementList = new();
+            if (IfStatement.Else is not ElseClauseSyntax ElseClause || IsStatementOrBlockSupported(fieldTable, parameterTable, ElseClause.Statement, out WhenFalseStatementList))
+            {
+                statement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+                return true;
+            }
+        }
+        else if (node is ReturnStatementSyntax ReturnStatement)
+        {
+            IExpression? ReturnExpression = null;
+
+            if (ReturnStatement.Expression is null || IsExpressionSupported(fieldTable, parameterTable, ReturnStatement.Expression, out ReturnExpression))
+            {
+                statement = new ReturnStatement { Expression = ReturnExpression };
+                return true;
+            }
         }
 
         statement = null!;
@@ -401,9 +455,9 @@ public partial record ClassModel
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out string Operator, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out string OperatorText, out int ConstantValue))
         {
-            NewInvariant = new Invariant { Text = Text, Field = Field, Operator = Operator, ConstantValue = ConstantValue };
+            NewInvariant = new Invariant { Text = Text, Field = Field, OperatorText = OperatorText, ConstantValue = ConstantValue };
         }
         else
         {
@@ -541,7 +595,7 @@ public partial record ClassModel
 ";
 
                 foreach (Invariant Invariant in InvariantList)
-                    Result += @$"  * {Invariant.FieldName} {Invariant.Operator} {Invariant.ConstantValue}
+                    Result += @$"  * {Invariant.FieldName} {Invariant.OperatorText} {Invariant.ConstantValue}
 ";
             }
 

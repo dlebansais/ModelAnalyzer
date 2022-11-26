@@ -1,5 +1,8 @@
 ﻿namespace DemoAnalyzer;
 
+using System.Diagnostics;
+
+[DebuggerDisplay("{Left} {OperatorText} {Right}")]
 public class ComparisonExpression : IExpression
 {
     public required IExpression Left { get; init; }

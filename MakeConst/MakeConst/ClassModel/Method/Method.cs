@@ -1,7 +1,9 @@
 ﻿namespace DemoAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
+[DebuggerDisplay("{MethodName.Name}()")]
 public class Method : IMethod
 {
     public required MethodName MethodName { get; init; }
