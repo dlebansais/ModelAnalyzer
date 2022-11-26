@@ -50,7 +50,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
-        // Check whether the class can be modeled
+        // Ignore diagnostic for classes not modeled.
         if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
             return;
 

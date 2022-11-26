@@ -7,5 +7,5 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 BadInvariant | Design | Warning | ClassModelAnalyzer
 ClassModel | Design | Warning | ClassModelAnalyzer
-InvariantViolation | Design | Warning | InvariantViolationAnalyzer
+InvariantViolation | Design | Error | InvariantViolationAnalyzer
 MakeConst | Usage | Warning | MakeConstAnalyzer

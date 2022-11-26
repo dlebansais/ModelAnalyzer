@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +17,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
     private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.InvariantViolationAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
     private const string Category = "Design";
 
-    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Error, isEnabledByDefault: true, description: Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
 
@@ -46,6 +44,10 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
+        // Ignore diagnostic for classes not modeled.
+        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+            return;
+
         string Name = classDeclaration.Identifier.ValueText;
 
         if (Name == string.Empty)

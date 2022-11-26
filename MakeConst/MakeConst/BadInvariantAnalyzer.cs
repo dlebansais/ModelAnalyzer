@@ -31,15 +31,22 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.CompilationUnit);
     }
 
     private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
         try
         {
-            var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
-            AnalyzeClass(context, ClassDeclaration);
+            var CompilationUnit = (CompilationUnitSyntax)context.Node;
+
+            foreach (MemberDeclarationSyntax Member in CompilationUnit.Members)
+                if (Member is FileScopedNamespaceDeclarationSyntax FileScopedNamespaceDeclaration)
+                    AnalyzeNamespaceMembers(context, FileScopedNamespaceDeclaration.Members);
+                else if (Member is NamespaceDeclarationSyntax NamespaceDeclaration)
+                    AnalyzeNamespaceMembers(context, NamespaceDeclaration.Members);
+                else if (Member is ClassDeclarationSyntax ClassDeclaration)
+                    AnalyzeClass(context, ClassDeclaration);
         }
         catch (Exception e)
         {
@@ -48,15 +55,20 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    private static void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members)
+    {
+        foreach (MemberDeclarationSyntax NamespaceMember in members)
+            if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
+                AnalyzeClass(context, ClassDeclaration);
+    }
+
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
-        // Check whether the class can be modeled
+        // Ignore diagnostic for classes not modeled.
         if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
             return;
 
         ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        if (NewClassModel.IsSupported)
-            return;
 
         foreach (IInvariant Item in NewClassModel.InvariantList)
             if (Item is UnsupportedInvariant Unsupported)

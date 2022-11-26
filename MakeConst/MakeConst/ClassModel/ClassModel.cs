@@ -47,7 +47,7 @@ public record ClassModel
             CheckUnsupportedMembers(classDeclaration, ref IsSupported);
             FieldTable = ParseFields(classDeclaration, ref IsSupported);
             MethodTable = ParseMethods(classDeclaration, ref IsSupported);
-            InvariantList = ParseInvariants(classDeclaration, FieldTable, ref IsSupported);
+            InvariantList = ParseInvariants(classDeclaration, FieldTable);
         }
 
         return new ClassModel
@@ -63,23 +63,35 @@ public record ClassModel
     private static bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
     {
         if (classDeclaration.AttributeLists.Count > 0)
-            return false;
-
-        foreach (SyntaxToken Modifier in classDeclaration.Modifiers)
         {
-            SyntaxKind Kind = Modifier.Kind();
-            if (Kind != SyntaxKind.PrivateKeyword && Kind != SyntaxKind.PublicKeyword && Kind != SyntaxKind.InternalKeyword && Kind != SyntaxKind.PartialKeyword)
-                return false;
+            Logger.Log("Too many attributes");
+            return false;
         }
 
+        foreach (SyntaxToken Modifier in classDeclaration.Modifiers)
+            if (!Modifier.IsKind(SyntaxKind.PrivateKeyword) && !Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword) && !Modifier.IsKind(SyntaxKind.PartialKeyword))
+            {
+                Logger.Log("Unsupported modifier");
+                return false;
+            }
+
         if (classDeclaration.BaseList is BaseListSyntax BaseList && BaseList.Types.Count > 0)
+        {
+            Logger.Log("Unsupported base");
             return false;
+        }
 
         if (classDeclaration.TypeParameterList is TypeParameterListSyntax TypeParameterList && TypeParameterList.Parameters.Count > 0)
+        {
+            Logger.Log("Unsupported type parameters");
             return false;
+        }
 
         if (classDeclaration.ConstraintClauses.Count > 0)
+        {
+            Logger.Log("Unsupported constraints");
             return false;
+        }
 
         return true;
     }
@@ -89,6 +101,7 @@ public record ClassModel
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is not FieldDeclarationSyntax && Member is not MethodDeclarationSyntax)
             {
+                Logger.Log($"{Member.GetType()} not supported");
                 isSupported = false;
                 break;
             }
@@ -126,6 +139,8 @@ public record ClassModel
             }
             else
             {
+                Logger.Log($"Bad field: {Name.Name}");
+
                 Location Location = Variable.Identifier.GetLocation();
                 NewField = new UnsupportedField { Name = Name, Location = Location };
                 isSupported = false;
@@ -166,6 +181,8 @@ public record ClassModel
         }
         else
         {
+            Logger.Log($"Bad method: {Name.Name}");
+
             Location Location = methodDeclaration.Identifier.GetLocation();
             NewMethod = new UnsupportedMethod { Name = Name, Location = Location };
             isSupported = false;
@@ -215,7 +232,7 @@ public record ClassModel
         return true;
     }
 
-    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, ref bool isSupported)
+    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable)
     {
         List<IInvariant> InvariantList = new();
 
@@ -225,19 +242,19 @@ public record ClassModel
         if (LastToken.HasTrailingTrivia)
         {
             SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
-            AddInvariantsInTrivia(InvariantList, fieldTable, TrailingTrivia, ref isSupported);
+            AddInvariantsInTrivia(InvariantList, fieldTable, TrailingTrivia);
             Location = TrailingTrivia.Last().GetLocation();
         }
 
         var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
 
         if (NextToken.HasLeadingTrivia)
-            AddInvariantsInTrivia(InvariantList, fieldTable, NextToken.LeadingTrivia, ref isSupported);
+            AddInvariantsInTrivia(InvariantList, fieldTable, NextToken.LeadingTrivia);
 
         return InvariantList;
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTriviaList triviaList, ref bool isSupported)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -246,11 +263,11 @@ public record ClassModel
                 string Pattern = $"// {Modeling.Invariant}";
 
                 if (Comment.StartsWith(Pattern))
-                    AddInvariantsInTrivia(invariantList, fieldTable, Trivia, Comment, Pattern, ref isSupported);
+                    AddInvariantsInTrivia(invariantList, fieldTable, Trivia, Comment, Pattern);
             }
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTrivia trivia, string comment, string pattern, ref bool isSupported)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
 
@@ -267,17 +284,17 @@ public record ClassModel
         }
         else
         {
+            Logger.Log($"Bad invariant {Text}");
+
             Location FullLocation = trivia.GetLocation();
             TextSpan FullSpan = FullLocation.SourceSpan;
             TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);
             Location Location = Location.Create(FullLocation.SourceTree!, InvariantSpan);
 
             NewInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
-            isSupported = false;
         }
 
         invariantList.Add(NewInvariant);
-        isSupported = false;
     }
 
     private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out string fieldName, out string operatorText, out int constantValue)

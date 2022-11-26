@@ -3,9 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 
 public class ClassModelManager
 {
@@ -118,6 +115,9 @@ public class ClassModelManager
 
             if (!IsFound)
             {
+                if (ClassTable.Count == 0)
+                    Logger.Clear();
+
                 ClassTable.Add(classModel.Name, classModel);
                 ViolationTable.Add(classModel.Name, false);
             }
