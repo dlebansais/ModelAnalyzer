@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -40,7 +40,11 @@
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(OutputPath)\MakeConst.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\MakeConst.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
-    </ItemGroup>
+      <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
+	  <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\runtimes\win-x64\native\libz3.dll" PackagePath="runtimes/win-x64/native" />
+	  <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
+	</ItemGroup>
   </Target>
 
 </Project>

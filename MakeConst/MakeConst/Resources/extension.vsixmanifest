@@ -1,0 +1,25 @@
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
+  <Metadata>
+    <Identity Id="MakeConst.8b9f2cb7-fd69-42e7-8bdd-d3f2e29c250c" Version="1.0" Language="en-US" Publisher="DLB" />
+    <DisplayName>MakeConst</DisplayName>
+    <Description xml:space="preserve">This is a sample diagnostic extension for the .NET Compiler Platform ("Roslyn").</Description>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0,)" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" Version="[4.5,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="MakeConst.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="MakeConst.dll" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="MakeConst.CodeFixes.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="MakeConst.CodeFixes.dll" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="Microsoft.Z3.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="Microsoft.Z3.dll" />
+  </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" DisplayName="Visual Studio core editor" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,)" DisplayName="Roslyn Language Services" />
+  </Prerequisites>
+</PackageManifest>
