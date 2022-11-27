@@ -32,15 +32,12 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
     {
         try
         {
-            Logger.Log($"InvariantViolation {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
-
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
         catch (Exception e)
         {
-            Logger.Log(e.Message);
-            Logger.Log(e.StackTrace);
+            Logger.LogException(e);
         }
     }
 

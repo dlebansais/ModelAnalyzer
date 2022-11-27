@@ -73,8 +73,7 @@ public class ClassModelManager
         }
         catch (Exception e)
         {
-            Logger.Log(e.Message);
-            Logger.Log(e.StackTrace);
+            Logger.LogException(e);
         }
     }
 
@@ -135,7 +134,6 @@ public class ClassModelManager
             if (ClassTable.Count == 0)
                 Logger.Clear();
 
-            Logger.Log($"Adding {ClassName}");
             ClassTable.Add(ClassName, classModel);
             ViolationTable.Add(ClassName, false);
         }
@@ -157,7 +155,6 @@ public class ClassModelManager
 
             foreach (string Key in ToRemoveClassList)
             {
-                Logger.Log($"Removing {Key}");
                 ClassTable.Remove(Key);
                 ViolationTable.Remove(Key);
             }

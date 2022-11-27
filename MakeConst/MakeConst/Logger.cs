@@ -42,6 +42,15 @@ public static class Logger
         }
     }
 
+    public static void LogException(Exception e)
+    {
+        lock (Mutex)
+        {
+            WriteLogSync(e.Message);
+            WriteLogSync(e.StackTrace);
+        }
+    }
+
     private static void WriteLogSync(string message)
     {
         for (int i = 0; i < 4; i++)

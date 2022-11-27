@@ -46,35 +46,20 @@ public partial record ClassModel
     private static bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
     {
         if (classDeclaration.AttributeLists.Count > 0)
-        {
-            Logger.Log("Too many attributes");
             return false;
-        }
 
         foreach (SyntaxToken Modifier in classDeclaration.Modifiers)
             if (!Modifier.IsKind(SyntaxKind.PrivateKeyword) && !Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword) && !Modifier.IsKind(SyntaxKind.PartialKeyword))
-            {
-                Logger.Log("Unsupported modifier");
                 return false;
-            }
 
         if (classDeclaration.BaseList is BaseListSyntax BaseList && BaseList.Types.Count > 0)
-        {
-            Logger.Log("Unsupported base");
             return false;
-        }
 
         if (classDeclaration.TypeParameterList is TypeParameterListSyntax TypeParameterList && TypeParameterList.Parameters.Count > 0)
-        {
-            Logger.Log("Unsupported type parameters");
             return false;
-        }
 
         if (classDeclaration.ConstraintClauses.Count > 0)
-        {
-            Logger.Log("Unsupported constraints");
             return false;
-        }
 
         return true;
     }
@@ -85,10 +70,7 @@ public partial record ClassModel
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is not FieldDeclarationSyntax && Member is not MethodDeclarationSyntax)
-            {
-                Logger.Log($"{Member.GetType()} not supported");
                 HasUnsupportedNode = true;
-            }
 
         return HasUnsupportedNode;
     }
@@ -112,8 +94,6 @@ public partial record ClassModel
             fieldDeclaration.Modifiers.Any(modifier => !modifier.IsKind(SyntaxKind.PrivateKeyword)) ||
             !IsTypeSupported(Declaration.Type, out _))
         {
-            Logger.Log("Bad field declaration");
-
             Location Location = Declaration.GetLocation();
             UnsupportedField UnsupportedField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
             unsupported.Fields.Add(UnsupportedField);
@@ -132,8 +112,6 @@ public partial record ClassModel
                 }
                 else
                 {
-                    Logger.Log($"Bad field: {FieldName.Name}");
-
                     Location Location = Variable.Identifier.GetLocation();
                     UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
                     unsupported.Fields.Add(UnsupportedField);
@@ -172,8 +150,6 @@ public partial record ClassModel
         }
         else
         {
-            Logger.Log($"Bad method: {MethodName.Name}");
-
             Location Location = methodDeclaration.Identifier.GetLocation();
             UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
             unsupported.Methods.Add(UnsupportedMethod);
@@ -508,8 +484,6 @@ public partial record ClassModel
         }
         else
         {
-            Logger.Log($"Bad invariant {Text}");
-
             Location FullLocation = trivia.GetLocation();
             TextSpan FullSpan = FullLocation.SourceSpan;
             TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);

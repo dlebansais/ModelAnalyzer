@@ -50,8 +50,7 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         }
         catch (Exception e)
         {
-            Logger.Log(e.Message);
-            Logger.Log(e.StackTrace);
+            Logger.LogException(e);
         }
     }
 

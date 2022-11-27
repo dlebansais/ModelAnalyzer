@@ -37,15 +37,12 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
     {
         try
         {
-            Logger.Log($"BadParameter {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
-
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
         catch (Exception e)
         {
-            Logger.Log(e.Message);
-            Logger.Log(e.StackTrace);
+            Logger.LogException(e);
         }
     }
 
