@@ -1,6 +1,7 @@
 ﻿namespace DemoAnalyzer;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -56,9 +57,16 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members)
     {
+        List<string> ExistingClassList = new();
+
         foreach (MemberDeclarationSyntax NamespaceMember in members)
             if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
+            {
+                ExistingClassList.Add(ClassDeclaration.Identifier.ValueText);
                 AnalyzeClass(context, ClassDeclaration);
+            }
+
+        ClassModelManager.Instance.RemoveMissingClasses(ExistingClassList);
     }
 
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)

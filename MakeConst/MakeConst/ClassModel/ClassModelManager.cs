@@ -135,12 +135,32 @@ public class ClassModelManager
             if (ClassTable.Count == 0)
                 Logger.Clear();
 
+            Logger.Log($"Adding {ClassName}");
             ClassTable.Add(ClassName, classModel);
             ViolationTable.Add(ClassName, false);
         }
         else
         {
             ClassTable[ClassName] = classModel;
+        }
+    }
+
+    public void RemoveMissingClasses(List<string> existingClassList)
+    {
+        lock (ClassTable)
+        {
+            List<string> ToRemoveClassList = new();
+
+            foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
+                if (!existingClassList.Contains(Entry.Key))
+                    ToRemoveClassList.Add(Entry.Key);
+
+            foreach (string Key in ToRemoveClassList)
+            {
+                Logger.Log($"Removing {Key}");
+                ClassTable.Remove(Key);
+                ViolationTable.Remove(Key);
+            }
         }
     }
 
