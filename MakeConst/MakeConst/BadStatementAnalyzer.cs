@@ -37,6 +37,8 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
     {
         try
         {
+            Logger.Log($"BadStatement {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
+
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
@@ -50,11 +52,11 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        foreach (UnsupportedStatement Item in NewClassModel.Unsupported.Statements)
+        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        foreach (UnsupportedStatement Item in ClassModel.Unsupported.Statements)
             context.ReportDiagnostic(Diagnostic.Create(BadStatementRule, Item.Location));
     }
 }

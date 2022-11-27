@@ -64,12 +64,12 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
+        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
 
-        foreach (IInvariant Item in NewClassModel.InvariantList)
+        foreach (IInvariant Item in ClassModel.InvariantList)
             if (Item is UnsupportedInvariant Unsupported)
                 context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Unsupported.Location, Item.Text));
     }

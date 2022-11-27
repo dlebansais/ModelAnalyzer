@@ -32,6 +32,8 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
     {
         try
         {
+            Logger.Log($"InvariantViolation {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
+
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
@@ -45,7 +47,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
         string Name = classDeclaration.Identifier.ValueText;

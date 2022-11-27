@@ -37,6 +37,8 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
     {
         try
         {
+            Logger.Log($"BadExpression {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
+
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
@@ -50,11 +52,11 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        foreach (UnsupportedExpression Item in NewClassModel.Unsupported.Expressions)
+        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        foreach (UnsupportedExpression Item in ClassModel.Unsupported.Expressions)
             context.ReportDiagnostic(Diagnostic.Create(BadExpressionRule, Item.Location));
     }
 }

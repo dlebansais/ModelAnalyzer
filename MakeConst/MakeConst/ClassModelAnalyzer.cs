@@ -38,6 +38,8 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     {
         try
         {
+            Logger.Log($"ClassModel {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
+
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
@@ -51,15 +53,12 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        if (NewClassModel.Unsupported.IsEmpty)
-        {
-            ClassModelManager.Instance.Update(NewClassModel);
+        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        if (ClassModel.Unsupported.IsEmpty)
             return;
-        }
 
         context.ReportDiagnostic(Diagnostic.Create(ClassModelRule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }

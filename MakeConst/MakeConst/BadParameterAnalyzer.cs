@@ -37,6 +37,8 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
     {
         try
         {
+            Logger.Log($"BadParameter {context.GetHashCode()} {context.Compilation.GetHashCode()} {context.SemanticModel.GetHashCode()}");
+
             var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
             AnalyzeClass(context, ClassDeclaration);
         }
@@ -50,11 +52,11 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
-        if (ClassModel.IsClassIgnoredForModeling(classDeclaration))
+        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel NewClassModel = ClassModel.FromClassDeclaration(classDeclaration);
-        foreach (UnsupportedParameter Item in NewClassModel.Unsupported.Parameters)
+        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        foreach (UnsupportedParameter Item in ClassModel.Unsupported.Parameters)
             context.ReportDiagnostic(Diagnostic.Create(BadParameterRule, Item.Location, Item.Name));
     }
 }

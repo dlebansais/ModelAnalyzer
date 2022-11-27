@@ -1,14 +1,19 @@
 ﻿namespace DemoAnalyzer;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 public class ClassModelManager
 {
     public static ClassModelManager Instance = new();
 
     private Dictionary<string, ClassModel> ClassTable = new();
+    private int LastHashCode;
     private Dictionary<string, bool> ViolationTable = new();
     private Thread? ModelThread = null;
     private bool ThreadShouldBeRestarted;
@@ -90,42 +95,68 @@ public class ClassModelManager
         }
     }
 
-    public void Update(ClassModel classModel)
+    public ClassModel GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
-        bool IsClassChanged = false;
+        int HashCode = context.Compilation.GetHashCode();
+        ClassModel Result;
 
         lock (ClassTable)
         {
-            bool IsFound = false;
+            string ClassName = classDeclaration.Identifier.ValueText;
 
-            foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
-                if (Entry.Key == classModel.Name)
-                {
-                    IsFound = true;
-                    ClassModel ExistingClassModel = Entry.Value;
-
-                    if (!ExistingClassModel.Equals(classModel))
-                    {
-                        ClassTable[classModel.Name] = classModel;
-                        IsClassChanged = true;
-                    }
-
-                    break;
-                }
-
-            if (!IsFound)
+            if (ClassName == string.Empty || LastHashCode != HashCode || !ClassTable.ContainsKey(ClassName))
             {
-                if (ClassTable.Count == 0)
-                    Logger.Clear();
+                Result = ClassModel.FromClassDeclaration(classDeclaration);
 
-                ClassTable.Add(classModel.Name, classModel);
-                ViolationTable.Add(classModel.Name, false);
+                if (ClassName != string.Empty)
+                {
+                    UpdateClassModel(Result);
+
+                    if (LastHashCode != HashCode)
+                    {
+                        LastHashCode = HashCode;
+                        ScheduleThreadStart();
+                    }
+                }
             }
+            else
+                Result = ClassTable[ClassName];
         }
 
-        if (IsClassChanged)
+        return Result;
+    }
+
+    public void UpdateClassModel(ClassModel classModel)
+    {
+        string ClassName = classModel.Name;
+
+        if (!ClassTable.ContainsKey(ClassName))
         {
-            ScheduleThreadStart();
+            if (ClassTable.Count == 0)
+                Logger.Clear();
+
+            ClassTable.Add(ClassName, classModel);
+            ViolationTable.Add(ClassName, false);
         }
+        else
+        {
+            ClassTable[ClassName] = classModel;
+        }
+    }
+
+    public static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
+    {
+        SyntaxToken firstToken = classDeclaration.GetFirstToken();
+        SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
+
+        foreach (SyntaxTrivia Trivia in leadingTrivia)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                if (Comment.StartsWith($"// {Modeling.None}"))
+                    return true;
+            }
+
+        return false;
     }
 }

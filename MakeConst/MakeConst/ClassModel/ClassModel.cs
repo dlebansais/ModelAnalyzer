@@ -1,14 +1,11 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Linq.Expressions;
-using System.Reflection.Metadata;
-using System;
 
 public partial record ClassModel
 {
@@ -17,22 +14,6 @@ public partial record ClassModel
     public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
     public required Unsupported Unsupported { get; init; }
-
-    public static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
-    {
-        SyntaxToken firstToken = classDeclaration.GetFirstToken();
-        SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
-
-        foreach (SyntaxTrivia Trivia in leadingTrivia)
-            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
-            {
-                string Comment = Trivia.ToFullString();
-                if (Comment.StartsWith($"// {Modeling.None}"))
-                    return true;
-            }
-
-        return false;
-    }
 
     public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration)
     {
