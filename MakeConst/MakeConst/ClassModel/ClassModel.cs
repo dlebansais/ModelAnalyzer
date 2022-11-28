@@ -613,7 +613,7 @@ public partial record ClassModel
 
                 foreach (Invariant Invariant in InvariantList)
                 {
-                    string OperatorText = ClassModel.SupportedComparisonOperators[Invariant.OperatorKind].Text;
+                    string OperatorText = SupportedComparisonOperators[Invariant.OperatorKind].Text;
                     Result += @$"  * {Invariant.FieldName} {OperatorText} {Invariant.ConstantValue}
 ";
                 }
