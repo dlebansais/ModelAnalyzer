@@ -264,12 +264,13 @@ public partial record ClassModel
 
         IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
         IExpression Right = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
+        SyntaxKind OperatorKind;
         string OperatorText;
 
         if (IsBinaryOperatorSupported(expressionNode.OperatorToken, out OperatorText))
             NewExpression = new BinaryExpression { Left = Left, OperatorText = OperatorText, Right = Right };
-        else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            NewExpression = new ComparisonExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+            NewExpression = new ComparisonExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
         else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorText))
             NewExpression = new BinaryLogicalExpression { Left = Left, OperatorText = OperatorText, Right = Right };
         else
@@ -293,16 +294,11 @@ public partial record ClassModel
                ;
     }
 
-    private static bool IsComparisonOperatorSupported(SyntaxToken token, out string operatorText)
+    private static bool IsComparisonOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
     {
-        operatorText = token.ValueText;
+        operatorKind = token.Kind();
 
-        return token.IsKind(SyntaxKind.EqualsEqualsToken) ||
-               token.IsKind(SyntaxKind.ExclamationEqualsToken) ||
-               token.IsKind(SyntaxKind.GreaterThanToken) ||
-               token.IsKind(SyntaxKind.GreaterThanEqualsToken) ||
-               token.IsKind(SyntaxKind.LessThanToken) ||
-               token.IsKind(SyntaxKind.LessThanEqualsToken);
+        return SupportedComparisonOperators.ContainsKey(operatorKind);
     }
 
     private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out string operatorText)
@@ -478,9 +474,9 @@ public partial record ClassModel
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out string OperatorText, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out SyntaxKind OperatorKind, out int ConstantValue))
         {
-            NewInvariant = new Invariant { Text = Text, Field = Field, OperatorText = OperatorText, ConstantValue = ConstantValue };
+            NewInvariant = new Invariant { Text = Text, Field = Field, OperatorKind = OperatorKind, ConstantValue = ConstantValue };
         }
         else
         {
@@ -495,10 +491,10 @@ public partial record ClassModel
         invariantList.Add(NewInvariant);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out IField field, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out IField field, out SyntaxKind operatorKind, out int constantValue)
     {
         field = null!;
-        operatorText = string.Empty;
+        operatorKind = SyntaxKind.None;
         constantValue = 0;
 
         CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
@@ -511,13 +507,13 @@ public partial record ClassModel
             return false;
 
         ExpressionSyntax Expression = AssignmentExpression.Right;
-        return IsValidInvariantExpression(fieldTable,  Expression, out field, out operatorText, out constantValue);
+        return IsValidInvariantExpression(fieldTable,  Expression, out field, out operatorKind, out constantValue);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out IField field, out string operatorText, out int constantValue)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out IField field, out SyntaxKind operatorKind, out int constantValue)
     {
         field = null!;
-        operatorText = string.Empty;
+        operatorKind = SyntaxKind.None;
         constantValue = 0;
 
         if (expression is not BinaryExpressionSyntax BinaryExpression)
@@ -531,7 +527,7 @@ public partial record ClassModel
             !TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out field))
             return false;
 
-        if (!IsComparisonOperatorSupported(Operator, out operatorText))
+        if (!IsComparisonOperatorSupported(Operator, out operatorKind))
             return false;
 
         if (RightExpression is not LiteralExpressionSyntax LiteralExpression ||
@@ -616,8 +612,11 @@ public partial record ClassModel
 ";
 
                 foreach (Invariant Invariant in InvariantList)
-                    Result += @$"  * {Invariant.FieldName} {Invariant.OperatorText} {Invariant.ConstantValue}
+                {
+                    string OperatorText = ClassModel.SupportedComparisonOperators[Invariant.OperatorKind].Text;
+                    Result += @$"  * {Invariant.FieldName} {OperatorText} {Invariant.ConstantValue}
 ";
+                }
             }
 
         return Result;

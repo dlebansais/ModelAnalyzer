@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Z3;
 
 public partial record ClassModel
@@ -29,6 +29,16 @@ public partial record ClassModel
         }
     }
 
+    public static Dictionary<SyntaxKind, ComparisonOperator> SupportedComparisonOperators = new()
+    {
+        { SyntaxKind.EqualsEqualsToken, new ComparisonOperator("==", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkEq(left, right)) },
+        { SyntaxKind.ExclamationEqualsToken, new ComparisonOperator("!=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkNot(ctx.MkEq(left, right))) },
+        { SyntaxKind.GreaterThanToken, new ComparisonOperator(">", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGt(left, right)) },
+        { SyntaxKind.GreaterThanEqualsToken, new ComparisonOperator(">=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGe(left, right)) },
+        { SyntaxKind.LessThanToken, new ComparisonOperator("<", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLt(left, right)) },
+        { SyntaxKind.LessThanEqualsToken, new ComparisonOperator("<=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLe(left, right)) },
+    };
+
     public void AddInvariants(Context ctx, Solver solver)
     {
         List<BoolExpr> AssertionList = new();
@@ -37,37 +47,21 @@ public partial record ClassModel
             if (Item is Invariant Invariant)
             {
                 string FieldName = Invariant.FieldName;
-                string OperatorText = Invariant.OperatorText;
+                SyntaxKind OperatorKind = Invariant.OperatorKind;
                 int ConstantValue = Invariant.ConstantValue;
 
-                IntExpr FieldExpr = ctx.MkIntConst(FieldName);
-                IntExpr ConstantExpr = ctx.MkInt(ConstantValue);
-                BoolExpr Assertion;
-
-                Logger.Log($"Adding {FieldName} {OperatorText} {ConstantValue}");
-
-                switch (OperatorText)
+                if (SupportedComparisonOperators.ContainsKey(OperatorKind))
                 {
-                    case "==":
-                        Assertion = ctx.MkEq(FieldExpr, ConstantExpr);
-                        break;
-                    case ">":
-                        Assertion = ctx.MkGt(FieldExpr, ConstantExpr);
-                        break;
-                    case ">=":
-                        Assertion = ctx.MkGe(FieldExpr, ConstantExpr);
-                        break;
-                    case "<":
-                        Assertion = ctx.MkLt(FieldExpr, ConstantExpr);
-                        break;
-                    case "<=":
-                        Assertion = ctx.MkLe(FieldExpr, ConstantExpr);
-                        break;
-                    default:
-                        throw new NotImplementedException("Other operators are not implemented");
-                }
+                    ComparisonOperator Operator = SupportedComparisonOperators[OperatorKind];
+                    Logger.Log($"Adding {FieldName} {Operator.Text} {ConstantValue}");
 
-                AssertionList.Add(Assertion);
+                    IntExpr FieldExpr = ctx.MkIntConst(FieldName);
+                    IntExpr ConstantExpr = ctx.MkInt(ConstantValue);
+                    BoolExpr Assertion = Operator.Asserter(ctx, FieldExpr, ConstantExpr);
+                    AssertionList.Add(Assertion);
+                }
+                else
+                    throw new NotImplementedException($"Comparison operator {OperatorKind} not implemented");
             }
 
         solver.Assert(ctx.MkAnd(AssertionList));
