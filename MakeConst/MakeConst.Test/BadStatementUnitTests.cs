@@ -40,4 +40,62 @@ class Program
 }
 ");
     }
+
+    [TestMethod]
+    public async Task ValidReturn_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+}
+");
+    }
+
+    [TestMethod]
+    public async Task InvalidReturn_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    int Read()
+    {
+        [|return X;|]
+        X = 0;
+    }
+}
+");
+    }
+
+    [TestMethod]
+    public async Task InvalidNestedReturns_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    int Read()
+    {
+        if (X == 0)
+            [|return X;|]
+        else
+            [|return X + 1;|]
+    }
+}
+");
+    }
 }
