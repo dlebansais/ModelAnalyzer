@@ -1,12 +1,18 @@
 ﻿namespace DemoAnalyzer;
 
 using Microsoft.CodeAnalysis.CSharp;
-using System.Diagnostics;
 
-[DebuggerDisplay("{Left} {OperatorText} {Right}")]
 public class BinaryArithmeticExpression : IExpression
 {
+    public bool IsSimple => false;
     public required IExpression Left { get; init; }
     public required SyntaxKind OperatorKind { get; init; }
     public required IExpression Right { get; init; }
+
+    public override string ToString()
+    {
+        string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
+        string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
+        return $"{LeftString} {ClassModel.SupportedArithmeticOperators[OperatorKind].Text} {RightString}";
+    }
 }

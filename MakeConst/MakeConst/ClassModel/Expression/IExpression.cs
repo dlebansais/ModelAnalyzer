@@ -2,4 +2,5 @@
 
 public interface IExpression
 {
+    bool IsSimple { get; }
 }

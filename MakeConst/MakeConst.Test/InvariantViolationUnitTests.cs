@@ -34,4 +34,42 @@ class [|Program2|]
 // Invariant: X == 1
 ");
     }
+
+    [TestMethod]
+    public async Task ValidInvariantAfterAssignment_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program3
+{
+    int X;
+
+    public void Write()
+    {
+        X = 1;
+    }
+}
+// Invariant: X == 0 || X == 1
+");
+    }
+
+    [TestMethod]
+    public async Task InvalidInvariantAfterAssignment_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class [|Program4|]
+{
+    int X;
+
+    public void Write()
+    {
+        X = 1;
+    }
+}
+// Invariant: X == 0
+");
+    }
 }

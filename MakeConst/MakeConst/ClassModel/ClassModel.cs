@@ -33,7 +33,7 @@ public partial record ClassModel
             Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(classDeclaration);
             FieldTable = ParseFields(classDeclaration, Unsupported);
             MethodTable = ParseMethods(classDeclaration, FieldTable, Unsupported);
-            InvariantList = ParseInvariants(classDeclaration, FieldTable);
+            InvariantList = ParseInvariants(classDeclaration, FieldTable, Unsupported);
         }
 
         return new ClassModel
@@ -426,7 +426,7 @@ public partial record ClassModel
         return true;
     }
 
-    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable)
+    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
     {
         List<IInvariant> InvariantList = new();
 
@@ -436,19 +436,19 @@ public partial record ClassModel
         if (LastToken.HasTrailingTrivia)
         {
             SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
-            AddInvariantsInTrivia(InvariantList, fieldTable, TrailingTrivia);
+            AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, TrailingTrivia);
             Location = TrailingTrivia.Last().GetLocation();
         }
 
         var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
 
         if (NextToken.HasLeadingTrivia)
-            AddInvariantsInTrivia(InvariantList, fieldTable, NextToken.LeadingTrivia);
+            AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, NextToken.LeadingTrivia);
 
         return InvariantList;
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTriviaList triviaList)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -457,11 +457,11 @@ public partial record ClassModel
                 string Pattern = $"// {Modeling.Invariant}";
 
                 if (Comment.StartsWith(Pattern))
-                    AddInvariantsInTrivia(invariantList, fieldTable, Trivia, Comment, Pattern);
+                    AddInvariantsInTrivia(invariantList, fieldTable, unsupported, Trivia, Comment, Pattern);
             }
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, SyntaxTrivia trivia, string comment, string pattern)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
 
@@ -472,9 +472,9 @@ public partial record ClassModel
 
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, SyntaxTree, out IField Field, out SyntaxKind OperatorKind, out int ConstantValue))
+        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, unsupported, SyntaxTree, out IExpression BooleanExpression))
         {
-            NewInvariant = new Invariant { Text = Text, Field = Field, OperatorKind = OperatorKind, ConstantValue = ConstantValue };
+            NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
         }
         else
         {
@@ -489,11 +489,9 @@ public partial record ClassModel
         invariantList.Add(NewInvariant);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, SyntaxTree syntaxTree, out IField field, out SyntaxKind operatorKind, out int constantValue)
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
     {
-        field = null!;
-        operatorKind = SyntaxKind.None;
-        constantValue = 0;
+        booleanExpression = null!;
 
         CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
         if (Root.AttributeLists.Count > 0 || Root.Usings.Count > 0 || Root.Members.Count != 1)
@@ -505,35 +503,14 @@ public partial record ClassModel
             return false;
 
         ExpressionSyntax Expression = AssignmentExpression.Right;
-        return IsValidInvariantExpression(fieldTable,  Expression, out field, out operatorKind, out constantValue);
+        return IsValidInvariantExpression(fieldTable, unsupported, Expression, out booleanExpression);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, ExpressionSyntax expression, out IField field, out SyntaxKind operatorKind, out int constantValue)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
     {
-        field = null!;
-        operatorKind = SyntaxKind.None;
-        constantValue = 0;
+        booleanExpression = ParseExpression(fieldTable, new Dictionary<ParameterName, IParameter>(), unsupported, expressionNode);
 
-        if (expression is not BinaryExpressionSyntax BinaryExpression)
-            return false;
-
-        ExpressionSyntax LeftExpression = BinaryExpression.Left;
-        SyntaxToken Operator = BinaryExpression.OperatorToken;
-        ExpressionSyntax RightExpression = BinaryExpression.Right;
-
-        if (LeftExpression is not IdentifierNameSyntax IdentifierName || 
-            !TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out field))
-            return false;
-
-        if (!IsComparisonOperatorSupported(Operator, out operatorKind))
-            return false;
-
-        if (RightExpression is not LiteralExpressionSyntax LiteralExpression ||
-            !LiteralExpression.IsKind(SyntaxKind.NumericLiteralExpression) ||
-            !int.TryParse(LiteralExpression.Token.ValueText, out constantValue))
-            return false;
-
-        return true;
+        return booleanExpression is not UnsupportedExpression;
     }
 
     private static bool TryFindVariableByName(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, string variableName, out IVariable variable)
@@ -611,8 +588,7 @@ public partial record ClassModel
 
                 foreach (Invariant Invariant in InvariantList)
                 {
-                    string OperatorText = SupportedComparisonOperators[Invariant.OperatorKind].Text;
-                    Result += @$"  * {Invariant.FieldName} {OperatorText} {Invariant.ConstantValue}
+                    Result += @$"  * {Invariant.BooleanExpression}
 ";
                 }
             }
