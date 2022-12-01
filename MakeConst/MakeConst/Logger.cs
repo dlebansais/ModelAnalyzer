@@ -1,8 +1,8 @@
 ﻿namespace DemoAnalyzer;
 
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 
 public static class Logger
@@ -26,7 +26,10 @@ public static class Logger
 
             try
             {
-                WriteFile(FileMode.Create, $"Cleared {DateTime.Now}");
+                DateTime LastWriteTime = File.GetLastWriteTimeUtc(FilePath);
+
+                if (LastWriteTime + TimeSpan.FromMinutes(1) <= DateTime.UtcNow)
+                    WriteFile(FileMode.Create, $"Cleared {DateTime.Now}");
                 return;
             }
             catch
@@ -70,10 +73,15 @@ public static class Logger
         }
     }
 
+    private const string FilePath = "C:\\Projects\\Temp\\analyzer.txt";
+
     private static void WriteFile(FileMode mode, string message)
     {
-        using FileStream Stream = new("C:\\Projects\\Temp\\analyzer.txt", mode, FileAccess.Write);
+        using FileStream Stream = new(FilePath, mode, FileAccess.Write);
         using StreamWriter Writer = new(Stream);
-        Writer.WriteLine(message);
+        
+        string FullMessage = $"{Process.GetCurrentProcess().Id, 5} {DateTime.Now} {message}";
+
+        Writer.WriteLine(FullMessage);
     }
 }

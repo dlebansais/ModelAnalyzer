@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,6 +15,8 @@ public partial record ClassModel
     public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
     public required Unsupported Unsupported { get; init; }
+
+    private AutoResetEvent PulseEvent = new(initialState: false);
 
     public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration)
     {
@@ -225,7 +228,7 @@ public partial record ClassModel
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
             StatementList = ParseExpressionBody(fieldTable, parameterTable, unsupported, ArrowExpressionClause.Expression);
         else if (methodDeclaration.Body is BlockSyntax Block)
-            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block);
+            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block, isMainBlock: true);
 
         return StatementList;
     }
@@ -265,14 +268,13 @@ public partial record ClassModel
         IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
         IExpression Right = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
         SyntaxKind OperatorKind;
-        string OperatorText;
 
-        if (IsBinaryOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            NewExpression = new BinaryExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+            NewExpression = new BinaryArithmeticExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
         else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
             NewExpression = new ComparisonExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-        else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorText))
-            NewExpression = new BinaryLogicalExpression { Left = Left, OperatorText = OperatorText, Right = Right };
+        else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+            NewExpression = new BinaryLogicalExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
         else
         {
             Location Location = expressionNode.OperatorToken.GetLocation();
@@ -285,13 +287,11 @@ public partial record ClassModel
         return NewExpression;
     }
 
-    private static bool IsBinaryOperatorSupported(SyntaxToken token, out string operatorText)
+    private static bool IsBinaryArithmeticOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
     {
-        operatorText = token.ValueText;
+        operatorKind = token.Kind();
 
-        return token.IsKind(SyntaxKind.PlusToken) ||
-               token.IsKind(SyntaxKind.MinusToken)
-               ;
+        return SupportedArithmeticOperators.ContainsKey(operatorKind);
     }
 
     private static bool IsComparisonOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
@@ -301,13 +301,11 @@ public partial record ClassModel
         return SupportedComparisonOperators.ContainsKey(operatorKind);
     }
 
-    private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out string operatorText)
+    private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
     {
-        operatorText = token.ValueText;
+        operatorKind = token.Kind();
 
-        return token.IsKind(SyntaxKind.BarBarToken) ||
-               token.IsKind(SyntaxKind.AmpersandAmpersandToken)
-               ;
+        return SupportedLogicalOperators.ContainsKey(operatorKind);
     }
 
     private static List<IStatement> ParseStatementOrBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
@@ -315,30 +313,30 @@ public partial record ClassModel
         List<IStatement> StatementList;
 
         if (node is BlockSyntax Block)
-            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block);
+            StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block, isMainBlock: false);
         else
         {
-            IStatement Statement = ParseStatement(fieldTable, parameterTable, unsupported, node);
+            IStatement Statement = ParseStatement(fieldTable, parameterTable, unsupported, node, isLastStatement: false);
             StatementList = new List<IStatement> { Statement };
         }
 
         return StatementList;
     }
 
-    private static List<IStatement> ParseBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BlockSyntax block)
+    private static List<IStatement> ParseBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
     {
         List<IStatement> StatementList = new();
 
         foreach (StatementSyntax Item in block.Statements)
         {
-            IStatement NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, Item);
+            IStatement NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, Item, isMainBlock && Item == block.Statements.Last());
             StatementList.Add(NewStatement);
         }
 
         return StatementList;
     }
 
-    private static IStatement ParseStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
+    private static IStatement ParseStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node, bool isLastStatement)
     {
         IStatement? NewStatement = null;
 
@@ -348,7 +346,7 @@ public partial record ClassModel
                 NewStatement = ParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
             else if (node is IfStatementSyntax IfStatement)
                 NewStatement = ParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
-            else if (node is ReturnStatementSyntax ReturnStatement)
+            else if (node is ReturnStatementSyntax ReturnStatement && isLastStatement)
                 NewStatement = ParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
         }
 

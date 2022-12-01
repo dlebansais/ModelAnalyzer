@@ -31,6 +31,8 @@ public class ClassModelManager
 
     private void StartThread()
     {
+        Logger.Log("StartThread()");
+
         ThreadShouldBeRestarted = false;
         ModelThread = new Thread(new ThreadStart(ExecuteThread));
         ModelThread.Start();
@@ -56,7 +58,7 @@ public class ClassModelManager
             foreach (ClassModel Item in ClassModelList)
                 Item.Verify();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(TimeSpan.FromSeconds(1));
 
             bool Restart = false;
 
@@ -94,10 +96,11 @@ public class ClassModelManager
         }
     }
 
-    public ClassModel GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    public (ClassModel, bool) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         int HashCode = context.Compilation.GetHashCode();
         ClassModel Result;
+        bool IsThreadStarted = false;
 
         lock (ClassTable)
         {
@@ -115,6 +118,7 @@ public class ClassModelManager
                     {
                         LastHashCode = HashCode;
                         ScheduleThreadStart();
+                        IsThreadStarted = true;
                     }
                 }
             }
@@ -122,7 +126,7 @@ public class ClassModelManager
                 Result = ClassTable[ClassName];
         }
 
-        return Result;
+        return (Result, IsThreadStarted);
     }
 
     public void UpdateClassModel(ClassModel classModel)

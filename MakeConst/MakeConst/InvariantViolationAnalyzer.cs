@@ -47,12 +47,15 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        string Name = classDeclaration.Identifier.ValueText;
+        (ClassModel ClassModel, bool IsThreadStarted) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        
+        if (IsThreadStarted)
+            ClassModel.WaitForThreadCompleted();
 
-        if (Name == string.Empty)
+        if (!ClassModel.Unsupported.IsEmpty)
             return;
 
-        if (!ClassModelManager.Instance.IsInvariantViolated(Name))
+        if (!ClassModelManager.Instance.IsInvariantViolated(ClassModel.Name))
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));

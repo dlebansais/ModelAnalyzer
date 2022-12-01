@@ -74,7 +74,7 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ClassModel ClassModel = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        (ClassModel ClassModel, _) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
 
         foreach (IInvariant Item in ClassModel.InvariantList)
             if (Item is UnsupportedInvariant Unsupported)

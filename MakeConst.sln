@@ -12,6 +12,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Test", "MakeConst\MakeConst.Test\MakeConst.Test.csproj", "{42E47761-3282-4DD9-BBCE-898317006DE5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Vsix", "MakeConst\MakeConst.Vsix\MakeConst.Vsix.csproj", "{45C0524E-0FAA-4BB4-8154-57717DE0E14C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42E47761-3282-4DD9-BBCE-898317006DE5} = {42E47761-3282-4DD9-BBCE-898317006DE5}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
