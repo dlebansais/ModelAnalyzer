@@ -1,12 +1,16 @@
 ﻿namespace DemoAnalyzer;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Z3;
+using static System.Net.Mime.MediaTypeNames;
 
 public partial record ClassModel
 {
@@ -132,8 +136,13 @@ public partial record ClassModel
         Dictionary<MethodName, IMethod> MethodTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
+        {
+            if (Member.HasLeadingTrivia)
+                ReportUnsupportedRequires(unsupported, Member.GetLeadingTrivia());
+
             if (Member is MethodDeclarationSyntax MethodDeclaration)
                 AddMethod(MethodDeclaration, fieldTable, MethodTable, unsupported);
+        }
 
         return MethodTable;
     }
@@ -147,9 +156,20 @@ public partial record ClassModel
         {
             bool IsSupported = true;
             Dictionary<ParameterName, IParameter> ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
+            List<IRequire> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
             List<IStatement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
+            List<IEnsure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
 
-            NewMethod = new Method { MethodName = MethodName, IsSupported = IsSupported, HasReturnValue = HasReturnValue, ParameterTable = ParameterTable, StatementList = StatementList };
+            NewMethod = new Method
+            {
+                MethodName = MethodName,
+                IsSupported = IsSupported,
+                HasReturnValue = HasReturnValue,
+                ParameterTable = ParameterTable,
+                RequireList = RequireList,
+                StatementList = StatementList,
+                EnsureList = EnsureList,
+            };
         }
         else
         {
@@ -219,6 +239,84 @@ public partial record ClassModel
             return false;
 
         return true;
+    }
+
+    private static List<IRequire> ParseRequires(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    {
+        List<IRequire> RequireList;
+
+        if (methodDeclaration.Body is BlockSyntax Block && Block.HasLeadingTrivia)
+            RequireList = ParseRequires(Block.GetLeadingTrivia(), fieldTable, parameterTable, unsupported);
+        else
+            RequireList = new();
+
+        return RequireList;
+    }
+
+    private static List<IRequire> ParseRequires(SyntaxTriviaList triviaList, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    {
+        List<IRequire> RequireList = new();
+
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Require}";
+
+                if (Comment.StartsWith(Pattern))
+                    ParseRequire(fieldTable, parameterTable, unsupported, RequireList, Trivia, Comment, Pattern);
+            }
+
+        return RequireList;
+    }
+
+    private static void ParseRequire(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, List<IRequire> requireList, SyntaxTrivia trivia, string comment, string pattern)
+    {
+        string Text = comment.Substring(pattern.Length);
+        IRequire NewRequire;
+
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
+        {
+            NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
+        }
+        else
+        {
+            Location Location = GetLocationInComment(trivia, pattern);
+            UnsupportedRequire UnsupportedRequire = new UnsupportedRequire { Text = Text, Location = Location };
+            unsupported.Requires.Add(UnsupportedRequire);
+
+            NewRequire = UnsupportedRequire;
+        }
+
+        requireList.Add(NewRequire);
+    }
+
+    private static void ReportUnsupportedRequires(Unsupported unsupported, SyntaxTriviaList triviaList)
+    {
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Require}";
+
+                if (Comment.StartsWith(Pattern))
+                    ReportUnsupportedRequire(unsupported, Trivia, Comment, Pattern);
+            }
+    }
+
+    private static void ReportUnsupportedRequire(Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    {
+        string Text = comment.Substring(pattern.Length);
+        Location Location = GetLocationInComment(trivia, pattern);
+        UnsupportedRequire UnsupportedRequire = new() { Text = Text, Location = Location };
+        unsupported.Requires.Add(UnsupportedRequire);
+    }
+
+    private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    {
+        List<IEnsure> EnsureList = new();
+
+        return EnsureList;
     }
 
     private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
@@ -460,6 +558,9 @@ public partial record ClassModel
         SyntaxToken LastToken = classDeclaration.GetLastToken();
         var Location = LastToken.GetLocation();
 
+        if (LastToken.HasLeadingTrivia)
+            ReportUnsupportedRequires(unsupported, LastToken.LeadingTrivia);
+
         if (LastToken.HasTrailingTrivia)
         {
             SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
@@ -491,32 +592,34 @@ public partial record ClassModel
     private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
-
-        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {Text};", Options);
-        var Diagnostics = SyntaxTree.GetDiagnostics();
-        List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
-
         IInvariant NewInvariant;
 
-        if (ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, unsupported, SyntaxTree, out IExpression BooleanExpression))
+        if (TryParseAssertionInTrivia(fieldTable, new Dictionary < ParameterName, IParameter >(), unsupported, Text, out IExpression BooleanExpression))
         {
             NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
         }
         else
         {
-            Location FullLocation = trivia.GetLocation();
-            TextSpan FullSpan = FullLocation.SourceSpan;
-            TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);
-            Location Location = Location.Create(FullLocation.SourceTree!, InvariantSpan);
-
+            Location Location = GetLocationInComment(trivia, pattern);
             NewInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
         }
 
         invariantList.Add(NewInvariant);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
+    private static bool TryParseAssertionInTrivia(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, string text, out IExpression booleanExpression)
+    {
+        booleanExpression = null!;
+
+        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
+        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
+        var Diagnostics = SyntaxTree.GetDiagnostics();
+        List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
+
+        return ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
+    }
+
+    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
     {
         booleanExpression = null!;
 
@@ -530,12 +633,12 @@ public partial record ClassModel
             return false;
 
         ExpressionSyntax Expression = AssignmentExpression.Right;
-        return IsValidInvariantExpression(fieldTable, unsupported, Expression, out booleanExpression);
+        return IsValidInvariantExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
+    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
     {
-        booleanExpression = ParseExpression(fieldTable, new Dictionary<ParameterName, IParameter>(), unsupported, expressionNode);
+        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode);
 
         return booleanExpression is not UnsupportedExpression;
     }
@@ -584,6 +687,16 @@ public partial record ClassModel
 
         parameter = null!;
         return false;
+    }
+
+    private static Location GetLocationInComment(SyntaxTrivia trivia, string pattern)
+    {
+        Location FullLocation = trivia.GetLocation();
+        TextSpan FullSpan = FullLocation.SourceSpan;
+        TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);
+        Location Location = Location.Create(FullLocation.SourceTree!, InvariantSpan);
+
+        return Location;
     }
 
     public override string ToString()

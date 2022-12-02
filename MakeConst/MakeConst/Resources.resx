@@ -117,14 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BadEnsureAnalyzerDescription" xml:space="preserve">
+    <value>Bad assertion.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadEnsureAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad assertion</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadEnsureAnalyzerTitle" xml:space="preserve">
+    <value>Bad assertion</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="BadExpressionAnalyzerDescription" xml:space="preserve">
     <value>Bad expression.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadExpressionAnalyzerMessageFormat" xml:space="preserve">
     <value>Bad expression</value>
+    <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadExpressionAnalyzerTitle" xml:space="preserve">
     <value>Bad expression</value>
+    <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadInvariantAnalyzerDescription" xml:space="preserve">
     <value>Bad invariant.</value>
@@ -148,6 +163,18 @@
   </data>
   <data name="BadParameterAnalyzerTitle" xml:space="preserve">
     <value>Parameter is invalid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="BadRequireAnalyzerDescription" xml:space="preserve">
+    <value>Bad requirement.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadRequireAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad requirement</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadRequireAnalyzerTitle" xml:space="preserve">
+    <value>Bad requirement</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadStatementAnalyzerDescription" xml:space="preserve">

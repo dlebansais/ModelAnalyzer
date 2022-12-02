@@ -61,6 +61,33 @@ namespace DemoAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bad assertion..
+        /// </summary>
+        internal static string BadEnsureAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadEnsureAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad assertion.
+        /// </summary>
+        internal static string BadEnsureAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadEnsureAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad assertion.
+        /// </summary>
+        internal static string BadEnsureAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadEnsureAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad expression..
         /// </summary>
         internal static string BadExpressionAnalyzerDescription {
@@ -138,6 +165,33 @@ namespace DemoAnalyzer {
         internal static string BadParameterAnalyzerTitle {
             get {
                 return ResourceManager.GetString("BadParameterAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad requirement..
+        /// </summary>
+        internal static string BadRequireAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadRequireAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad requirement.
+        /// </summary>
+        internal static string BadRequireAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadRequireAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad requirement.
+        /// </summary>
+        internal static string BadRequireAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadRequireAnalyzerTitle", resourceCulture);
             }
         }
         

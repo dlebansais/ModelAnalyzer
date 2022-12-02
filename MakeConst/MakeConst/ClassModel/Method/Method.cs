@@ -10,7 +10,9 @@ public class Method : IMethod
     public required bool IsSupported { get; init; }
     public required bool HasReturnValue { get; init; }
     public required Dictionary<ParameterName, IParameter> ParameterTable { get; init; }
+    public required List<IRequire> RequireList { get; init; }
     public required List<IStatement> StatementList { get; init; }
+    public required List<IEnsure> EnsureList { get; init; }
 
     public string Name { get { return MethodName.Name; } }
 }
