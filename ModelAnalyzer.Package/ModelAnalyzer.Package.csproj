@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>MakeConst</PackageId>
+    <PackageId>ModelAnalyzer</PackageId>
     <PackageVersion>1.0.0.0</PackageVersion>
     <Authors>DLB</Authors>
     <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
@@ -17,10 +17,10 @@
     <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
     <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>MakeConst</Description>
+    <Description>Model Analyzer</Description>
     <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
     <Copyright>Copyright</Copyright>
-    <PackageTags>MakeConst, analyzers</PackageTags>
+    <PackageTags>ModelAnalyzer, analyzers</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
@@ -28,8 +28,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MakeConst.CodeFixes\MakeConst.CodeFixes.csproj" />
-    <ProjectReference Include="..\MakeConst\MakeConst.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer.CodeFixes\ModelAnalyzer.CodeFixes.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer\ModelAnalyzer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,12 +38,13 @@
 
   <Target Name="_AddAnalyzersToOutput">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\MakeConst.dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="$(OutputPath)\MakeConst.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
-	  <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\runtimes\win-x64\native\libz3.dll" PackagePath="runtimes/win-x64/native" />
-	  <TfmSpecificPackageFile Include="..\MakeConst.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
+	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\runtimes\win-x64\native\libz3.dll" PackagePath="runtimes/win-x64/native" />
+	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
 	</ItemGroup>
   </Target>
 

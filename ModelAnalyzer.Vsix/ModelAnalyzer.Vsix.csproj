@@ -5,8 +5,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <Platforms>x64</Platforms>
-    <RootNamespace>MakeConst.Vsix</RootNamespace>
-    <AssemblyName>MakeConst.Vsix</AssemblyName>
+    <RootNamespace>ModelAnalyzer.Vsix</RootNamespace>
+    <AssemblyName>ModelAnalyzer.Vsix</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -34,8 +34,8 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
 
   <ItemGroup>
-    <ProjectReference Include="..\MakeConst.CodeFixes\MakeConst.CodeFixes.csproj" />
-    <ProjectReference Include="..\MakeConst\MakeConst.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer.CodeFixes\ModelAnalyzer.CodeFixes.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer\ModelAnalyzer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SolutionDir)'!='*Undefined*'">
-    <Exec Command="copyfiles.bat $(PkgDefApplicationConfigFile) $(SolutionName) $(SolutionDir)$(SolutionName)\$(SolutionName).Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1 $(SolutionDir)$(SolutionName)\$(SolutionName)\Resources\extension.vsixmanifest" />
+    <Exec Command="copyfiles.bat $(PkgDefApplicationConfigFile) $(SolutionName) $(SolutionDir)Test\$(SolutionName).Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1 $(SolutionDir)$(SolutionName).Vsix\source.extension.vsixmanifest extension.vsixmanifest" />
   </Target>
 
 </Project>

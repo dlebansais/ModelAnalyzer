@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MakeConst.Core\MakeConst.Core.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer.Core\ModelAnalyzer.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

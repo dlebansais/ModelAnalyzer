@@ -3,20 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst", "MakeConst\MakeConst\MakeConst.csproj", "{03C56034-0D84-46A0-8F37-208A8779092E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer", "ModelAnalyzer\ModelAnalyzer.csproj", "{03C56034-0D84-46A0-8F37-208A8779092E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.CodeFixes", "MakeConst\MakeConst.CodeFixes\MakeConst.CodeFixes.csproj", "{F9E749E1-9D25-4F08-A460-D96885785609}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.CodeFixes", "ModelAnalyzer.CodeFixes\ModelAnalyzer.CodeFixes.csproj", "{F9E749E1-9D25-4F08-A460-D96885785609}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Package", "MakeConst\MakeConst.Package\MakeConst.Package.csproj", "{A1CF45A1-D377-4468-9797-8BF4D1369C7D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Test", "MakeConst\MakeConst.Test\MakeConst.Test.csproj", "{42E47761-3282-4DD9-BBCE-898317006DE5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Vsix", "MakeConst\MakeConst.Vsix\MakeConst.Vsix.csproj", "{45C0524E-0FAA-4BB4-8154-57717DE0E14C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Package", "ModelAnalyzer.Package\ModelAnalyzer.Package.csproj", "{A1CF45A1-D377-4468-9797-8BF4D1369C7D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{42E47761-3282-4DD9-BBCE-898317006DE5} = {42E47761-3282-4DD9-BBCE-898317006DE5}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeConst.Core", "MakeConst\MakeConst.Core\MakeConst.Core.csproj", "{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Test", "Test\ModelAnalyzer.Test\ModelAnalyzer.Test.csproj", "{42E47761-3282-4DD9-BBCE-898317006DE5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Vsix", "ModelAnalyzer.Vsix\ModelAnalyzer.Vsix.csproj", "{45C0524E-0FAA-4BB4-8154-57717DE0E14C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42E47761-3282-4DD9-BBCE-898317006DE5} = {42E47761-3282-4DD9-BBCE-898317006DE5}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core", "ModelAnalyzer.Core\ModelAnalyzer.Core.csproj", "{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

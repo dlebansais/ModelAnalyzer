@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MakeConst.CodeFixes\MakeConst.CodeFixes.csproj" />
-    <ProjectReference Include="..\MakeConst\MakeConst.csproj" />
+    <ProjectReference Include="..\..\ModelAnalyzer.CodeFixes\ModelAnalyzer.CodeFixes.csproj" />
+    <ProjectReference Include="..\..\ModelAnalyzer\ModelAnalyzer.csproj" />
   </ItemGroup>
 
 </Project>
