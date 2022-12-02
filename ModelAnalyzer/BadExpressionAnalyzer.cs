@@ -33,7 +33,10 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
     }
 
-    private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+    private ILogger Logger = Initialization.Logger;
+    private ClassModelManager Manager = Initialization.Manager;
+
+    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
         try
         {
@@ -46,13 +49,13 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, _) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        (ClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
         foreach (UnsupportedExpression Item in ClassModel.Unsupported.Expressions)
             context.ReportDiagnostic(Diagnostic.Create(BadExpressionRule, Item.Location));
     }

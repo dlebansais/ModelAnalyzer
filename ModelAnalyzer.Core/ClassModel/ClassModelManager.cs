@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 public class ClassModelManager
 {
-    public static ClassModelManager Instance { get; } = new();
+    required public ILogger Logger { get; init; }
 
     private Dictionary<string, ClassModel> ClassTable = new();
     private int LastHashCode;
@@ -96,7 +96,7 @@ public class ClassModelManager
         }
     }
 
-    public (ClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    public (ClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
     {
         int HashCode = context.Compilation.GetHashCode();
         ClassModel Result;
@@ -108,7 +108,7 @@ public class ClassModelManager
 
             if (ClassName == string.Empty || LastHashCode != HashCode || !ClassTable.ContainsKey(ClassName))
             {
-                Result = ClassModel.FromClassDeclaration(classDeclaration);
+                Result = ClassModel.FromClassDeclaration(classDeclaration, this, logger);
 
                 if (ClassName != string.Empty)
                 {

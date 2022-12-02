@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-public static class Logger
+public class FileLogger : ILogger
 {
     private static readonly Mutex Mutex = new();
 
-    public static void Clear()
+    public void Clear()
     {
         lock (Mutex)
         {
@@ -17,7 +17,7 @@ public static class Logger
         }
     }
 
-    private static void ClearSync()
+    private void ClearSync()
     {
         for (int i = 0; i < 4; i++)
         {
@@ -38,7 +38,7 @@ public static class Logger
         }
     }
 
-    public static void Log(string message)
+    public void Log(string message)
     {
         lock (Mutex)
         {
@@ -46,7 +46,7 @@ public static class Logger
         }
     }
 
-    public static void LogException(Exception e)
+    public void LogException(Exception e)
     {
         lock (Mutex)
         {
@@ -55,7 +55,7 @@ public static class Logger
         }
     }
 
-    private static void WriteLogSync(string message)
+    private void WriteLogSync(string message)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -75,7 +75,7 @@ public static class Logger
 
     private const string FilePath = "C:\\Projects\\Temp\\analyzer.txt";
 
-    private static void WriteFile(FileMode mode, string message)
+    private void WriteFile(FileMode mode, string message)
     {
         using FileStream Stream = new(FilePath, mode, FileAccess.Write);
         using StreamWriter Writer = new(Stream);

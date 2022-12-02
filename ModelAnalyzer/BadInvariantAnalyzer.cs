@@ -34,7 +34,10 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.CompilationUnit);
     }
 
-    private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+    private ILogger Logger = Initialization.Logger;
+    private ClassModelManager Manager = Initialization.Manager;
+
+    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
         try
         {
@@ -54,7 +57,7 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members)
+    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members)
     {
         List<string> ExistingClassList = new();
 
@@ -65,16 +68,16 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
                 AnalyzeClass(context, ClassDeclaration);
             }
 
-        ClassModelManager.Instance.RemoveMissingClasses(ExistingClassList);
+        Manager.RemoveMissingClasses(ExistingClassList);
     }
 
-    private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, _) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        (ClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
 
         foreach (IInvariant Item in ClassModel.InvariantList)
             if (Item is UnsupportedInvariant Unsupported)

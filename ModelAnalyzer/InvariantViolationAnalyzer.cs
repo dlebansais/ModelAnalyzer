@@ -29,7 +29,10 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
     }
 
-    private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+    private ILogger Logger = Initialization.Logger;
+    private ClassModelManager Manager = Initialization.Manager;
+
+    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
         try
         {
@@ -42,13 +45,13 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, bool IsThreadStarted) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        (ClassModel ClassModel, bool IsThreadStarted) = Manager.GetClassModel(context, classDeclaration, Logger);
         
         if (IsThreadStarted)
             ClassModel.WaitForThreadCompleted();
@@ -56,7 +59,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (!ClassModel.Unsupported.IsEmpty)
             return;
 
-        if (!ClassModelManager.Instance.IsInvariantViolated(ClassModel.Name))
+        if (!Manager.IsInvariantViolated(ClassModel.Name))
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));

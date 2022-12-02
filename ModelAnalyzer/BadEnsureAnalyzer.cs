@@ -33,7 +33,10 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
     }
 
-    private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+    private ILogger Logger = Initialization.Logger;
+    private ClassModelManager Manager = Initialization.Manager;
+
+    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
     {
         try
         {
@@ -46,13 +49,13 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         // Ignore diagnostic for classes not modeled.
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, _) = ClassModelManager.Instance.GetClassModel(context, classDeclaration);
+        (ClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
         foreach (UnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
             context.ReportDiagnostic(Diagnostic.Create(BadEnsureRule, Item.Location));
     }

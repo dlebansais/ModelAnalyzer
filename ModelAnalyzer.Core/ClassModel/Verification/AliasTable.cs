@@ -59,7 +59,6 @@ public class AliasTable
         {
             if (!other.AllAliases.Contains(Alias))
             {
-                Logger.Log($"{Alias} is only in 1");
                 AliasDifference.Add(Alias);
             }
         }

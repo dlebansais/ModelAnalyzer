@@ -20,6 +20,7 @@ public partial class Verifier : IDisposable
 
     required public int MaxDepth { get; init; }
     required public string ClassName { get; init; }
+    required public ILogger Logger { get; init; }
     required public FieldTable FieldTable { get; init; }
     required public MethodTable MethodTable { get; init; }
     required public List<IInvariant> InvariantList { get; init; }

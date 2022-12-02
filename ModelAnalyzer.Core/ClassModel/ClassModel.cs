@@ -11,6 +11,8 @@ using Microsoft.CodeAnalysis.Text;
 public partial record ClassModel
 {
     required public string Name { get; init; }
+    required public ClassModelManager Manager { get; init; }
+    required public ILogger Logger { get; init; }
     required public FieldTable FieldTable { get; init; }
     required public MethodTable MethodTable { get; init; }
     required public List<IInvariant> InvariantList { get; init; }
@@ -18,7 +20,7 @@ public partial record ClassModel
 
     private AutoResetEvent PulseEvent = new(initialState: false);
 
-    public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration)
+    public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration, ClassModelManager manager, ILogger logger)
     {
         string Name = classDeclaration.Identifier.ValueText;
         FieldTable FieldTable = new();
@@ -39,6 +41,8 @@ public partial record ClassModel
         return new ClassModel
         {
             Name = Name,
+            Manager = manager,
+            Logger = logger,
             FieldTable = FieldTable,
             MethodTable = MethodTable,
             InvariantList = InvariantList,

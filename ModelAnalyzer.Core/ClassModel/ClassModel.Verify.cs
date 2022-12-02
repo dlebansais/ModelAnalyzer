@@ -13,10 +13,10 @@ public partial record ClassModel
     {
         if (Unsupported.IsEmpty)
         {
-            Verifier Verifier = new() { MaxDepth = MaxDepth, ClassName = Name, FieldTable = FieldTable, MethodTable = MethodTable, InvariantList = InvariantList };
+            Verifier Verifier = new() { MaxDepth = MaxDepth, ClassName = Name, Logger = Logger, FieldTable = FieldTable, MethodTable = MethodTable, InvariantList = InvariantList };
             Verifier.Verify();
 
-            ClassModelManager.Instance.SetIsInvariantViolated(Name, Verifier.IsInvariantViolated);
+            Manager.SetIsInvariantViolated(Name, Verifier.IsInvariantViolated);
         }
 
         Logger.Log("Pulsing event");
