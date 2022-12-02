@@ -79,8 +79,8 @@ public static class Logger
     {
         using FileStream Stream = new(FilePath, mode, FileAccess.Write);
         using StreamWriter Writer = new(Stream);
-        
-        string FullMessage = $"{Process.GetCurrentProcess().Id, 5} {DateTime.Now} {message}";
+
+        string FullMessage = $"{Process.GetCurrentProcess().Id,5} {DateTime.Now} {message}";
 
         Writer.WriteLine(FullMessage);
     }

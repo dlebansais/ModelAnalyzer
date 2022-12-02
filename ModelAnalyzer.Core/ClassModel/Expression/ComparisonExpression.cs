@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis.CSharp;
 public class ComparisonExpression : IExpression
 {
     public bool IsSimple => false;
-    public required IExpression Left { get; init; }
-    public required SyntaxKind OperatorKind { get; init; }
-    public required IExpression Right { get; init; }
+    required public IExpression Left { get; init; }
+    required public SyntaxKind OperatorKind { get; init; }
+    required public IExpression Right { get; init; }
 
     public override string ToString()
     {

@@ -1,16 +1,16 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 public class ClassModelManager
 {
-    public static ClassModelManager Instance = new();
+    public static ClassModelManager Instance { get; } = new();
 
     private Dictionary<string, ClassModel> ClassTable = new();
     private int LastHashCode;
@@ -96,7 +96,7 @@ public class ClassModelManager
         }
     }
 
-    public (ClassModel, bool) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    public (ClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         int HashCode = context.Compilation.GetHashCode();
         ClassModel Result;

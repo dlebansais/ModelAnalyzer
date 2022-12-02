@@ -1,8 +1,8 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.Z3;
 using System;
 using System.Collections.Generic;
+using Microsoft.Z3;
 
 public partial class Verifier : IDisposable
 {

@@ -5,6 +5,6 @@ using System.Diagnostics;
 [DebuggerDisplay("{Destination} = {Expression}")]
 public class AssignmentStatement : IStatement
 {
-    public required IVariable Destination { get; init; }
-    public required IExpression Expression { get; init; }
+    required public IVariable Destination { get; init; }
+    required public IExpression Expression { get; init; }
 }

@@ -1,12 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 
 [DebuggerDisplay("{ParameterName.Name}")]
 public class UnsupportedParameter : IParameter
 {
-    public required ParameterName ParameterName { get; init; }
+    required public ParameterName ParameterName { get; init; }
     public string Name { get { return ParameterName.Name; } }
-    public required Location Location { get; init; }
+    required public Location Location { get; init; }
 }

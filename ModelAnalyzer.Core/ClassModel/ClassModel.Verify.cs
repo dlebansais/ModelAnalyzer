@@ -7,7 +7,7 @@ using Microsoft.Z3;
 
 public partial record ClassModel
 {
-    const int MaxDepth = 1;
+    private const int MaxDepth = 1;
 
     public void Verify()
     {
@@ -30,7 +30,7 @@ public partial record ClassModel
         Logger.Log($"Wait on event done, IsCompleted={IsCompleted}");
     }
 
-    public static Dictionary<SyntaxKind, ComparisonOperator> SupportedComparisonOperators = new()
+    public static Dictionary<SyntaxKind, ComparisonOperator> SupportedComparisonOperators { get; } = new()
     {
         { SyntaxKind.EqualsEqualsToken, new ComparisonOperator("==", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkEq(left, right)) },
         { SyntaxKind.ExclamationEqualsToken, new ComparisonOperator("!=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkNot(ctx.MkEq(left, right))) },
@@ -40,7 +40,7 @@ public partial record ClassModel
         { SyntaxKind.LessThanEqualsToken, new ComparisonOperator("<=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLe(left, right)) },
     };
 
-    public static Dictionary<SyntaxKind, ArithmeticOperator> SupportedArithmeticOperators = new()
+    public static Dictionary<SyntaxKind, ArithmeticOperator> SupportedArithmeticOperators { get; } = new()
     {
         { SyntaxKind.PlusToken, new ArithmeticOperator("+", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkAdd(left, right)) },
         { SyntaxKind.MinusToken, new ArithmeticOperator("-", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkSub(left, right)) },
@@ -48,7 +48,7 @@ public partial record ClassModel
         { SyntaxKind.SlashToken, new ArithmeticOperator("/", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkDiv(left, right)) },
     };
 
-    public static Dictionary<SyntaxKind, LogicalOperator> SupportedLogicalOperators = new()
+    public static Dictionary<SyntaxKind, LogicalOperator> SupportedLogicalOperators { get; } = new()
     {
         { SyntaxKind.BarBarToken, new LogicalOperator("||", (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkOr(left, right)) },
         { SyntaxKind.AmpersandAmpersandToken, new LogicalOperator("&&", (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkAnd(left, right)) },

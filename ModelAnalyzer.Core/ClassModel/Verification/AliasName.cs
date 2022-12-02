@@ -7,7 +7,7 @@ public record AliasName
         Index = 0;
     }
 
-    public required string BaseName { get; init; }
+    required public string BaseName { get; init; }
     public string Alias { get { return $"{BaseName}_{Index}"; } }
 
     public void Increment()

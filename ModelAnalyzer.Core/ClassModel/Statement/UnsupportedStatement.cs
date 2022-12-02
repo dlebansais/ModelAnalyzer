@@ -1,8 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿namespace DemoAnalyzer;
 
-namespace DemoAnalyzer;
+using Microsoft.CodeAnalysis;
 
 public class UnsupportedStatement : IStatement
 {
-    public required Location Location { get; init; }
+    required public Location Location { get; init; }
 }

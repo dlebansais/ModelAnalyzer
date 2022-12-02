@@ -2,8 +2,8 @@
 
 public class Invariant : IInvariant
 {
-    public required string Text { get; init; }
-    public required IExpression BooleanExpression { get; init; }
+    required public string Text { get; init; }
+    required public IExpression BooleanExpression { get; init; }
 
     public override string ToString()
     {

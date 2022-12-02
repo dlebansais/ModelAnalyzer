@@ -4,6 +4,6 @@ using Microsoft.CodeAnalysis;
 
 public class UnsupportedMethod : IMethod
 {
-    public required MethodName MethodName { get; init; }
-    public required Location Location { get; init; }
+    required public MethodName MethodName { get; init; }
+    required public Location Location { get; init; }
 }

@@ -1,8 +1,8 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.Z3;
 using System;
 using System.Collections.Generic;
+using Microsoft.Z3;
 
 public partial class Verifier : IDisposable
 {
@@ -18,11 +18,11 @@ public partial class Verifier : IDisposable
         Verify(0);
     }
 
-    public required int MaxDepth { get; init; }
-    public required string ClassName { get; init; }
-    public required FieldTable FieldTable { get; init; }
-    public required MethodTable MethodTable { get; init; }
-    public required List<IInvariant> InvariantList { get; init; }
+    required public int MaxDepth { get; init; }
+    required public string ClassName { get; init; }
+    required public FieldTable FieldTable { get; init; }
+    required public MethodTable MethodTable { get; init; }
+    required public List<IInvariant> InvariantList { get; init; }
 
     public bool IsInvariantViolated { get; private set; }
 

@@ -3,7 +3,7 @@
 public class ParenthesizedExpression : IExpression
 {
     public bool IsSimple => false;
-    public required IExpression Inside { get; init; }
+    required public IExpression Inside { get; init; }
 
     public override string ToString()
     {

@@ -10,11 +10,11 @@ using Microsoft.CodeAnalysis.Text;
 
 public partial record ClassModel
 {
-    public required string Name { get; init; }
-    public required FieldTable FieldTable { get; init; }
-    public required MethodTable MethodTable { get; init; }
-    public required List<IInvariant> InvariantList { get; init; }
-    public required Unsupported Unsupported { get; init; }
+    required public string Name { get; init; }
+    required public FieldTable FieldTable { get; init; }
+    required public MethodTable MethodTable { get; init; }
+    required public List<IInvariant> InvariantList { get; init; }
+    required public Unsupported Unsupported { get; init; }
 
     private AutoResetEvent PulseEvent = new(initialState: false);
 
@@ -85,7 +85,7 @@ public partial record ClassModel
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is FieldDeclarationSyntax FieldDeclaration)
                 AddField(FieldDeclaration, FieldTable, unsupported);
-    
+
         return FieldTable;
     }
 
@@ -198,16 +198,16 @@ public partial record ClassModel
         }
     }
 
-    private static bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out bool HasReturnValue)
+    private static bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out bool hasReturnValue)
     {
-        HasReturnValue = false;
+        hasReturnValue = false;
 
         if (!IsTypeSupported(methodDeclaration.ReturnType, out bool IsVoidReturn) ||
             methodDeclaration.AttributeLists.Count > 0 ||
             methodDeclaration.Modifiers.Any(modifier => !modifier.IsKind(SyntaxKind.PrivateKeyword) && !modifier.IsKind(SyntaxKind.PublicKeyword) && !modifier.IsKind(SyntaxKind.InternalKeyword)))
             return false;
 
-        HasReturnValue = !IsVoidReturn;
+        hasReturnValue = !IsVoidReturn;
         return true;
     }
 
@@ -740,7 +740,7 @@ public partial record ClassModel
         if (Root.AttributeLists.Count > 0 || Root.Usings.Count > 0 || Root.Members.Count != 1)
             return false;
 
-        if (Root.Members[0] is not GlobalStatementSyntax GlobalStatement || 
+        if (Root.Members[0] is not GlobalStatementSyntax GlobalStatement ||
             GlobalStatement.Statement is not ExpressionStatementSyntax ExpressionStatement ||
             ExpressionStatement.Expression is not AssignmentExpressionSyntax AssignmentExpression)
             return false;
@@ -783,7 +783,6 @@ public partial record ClassModel
                 return true;
             }
 
-
         field = null!;
         return false;
     }
@@ -796,7 +795,6 @@ public partial record ClassModel
                 parameter = ValidParameter;
                 return true;
             }
-
 
         parameter = null!;
         return false;
