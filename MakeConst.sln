@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeConst.Vsix", "MakeConst
 		{42E47761-3282-4DD9-BBCE-898317006DE5} = {42E47761-3282-4DD9-BBCE-898317006DE5}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeConst.Core", "MakeConst\MakeConst.Core\MakeConst.Core.csproj", "{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -42,6 +44,10 @@ Global
 		{45C0524E-0FAA-4BB4-8154-57717DE0E14C}.Debug|x64.Build.0 = Debug|x64
 		{45C0524E-0FAA-4BB4-8154-57717DE0E14C}.Release|x64.ActiveCfg = Release|x64
 		{45C0524E-0FAA-4BB4-8154-57717DE0E14C}.Release|x64.Build.0 = Release|x64
+		{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}.Debug|x64.ActiveCfg = Debug|x64
+		{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}.Debug|x64.Build.0 = Debug|x64
+		{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}.Release|x64.ActiveCfg = Release|x64
+		{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

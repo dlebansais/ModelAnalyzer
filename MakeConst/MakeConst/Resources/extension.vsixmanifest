@@ -13,6 +13,8 @@
   <Assets>
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="MakeConst.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="MakeConst.dll" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="MakeConst.Core.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="MakeConst.Core.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="MakeConst.CodeFixes.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="MakeConst.CodeFixes.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="Microsoft.Z3.dll" />

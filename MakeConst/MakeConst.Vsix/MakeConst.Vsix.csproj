@@ -47,9 +47,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SolutionDir)'!='*Undefined*'">
-    <Exec Command="copy &quot;C:\Projects\Temp\MakeConst\MakeConst\MakeConst.Test\bin\x64\Debug\netcoreapp3.1\libz3.dll&quot; &quot;C:\Users\DLB\AppData\Local\Microsoft\VisualStudio\17.0_41bd731bRoslyn\Extensions\DLB\MakeConst\1.0&quot; /Y" />
-    <Exec Command="copy &quot;C:\Projects\Temp\MakeConst\MakeConst\MakeConst.Test\bin\x64\Debug\netcoreapp3.1\Microsoft.Z3.dll&quot; &quot;C:\Users\DLB\AppData\Local\Microsoft\VisualStudio\17.0_41bd731bRoslyn\Extensions\DLB\MakeConst\1.0&quot; /Y" />
-    <Exec Command="copy &quot;C:\Projects\Temp\MakeConst\MakeConst\MakeConst\Resources\extension.vsixmanifest&quot; &quot;C:\Users\DLB\AppData\Local\Microsoft\VisualStudio\17.0_41bd731bRoslyn\Extensions\DLB\MakeConst\1.0&quot; /Y" />
+    <Exec Command="copyfiles.bat $(PkgDefApplicationConfigFile) $(SolutionName) $(SolutionDir)$(SolutionName)\$(SolutionName).Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1 $(SolutionDir)$(SolutionName)\$(SolutionName)\Resources\extension.vsixmanifest" />
   </Target>
 
 </Project>
