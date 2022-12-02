@@ -42,4 +42,22 @@ class Program
 }
 ");
     }
+
+    [TestMethod]
+    public async Task ValidOperator_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = (x + x) - ((x * x) / x);
+    }
+}
+");
+    }
 }

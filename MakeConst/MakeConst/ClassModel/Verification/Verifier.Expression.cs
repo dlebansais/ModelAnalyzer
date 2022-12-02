@@ -24,6 +24,9 @@ public partial class Verifier : IDisposable
             case LiteralValueExpression LiteralValue:
                 Result = BuildLiteralValueExpression(LiteralValue);
                 break;
+            case ParenthesizedExpression Parenthesized:
+                Result = BuildParenthesizedExpression(aliasTable, Parenthesized);
+                break;
             case VariableValueExpression VariableValue:
                 Result = BuildVariableValueExpression(aliasTable, VariableValue);
                 break;
@@ -59,6 +62,11 @@ public partial class Verifier : IDisposable
     private ArithExpr BuildLiteralValueExpression(LiteralValueExpression literalValueExpression)
     {
         return ctx.MkInt(literalValueExpression.Value);
+    }
+
+    private Expr BuildParenthesizedExpression(AliasTable aliasTable, ParenthesizedExpression parenthesizedExpression)
+    {
+        return BuildExpression<Expr>(aliasTable, parenthesizedExpression.Inside);
     }
 
     private ArithExpr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)

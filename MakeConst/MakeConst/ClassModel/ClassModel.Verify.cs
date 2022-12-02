@@ -44,6 +44,8 @@ public partial record ClassModel
     {
         { SyntaxKind.PlusToken, new ArithmeticOperator("+", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkAdd(left, right)) },
         { SyntaxKind.MinusToken, new ArithmeticOperator("-", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkSub(left, right)) },
+        { SyntaxKind.AsteriskToken, new ArithmeticOperator("*", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkMul(left, right)) },
+        { SyntaxKind.SlashToken, new ArithmeticOperator("/", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkDiv(left, right)) },
     };
 
     public static Dictionary<SyntaxKind, LogicalOperator> SupportedLogicalOperators = new()

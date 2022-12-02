@@ -249,6 +249,8 @@ public partial record ClassModel
             NewExpression = new VariableValueExpression { Variable = Variable };
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression && int.TryParse(LiteralExpression.Token.ValueText, out int Value))
             NewExpression = new LiteralValueExpression { Value = Value };
+        else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
+            NewExpression = ParseParenthesizedExpression(fieldTable, parameterTable, unsupported, ParenthesizedExpression);
         else
         {
             Location Location = expressionNode.GetLocation();
@@ -310,6 +312,27 @@ public partial record ClassModel
         operatorKind = token.Kind();
 
         return SupportedLogicalOperators.ContainsKey(operatorKind);
+    }
+
+    private static IExpression ParseParenthesizedExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
+    {
+        IExpression NewExpression;
+        IExpression Inside = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Expression);
+
+        if (Inside is not UnsupportedExpression)
+        {
+            NewExpression = new ParenthesizedExpression { Inside = Inside };
+        }
+        else
+        {
+            Location Location = expressionNode.Expression.GetLocation();
+            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
+            unsupported.Expressions.Add(UnsupportedExpression);
+
+            NewExpression = UnsupportedExpression;
+        }
+
+        return NewExpression;
     }
 
     private static List<IStatement> ParseStatementOrBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
