@@ -11,8 +11,8 @@ using Microsoft.CodeAnalysis.Text;
 public partial record ClassModel
 {
     public required string Name { get; init; }
-    public required Dictionary<FieldName, IField> FieldTable { get; init; }
-    public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
+    public required FieldTable FieldTable { get; init; }
+    public required MethodTable MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
     public required Unsupported Unsupported { get; init; }
 
@@ -21,8 +21,8 @@ public partial record ClassModel
     public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration)
     {
         string Name = classDeclaration.Identifier.ValueText;
-        Dictionary<FieldName, IField> FieldTable = new();
-        Dictionary<MethodName, IMethod> MethodTable = new();
+        FieldTable FieldTable = new();
+        MethodTable MethodTable = new();
         List<IInvariant> InvariantList = new();
         Unsupported Unsupported = new();
 
@@ -78,9 +78,9 @@ public partial record ClassModel
         return HasUnsupportedNode;
     }
 
-    private static Dictionary<FieldName, IField> ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
+    private static FieldTable ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
     {
-        Dictionary<FieldName, IField> FieldTable = new();
+        FieldTable FieldTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is FieldDeclarationSyntax FieldDeclaration)
@@ -89,7 +89,7 @@ public partial record ClassModel
         return FieldTable;
     }
 
-    private static void AddField(FieldDeclarationSyntax fieldDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
+    private static void AddField(FieldDeclarationSyntax fieldDeclaration, FieldTable fieldTable, Unsupported unsupported)
     {
         VariableDeclarationSyntax Declaration = fieldDeclaration.Declaration;
 
@@ -104,32 +104,39 @@ public partial record ClassModel
         else
         {
             foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-            {
-                FieldName FieldName = new(Variable.Identifier.ValueText);
-                IField NewField;
-
-                if ((Variable.ArgumentList is not BracketedArgumentListSyntax BracketedArgumentList || BracketedArgumentList.Arguments.Count == 0) &&
-                    Variable.Initializer is null)
-                {
-                    NewField = new Field { FieldName = FieldName };
-                }
-                else
-                {
-                    Location Location = Variable.Identifier.GetLocation();
-                    UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
-                    unsupported.Fields.Add(UnsupportedField);
-
-                    NewField = UnsupportedField;
-                }
-
-                fieldTable.Add(NewField.FieldName, NewField);
-            }
+                AddField(Variable, fieldTable, unsupported);
         }
     }
 
-    private static Dictionary<MethodName, IMethod> ParseMethods(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
+    private static void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported)
     {
-        Dictionary<MethodName, IMethod> MethodTable = new();
+        FieldName FieldName = new(variable.Identifier.ValueText);
+
+        if (!fieldTable.ContainsField(FieldName))
+        {
+            IField NewField;
+
+            if ((variable.ArgumentList is not BracketedArgumentListSyntax BracketedArgumentList || BracketedArgumentList.Arguments.Count == 0) &&
+                variable.Initializer is null)
+            {
+                NewField = new Field { FieldName = FieldName };
+            }
+            else
+            {
+                Location Location = variable.Identifier.GetLocation();
+                UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
+                unsupported.Fields.Add(UnsupportedField);
+
+                NewField = UnsupportedField;
+            }
+
+            fieldTable.AddField(NewField.FieldName, NewField);
+        }
+    }
+
+    private static MethodTable ParseMethods(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    {
+        MethodTable MethodTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
         {
@@ -147,43 +154,48 @@ public partial record ClassModel
         return MethodTable;
     }
 
-    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<MethodName, IMethod> methodTable, Unsupported unsupported)
+    private static void AddMethod(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
     {
-        MethodName MethodName = new(methodDeclaration.Identifier.ValueText);
-        IMethod NewMethod;
+        string Name = methodDeclaration.Identifier.ValueText;
+        MethodName MethodName = new(Name);
 
-        if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue))
+        if (!methodTable.ContainsMethod(MethodName))
         {
-            bool IsSupported = true;
-            Dictionary<ParameterName, IParameter> ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
-            List<IRequire> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
-            List<IStatement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
-            List<IEnsure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
+            IMethod NewMethod;
 
-            NewMethod = new Method
+            if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue))
             {
-                MethodName = MethodName,
-                IsSupported = IsSupported,
-                HasReturnValue = HasReturnValue,
-                ParameterTable = ParameterTable,
-                RequireList = RequireList,
-                StatementList = StatementList,
-                EnsureList = EnsureList,
-            };
+                bool IsSupported = true;
+                ParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
+                List<IRequire> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
+                List<IStatement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
+                List<IEnsure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
+
+                NewMethod = new Method
+                {
+                    MethodName = MethodName,
+                    IsSupported = IsSupported,
+                    HasReturnValue = HasReturnValue,
+                    ParameterTable = ParameterTable,
+                    RequireList = RequireList,
+                    StatementList = StatementList,
+                    EnsureList = EnsureList,
+                };
+            }
+            else
+            {
+                if (TryFindTrailingTrivia(methodDeclaration, out SyntaxTriviaList TriviaList))
+                    ReportUnsupportedEnsures(unsupported, TriviaList);
+
+                Location Location = methodDeclaration.Identifier.GetLocation();
+                UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
+                unsupported.Methods.Add(UnsupportedMethod);
+
+                NewMethod = UnsupportedMethod;
+            }
+
+            methodTable.AddMethod(NewMethod.MethodName, NewMethod);
         }
-        else
-        {
-            if (TryFindTrailingTrivia(methodDeclaration, out SyntaxTriviaList TriviaList))
-                ReportUnsupportedEnsures(unsupported, TriviaList);
-
-            Location Location = methodDeclaration.Identifier.GetLocation();
-            UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
-            unsupported.Methods.Add(UnsupportedMethod);
-
-            NewMethod = UnsupportedMethod;
-        }
-
-        methodTable.Add(NewMethod.MethodName, NewMethod);
     }
 
     private static bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out bool HasReturnValue)
@@ -199,35 +211,39 @@ public partial record ClassModel
         return true;
     }
 
-    private static Dictionary<ParameterName, IParameter> ParseParameters(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
+    private static ParameterTable ParseParameters(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, Unsupported unsupported)
     {
-        Dictionary<ParameterName, IParameter> ParameterTable = new();
+        ParameterTable ParameterTable = new();
 
         foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
             ParameterName ParameterName = new(Parameter.Identifier.ValueText);
-            IParameter NewParameter;
 
-            if (IsParameterSupported(Parameter, fieldTable))
+            if (!ParameterTable.ContainsParameter(ParameterName))
             {
-                NewParameter = new Parameter() { ParameterName = ParameterName };
-            }
-            else
-            {
-                Location Location = Parameter.GetLocation();
-                UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { ParameterName = ParameterName, Location = Location };
-                unsupported.Parameters.Add(UnsupportedParameter);
+                IParameter NewParameter;
 
-                NewParameter = UnsupportedParameter;
-            }
+                if (IsParameterSupported(Parameter, fieldTable))
+                {
+                    NewParameter = new Parameter() { ParameterName = ParameterName };
+                }
+                else
+                {
+                    Location Location = Parameter.GetLocation();
+                    UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { ParameterName = ParameterName, Location = Location };
+                    unsupported.Parameters.Add(UnsupportedParameter);
 
-            ParameterTable.Add(ParameterName, NewParameter);
+                    NewParameter = UnsupportedParameter;
+                }
+
+                ParameterTable.AddParameter(ParameterName, NewParameter);
+            }
         }
 
         return ParameterTable;
     }
 
-    private static bool IsParameterSupported(ParameterSyntax parameter, Dictionary<FieldName, IField> fieldTable)
+    private static bool IsParameterSupported(ParameterSyntax parameter, FieldTable fieldTable)
     {
         if (parameter.AttributeLists.Count > 0)
             return false;
@@ -244,7 +260,7 @@ public partial record ClassModel
         return true;
     }
 
-    private static List<IRequire> ParseRequires(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    private static List<IRequire> ParseRequires(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
         List<IRequire> RequireList;
 
@@ -256,7 +272,7 @@ public partial record ClassModel
         return RequireList;
     }
 
-    private static List<IRequire> ParseRequires(SyntaxTriviaList triviaList, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    private static List<IRequire> ParseRequires(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
         List<IRequire> RequireList = new();
 
@@ -273,7 +289,7 @@ public partial record ClassModel
         return RequireList;
     }
 
-    private static void ParseRequire(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, List<IRequire> requireList, SyntaxTrivia trivia, string comment, string pattern)
+    private static void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<IRequire> requireList, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
         IRequire NewRequire;
@@ -342,7 +358,7 @@ public partial record ClassModel
         unsupported.Requires.Add(UnsupportedRequire);
     }
 
-    private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
         List<IEnsure> EnsureList;
 
@@ -357,7 +373,7 @@ public partial record ClassModel
         return EnsureList;
     }
 
-    private static List<IEnsure> ParseEnsures(SyntaxTriviaList triviaList, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    private static List<IEnsure> ParseEnsures(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
         List<IEnsure> EnsureList = new();
 
@@ -374,7 +390,7 @@ public partial record ClassModel
         return EnsureList;
     }
 
-    private static void ParseEnsure(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, List<IEnsure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
+    private static void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<IEnsure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
         IEnsure NewEnsure;
@@ -416,7 +432,7 @@ public partial record ClassModel
         unsupported.Ensures.Add(UnsupportedEnsure);
     }
 
-    private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
         List<IStatement> StatementList = new();
 
@@ -428,13 +444,13 @@ public partial record ClassModel
         return StatementList;
     }
 
-    private static List<IStatement> ParseExpressionBody(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
+    private static List<IStatement> ParseExpressionBody(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
         IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionBody);
         return new List<IStatement>() { new ReturnStatement { Expression = Expression } };
     }
 
-    private static IExpression ParseExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode)
+    private static IExpression ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode)
     {
         IExpression NewExpression;
 
@@ -458,7 +474,7 @@ public partial record ClassModel
         return NewExpression;
     }
 
-    private static IExpression ParseBinaryExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
+    private static IExpression ParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
     {
         IExpression? NewExpression = null;
         IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
@@ -509,7 +525,7 @@ public partial record ClassModel
         return SupportedLogicalOperators.ContainsKey(operatorKind);
     }
 
-    private static IExpression ParseParenthesizedExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
+    private static IExpression ParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
     {
         IExpression NewExpression;
         IExpression Inside = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Expression);
@@ -530,7 +546,7 @@ public partial record ClassModel
         return NewExpression;
     }
 
-    private static List<IStatement> ParseStatementOrBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node)
+    private static List<IStatement> ParseStatementOrBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax node)
     {
         List<IStatement> StatementList;
 
@@ -545,7 +561,7 @@ public partial record ClassModel
         return StatementList;
     }
 
-    private static List<IStatement> ParseBlock(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
+    private static List<IStatement> ParseBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
     {
         List<IStatement> StatementList = new();
 
@@ -558,7 +574,7 @@ public partial record ClassModel
         return StatementList;
     }
 
-    private static IStatement ParseStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, StatementSyntax node, bool isLastStatement)
+    private static IStatement ParseStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax node, bool isLastStatement)
     {
         IStatement? NewStatement = null;
 
@@ -584,7 +600,7 @@ public partial record ClassModel
         return NewStatement;
     }
 
-    private static IStatement ParseAssignmentStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionStatementSyntax node)
+    private static IStatement ParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax node)
     {
         IStatement NewStatement;
 
@@ -607,7 +623,7 @@ public partial record ClassModel
         return NewStatement;
     }
 
-    private static IStatement ParseIfStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, IfStatementSyntax node)
+    private static IStatement ParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax node)
     {
         IExpression Condition = ParseExpression(fieldTable, parameterTable, unsupported, node.Condition);
         List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, node.Statement);
@@ -621,7 +637,7 @@ public partial record ClassModel
         return new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
     }
 
-    private static IStatement ParseReturnStatement(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ReturnStatementSyntax node)
+    private static IStatement ParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax node)
     {
         IExpression? ReturnExpression;
 
@@ -648,7 +664,7 @@ public partial record ClassModel
         return true;
     }
 
-    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported)
+    private static List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
     {
         List<IInvariant> InvariantList = new();
 
@@ -673,7 +689,7 @@ public partial record ClassModel
         return InvariantList;
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -686,12 +702,12 @@ public partial record ClassModel
             }
     }
 
-    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, Dictionary<FieldName, IField> fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    private static void AddInvariantsInTrivia(List<IInvariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
         IInvariant NewInvariant;
 
-        if (TryParseAssertionInTrivia(fieldTable, new Dictionary < ParameterName, IParameter >(), unsupported, Text, out IExpression BooleanExpression))
+        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, out IExpression BooleanExpression))
         {
             NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
         }
@@ -704,7 +720,7 @@ public partial record ClassModel
         invariantList.Add(NewInvariant);
     }
 
-    private static bool TryParseAssertionInTrivia(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, string text, out IExpression booleanExpression)
+    private static bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, out IExpression booleanExpression)
     {
         booleanExpression = null!;
 
@@ -716,7 +732,7 @@ public partial record ClassModel
         return ErrorList.Count == 0 && IsValidInvariantSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
     }
 
-    private static bool IsValidInvariantSyntaxTree(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
+    private static bool IsValidInvariantSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
     {
         booleanExpression = null!;
 
@@ -733,14 +749,14 @@ public partial record ClassModel
         return IsValidInvariantExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression);
     }
 
-    private static bool IsValidInvariantExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
+    private static bool IsValidInvariantExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
     {
         booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode);
 
         return booleanExpression is not UnsupportedExpression;
     }
 
-    private static bool TryFindVariableByName(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, string variableName, out IVariable variable)
+    private static bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)
     {
         if (TryFindFieldByName(fieldTable, variableName, out IField Field))
         {
@@ -758,7 +774,7 @@ public partial record ClassModel
         return false;
     }
 
-    private static bool TryFindFieldByName(Dictionary<FieldName, IField> fieldTable, string fieldName, out IField field)
+    private static bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out IField field)
     {
         foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
             if (Entry.Value is Field ValidField && ValidField.FieldName.Name == fieldName)
@@ -772,7 +788,7 @@ public partial record ClassModel
         return false;
     }
 
-    private static bool TryFindParameterByName(Dictionary<ParameterName, IParameter> parameterTable, string parameterName, out IParameter parameter)
+    private static bool TryFindParameterByName(ParameterTable parameterTable, string parameterName, out IParameter parameter)
     {
         foreach (KeyValuePair<ParameterName, IParameter> Entry in parameterTable)
             if (Entry.Value is Parameter ValidParameter && ValidParameter.ParameterName.Name == parameterName)

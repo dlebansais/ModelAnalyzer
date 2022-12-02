@@ -20,8 +20,8 @@ public partial class Verifier : IDisposable
 
     public required int MaxDepth { get; init; }
     public required string ClassName { get; init; }
-    public required Dictionary<FieldName, IField> FieldTable { get; init; }
-    public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
+    public required FieldTable FieldTable { get; init; }
+    public required MethodTable MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
 
     public bool IsInvariantViolated { get; private set; }
