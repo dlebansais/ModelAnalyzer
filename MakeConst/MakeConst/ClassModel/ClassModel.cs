@@ -1,16 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.Z3;
-using static System.Net.Mime.MediaTypeNames;
 
 public partial record ClassModel
 {
@@ -137,11 +133,15 @@ public partial record ClassModel
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
         {
-            if (Member.HasLeadingTrivia)
-                ReportUnsupportedRequires(unsupported, Member.GetLeadingTrivia());
+            SyntaxTriviaList TriviaList;
+
+            if (TryFindLeadingTrivia(Member, out TriviaList))
+                ReportUnsupportedRequires(unsupported, TriviaList);
 
             if (Member is MethodDeclarationSyntax MethodDeclaration)
                 AddMethod(MethodDeclaration, fieldTable, MethodTable, unsupported);
+            else if (TryFindTrailingTrivia(Member, out TriviaList))
+                ReportUnsupportedEnsures(unsupported, TriviaList);
         }
 
         return MethodTable;
@@ -173,6 +173,9 @@ public partial record ClassModel
         }
         else
         {
+            if (TryFindTrailingTrivia(methodDeclaration, out SyntaxTriviaList TriviaList))
+                ReportUnsupportedEnsures(unsupported, TriviaList);
+
             Location Location = methodDeclaration.Identifier.GetLocation();
             UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
             unsupported.Methods.Add(UnsupportedMethod);
@@ -291,6 +294,33 @@ public partial record ClassModel
         requireList.Add(NewRequire);
     }
 
+    private static bool TryFindLeadingTrivia(MemberDeclarationSyntax member, out SyntaxTriviaList triviaList)
+    {
+        if (member.HasLeadingTrivia)
+        {
+            triviaList = member.GetLeadingTrivia();
+            return true;
+        }
+
+        triviaList = default;
+        return false;
+    }
+
+    private static bool TryFindTrailingTrivia(MemberDeclarationSyntax member, out SyntaxTriviaList triviaList)
+    {
+        SyntaxToken LastToken = member.GetLastToken();
+        SyntaxToken NextToken = LastToken.GetNextToken();
+
+        if (NextToken.HasLeadingTrivia)
+        {
+            triviaList = NextToken.LeadingTrivia;
+            return true;
+        }
+
+        triviaList = default;
+        return false;
+    }
+
     private static void ReportUnsupportedRequires(Unsupported unsupported, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
@@ -314,9 +344,76 @@ public partial record ClassModel
 
     private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
     {
-        List<IEnsure> EnsureList = new();
+        List<IEnsure> EnsureList;
+
+        SyntaxToken LastToken = methodDeclaration.GetLastToken();
+        SyntaxToken NextToken = LastToken.GetNextToken();
+
+        if (NextToken.HasLeadingTrivia)
+            EnsureList = ParseEnsures(NextToken.LeadingTrivia, fieldTable, parameterTable, unsupported);
+        else
+            EnsureList = new();
 
         return EnsureList;
+    }
+
+    private static List<IEnsure> ParseEnsures(SyntaxTriviaList triviaList, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
+    {
+        List<IEnsure> EnsureList = new();
+
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Ensure}";
+
+                if (Comment.StartsWith(Pattern))
+                    ParseEnsure(fieldTable, parameterTable, unsupported, EnsureList, Trivia, Comment, Pattern);
+            }
+
+        return EnsureList;
+    }
+
+    private static void ParseEnsure(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, List<IEnsure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
+    {
+        string Text = comment.Substring(pattern.Length);
+        IEnsure NewEnsure;
+
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
+        {
+            NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+        }
+        else
+        {
+            Location Location = GetLocationInComment(trivia, pattern);
+            UnsupportedEnsure UnsupportedEnsure = new UnsupportedEnsure { Text = Text, Location = Location };
+            unsupported.Ensures.Add(UnsupportedEnsure);
+
+            NewEnsure = UnsupportedEnsure;
+        }
+
+        ensureList.Add(NewEnsure);
+    }
+
+    private static void ReportUnsupportedEnsures(Unsupported unsupported, SyntaxTriviaList triviaList)
+    {
+        foreach (SyntaxTrivia Trivia in triviaList)
+            if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                string Comment = Trivia.ToFullString();
+                string Pattern = $"// {Modeling.Ensure}";
+
+                if (Comment.StartsWith(Pattern))
+                    ReportUnsupportedEnsure(unsupported, Trivia, Comment, Pattern);
+            }
+    }
+
+    private static void ReportUnsupportedEnsure(Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    {
+        string Text = comment.Substring(pattern.Length);
+        Location Location = GetLocationInComment(trivia, pattern);
+        UnsupportedEnsure UnsupportedEnsure = new() { Text = Text, Location = Location };
+        unsupported.Ensures.Add(UnsupportedEnsure);
     }
 
     private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported)
