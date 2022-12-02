@@ -127,12 +127,12 @@ class Program
             X = x;
     }
 }
-// Invariant: [|0|]
+// Invariant: [|typeof(X)|]
 ");
     }
 
     [TestMethod]
-    public async Task ClassWithInvertedExpressionInInvariant_Diagnostic()
+    public async Task ClassWithInvertedExpressionInInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -152,7 +152,7 @@ class Program
             X = x;
     }
 }
-// Invariant: [|0 <= X|]
+// Invariant: 0 <= X
 ");
     }
 

@@ -263,19 +263,23 @@ public partial record ClassModel
 
     private static IExpression ParseBinaryExpression(Dictionary<FieldName, IField> fieldTable, Dictionary<ParameterName, IParameter> parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
     {
-        IExpression NewExpression;
-
+        IExpression? NewExpression = null;
         IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
         IExpression Right = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
-        SyntaxKind OperatorKind;
 
-        if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-            NewExpression = new BinaryArithmeticExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-        else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-            NewExpression = new ComparisonExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-        else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-            NewExpression = new BinaryLogicalExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-        else
+        if (Left is not UnsupportedExpression && Right is not UnsupportedExpression)
+        {
+            SyntaxKind OperatorKind;
+
+            if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+                NewExpression = new BinaryArithmeticExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
+            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+                NewExpression = new ComparisonExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
+            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
+                NewExpression = new BinaryLogicalExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
+        }
+
+        if (NewExpression is null)
         {
             Location Location = expressionNode.OperatorToken.GetLocation();
             UnsupportedExpression UnsupportedExpression = new() { Location = Location };

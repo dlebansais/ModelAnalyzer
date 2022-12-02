@@ -11,10 +11,13 @@ public partial record ClassModel
 
     public void Verify()
     {
-        Verifier Verifier = new() { MaxDepth = MaxDepth, FieldTable = FieldTable, MethodTable = MethodTable, InvariantList = InvariantList };
-        Verifier.Verify();
+        if (Unsupported.IsEmpty)
+        {
+            Verifier Verifier = new() { MaxDepth = MaxDepth, ClassName = Name, FieldTable = FieldTable, MethodTable = MethodTable, InvariantList = InvariantList };
+            Verifier.Verify();
 
-        ClassModelManager.Instance.SetIsInvariantViolated(Name, Verifier.IsInvariantViolated);
+            ClassModelManager.Instance.SetIsInvariantViolated(Name, Verifier.IsInvariantViolated);
+        }
 
         Logger.Log("Pulsing event");
         PulseEvent.Set();

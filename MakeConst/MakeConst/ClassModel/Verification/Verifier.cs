@@ -1,6 +1,5 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Z3;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ public class Verifier : IDisposable
     {
         // Need model generation turned on.
         ctx = new Context(new Dictionary<string, string>() { { "model", "true" } });
+        Zero = ctx.MkInt(0);
     }
 
     public void Verify()
@@ -19,6 +19,7 @@ public class Verifier : IDisposable
     }
 
     public required int MaxDepth { get; init; }
+    public required string ClassName { get; init; }
     public required Dictionary<FieldName, IField> FieldTable { get; init; }
     public required Dictionary<MethodName, IMethod> MethodTable { get; init; }
     public required List<IInvariant> InvariantList { get; init; }
@@ -60,10 +61,11 @@ public class Verifier : IDisposable
 
     private void AddMethodCalls(List<Method> callSequence)
     {
-        Solver solver = ctx.MkSolver();
+        Solver solverExist = ctx.MkSolver();
+        Solver solverInvariant = ctx.MkSolver();
         AliasTable aliasTable = new();
 
-        AddInitialState(solver, aliasTable);
+        AddInitialState(solverExist, solverInvariant, aliasTable);
 
         string CallSequenceString = string.Empty;
         foreach (Method Method in callSequence)
@@ -74,24 +76,46 @@ public class Verifier : IDisposable
             CallSequenceString += Method.Name;
         }
 
-        Logger.Log($"Call sequence: {CallSequenceString}");
+        if (CallSequenceString == string.Empty)
+            Logger.Log($"Call sequence empty");
+        else
+            Logger.Log($"Call sequence: {CallSequenceString}");
 
         foreach (Method Method in callSequence)
-            AddMethodCallState(solver, aliasTable, Method);
+            AddMethodCallState(solverExist, solverInvariant, aliasTable, Method);
 
-        AddClassInvariant(solver, aliasTable);
+        AddClassInvariant(solverExist, solverInvariant, aliasTable);
 
-        if (solver.Check() == Status.SATISFIABLE)
+        if (solverExist.Check() == Status.SATISFIABLE)
+        {
+            Logger.Log($"Model satisfied for class {ClassName}");
+
+            string ModelString = solverExist.Model.ToString();
+            ModelString = ModelString.Replace("\n", "\r\n");
+            Logger.Log(ModelString);
+        }
+        else
+        {
+            Logger.Log($"Model cannot be satified for class {ClassName}");
             IsInvariantViolated = true;
+        }
 
-        Logger.Log($"Solver result: {(IsInvariantViolated ? "NOK" : "OK")}");
+        if (solverInvariant.Check() == Status.SATISFIABLE)
+        {
+            IsInvariantViolated = true;
+            Logger.Log($"Invariant violation for class {ClassName}");
+
+            string ModelString = solverInvariant.Model.ToString();
+            ModelString = ModelString.Replace("\n", "\r\n");
+            Logger.Log(ModelString);
+        }
+        else
+            Logger.Log($"Invariant preserved for class {ClassName}");
     }
 
-    private void AddInitialState(Solver solver, AliasTable aliasTable)
+    private void AddInitialState(Solver solverExist, Solver solverInvariant, AliasTable aliasTable)
     {
-        Logger.Log($"Initial state");
-
-        IntExpr Zero = ctx.MkInt(0);
+        Logger.Log($"Initial state for class {ClassName}");
 
         foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
         {
@@ -100,13 +124,17 @@ public class Verifier : IDisposable
             string FieldNameAlias = aliasTable.GetAlias(FieldName);
 
             IntExpr FieldExpr = ctx.MkIntConst(FieldNameAlias);
-            AddToSolver(solver, ctx.MkEq(FieldExpr, Zero));
+            BoolExpr InitExpr = ctx.MkEq(FieldExpr, Zero);
+
+            Logger.Log($"Adding {InitExpr}");
+            solverExist.Assert(InitExpr);
+            solverInvariant.Assert(InitExpr);
         }
     }
 
-    private void AddClassInvariant(Solver solver, AliasTable aliasTable)
+    private void AddClassInvariant(Solver solverExist, Solver solverInvariant, AliasTable aliasTable)
     {
-        Logger.Log($"Class invariant");
+        Logger.Log($"Invariant for class {ClassName}");
 
         List<BoolExpr> AssertionList = new();
 
@@ -114,13 +142,17 @@ public class Verifier : IDisposable
             if (Item is Invariant Invariant)
             {
                 BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, Invariant.BooleanExpression);
-                AssertionList.Add(ctx.MkNot(InvariantExpression));
+                AssertionList.Add(InvariantExpression);
             }
 
-        AddToSolver(solver, ctx.MkOr(AssertionList));
+        BoolExpr AllInvariants = ctx.MkAnd(AssertionList);
+
+        Logger.Log($"Adding {AllInvariants} and opposite");
+        solverExist.Assert(AllInvariants);
+        solverInvariant.Assert(ctx.MkNot(AllInvariants));
     }
 
-    private void AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
+    private void AddMethodCallState(Solver solverExist, Solver solverInvariant, AliasTable aliasTable, Method method)
     {
         List<IntExpr> ExpressionList = new();
 
@@ -137,22 +169,22 @@ public class Verifier : IDisposable
 
         BoolExpr True = ctx.MkBool(true);
 
-        AddStatementListExecution(solver, aliasTable, True, method.StatementList);
+        AddStatementListExecution(solverExist, solverInvariant, aliasTable, True, method.StatementList);
     }
 
-    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<IStatement> statementList)
+    private void AddStatementListExecution(Solver solverExist, Solver solverInvariant, AliasTable aliasTable, BoolExpr branch, List<IStatement> statementList)
     {
         foreach (IStatement Statement in statementList)
             switch (Statement)
             {
                 case AssignmentStatement Assignment:
-                    AddAssignmentExecution(solver, aliasTable, branch, Assignment);
+                    AddAssignmentExecution(solverExist, solverInvariant, aliasTable, branch, Assignment);
                     break;
                 case ConditionalStatement Conditional:
-                    AddConditionalExecution(solver, aliasTable, branch, Conditional);
+                    AddConditionalExecution(solverExist, solverInvariant, aliasTable, branch, Conditional);
                     break;
                 case ReturnStatement Return:
-                    AddReturnExecution(solver, aliasTable, branch, Return);
+                    AddReturnExecution(solverExist, solverInvariant, aliasTable, branch, Return);
                     break;
                 case UnsupportedStatement:
                 default:
@@ -160,7 +192,7 @@ public class Verifier : IDisposable
             }
     }
 
-    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, AssignmentStatement assignmentStatement)
+    private void AddAssignmentExecution(Solver solverExist, Solver solverInvariant, AliasTable aliasTable, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
         Expr SourceExpr = BuildExpression<Expr>(aliasTable, assignmentStatement.Expression);
 
@@ -169,17 +201,62 @@ public class Verifier : IDisposable
         string DestinationNameAlias = aliasTable.GetAlias(DestinationName);
         IntExpr DestinationExpr = ctx.MkIntConst(DestinationNameAlias);
 
-        AddToSolver(solver, ctx.MkAnd(branch, ctx.MkEq(DestinationExpr, SourceExpr)));
+        AddToSolver(solverExist, solverInvariant, branch, ctx.MkEq(DestinationExpr, SourceExpr));
     }
 
-    private void AddConditionalExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, ConditionalStatement conditionalStatement)
+    private void AddConditionalExecution(Solver solverExist, Solver solverInvariant, AliasTable aliasTable, BoolExpr branch, ConditionalStatement conditionalStatement)
     {
         BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, conditionalStatement.Condition);
-        AddStatementListExecution(solver, aliasTable, ctx.MkAnd(branch, ConditionExpr), conditionalStatement.WhenTrueStatementList);
-        AddStatementListExecution(solver, aliasTable, ctx.MkAnd(branch, ctx.MkNot(ConditionExpr)), conditionalStatement.WhenFalseStatementList);
+        BoolExpr TrueBranchExpr = ctx.MkAnd(branch, ConditionExpr);
+        BoolExpr FalseBranchExpr = ctx.MkAnd(branch, ctx.MkNot(ConditionExpr));
+
+        AliasTable BeforeWhenTrue = aliasTable.Clone();
+        AddStatementListExecution(solverExist, solverInvariant, aliasTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
+        List<string> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
+
+        AliasTable WhenTrueAliasTable = aliasTable.Clone();
+
+        AliasTable BeforeWhenFalse = WhenTrueAliasTable;
+        AddStatementListExecution(solverExist, solverInvariant, aliasTable, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
+        List<string> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
+
+        AliasTable WhenFalseAliasTable = aliasTable.Clone();
+
+        aliasTable.Merge(WhenTrueAliasTable, out List<string> UpdatedNameList);
+
+        foreach (string NameAlias in AliasesOnlyWhenFalse)
+        {
+            IntExpr AliasExpr = ctx.MkIntConst(NameAlias);
+            BoolExpr InitExpr = ctx.MkEq(AliasExpr, Zero);
+            AddToSolver(solverExist, solverInvariant, TrueBranchExpr, InitExpr);
+        }
+
+        foreach (string NameAlias in AliasesOnlyWhenTrue)
+        {
+            IntExpr AliasExpr = ctx.MkIntConst(NameAlias);
+            BoolExpr InitExpr = ctx.MkEq(AliasExpr, Zero);
+            AddToSolver(solverExist, solverInvariant, FalseBranchExpr, InitExpr);
+        }
+
+        foreach (string Name in UpdatedNameList)
+        {
+            string NameAlias = aliasTable.GetAlias(Name);
+            IntExpr DestinationExpr = ctx.MkIntConst(NameAlias);
+
+            string WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Name);
+            IntExpr WhenTrueSourceExpr = ctx.MkIntConst(WhenTrueNameAlias);
+            BoolExpr WhenTrueInitExpr = ctx.MkEq(DestinationExpr, WhenTrueSourceExpr);
+
+            string WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Name);
+            IntExpr WhenFalseSourceExpr = ctx.MkIntConst(WhenFalseNameAlias);
+            BoolExpr WhenFalseInitExpr = ctx.MkEq(DestinationExpr, WhenFalseSourceExpr);
+
+            AddToSolver(solverExist, solverInvariant, TrueBranchExpr, WhenTrueInitExpr);
+            AddToSolver(solverExist, solverInvariant, FalseBranchExpr, WhenFalseInitExpr);
+        }
     }
 
-    private void AddReturnExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, ReturnStatement returnStatement)
+    private void AddReturnExecution(Solver solverExist, Solver solverInvariant, AliasTable aliasTable, BoolExpr branch, ReturnStatement returnStatement)
     {
     }
 
@@ -247,10 +324,11 @@ public class Verifier : IDisposable
         return ctx.MkIntConst(VariableAliasName);
     }
 
-    private void AddToSolver(Solver solver, BoolExpr boolExpr)
+    private void AddToSolver(Solver solverExist, Solver solverInvariant, BoolExpr branch, BoolExpr boolExpr)
     {
-        solver.Assert(boolExpr);
-        Logger.Log($"Adding {boolExpr}");
+        solverExist.Assert(ctx.MkImplies(branch, boolExpr));
+        solverInvariant.Assert(ctx.MkImplies(branch, boolExpr));
+        Logger.Log($"Adding {branch} => {boolExpr}");
     }
 
     public void Dispose()
@@ -259,4 +337,5 @@ public class Verifier : IDisposable
     }
 
     private Context ctx;
+    private IntExpr Zero;
 }
