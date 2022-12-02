@@ -138,4 +138,43 @@ class [|Program7|]
 // Invariant: X == 0 || X == 1
 ");
     }
+
+    [TestMethod]
+    public async Task UnconstrainedInvariant_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class [|Program8|]
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+// Invariant: X == 0
+");
+    }
+
+    [TestMethod]
+    public async Task ConstrainedInvariant_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program9
+{
+    int X;
+
+    void Write(int x)
+    // Require: x == 0
+    {
+        X = x;
+    }
+}
+// Invariant: X == 0
+");
+    }
 }

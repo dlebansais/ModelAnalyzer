@@ -151,9 +151,16 @@ public partial class Verifier : IDisposable
                 ExpressionList.Add(ParameterExpr);
             }
 
-        BoolExpr True = ctx.MkBool(true);
+        foreach (IRequire Item in method.RequireList)
+            if (Item is Require Require)
+            {
+                BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
+                solver.Assert(RequireExpr);
+            }
 
-        AddStatementListExecution(solver, aliasTable, True, method.StatementList);
+        BoolExpr MainBranch = ctx.MkBool(true);
+
+        AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
     }
 
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)
