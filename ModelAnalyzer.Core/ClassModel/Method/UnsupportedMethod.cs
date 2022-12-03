@@ -2,8 +2,14 @@
 
 using Microsoft.CodeAnalysis;
 
+/// <summary>
+/// Represents an unsupported method.
+/// </summary>
 internal class UnsupportedMethod : IUnsupportedMethod
 {
-    required public IMethodName MethodName { get; init; }
+    /// <inheritdoc/>
+    public string Name => "*";
+
+    /// <inheritdoc/>
     required public Location Location { get; init; }
 }

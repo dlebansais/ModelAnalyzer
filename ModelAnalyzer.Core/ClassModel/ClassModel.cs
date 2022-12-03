@@ -228,13 +228,13 @@ internal partial record ClassModel : IClassModel
                     ReportUnsupportedEnsures(unsupported, TriviaList);
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
-                UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
+                UnsupportedMethod UnsupportedMethod = new() { Location = Location };
                 unsupported.AddUnsupportedMethod(UnsupportedMethod);
 
                 NewMethod = UnsupportedMethod;
             }
 
-            methodTable.AddMethod(NewMethod.MethodName, NewMethod);
+            methodTable.AddMethod(MethodName, NewMethod);
         }
     }
 
@@ -270,7 +270,7 @@ internal partial record ClassModel : IClassModel
                 else
                 {
                     Location Location = Parameter.GetLocation();
-                    UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { ParameterName = ParameterName, Location = Location };
+                    UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { Location = Location };
                     unsupported.AddUnsupportedParameter(UnsupportedParameter);
 
                     NewParameter = UnsupportedParameter;
@@ -838,7 +838,7 @@ internal partial record ClassModel : IClassModel
 
     private static bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out IField field)
     {
-        foreach (KeyValuePair<IFieldName, IField> Entry in fieldTable)
+        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
             if (Entry.Value is Field ValidField && ValidField.FieldName.Name == fieldName)
             {
                 field = ValidField;
@@ -878,12 +878,12 @@ internal partial record ClassModel : IClassModel
         string Result = @$"{Name}
 ";
 
-        foreach (KeyValuePair<IFieldName, IField> FieldEntry in FieldTable)
+        foreach (KeyValuePair<FieldName, IField> FieldEntry in FieldTable)
             if (FieldEntry.Value is Field Field)
                 Result += @$"  int {Field.Name}
 ";
 
-        foreach (KeyValuePair<IMethodName, IMethod> MethodEntry in MethodTable)
+        foreach (KeyValuePair<MethodName, IMethod> MethodEntry in MethodTable)
             if (MethodEntry.Value is Method Method)
             {
                 string Parameters = string.Empty;

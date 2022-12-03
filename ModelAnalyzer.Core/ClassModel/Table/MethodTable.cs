@@ -2,20 +2,28 @@
 
 using System.Collections.Generic;
 
-internal class MethodTable : IEnumerable<KeyValuePair<IMethodName, IMethod>>
+/// <summary>
+/// Represents a collection of methods and name keys.
+/// </summary>
+internal class MethodTable : IEnumerable<KeyValuePair<MethodName, IMethod>>
 {
-    private Dictionary<IMethodName, IMethod> Table = new();
+    private Dictionary<MethodName, IMethod> Table = new();
 
-    public void AddMethod(IMethodName fieldName, IMethod field)
+    /// <summary>
+    /// Adds a method to the collection. The field name must be unique.
+    /// </summary>
+    /// <param name="fieldName">The field name used as a key.</param>
+    /// <param name="field">The field.</param>
+    public void AddMethod(MethodName fieldName, IMethod field)
     {
         Table.Add(fieldName, field);
     }
 
-    public bool ContainsMethod(IMethodName fieldName)
+    public bool ContainsMethod(MethodName fieldName)
     {
         return Table.ContainsKey(fieldName);
     }
 
-    public IEnumerator<KeyValuePair<IMethodName, IMethod>> GetEnumerator() => Table.GetEnumerator();
+    public IEnumerator<KeyValuePair<MethodName, IMethod>> GetEnumerator() => Table.GetEnumerator();
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 }

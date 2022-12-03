@@ -5,8 +5,4 @@
 /// </summary>
 public interface IParameter : IVariable
 {
-    /// <summary>
-    /// Gets the parameter name.
-    /// </summary>
-    IParameterName ParameterName { get; }
 }

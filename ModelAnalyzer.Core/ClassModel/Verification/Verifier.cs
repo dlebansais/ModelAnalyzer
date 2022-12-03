@@ -49,7 +49,7 @@ internal partial class Verifier : IDisposable
 
         if (depth > 0)
         {
-            foreach (KeyValuePair<IMethodName, IMethod> Entry in MethodTable)
+            foreach (KeyValuePair<MethodName, IMethod> Entry in MethodTable)
                 if (Entry.Value is Method Method)
                 {
                     List<Method> NewCallSequence = new();
@@ -106,7 +106,7 @@ internal partial class Verifier : IDisposable
     {
         Logger.Log($"Initial state for class {ClassName}");
 
-        foreach (KeyValuePair<IFieldName, IField> Entry in FieldTable)
+        foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
         {
             string FieldName = Entry.Key.Name;
             aliasTable.AddName(FieldName);

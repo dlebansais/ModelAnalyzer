@@ -1,3 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-internal record MethodName(string Name) : IMethodName;
+/// <summary>
+/// Represents a method name.
+/// </summary>
+internal record MethodName(string Name);
