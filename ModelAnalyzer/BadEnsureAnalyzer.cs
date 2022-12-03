@@ -55,8 +55,8 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
-        foreach (UnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
+        (IClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
+        foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
             context.ReportDiagnostic(Diagnostic.Create(BadEnsureRule, Item.Location));
     }
 }

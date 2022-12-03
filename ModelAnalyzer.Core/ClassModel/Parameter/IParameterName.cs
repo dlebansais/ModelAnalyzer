@@ -1,12 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
 /// <summary>
-/// Provides information about a class member name.
+/// Provides information about a parameter name.
 /// </summary>
-public interface IClassMemberName
+public interface IParameterName
 {
     /// <summary>
-    /// Gets the member name.
+    /// Gets the parameter name.
     /// </summary>
     string Name { get; }
 }

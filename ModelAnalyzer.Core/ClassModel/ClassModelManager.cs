@@ -8,11 +8,17 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
+/// <summary>
+/// Represents a manager for class models.
+/// </summary>
 public class ClassModelManager
 {
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
     required public ILogger Logger { get; init; }
 
-    private Dictionary<string, ClassModel> ClassTable = new();
+    private Dictionary<string, IClassModel> ClassTable = new();
     private int LastHashCode;
     private Dictionary<string, bool> ViolationTable = new();
     private Thread? ModelThread = null;
@@ -46,9 +52,9 @@ public class ClassModelManager
 
             lock (ClassTable)
             {
-                foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
+                foreach (KeyValuePair<string, IClassModel> Entry in ClassTable)
                 {
-                    ClassModel Original = Entry.Value;
+                    ClassModel Original = (ClassModel)Entry.Value;
                     ClassModel Clone = Original with { };
 
                     ClassModelList.Add(Clone);
@@ -79,6 +85,10 @@ public class ClassModelManager
         }
     }
 
+    /// <summary>
+    /// Checks whether the invariant of a class is violated.
+    /// </summary>
+    /// <param name="name">The class name.</param>
     public bool IsInvariantViolated(string name)
     {
         lock (ViolationTable)
@@ -87,6 +97,11 @@ public class ClassModelManager
         }
     }
 
+    /// <summary>
+    /// Sets whether the invariant of a class is violated.
+    /// </summary>
+    /// <param name="name">The class name.</param>
+    /// <param name="isInvariantViolated">Whether the invariant is violated.</param>
     public void SetIsInvariantViolated(string name, bool isInvariantViolated)
     {
         lock (ViolationTable)
@@ -96,10 +111,16 @@ public class ClassModelManager
         }
     }
 
-    public (ClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
+    /// <summary>
+    /// Gets the model of a class.
+    /// </summary>
+    /// <param name="context">The analysis context.</param>
+    /// <param name="classDeclaration">The class declaration.</param>
+    /// <param name="logger">The logger.</param>
+    public (IClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
     {
         int HashCode = context.Compilation.GetHashCode();
-        ClassModel Result;
+        IClassModel Result;
         bool IsThreadStarted = false;
 
         lock (ClassTable)
@@ -129,7 +150,11 @@ public class ClassModelManager
         return (Result, IsThreadStarted);
     }
 
-    public void UpdateClassModel(ClassModel classModel)
+    /// <summary>
+    /// Updates a class model.
+    /// </summary>
+    /// <param name="classModel">The class model.</param>
+    public void UpdateClassModel(IClassModel classModel)
     {
         string ClassName = classModel.Name;
 
@@ -147,13 +172,17 @@ public class ClassModelManager
         }
     }
 
+    /// <summary>
+    /// Removes class that no longer exist.
+    /// </summary>
+    /// <param name="existingClassList">The list of existing classes.</param>
     public void RemoveMissingClasses(List<string> existingClassList)
     {
         lock (ClassTable)
         {
             List<string> ToRemoveClassList = new();
 
-            foreach (KeyValuePair<string, ClassModel> Entry in ClassTable)
+            foreach (KeyValuePair<string, IClassModel> Entry in ClassTable)
                 if (!existingClassList.Contains(Entry.Key))
                     ToRemoveClassList.Add(Entry.Key);
 
@@ -165,6 +194,10 @@ public class ClassModelManager
         }
     }
 
+    /// <summary>
+    /// Checks whether a class is ignored for modeling.
+    /// </summary>
+    /// <param name="classDeclaration">The class declaration.</param>
     public static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
     {
         SyntaxToken firstToken = classDeclaration.GetFirstToken();

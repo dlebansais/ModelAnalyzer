@@ -2,11 +2,11 @@
 
 using System.Collections.Generic;
 
-public class FieldTable : IEnumerable<KeyValuePair<FieldName, IField>>
+internal class FieldTable : IEnumerable<KeyValuePair<IFieldName, IField>>
 {
-    private Dictionary<FieldName, IField> Table = new();
+    private Dictionary<IFieldName, IField> Table = new();
 
-    public void AddField(FieldName fieldName, IField field)
+    public void AddField(IFieldName fieldName, IField field)
     {
         Table.Add(fieldName, field);
     }
@@ -16,6 +16,6 @@ public class FieldTable : IEnumerable<KeyValuePair<FieldName, IField>>
         return Table.ContainsKey(fieldName);
     }
 
-    public IEnumerator<KeyValuePair<FieldName, IField>> GetEnumerator() => Table.GetEnumerator();
+    public IEnumerator<KeyValuePair<IFieldName, IField>> GetEnumerator() => Table.GetEnumerator();
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 }

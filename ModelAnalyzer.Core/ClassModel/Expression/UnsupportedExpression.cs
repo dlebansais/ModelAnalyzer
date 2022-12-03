@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 
-public class UnsupportedExpression : IExpression
+internal class UnsupportedExpression : IUnsupportedExpression
 {
     public bool IsSimple => true;
     required public Location Location { get; init; }

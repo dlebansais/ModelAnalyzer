@@ -1,6 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
+/// <summary>
+/// Provides information about a method.
+/// </summary>
 public interface IMethod
 {
-    MethodName MethodName { get; }
+    /// <summary>
+    /// Gets the method name.
+    /// </summary>
+    IMethodName MethodName { get; }
 }

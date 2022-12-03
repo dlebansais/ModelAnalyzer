@@ -1,14 +1,14 @@
 ﻿namespace DemoAnalyzer;
 
 using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Z3;
 
-public partial record ClassModel
+internal partial record ClassModel : IClassModel
 {
     private const int MaxDepth = 1;
 
+    /// <summary>
+    /// Verifies a class model.
+    /// </summary>
     public void Verify()
     {
         if (Unsupported.IsEmpty)
@@ -23,34 +23,11 @@ public partial record ClassModel
         PulseEvent.Set();
     }
 
+    /// <inheritdoc/>
     public void WaitForThreadCompleted()
     {
         bool IsCompleted = PulseEvent.WaitOne(TimeSpan.FromSeconds(2));
 
         Logger.Log($"Wait on event done, IsCompleted={IsCompleted}");
     }
-
-    public static Dictionary<SyntaxKind, ComparisonOperator> SupportedComparisonOperators { get; } = new()
-    {
-        { SyntaxKind.EqualsEqualsToken, new ComparisonOperator("==", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkEq(left, right)) },
-        { SyntaxKind.ExclamationEqualsToken, new ComparisonOperator("!=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkNot(ctx.MkEq(left, right))) },
-        { SyntaxKind.GreaterThanToken, new ComparisonOperator(">", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGt(left, right)) },
-        { SyntaxKind.GreaterThanEqualsToken, new ComparisonOperator(">=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGe(left, right)) },
-        { SyntaxKind.LessThanToken, new ComparisonOperator("<", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLt(left, right)) },
-        { SyntaxKind.LessThanEqualsToken, new ComparisonOperator("<=", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLe(left, right)) },
-    };
-
-    public static Dictionary<SyntaxKind, ArithmeticOperator> SupportedArithmeticOperators { get; } = new()
-    {
-        { SyntaxKind.PlusToken, new ArithmeticOperator("+", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkAdd(left, right)) },
-        { SyntaxKind.MinusToken, new ArithmeticOperator("-", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkSub(left, right)) },
-        { SyntaxKind.AsteriskToken, new ArithmeticOperator("*", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkMul(left, right)) },
-        { SyntaxKind.SlashToken, new ArithmeticOperator("/", (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkDiv(left, right)) },
-    };
-
-    public static Dictionary<SyntaxKind, LogicalOperator> SupportedLogicalOperators { get; } = new()
-    {
-        { SyntaxKind.BarBarToken, new LogicalOperator("||", (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkOr(left, right)) },
-        { SyntaxKind.AmpersandAmpersandToken, new LogicalOperator("&&", (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkAnd(left, right)) },
-    };
 }

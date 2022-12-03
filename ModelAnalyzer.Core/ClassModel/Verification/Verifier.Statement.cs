@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Z3;
 
-public partial class Verifier : IDisposable
+/// <summary>
+/// Represents a code verifier.
+/// </summary>
+internal partial class Verifier : IDisposable
 {
     private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<IStatement> statementList)
     {

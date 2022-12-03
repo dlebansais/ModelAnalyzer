@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class VariableValueExpression : IExpression
+internal class VariableValueExpression : IExpression
 {
     public bool IsSimple => true;
     required public IVariable Variable { get; init; }

@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class ParenthesizedExpression : IExpression
+internal class ParenthesizedExpression : IExpression
 {
     public bool IsSimple => false;
     required public IExpression Inside { get; init; }

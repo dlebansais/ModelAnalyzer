@@ -13,4 +13,3 @@ BadRequire | Design | Warning | BadRequireAnalyzer
 BadStatement | Design | Warning | BadStatementAnalyzer
 ClassModel | Design | Warning | ClassModelAnalyzer
 InvariantViolation | Design | Error | InvariantViolationAnalyzer
-MakeConst | Usage | Warning | MakeConstAnalyzer

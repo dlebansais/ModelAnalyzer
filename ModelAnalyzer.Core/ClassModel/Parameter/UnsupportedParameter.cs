@@ -4,9 +4,9 @@ using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 [DebuggerDisplay("{ParameterName.Name}")]
-public class UnsupportedParameter : IParameter
+internal class UnsupportedParameter : IUnsupportedParameter
 {
-    required public ParameterName ParameterName { get; init; }
+    required public IParameterName ParameterName { get; init; }
     public string Name { get { return ParameterName.Name; } }
     required public Location Location { get; init; }
 }

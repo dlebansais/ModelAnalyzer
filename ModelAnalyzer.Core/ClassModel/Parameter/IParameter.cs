@@ -1,6 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
+/// <summary>
+/// Provides information about a method parameter.
+/// </summary>
 public interface IParameter : IVariable
 {
-    ParameterName ParameterName { get; }
+    /// <summary>
+    /// Gets the parameter name.
+    /// </summary>
+    IParameterName ParameterName { get; }
 }

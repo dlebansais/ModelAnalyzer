@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-public class ParameterTable : IEnumerable<KeyValuePair<ParameterName, IParameter>>
+internal class ParameterTable : IEnumerable<KeyValuePair<ParameterName, IParameter>>
 {
     private Dictionary<ParameterName, IParameter> Table = new();
 

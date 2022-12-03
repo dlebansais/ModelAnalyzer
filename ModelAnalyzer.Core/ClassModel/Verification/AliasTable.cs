@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public class AliasTable
+internal class AliasTable
 {
     public AliasTable()
     {

@@ -9,6 +9,7 @@ public class FileLogger : ILogger
 {
     private static readonly Mutex Mutex = new();
 
+    /// <inheritdoc/>
     public void Clear()
     {
         lock (Mutex)
@@ -38,6 +39,7 @@ public class FileLogger : ILogger
         }
     }
 
+    /// <inheritdoc/>
     public void Log(string message)
     {
         lock (Mutex)
@@ -46,12 +48,13 @@ public class FileLogger : ILogger
         }
     }
 
-    public void LogException(Exception e)
+    /// <inheritdoc/>
+    public void LogException(Exception exception)
     {
         lock (Mutex)
         {
-            WriteLogSync(e.Message);
-            WriteLogSync(e.StackTrace);
+            WriteLogSync(exception.Message);
+            WriteLogSync(exception.StackTrace);
         }
     }
 

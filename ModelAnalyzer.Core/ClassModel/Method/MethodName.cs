@@ -1,3 +1,3 @@
 ﻿namespace DemoAnalyzer;
 
-public record MethodName(string Name) : IClassMemberName;
+internal record MethodName(string Name) : IMethodName;

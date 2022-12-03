@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 [DebuggerDisplay("{MethodName.Name}()")]
-public class Method : IMethod
+internal class Method : IMethod
 {
-    required public MethodName MethodName { get; init; }
+    required public IMethodName MethodName { get; init; }
     required public bool IsSupported { get; init; }
     required public bool HasReturnValue { get; init; }
     required public ParameterTable ParameterTable { get; init; }

@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 
-public class BinaryArithmeticExpression : IExpression
+internal class BinaryArithmeticExpression : IExpression
 {
     public bool IsSimple => false;
     required public IExpression Left { get; init; }
@@ -13,6 +13,6 @@ public class BinaryArithmeticExpression : IExpression
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
-        return $"{LeftString} {ClassModel.SupportedArithmeticOperators[OperatorKind].Text} {RightString}";
+        return $"{LeftString} {SupportedOperators.Arithmetic[OperatorKind].Text} {RightString}";
     }
 }

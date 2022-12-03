@@ -51,7 +51,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (ClassModel ClassModel, bool IsThreadStarted) = Manager.GetClassModel(context, classDeclaration, Logger);
+        (IClassModel ClassModel, bool IsThreadStarted) = Manager.GetClassModel(context, classDeclaration, Logger);
         
         if (IsThreadStarted)
             ClassModel.WaitForThreadCompleted();

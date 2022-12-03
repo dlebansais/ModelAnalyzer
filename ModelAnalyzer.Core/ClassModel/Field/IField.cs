@@ -1,6 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
+/// <summary>
+/// Provides information about a field.
+/// </summary>
 public interface IField : IVariable
 {
-    FieldName FieldName { get; }
+    /// <summary>
+    /// Gets the field name.
+    /// </summary>
+    IFieldName FieldName { get; }
 }

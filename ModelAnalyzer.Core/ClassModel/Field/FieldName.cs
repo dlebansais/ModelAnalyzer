@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public record FieldName(string Name) : IClassMemberName
+internal record FieldName(string Name) : IFieldName
 {
     public static FieldName UnsupportedFieldName { get; } = new("*");
 }

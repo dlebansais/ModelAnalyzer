@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Z3;
 
-public partial class Verifier : IDisposable
+/// <summary>
+/// Represents a code verifier.
+/// </summary>
+internal partial class Verifier : IDisposable
 {
     public Verifier()
     {
@@ -46,7 +49,7 @@ public partial class Verifier : IDisposable
 
         if (depth > 0)
         {
-            foreach (KeyValuePair<MethodName, IMethod> Entry in MethodTable)
+            foreach (KeyValuePair<IMethodName, IMethod> Entry in MethodTable)
                 if (Entry.Value is Method Method)
                 {
                     List<Method> NewCallSequence = new();
@@ -103,7 +106,7 @@ public partial class Verifier : IDisposable
     {
         Logger.Log($"Initial state for class {ClassName}");
 
-        foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
+        foreach (KeyValuePair<IFieldName, IField> Entry in FieldTable)
         {
             string FieldName = Entry.Key.Name;
             aliasTable.AddName(FieldName);

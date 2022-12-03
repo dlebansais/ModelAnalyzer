@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class Invariant : IInvariant
+internal class Invariant : IInvariant
 {
     required public string Text { get; init; }
     required public IExpression BooleanExpression { get; init; }

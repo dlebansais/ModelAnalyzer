@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 
-public class UnsupportedStatement : IStatement
+internal class UnsupportedStatement : IUnsupportedStatement
 {
     required public Location Location { get; init; }
 }

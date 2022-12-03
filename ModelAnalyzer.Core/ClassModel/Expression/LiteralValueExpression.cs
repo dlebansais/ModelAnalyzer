@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class LiteralValueExpression : IExpression
+internal class LiteralValueExpression : IExpression
 {
     public bool IsSimple => true;
     required public int Value { get; init; }

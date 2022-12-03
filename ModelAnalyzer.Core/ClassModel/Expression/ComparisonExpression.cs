@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 
-public class ComparisonExpression : IExpression
+internal class ComparisonExpression : IExpression
 {
     public bool IsSimple => false;
     required public IExpression Left { get; init; }
@@ -13,6 +13,6 @@ public class ComparisonExpression : IExpression
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
-        return $"{LeftString} {ClassModel.SupportedComparisonOperators[OperatorKind].Text} {RightString}";
+        return $"{LeftString} {SupportedOperators.Comparison[OperatorKind].Text} {RightString}";
     }
 }

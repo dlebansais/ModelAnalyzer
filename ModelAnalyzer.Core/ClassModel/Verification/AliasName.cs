@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public record AliasName
+internal record AliasName
 {
     public AliasName()
     {

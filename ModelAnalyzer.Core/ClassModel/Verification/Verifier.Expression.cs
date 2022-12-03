@@ -3,7 +3,10 @@
 using System;
 using Microsoft.Z3;
 
-public partial class Verifier : IDisposable
+/// <summary>
+/// Represents a code verifier.
+/// </summary>
+internal partial class Verifier : IDisposable
 {
     private T BuildExpression<T>(AliasTable aliasTable, IExpression expression)
         where T : Expr
@@ -42,21 +45,21 @@ public partial class Verifier : IDisposable
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Right);
-        return ClassModel.SupportedArithmeticOperators[binaryArithmeticExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return SupportedOperators.Arithmetic[binaryArithmeticExpression.OperatorKind].Asserter(ctx, Left, Right);
     }
 
     private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, BinaryLogicalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);
-        return ClassModel.SupportedLogicalOperators[binaryLogicalExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return SupportedOperators.Logical[binaryLogicalExpression.OperatorKind].Asserter(ctx, Left, Right);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Right);
-        return ClassModel.SupportedComparisonOperators[comparisonExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return SupportedOperators.Comparison[comparisonExpression.OperatorKind].Asserter(ctx, Left, Right);
     }
 
     private ArithExpr BuildLiteralValueExpression(LiteralValueExpression literalValueExpression)

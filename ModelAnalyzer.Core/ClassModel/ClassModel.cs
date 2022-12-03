@@ -8,18 +8,54 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-public partial record ClassModel
+/// <summary>
+/// Represents the model of a class.
+/// </summary>
+internal partial record ClassModel : IClassModel
 {
+    /// <summary>
+    /// Gets the class name.
+    /// </summary>
     required public string Name { get; init; }
+
+    /// <summary>
+    /// Gets the class manager.
+    /// </summary>
     required public ClassModelManager Manager { get; init; }
+
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
     required public ILogger Logger { get; init; }
+
+    /// <summary>
+    /// Gets the field table.
+    /// </summary>
     required public FieldTable FieldTable { get; init; }
+
+    /// <summary>
+    /// Gets the method table.
+    /// </summary>
     required public MethodTable MethodTable { get; init; }
+
+    /// <summary>
+    /// Gets the list of invariants.
+    /// </summary>
     required public List<IInvariant> InvariantList { get; init; }
-    required public Unsupported Unsupported { get; init; }
+
+    /// <summary>
+    /// Gets unsupported class elements.
+    /// </summary>
+    required public IUnsupported Unsupported { get; init; }
 
     private AutoResetEvent PulseEvent = new(initialState: false);
 
+    /// <summary>
+    /// Creates a class model from a class declaration.
+    /// </summary>
+    /// <param name="classDeclaration">The class declaration.</param>
+    /// <param name="manager">The class manager.</param>
+    /// <param name="logger">The logger.</param>
     public static ClassModel FromClassDeclaration(ClassDeclarationSyntax classDeclaration, ClassModelManager manager, ILogger logger)
     {
         string Name = classDeclaration.Identifier.ValueText;
@@ -103,7 +139,7 @@ public partial record ClassModel
         {
             Location Location = Declaration.GetLocation();
             UnsupportedField UnsupportedField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
-            unsupported.Fields.Add(UnsupportedField);
+            unsupported.AddUnsupportedField(UnsupportedField);
         }
         else
         {
@@ -129,7 +165,7 @@ public partial record ClassModel
             {
                 Location Location = variable.Identifier.GetLocation();
                 UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
-                unsupported.Fields.Add(UnsupportedField);
+                unsupported.AddUnsupportedField(UnsupportedField);
 
                 NewField = UnsupportedField;
             }
@@ -193,7 +229,7 @@ public partial record ClassModel
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
                 UnsupportedMethod UnsupportedMethod = new() { MethodName = MethodName, Location = Location };
-                unsupported.Methods.Add(UnsupportedMethod);
+                unsupported.AddUnsupportedMethod(UnsupportedMethod);
 
                 NewMethod = UnsupportedMethod;
             }
@@ -235,7 +271,7 @@ public partial record ClassModel
                 {
                     Location Location = Parameter.GetLocation();
                     UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { ParameterName = ParameterName, Location = Location };
-                    unsupported.Parameters.Add(UnsupportedParameter);
+                    unsupported.AddUnsupportedParameter(UnsupportedParameter);
 
                     NewParameter = UnsupportedParameter;
                 }
@@ -306,7 +342,7 @@ public partial record ClassModel
         {
             Location Location = GetLocationInComment(trivia, pattern);
             UnsupportedRequire UnsupportedRequire = new UnsupportedRequire { Text = Text, Location = Location };
-            unsupported.Requires.Add(UnsupportedRequire);
+            unsupported.AddUnsupportedRequire(UnsupportedRequire);
 
             NewRequire = UnsupportedRequire;
         }
@@ -359,7 +395,7 @@ public partial record ClassModel
         string Text = comment.Substring(pattern.Length);
         Location Location = GetLocationInComment(trivia, pattern);
         UnsupportedRequire UnsupportedRequire = new() { Text = Text, Location = Location };
-        unsupported.Requires.Add(UnsupportedRequire);
+        unsupported.AddUnsupportedRequire(UnsupportedRequire);
     }
 
     private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
@@ -407,7 +443,7 @@ public partial record ClassModel
         {
             Location Location = GetLocationInComment(trivia, pattern);
             UnsupportedEnsure UnsupportedEnsure = new UnsupportedEnsure { Text = Text, Location = Location };
-            unsupported.Ensures.Add(UnsupportedEnsure);
+            unsupported.AddUnsupportedEnsure(UnsupportedEnsure);
 
             NewEnsure = UnsupportedEnsure;
         }
@@ -433,7 +469,7 @@ public partial record ClassModel
         string Text = comment.Substring(pattern.Length);
         Location Location = GetLocationInComment(trivia, pattern);
         UnsupportedEnsure UnsupportedEnsure = new() { Text = Text, Location = Location };
-        unsupported.Ensures.Add(UnsupportedEnsure);
+        unsupported.AddUnsupportedEnsure(UnsupportedEnsure);
     }
 
     private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
@@ -470,7 +506,7 @@ public partial record ClassModel
         {
             Location Location = expressionNode.GetLocation();
             UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.Expressions.Add(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -500,7 +536,7 @@ public partial record ClassModel
         {
             Location Location = expressionNode.OperatorToken.GetLocation();
             UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.Expressions.Add(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -512,21 +548,21 @@ public partial record ClassModel
     {
         operatorKind = token.Kind();
 
-        return SupportedArithmeticOperators.ContainsKey(operatorKind);
+        return SupportedOperators.Arithmetic.ContainsKey(operatorKind);
     }
 
     private static bool IsComparisonOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
     {
         operatorKind = token.Kind();
 
-        return SupportedComparisonOperators.ContainsKey(operatorKind);
+        return SupportedOperators.Comparison.ContainsKey(operatorKind);
     }
 
     private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
     {
         operatorKind = token.Kind();
 
-        return SupportedLogicalOperators.ContainsKey(operatorKind);
+        return SupportedOperators.Logical.ContainsKey(operatorKind);
     }
 
     private static IExpression ParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
@@ -542,7 +578,7 @@ public partial record ClassModel
         {
             Location Location = expressionNode.Expression.GetLocation();
             UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.Expressions.Add(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -596,7 +632,7 @@ public partial record ClassModel
         {
             Location Location = node.GetLocation();
             UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.Statements.Add(UnsupportedStatement);
+            unsupported.AddUnsupportedStatement(UnsupportedStatement);
 
             NewStatement = UnsupportedStatement;
         }
@@ -619,7 +655,7 @@ public partial record ClassModel
         {
             Location Location = node.GetLocation();
             UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.Statements.Add(UnsupportedStatement);
+            unsupported.AddUnsupportedStatement(UnsupportedStatement);
 
             NewStatement = UnsupportedStatement;
         }
@@ -718,7 +754,10 @@ public partial record ClassModel
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            NewInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
+            UnsupportedInvariant UnsupportedInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
+            unsupported.AddUnsupportedInvariant(UnsupportedInvariant);
+
+            NewInvariant = UnsupportedInvariant;
         }
 
         invariantList.Add(NewInvariant);
@@ -780,7 +819,7 @@ public partial record ClassModel
 
     private static bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out IField field)
     {
-        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
+        foreach (KeyValuePair<IFieldName, IField> Entry in fieldTable)
             if (Entry.Value is Field ValidField && ValidField.FieldName.Name == fieldName)
             {
                 field = ValidField;
@@ -814,17 +853,18 @@ public partial record ClassModel
         return Location;
     }
 
+    /// <inheritdoc/>
     public override string ToString()
     {
         string Result = @$"{Name}
 ";
 
-        foreach (KeyValuePair<FieldName, IField> FieldEntry in FieldTable)
+        foreach (KeyValuePair<IFieldName, IField> FieldEntry in FieldTable)
             if (FieldEntry.Value is Field Field)
                 Result += @$"  int {Field.Name}
 ";
 
-        foreach (KeyValuePair<MethodName, IMethod> MethodEntry in MethodTable)
+        foreach (KeyValuePair<IMethodName, IMethod> MethodEntry in MethodTable)
             if (MethodEntry.Value is Method Method)
             {
                 string Parameters = string.Empty;

@@ -1,6 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
-public class Require : IRequire
+internal class Require : IRequire
 {
     required public string Text { get; init; }
     required public IExpression BooleanExpression { get; init; }

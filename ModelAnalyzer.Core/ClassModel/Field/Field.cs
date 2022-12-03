@@ -3,8 +3,8 @@
 using System.Diagnostics;
 
 [DebuggerDisplay("{FieldName.Name}")]
-public class Field : IField
+internal class Field : IField
 {
-    required public FieldName FieldName { get; init; }
+    required public IFieldName FieldName { get; init; }
     public string Name { get { return FieldName.Name; } }
 }

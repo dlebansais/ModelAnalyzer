@@ -1,3 +1,3 @@
 ﻿namespace DemoAnalyzer;
 
-public record ParameterName(string Name);
+internal record ParameterName(string Name) : IParameterName;

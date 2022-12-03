@@ -2,8 +2,14 @@
 
 using Microsoft.CodeAnalysis;
 
-public class UnsupportedEnsure : IEnsure
+/// <summary>
+/// Represents a guarantee that is not supported.
+/// </summary>
+internal class UnsupportedEnsure : IUnsupportedEnsure
 {
+    /// <inheritdoc/>
     required public string Text { get; init; }
+
+    /// <inheritdoc/>
     required public Location Location { get; init; }
 }
