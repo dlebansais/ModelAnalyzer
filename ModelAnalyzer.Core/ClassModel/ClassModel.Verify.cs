@@ -24,7 +24,7 @@ internal partial record ClassModel : IClassModel
     }
 
     /// <inheritdoc/>
-    public void WaitForThreadCompleted()
+    public void WaitForVerifyCompleted()
     {
         bool IsCompleted = PulseEvent.WaitOne(TimeSpan.FromSeconds(2));
 

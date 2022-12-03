@@ -3,4 +3,4 @@
 /// <summary>
 /// Represents a method name.
 /// </summary>
-internal record MethodName(string Name);
+internal record MethodName(string Name) : IClassMemberName;

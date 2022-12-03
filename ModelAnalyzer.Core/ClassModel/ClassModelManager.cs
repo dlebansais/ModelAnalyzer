@@ -121,7 +121,7 @@ public class ClassModelManager
     {
         int HashCode = context.Compilation.GetHashCode();
         IClassModel Result;
-        bool IsThreadStarted = false;
+        bool IsVerifyingAsynchronously = false;
 
         lock (ClassTable)
         {
@@ -139,7 +139,7 @@ public class ClassModelManager
                     {
                         LastHashCode = HashCode;
                         ScheduleThreadStart();
-                        IsThreadStarted = true;
+                        IsVerifyingAsynchronously = true;
                     }
                 }
             }
@@ -147,7 +147,7 @@ public class ClassModelManager
                 Result = ClassTable[ClassName];
         }
 
-        return (Result, IsThreadStarted);
+        return (Result, IsVerifyingAsynchronously);
     }
 
     /// <summary>

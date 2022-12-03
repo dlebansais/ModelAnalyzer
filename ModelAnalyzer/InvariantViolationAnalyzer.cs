@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.Z3;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class InvariantViolationAnalyzer : DiagnosticAnalyzer
@@ -51,10 +50,10 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (IClassModel ClassModel, bool IsThreadStarted) = Manager.GetClassModel(context, classDeclaration, Logger);
+        (IClassModel ClassModel, bool IsVerifyingAsynchronously) = Manager.GetClassModel(context, classDeclaration, Logger);
         
-        if (IsThreadStarted)
-            ClassModel.WaitForThreadCompleted();
+        if (IsVerifyingAsynchronously)
+            ClassModel.WaitForVerifyCompleted();
 
         if (!ClassModel.Unsupported.IsEmpty)
             return;

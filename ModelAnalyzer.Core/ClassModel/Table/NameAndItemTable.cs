@@ -14,7 +14,7 @@ internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, 
     /// </summary>
     /// <param name="itemName">The item name used as a key.</param>
     /// <param name="item">The item.</param>
-    public void AddField(TName itemName, TItem item)
+    public void AddItem(TName itemName, TItem item)
     {
         Table.Add(itemName, item);
     }
@@ -23,8 +23,8 @@ internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, 
     /// Checks whether the collection contains a given item.
     /// </summary>
     /// <param name="itemName">The item name.</param>
-    /// <returns><see langword="True"/> if the collection contains an item with this name; otherwise, <see langword="False"/>.</returns>
-    public bool ContainsField(TName itemName)
+    /// <returns><see langword="true"/> if the collection contains an item with this name; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsItem(TName itemName)
     {
         return Table.ContainsKey(itemName);
     }

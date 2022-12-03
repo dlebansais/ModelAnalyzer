@@ -1,7 +1,5 @@
 ﻿namespace DemoAnalyzer;
 
-using System.Collections.Generic;
-
 /// <summary>
 /// Provides information about a class model.
 /// </summary>
@@ -20,5 +18,5 @@ public interface IClassModel
     /// <summary>
     /// Waits for the verification to complete.
     /// </summary>
-    void WaitForThreadCompleted();
+    void WaitForVerifyCompleted();
 }

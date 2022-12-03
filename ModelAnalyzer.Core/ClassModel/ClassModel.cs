@@ -138,8 +138,7 @@ internal partial record ClassModel : IClassModel
             !IsTypeSupported(Declaration.Type, out _))
         {
             Location Location = Declaration.GetLocation();
-            UnsupportedField UnsupportedField = new() { Location = Location };
-            unsupported.AddUnsupportedField(UnsupportedField);
+            unsupported.AddUnsupportedField(Location, out _);
         }
         else
         {
@@ -152,7 +151,7 @@ internal partial record ClassModel : IClassModel
     {
         FieldName FieldName = new(variable.Identifier.ValueText);
 
-        if (!fieldTable.ContainsField(FieldName))
+        if (!fieldTable.ContainsItem(FieldName))
         {
             IField NewField;
 
@@ -164,13 +163,12 @@ internal partial record ClassModel : IClassModel
             else
             {
                 Location Location = variable.Identifier.GetLocation();
-                UnsupportedField UnsupportedField = new() { Location = Location };
-                unsupported.AddUnsupportedField(UnsupportedField);
+                unsupported.AddUnsupportedField(Location, out IUnsupportedField UnsupportedField);
 
                 NewField = UnsupportedField;
             }
 
-            fieldTable.AddField(FieldName, NewField);
+            fieldTable.AddItem(FieldName, NewField);
         }
     }
 
@@ -199,7 +197,7 @@ internal partial record ClassModel : IClassModel
         string Name = methodDeclaration.Identifier.ValueText;
         MethodName MethodName = new(Name);
 
-        if (!methodTable.ContainsMethod(MethodName))
+        if (!methodTable.ContainsItem(MethodName))
         {
             IMethod NewMethod;
 
@@ -228,13 +226,12 @@ internal partial record ClassModel : IClassModel
                     ReportUnsupportedEnsures(unsupported, TriviaList);
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
-                UnsupportedMethod UnsupportedMethod = new() { Location = Location };
-                unsupported.AddUnsupportedMethod(UnsupportedMethod);
+                unsupported.AddUnsupportedMethod(Location, out IUnsupportedMethod UnsupportedMethod);
 
                 NewMethod = UnsupportedMethod;
             }
 
-            methodTable.AddMethod(MethodName, NewMethod);
+            methodTable.AddItem(MethodName, NewMethod);
         }
     }
 
@@ -259,7 +256,7 @@ internal partial record ClassModel : IClassModel
         {
             ParameterName ParameterName = new(Parameter.Identifier.ValueText);
 
-            if (!ParameterTable.ContainsParameter(ParameterName))
+            if (!ParameterTable.ContainsItem(ParameterName))
             {
                 IParameter NewParameter;
 
@@ -270,13 +267,12 @@ internal partial record ClassModel : IClassModel
                 else
                 {
                     Location Location = Parameter.GetLocation();
-                    UnsupportedParameter UnsupportedParameter = new UnsupportedParameter() { Location = Location };
-                    unsupported.AddUnsupportedParameter(UnsupportedParameter);
+                    unsupported.AddUnsupportedParameter(Location, out IUnsupportedParameter UnsupportedParameter);
 
                     NewParameter = UnsupportedParameter;
                 }
 
-                ParameterTable.AddParameter(ParameterName, NewParameter);
+                ParameterTable.AddItem(ParameterName, NewParameter);
             }
         }
 
@@ -341,8 +337,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            UnsupportedRequire UnsupportedRequire = new UnsupportedRequire { Text = Text, Location = Location };
-            unsupported.AddUnsupportedRequire(UnsupportedRequire);
+            unsupported.AddUnsupportedRequire(Text, Location, out IUnsupportedRequire UnsupportedRequire);
 
             NewRequire = UnsupportedRequire;
         }
@@ -394,8 +389,7 @@ internal partial record ClassModel : IClassModel
     {
         string Text = comment.Substring(pattern.Length);
         Location Location = GetLocationInComment(trivia, pattern);
-        UnsupportedRequire UnsupportedRequire = new() { Text = Text, Location = Location };
-        unsupported.AddUnsupportedRequire(UnsupportedRequire);
+        unsupported.AddUnsupportedRequire(Text, Location, out _);
     }
 
     private static List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
@@ -442,8 +436,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            UnsupportedEnsure UnsupportedEnsure = new UnsupportedEnsure { Text = Text, Location = Location };
-            unsupported.AddUnsupportedEnsure(UnsupportedEnsure);
+            unsupported.AddUnsupportedEnsure(Text, Location, out IUnsupportedEnsure UnsupportedEnsure);
 
             NewEnsure = UnsupportedEnsure;
         }
@@ -468,8 +461,7 @@ internal partial record ClassModel : IClassModel
     {
         string Text = comment.Substring(pattern.Length);
         Location Location = GetLocationInComment(trivia, pattern);
-        UnsupportedEnsure UnsupportedEnsure = new() { Text = Text, Location = Location };
-        unsupported.AddUnsupportedEnsure(UnsupportedEnsure);
+        unsupported.AddUnsupportedEnsure(Text, Location, out _);
     }
 
     private static List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
@@ -505,8 +497,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = expressionNode.GetLocation();
-            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.AddUnsupportedExpression(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -533,8 +524,7 @@ internal partial record ClassModel : IClassModel
         if (NewExpression is null)
         {
             Location Location = expressionNode.OperatorToken.GetLocation();
-            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.AddUnsupportedExpression(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -596,8 +586,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = expressionNode.Expression.GetLocation();
-            UnsupportedExpression UnsupportedExpression = new() { Location = Location };
-            unsupported.AddUnsupportedExpression(UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
@@ -650,8 +639,7 @@ internal partial record ClassModel : IClassModel
         if (NewStatement is null)
         {
             Location Location = node.GetLocation();
-            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.AddUnsupportedStatement(UnsupportedStatement);
+            unsupported.AddUnsupportedStatement(Location, out IUnsupportedStatement UnsupportedStatement);
 
             NewStatement = UnsupportedStatement;
         }
@@ -673,8 +661,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = node.GetLocation();
-            UnsupportedStatement UnsupportedStatement = new() { Location = Location };
-            unsupported.AddUnsupportedStatement(UnsupportedStatement);
+            unsupported.AddUnsupportedStatement(Location, out IUnsupportedStatement UnsupportedStatement);
 
             NewStatement = UnsupportedStatement;
         }
@@ -773,8 +760,7 @@ internal partial record ClassModel : IClassModel
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            UnsupportedInvariant UnsupportedInvariant = new UnsupportedInvariant { Text = Text, Location = Location };
-            unsupported.AddUnsupportedInvariant(UnsupportedInvariant);
+            unsupported.AddUnsupportedInvariant(Text, Location, out IUnsupportedInvariant UnsupportedInvariant);
 
             NewInvariant = UnsupportedInvariant;
         }
