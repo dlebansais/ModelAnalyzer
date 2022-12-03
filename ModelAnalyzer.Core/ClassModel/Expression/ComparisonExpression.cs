@@ -1,18 +1,33 @@
 ﻿namespace DemoAnalyzer;
 
-using Microsoft.CodeAnalysis.CSharp;
-
-internal class ComparisonExpression : IExpression
+/// <summary>
+/// Represents a comparison expression.
+/// </summary>
+internal class ComparisonExpression : Expression
 {
-    public bool IsSimple => false;
-    required public IExpression Left { get; init; }
-    required public SyntaxKind OperatorKind { get; init; }
-    required public IExpression Right { get; init; }
+    /// <inheritdoc/>
+    public override bool IsSimple => false;
 
+    /// <summary>
+    /// Gets the left expression.
+    /// </summary>
+    required public Expression Left { get; init; }
+
+    /// <summary>
+    /// Gets the comparison operator.
+    /// </summary>
+    required public ComparisonOperator Operator { get; init; }
+
+    /// <summary>
+    /// Gets the right expression.
+    /// </summary>
+    required public Expression Right { get; init; }
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
-        return $"{LeftString} {SupportedOperators.Comparison[OperatorKind].Text} {RightString}";
+        return $"{LeftString} {Operator.Text} {RightString}";
     }
 }

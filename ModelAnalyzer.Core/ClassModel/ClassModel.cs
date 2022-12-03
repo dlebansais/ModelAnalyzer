@@ -138,7 +138,7 @@ internal partial record ClassModel : IClassModel
             !IsTypeSupported(Declaration.Type, out _))
         {
             Location Location = Declaration.GetLocation();
-            UnsupportedField UnsupportedField = new() { FieldName = FieldName.UnsupportedFieldName, Location = Location };
+            UnsupportedField UnsupportedField = new() { Location = Location };
             unsupported.AddUnsupportedField(UnsupportedField);
         }
         else
@@ -164,13 +164,13 @@ internal partial record ClassModel : IClassModel
             else
             {
                 Location Location = variable.Identifier.GetLocation();
-                UnsupportedField UnsupportedField = new() { FieldName = FieldName, Location = Location };
+                UnsupportedField UnsupportedField = new() { Location = Location };
                 unsupported.AddUnsupportedField(UnsupportedField);
 
                 NewField = UnsupportedField;
             }
 
-            fieldTable.AddField(NewField.FieldName, NewField);
+            fieldTable.AddField(FieldName, NewField);
         }
     }
 
@@ -517,19 +517,17 @@ internal partial record ClassModel : IClassModel
     private static IExpression ParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
     {
         IExpression? NewExpression = null;
-        IExpression Left = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
-        IExpression Right = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
+        IExpression LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
+        IExpression RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
 
-        if (Left is not UnsupportedExpression && Right is not UnsupportedExpression)
+        if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
-            SyntaxKind OperatorKind;
-
-            if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-                NewExpression = new BinaryArithmeticExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-                NewExpression = new ComparisonExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
-            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out OperatorKind))
-                NewExpression = new BinaryLogicalExpression { Left = Left, OperatorKind = OperatorKind, Right = Right };
+            if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out ArithmeticOperator ArithmeticOperator))
+                NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = ArithmeticOperator, Right = Right };
+            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out ComparisonOperator ComparisonOperator))
+                NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
+            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out LogicalOperator LogicalOperator))
+                NewExpression = new BinaryLogicalExpression { Left = Left, Operator = LogicalOperator, Right = Right };
         }
 
         if (NewExpression is null)
@@ -544,33 +542,54 @@ internal partial record ClassModel : IClassModel
         return NewExpression;
     }
 
-    private static bool IsBinaryArithmeticOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
+    private static bool IsBinaryArithmeticOperatorSupported(SyntaxToken token, out ArithmeticOperator arithmeticOperator)
     {
-        operatorKind = token.Kind();
+        SyntaxKind OperatorKind = token.Kind();
 
-        return SupportedOperators.Arithmetic.ContainsKey(operatorKind);
+        if (SupportedOperators.Arithmetic.ContainsKey(OperatorKind))
+        {
+            arithmeticOperator = SupportedOperators.Arithmetic[OperatorKind];
+            return true;
+        }
+
+        arithmeticOperator = null!;
+        return false;
     }
 
-    private static bool IsComparisonOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
+    private static bool IsComparisonOperatorSupported(SyntaxToken token, out ComparisonOperator comparisonOperator)
     {
-        operatorKind = token.Kind();
+        SyntaxKind OperatorKind = token.Kind();
 
-        return SupportedOperators.Comparison.ContainsKey(operatorKind);
+        if (SupportedOperators.Comparison.ContainsKey(OperatorKind))
+        {
+            comparisonOperator = SupportedOperators.Comparison[OperatorKind];
+            return true;
+        }
+
+        comparisonOperator = null!;
+        return false;
     }
 
-    private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out SyntaxKind operatorKind)
+    private static bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out LogicalOperator logicalOperator)
     {
-        operatorKind = token.Kind();
+        SyntaxKind OperatorKind = token.Kind();
 
-        return SupportedOperators.Logical.ContainsKey(operatorKind);
+        if (SupportedOperators.Logical.ContainsKey(OperatorKind))
+        {
+            logicalOperator = SupportedOperators.Logical[OperatorKind];
+            return true;
+        }
+
+        logicalOperator = null!;
+        return false;
     }
 
     private static IExpression ParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
     {
         IExpression NewExpression;
-        IExpression Inside = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Expression);
+        IExpression InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Expression);
 
-        if (Inside is not UnsupportedExpression)
+        if (InsideExpression is Expression Inside)
         {
             NewExpression = new ParenthesizedExpression { Inside = Inside };
         }

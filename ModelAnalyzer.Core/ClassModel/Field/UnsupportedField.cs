@@ -2,9 +2,14 @@
 
 using Microsoft.CodeAnalysis;
 
+/// <summary>
+/// Represents an unsupported field.
+/// </summary>
 internal class UnsupportedField : IUnsupportedField
 {
-    required public IFieldName FieldName { get; init; }
-    public string Name { get { return FieldName.Name; } }
+    /// <inheritdoc/>
+    public string Name => "*";
+
+    /// <inheritdoc/>
     required public Location Location { get; init; }
 }

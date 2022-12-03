@@ -45,21 +45,21 @@ internal partial class Verifier : IDisposable
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Right);
-        return SupportedOperators.Arithmetic[binaryArithmeticExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return binaryArithmeticExpression.Operator.Asserter(ctx, Left, Right);
     }
 
     private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, BinaryLogicalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);
-        return SupportedOperators.Logical[binaryLogicalExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return binaryLogicalExpression.Operator.Asserter(ctx, Left, Right);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Right);
-        return SupportedOperators.Comparison[comparisonExpression.OperatorKind].Asserter(ctx, Left, Right);
+        return comparisonExpression.Operator.Asserter(ctx, Left, Right);
     }
 
     private ArithExpr BuildLiteralValueExpression(LiteralValueExpression literalValueExpression)

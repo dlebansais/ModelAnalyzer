@@ -1,10 +1,19 @@
 ﻿namespace DemoAnalyzer;
 
-internal class ParenthesizedExpression : IExpression
+/// <summary>
+/// Represents a parenthesized expression.
+/// </summary>
+internal class ParenthesizedExpression : Expression
 {
-    public bool IsSimple => false;
-    required public IExpression Inside { get; init; }
+    /// <inheritdoc/>
+    public override bool IsSimple => false;
 
+    /// <summary>
+    /// Gets the expression within parenthesis.
+    /// </summary>
+    required public Expression Inside { get; init; }
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         return Inside.ToString();

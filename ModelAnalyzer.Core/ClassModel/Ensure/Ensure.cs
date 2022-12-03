@@ -3,11 +3,9 @@
 /// <summary>
 /// Represents a guarantee when a method returns.
 /// </summary>
-public class Ensure : IEnsure
+internal class Ensure : IEnsure
 {
-    /// <summary>
-    /// Gets the text of the assertion.
-    /// </summary>
+    /// <inheritdoc/>
     required public string Text { get; init; }
 
     /// <summary>
