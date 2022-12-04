@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Represents a manager for class models.
@@ -39,7 +40,7 @@ public class ClassModelManager
 
     private void StartThread()
     {
-        Logger.Log("StartThread()");
+        Log("StartThread()");
 
         ThreadShouldBeRestarted = false;
         ModelThread = new Thread(new ThreadStart(ExecuteThread));
@@ -107,7 +108,7 @@ public class ClassModelManager
         }
         catch (Exception e)
         {
-            Logger.LogException(e);
+            LogException(e);
         }
     }
 
@@ -202,7 +203,7 @@ public class ClassModelManager
         if (!ModelVerificationTable.ContainsKey(ClassName))
         {
             if (ModelVerificationTable.Count == 0)
-                Logger.Clear();
+                ClearLogs();
 
             ModelVerificationTable.Add(ClassName, modelVerification);
             ViolationTable.Add(ClassName, false);
@@ -253,5 +254,19 @@ public class ClassModelManager
             }
 
         return false;
+    }
+
+    private void Log(string message)
+    {
+        Logger.Log(LogLevel.Information, message);
+    }
+
+    private void LogException(Exception exception)
+    {
+        Logger.Log(LogLevel.Information, exception.Message);
+    }
+
+    private void ClearLogs()
+    {
     }
 }

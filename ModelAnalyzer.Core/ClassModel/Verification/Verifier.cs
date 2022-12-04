@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
 
 /// <summary>
@@ -80,9 +81,9 @@ internal partial class Verifier : IDisposable
         }
 
         if (CallSequenceString == string.Empty)
-            Logger.Log($"Call sequence empty");
+            Log($"Call sequence empty");
         else
-            Logger.Log($"Call sequence: {CallSequenceString}");
+            Log($"Call sequence: {CallSequenceString}");
 
         foreach (Method Method in callSequence)
             AddMethodCallState(solver, aliasTable, Method);
@@ -92,19 +93,19 @@ internal partial class Verifier : IDisposable
         if (solver.Check() == Status.SATISFIABLE)
         {
             IsInvariantViolated = true;
-            Logger.Log($"Invariant violation for class {ClassName}");
+            Log($"Invariant violation for class {ClassName}");
 
             string ModelString = solver.Model.ToString();
             ModelString = ModelString.Replace("\n", "\r\n");
-            Logger.Log(ModelString);
+            Log(ModelString);
         }
         else
-            Logger.Log($"Invariant preserved for class {ClassName}");
+            Log($"Invariant preserved for class {ClassName}");
     }
 
     private void AddInitialState(Solver solver, AliasTable aliasTable)
     {
-        Logger.Log($"Initial state for class {ClassName}");
+        Log($"Initial state for class {ClassName}");
 
         foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
         {
@@ -115,14 +116,14 @@ internal partial class Verifier : IDisposable
             IntExpr FieldExpr = ctx.MkIntConst(FieldNameAlias);
             BoolExpr InitExpr = ctx.MkEq(FieldExpr, Zero);
 
-            Logger.Log($"Adding {InitExpr}");
+            Log($"Adding {InitExpr}");
             solver.Assert(InitExpr);
         }
     }
 
     private void AddClassInvariant(Solver solver, AliasTable aliasTable)
     {
-        Logger.Log($"Invariant for class {ClassName}");
+        Log($"Invariant for class {ClassName}");
 
         List<BoolExpr> AssertionList = new();
 
@@ -136,7 +137,7 @@ internal partial class Verifier : IDisposable
         BoolExpr AllInvariants = ctx.MkAnd(AssertionList);
         BoolExpr AllInvariantsOpposite = ctx.MkNot(AllInvariants);
 
-        Logger.Log($"Adding invariant opposite {AllInvariantsOpposite}");
+        Log($"Adding invariant opposite {AllInvariantsOpposite}");
         solver.Assert(AllInvariantsOpposite);
     }
 
@@ -170,7 +171,12 @@ internal partial class Verifier : IDisposable
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)
     {
         solver.Assert(ctx.MkImplies(branch, boolExpr));
-        Logger.Log($"Adding {branch} => {boolExpr}");
+        Log($"Adding {branch} => {boolExpr}");
+    }
+
+    private void Log(string message)
+    {
+        Logger.Log(LogLevel.Information, message);
     }
 
     public void Dispose()

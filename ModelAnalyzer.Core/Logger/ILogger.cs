@@ -1,5 +1,5 @@
 ﻿namespace DemoAnalyzer;
-
+#if NOPE
 using System;
 
 /// <summary>
@@ -24,3 +24,4 @@ public interface ILogger
     /// <param name="exception">The exception.</param>
     void LogException(Exception exception);
 }
+#endif

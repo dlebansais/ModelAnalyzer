@@ -1,4 +1,6 @@
-﻿namespace DemoAnalyzer;
+﻿using Microsoft.Extensions.Logging;
+
+namespace DemoAnalyzer;
 
 public static class Initialization
 {

@@ -4,9 +4,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 public class FileLogger : ILogger
 {
+#if IN_FILE
     private static readonly Mutex Mutex = new();
 
     /// <inheritdoc/>
@@ -87,4 +89,19 @@ public class FileLogger : ILogger
 
         Writer.WriteLine(FullMessage);
     }
+#else
+    void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+    }
+
+    bool ILogger.IsEnabled(LogLevel logLevel)
+    {
+        return false;
+    }
+
+    IDisposable? ILogger.BeginScope<TState>(TState state)
+    {
+        return null;
+    }
+#endif
 }
