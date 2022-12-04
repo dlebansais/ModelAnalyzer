@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AnalysisLogger;
 
 namespace DemoAnalyzer;
 
 public static class Initialization
 {
-    public static ILogger Logger { get; } = new FileLogger();
+    public static IAnalysisLogger Logger { get; } = new Logger();
     public static ClassModelManager Manager { get; } = new ClassModelManager() { Logger = Logger };
 }

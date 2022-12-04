@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Represents a manager for class models.
@@ -19,7 +19,7 @@ public class ClassModelManager
     /// <summary>
     /// Gets the logger.
     /// </summary>
-    required public ILogger Logger { get; init; }
+    required public IAnalysisLogger Logger { get; init; }
 
     private Dictionary<string, ModelVerification> ModelVerificationTable = new();
     private int LastHashCode;
@@ -106,9 +106,9 @@ public class ClassModelManager
             if (Restart)
                 StartThread();
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            LogException(e);
+            Logger.LogException(exception);
         }
     }
 
@@ -144,7 +144,7 @@ public class ClassModelManager
     /// <param name="context">The analysis context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
     /// <param name="logger">The logger.</param>
-    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
+    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IAnalysisLogger logger)
     {
         int HashCode = context.Compilation.GetHashCode();
         ModelVerification Result;
@@ -258,12 +258,7 @@ public class ClassModelManager
 
     private void Log(string message)
     {
-        Logger.Log(LogLevel.Information, message);
-    }
-
-    private void LogException(Exception exception)
-    {
-        Logger.Log(LogLevel.Information, exception.Message);
+        Logger.Log(message);
     }
 
     private void ClearLogs()

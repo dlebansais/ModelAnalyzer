@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
+using AnalysisLogger;
 using Microsoft.Z3;
 
 /// <summary>
@@ -24,7 +24,7 @@ internal partial class Verifier : IDisposable
 
     required public int MaxDepth { get; init; }
     required public string ClassName { get; init; }
-    required public ILogger Logger { get; init; }
+    required public IAnalysisLogger Logger { get; init; }
     required public FieldTable FieldTable { get; init; }
     required public MethodTable MethodTable { get; init; }
     required public List<IInvariant> InvariantList { get; init; }
@@ -176,7 +176,7 @@ internal partial class Verifier : IDisposable
 
     private void Log(string message)
     {
-        Logger.Log(LogLevel.Information, message);
+        Logger.Log(message);
     }
 
     public void Dispose()

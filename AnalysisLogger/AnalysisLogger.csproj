@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <LangVersion>11</LangVersion>
+	  <Nullable>enable</Nullable>
+	  <Platforms>x64</Platforms>
+	  <IsPackable>false</IsPackable>
+	  <RootNamespace>AnalysisLogger</RootNamespace>
+	  <Product />
+	  <Description>A simple logger</Description>
+	  <Copyright>Copyright © 2022 David Le Bansais</Copyright>
+	  <Version>0.0.1</Version>
+	  <AssemblyVersion>0.0.1.1</AssemblyVersion>
+	  <FileVersion>0.0.1.1</FileVersion>
+	  <NeutralLanguage>en-US</NeutralLanguage>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <Authors>David Le Bansais</Authors>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.435">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

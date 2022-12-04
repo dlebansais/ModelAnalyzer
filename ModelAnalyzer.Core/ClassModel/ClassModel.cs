@@ -1,13 +1,7 @@
 ﻿namespace DemoAnalyzer;
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.Extensions.Logging;
+using AnalysisLogger;
 
 /// <summary>
 /// Represents the model of a class.
@@ -27,7 +21,7 @@ internal partial record ClassModel : IClassModel
     /// <summary>
     /// Gets the logger.
     /// </summary>
-    required public ILogger Logger { get; init; }
+    required public IAnalysisLogger Logger { get; init; }
 
     /// <summary>
     /// Gets the field table.

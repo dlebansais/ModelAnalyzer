@@ -1,13 +1,12 @@
 ﻿namespace DemoAnalyzer;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassModelAnalyzer : DiagnosticAnalyzer
@@ -35,7 +34,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
     }
 
-    private ILogger Logger = Initialization.Logger;
+    private IAnalysisLogger Logger = Initialization.Logger;
     private ClassModelManager Manager = Initialization.Manager;
 
     private void AnalyzeNode(SyntaxNodeAnalysisContext context)

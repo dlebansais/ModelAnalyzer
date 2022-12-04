@@ -2,11 +2,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Represents a class declaration parser.
@@ -41,7 +41,7 @@ internal class ClassDeclarationParser
     /// <summary>
     /// Gets the field table.
     /// </summary>
-    required public ILogger Logger { get; init; }
+    required public IAnalysisLogger Logger { get; init; }
 
     /// <summary>
     /// Gets the field table.
