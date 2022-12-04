@@ -1,7 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
 using System.Collections.Generic;
-using AnalysisLogger;
 
 /// <summary>
 /// Represents the model of a class.
@@ -17,11 +16,6 @@ internal partial record ClassModel : IClassModel
     /// Gets the class manager.
     /// </summary>
     required public ClassModelManager Manager { get; init; }
-
-    /// <summary>
-    /// Gets the logger.
-    /// </summary>
-    required public IAnalysisLogger Logger { get; init; }
 
     /// <summary>
     /// Gets the field table.
@@ -42,6 +36,9 @@ internal partial record ClassModel : IClassModel
     /// Gets unsupported class elements.
     /// </summary>
     required public IUnsupported Unsupported { get; init; }
+
+    /// <inheritdoc/>
+    public bool IsInvariantViolated { get; internal set; }
 
     /// <inheritdoc/>
     public override string ToString()

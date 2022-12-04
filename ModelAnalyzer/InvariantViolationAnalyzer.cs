@@ -59,7 +59,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (!ModelVerification.ClassModel.Unsupported.IsEmpty)
             return;
 
-        if (!Manager.IsInvariantViolated(ModelVerification.ClassModel.Name))
+        if (!ModelVerification.ClassModel.IsInvariantViolated)
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));

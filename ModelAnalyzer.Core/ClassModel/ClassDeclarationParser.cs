@@ -39,9 +39,9 @@ internal class ClassDeclarationParser
     }
 
     /// <summary>
-    /// Gets the field table.
+    /// Gets the logger.
     /// </summary>
-    required public IAnalysisLogger Logger { get; init; }
+    public IAnalysisLogger Logger { get; init; } = new NullLogger();
 
     /// <summary>
     /// Gets the field table.

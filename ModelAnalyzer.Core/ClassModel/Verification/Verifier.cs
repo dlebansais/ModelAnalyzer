@@ -24,10 +24,10 @@ internal partial class Verifier : IDisposable
 
     required public int MaxDepth { get; init; }
     required public string ClassName { get; init; }
-    required public IAnalysisLogger Logger { get; init; }
     required public FieldTable FieldTable { get; init; }
     required public MethodTable MethodTable { get; init; }
     required public List<IInvariant> InvariantList { get; init; }
+    public IAnalysisLogger Logger { get; init; } = new NullLogger();
 
     public bool IsInvariantViolated { get; private set; }
 

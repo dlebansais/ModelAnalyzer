@@ -14,4 +14,9 @@ public interface IClassModel
     /// Gets unsupported class elements.
     /// </summary>
     IUnsupported Unsupported { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the class invariant is violated.
+    /// </summary>
+    bool IsInvariantViolated { get; }
 }
