@@ -56,7 +56,7 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
         foreach (IUnsupportedEnsure Item in ModelVerification.ClassModel.Unsupported.Ensures)
             context.ReportDiagnostic(Diagnostic.Create(BadEnsureRule, Item.Location));
     }

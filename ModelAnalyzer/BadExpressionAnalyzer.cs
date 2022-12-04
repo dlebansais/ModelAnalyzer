@@ -56,7 +56,7 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
         foreach (IUnsupportedExpression Item in ModelVerification.ClassModel.Unsupported.Expressions)
             context.ReportDiagnostic(Diagnostic.Create(BadExpressionRule, Item.Location));
     }

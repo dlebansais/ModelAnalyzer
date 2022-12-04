@@ -143,8 +143,7 @@ public class ClassModelManager
     /// </summary>
     /// <param name="context">The analysis context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
-    /// <param name="logger">The logger.</param>
-    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IAnalysisLogger logger)
+    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         int HashCode = context.Compilation.GetHashCode();
         ModelVerification Result;
@@ -155,13 +154,13 @@ public class ClassModelManager
         {
             if (ClassName == string.Empty || LastHashCode != HashCode || !ModelVerificationTable.ContainsKey(ClassName))
             {
-                ClassDeclarationParser Parser = new(classDeclaration) { Logger = logger };
+                ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
 
                 IClassModel NewClassModel = new ClassModel()
                 {
                     Name = ClassName,
                     Manager = this,
-                    Logger = logger,
+                    Logger = Logger,
                     FieldTable = Parser.FieldTable,
                     MethodTable = Parser.MethodTable,
                     InvariantList = Parser.InvariantList,
