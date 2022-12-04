@@ -143,7 +143,7 @@ public class ClassModelManager
     /// </summary>
     /// <param name="context">The analysis context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
-    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    public IModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
         int HashCode = context.Compilation.GetHashCode();
         ModelVerification Result;
@@ -195,7 +195,7 @@ public class ClassModelManager
     /// Updates a class model.
     /// </summary>
     /// <param name="modelVerification">The model verification.</param>
-    public void UpdateClassModel(ModelVerification modelVerification)
+    private void UpdateClassModel(ModelVerification modelVerification)
     {
         string ClassName = modelVerification.ClassModel.Name;
 

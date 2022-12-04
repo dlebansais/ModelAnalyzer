@@ -56,7 +56,8 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
+        IModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
+
         if (ModelVerification.ClassModel.Unsupported.IsEmpty)
             return;
 

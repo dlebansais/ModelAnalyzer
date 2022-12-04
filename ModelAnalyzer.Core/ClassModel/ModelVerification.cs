@@ -6,34 +6,27 @@ using System.Threading;
 /// <summary>
 /// Represents a model verification.
 /// </summary>
-public class ModelVerification
+internal class ModelVerification : IModelVerification
 {
-    /// <summary>
-    /// Gets the class model.
-    /// </summary>
+    /// <inheritdoc/>
     required public IClassModel ClassModel { get; init; }
 
-    /// <summary>
-    /// Gets a value indicating whether the class model is up-to-date.
-    /// </summary>
+    /// <inheritdoc/>
     public bool IsUpToDate { get; private set; }
+
+    /// <inheritdoc/>
+    public void WaitForUpToDate(TimeSpan duration)
+    {
+        bool IsCompleted = PulseEvent.WaitOne(duration);
+    }
 
     /// <summary>
     /// Sets the <see cref="IsUpToDate"/> flag to <see langword="true"/>.
     /// </summary>
-    internal void SetUpToDate()
+    public void SetUpToDate()
     {
         IsUpToDate = true;
         PulseEvent.Set();
-    }
-
-    /// <summary>
-    /// Waits for the class model to be up to date.
-    /// </summary>
-    /// <param name="duration">The duration.</param>
-    public void WaitForUpToDate(TimeSpan duration)
-    {
-        bool IsCompleted = PulseEvent.WaitOne(duration);
     }
 
     private AutoResetEvent PulseEvent = new(initialState: false);

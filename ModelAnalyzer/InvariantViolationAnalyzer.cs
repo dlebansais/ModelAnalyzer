@@ -51,7 +51,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
+        IModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
         
         if (!ModelVerification.IsUpToDate)
             ModelVerification.WaitForUpToDate(TimeSpan.FromSeconds(2));
