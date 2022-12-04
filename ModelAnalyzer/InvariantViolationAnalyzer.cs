@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -51,17 +52,22 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        IModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration);
-        
-        if (!ModelVerification.IsUpToDate)
-            ModelVerification.WaitForUpToDate(TimeSpan.FromSeconds(2));
+        Location Location = classDeclaration.Identifier.GetLocation();
+        string ValueText = classDeclaration.Identifier.ValueText;
 
-        if (!ModelVerification.ClassModel.Unsupported.IsEmpty)
+        Task<IClassModel> GetClassModelTask = Manager.GetClassModelAsync(context, classDeclaration);
+        GetClassModelTask.Wait(TimeSpan.FromSeconds(2));
+        if (!GetClassModelTask.IsCompleted)
             return;
 
-        if (!ModelVerification.ClassModel.IsInvariantViolated)
+        IClassModel ClassModel = GetClassModelTask.Result;
+
+        if (!ClassModel.Unsupported.IsEmpty)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
+        if (!ClassModel.IsInvariantViolated)
+            return;
+
+        context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ValueText));
     }
 }

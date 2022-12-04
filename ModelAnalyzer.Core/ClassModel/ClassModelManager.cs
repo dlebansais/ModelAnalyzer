@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -46,16 +47,51 @@ public class ClassModelManager
     /// </summary>
     /// <param name="context">The analysis context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
-    public IModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    /// <param name="waitIfAsync">True if the method should wait until verification is completed.</param>
+    public IClassModel GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
     {
+        GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+
+        if (IsVerifyingAsynchronously && waitIfAsync)
+            ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+
+        return ModelVerification.ClassModel;
+    }
+
+    /// <summary>
+    /// Gets the model of a class.
+    /// </summary>
+    /// <param name="context">The analysis context.</param>
+    /// <param name="classDeclaration">The class declaration.</param>
+    public async Task<IClassModel> GetClassModelAsync(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    {
+        GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+
+        if (IsVerifyingAsynchronously)
+        {
+            return await Task.Run(() =>
+            {
+                ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+                return ModelVerification.ClassModel;
+            });
+        }
+        else
+            return ModelVerification.ClassModel;
+    }
+
+    private void GetClassModelInternal(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
+    {
+        isVerifyingAsynchronously = false;
+
         int HashCode = context.Compilation.GetHashCode();
-        ModelVerification Result;
-        bool IsVerifyingAsynchronously = false;
+        bool IsNewCompilationContext = LastHashCode != HashCode;
+        LastHashCode = HashCode;
+
         string ClassName = classDeclaration.Identifier.ValueText;
 
         lock (ModelVerificationTable)
         {
-            if (ClassName == string.Empty || LastHashCode != HashCode || !ModelVerificationTable.ContainsKey(ClassName))
+            if (ClassName == string.Empty || IsNewCompilationContext || !ModelVerificationTable.ContainsKey(ClassName))
             {
                 ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
 
@@ -69,28 +105,22 @@ public class ClassModelManager
                     Unsupported = Parser.Unsupported,
                 };
 
-                Result = new ModelVerification() { ClassModel = NewClassModel };
+                modelVerification = new() { ClassModel = NewClassModel };
 
                 if (ClassName != string.Empty)
                 {
-                    UpdateClassModel(Result);
+                    UpdateClassModel(modelVerification);
 
-                    if (LastHashCode != HashCode)
+                    if (IsNewCompilationContext)
                     {
-                        LastHashCode = HashCode;
                         ScheduleThreadStart();
-                        IsVerifyingAsynchronously = true;
+                        isVerifyingAsynchronously = true;
                     }
                 }
-
-                if (!IsVerifyingAsynchronously)
-                    Result.SetUpToDate();
             }
             else
-                Result = ModelVerificationTable[ClassName];
+                modelVerification = ModelVerificationTable[ClassName];
         }
-
-        return Result;
     }
 
     private void UpdateClassModel(ModelVerification modelVerification)
