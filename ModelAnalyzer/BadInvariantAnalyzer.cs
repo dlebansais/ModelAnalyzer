@@ -77,9 +77,9 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (IClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
 
-        foreach (IUnsupportedInvariant Item in ClassModel.Unsupported.Invariants)
+        foreach (IUnsupportedInvariant Item in ModelVerification.ClassModel.Unsupported.Invariants)
             context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Item.Location, Item.Text));
     }
 }

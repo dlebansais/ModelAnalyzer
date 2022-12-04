@@ -55,8 +55,8 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (IClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
-        foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
+        foreach (IUnsupportedStatement Item in ModelVerification.ClassModel.Unsupported.Statements)
             context.ReportDiagnostic(Diagnostic.Create(BadStatementRule, Item.Location));
     }
 }

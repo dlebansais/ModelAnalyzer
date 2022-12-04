@@ -50,15 +50,15 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (IClassModel ClassModel, bool IsVerifyingAsynchronously) = Manager.GetClassModel(context, classDeclaration, Logger);
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
         
-        if (IsVerifyingAsynchronously)
-            ClassModel.WaitForVerifyCompleted();
+        if (!ModelVerification.IsUpToDate)
+            ModelVerification.WaitForUpToDate(TimeSpan.FromSeconds(2));
 
-        if (!ClassModel.Unsupported.IsEmpty)
+        if (!ModelVerification.ClassModel.Unsupported.IsEmpty)
             return;
 
-        if (!Manager.IsInvariantViolated(ClassModel.Name))
+        if (!Manager.IsInvariantViolated(ModelVerification.ClassModel.Name))
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));

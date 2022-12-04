@@ -13,12 +13,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// </summary>
 public class ClassModelManager
 {
+    private const int MaxDepth = 1;
+
     /// <summary>
     /// Gets the logger.
     /// </summary>
     required public ILogger Logger { get; init; }
 
-    private Dictionary<string, IClassModel> ClassTable = new();
+    private Dictionary<string, ModelVerification> ModelVerificationTable = new();
     private int LastHashCode;
     private Dictionary<string, bool> ViolationTable = new();
     private Thread? ModelThread = null;
@@ -26,7 +28,7 @@ public class ClassModelManager
 
     private void ScheduleThreadStart()
     {
-        lock (ClassTable)
+        lock (ModelVerificationTable)
         {
             if (ModelThread is null)
                 StartThread();
@@ -48,27 +50,51 @@ public class ClassModelManager
     {
         try
         {
-            List<ClassModel> ClassModelList = new();
+            Dictionary<ModelVerification, ClassModel> CloneTable = new();
 
-            lock (ClassTable)
+            lock (ModelVerificationTable)
             {
-                foreach (KeyValuePair<string, IClassModel> Entry in ClassTable)
+                foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
                 {
-                    ClassModel Original = (ClassModel)Entry.Value;
+                    ModelVerification ModelVerification = Entry.Value;
+                    ClassModel Original = (ClassModel)ModelVerification.ClassModel;
                     ClassModel Clone = Original with { };
 
-                    ClassModelList.Add(Clone);
+                    CloneTable.Add(ModelVerification, Clone);
                 }
             }
 
-            foreach (ClassModel Item in ClassModelList)
-                Item.Verify();
+            foreach (KeyValuePair<ModelVerification, ClassModel> Entry in CloneTable)
+            {
+                ModelVerification ModelVerification = Entry.Key;
+                ClassModel ClassModel = Entry.Value;
+                string ClassName = ClassModel.Name;
+
+                if (ClassModel.Unsupported.IsEmpty)
+                {
+                    Verifier Verifier = new()
+                    {
+                        MaxDepth = MaxDepth,
+                        ClassName = ClassName,
+                        Logger = Logger,
+                        FieldTable = ClassModel.FieldTable,
+                        MethodTable = ClassModel.MethodTable,
+                        InvariantList = ClassModel.InvariantList,
+                    };
+
+                    Verifier.Verify();
+
+                    SetIsInvariantViolated(ClassName, Verifier.IsInvariantViolated);
+                }
+
+                ModelVerification.SetUpToDate();
+            }
 
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
             bool Restart = false;
 
-            lock (ClassTable)
+            lock (ModelVerificationTable)
             {
                 ModelThread = null;
 
@@ -102,7 +128,7 @@ public class ClassModelManager
     /// </summary>
     /// <param name="name">The class name.</param>
     /// <param name="isInvariantViolated">Whether the invariant is violated.</param>
-    public void SetIsInvariantViolated(string name, bool isInvariantViolated)
+    private void SetIsInvariantViolated(string name, bool isInvariantViolated)
     {
         lock (ViolationTable)
         {
@@ -117,19 +143,31 @@ public class ClassModelManager
     /// <param name="context">The analysis context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
     /// <param name="logger">The logger.</param>
-    public (IClassModel ClassModel, bool IsThreadStarted) GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
+    public ModelVerification GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, ILogger logger)
     {
         int HashCode = context.Compilation.GetHashCode();
-        IClassModel Result;
+        ModelVerification Result;
         bool IsVerifyingAsynchronously = false;
+        string ClassName = classDeclaration.Identifier.ValueText;
 
-        lock (ClassTable)
+        lock (ModelVerificationTable)
         {
-            string ClassName = classDeclaration.Identifier.ValueText;
-
-            if (ClassName == string.Empty || LastHashCode != HashCode || !ClassTable.ContainsKey(ClassName))
+            if (ClassName == string.Empty || LastHashCode != HashCode || !ModelVerificationTable.ContainsKey(ClassName))
             {
-                Result = ClassModel.FromClassDeclaration(classDeclaration, this, logger);
+                ClassDeclarationParser Parser = new(classDeclaration) { Logger = logger };
+
+                IClassModel NewClassModel = new ClassModel()
+                {
+                    Name = ClassName,
+                    Manager = this,
+                    Logger = logger,
+                    FieldTable = Parser.FieldTable,
+                    MethodTable = Parser.MethodTable,
+                    InvariantList = Parser.InvariantList,
+                    Unsupported = Parser.Unsupported,
+                };
+
+                Result = new ModelVerification() { ClassModel = NewClassModel };
 
                 if (ClassName != string.Empty)
                 {
@@ -142,53 +180,56 @@ public class ClassModelManager
                         IsVerifyingAsynchronously = true;
                     }
                 }
+
+                if (!IsVerifyingAsynchronously)
+                    Result.SetUpToDate();
             }
             else
-                Result = ClassTable[ClassName];
+                Result = ModelVerificationTable[ClassName];
         }
 
-        return (Result, IsVerifyingAsynchronously);
+        return Result;
     }
 
     /// <summary>
     /// Updates a class model.
     /// </summary>
-    /// <param name="classModel">The class model.</param>
-    public void UpdateClassModel(IClassModel classModel)
+    /// <param name="modelVerification">The model verification.</param>
+    public void UpdateClassModel(ModelVerification modelVerification)
     {
-        string ClassName = classModel.Name;
+        string ClassName = modelVerification.ClassModel.Name;
 
-        if (!ClassTable.ContainsKey(ClassName))
+        if (!ModelVerificationTable.ContainsKey(ClassName))
         {
-            if (ClassTable.Count == 0)
+            if (ModelVerificationTable.Count == 0)
                 Logger.Clear();
 
-            ClassTable.Add(ClassName, classModel);
+            ModelVerificationTable.Add(ClassName, modelVerification);
             ViolationTable.Add(ClassName, false);
         }
         else
         {
-            ClassTable[ClassName] = classModel;
+            ModelVerificationTable[ClassName] = modelVerification;
         }
     }
 
     /// <summary>
-    /// Removes class that no longer exist.
+    /// Removes classes that no longer exist.
     /// </summary>
     /// <param name="existingClassList">The list of existing classes.</param>
     public void RemoveMissingClasses(List<string> existingClassList)
     {
-        lock (ClassTable)
+        lock (ModelVerificationTable)
         {
             List<string> ToRemoveClassList = new();
 
-            foreach (KeyValuePair<string, IClassModel> Entry in ClassTable)
+            foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
                 if (!existingClassList.Contains(Entry.Key))
                     ToRemoveClassList.Add(Entry.Key);
 
             foreach (string Key in ToRemoveClassList)
             {
-                ClassTable.Remove(Key);
+                ModelVerificationTable.Remove(Key);
                 ViolationTable.Remove(Key);
             }
         }

@@ -14,9 +14,4 @@ public interface IClassModel
     /// Gets unsupported class elements.
     /// </summary>
     IUnsupported Unsupported { get; }
-
-    /// <summary>
-    /// Waits for the verification to complete.
-    /// </summary>
-    void WaitForVerifyCompleted();
 }

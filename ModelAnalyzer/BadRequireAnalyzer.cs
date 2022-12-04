@@ -55,8 +55,8 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        (IClassModel ClassModel, _) = Manager.GetClassModel(context, classDeclaration, Logger);
-        foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
+        ModelVerification ModelVerification = Manager.GetClassModel(context, classDeclaration, Logger);
+        foreach (IUnsupportedRequire Item in ModelVerification.ClassModel.Unsupported.Requires)
             context.ReportDiagnostic(Diagnostic.Create(BadRequireRule, Item.Location));
     }
 }
