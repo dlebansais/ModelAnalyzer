@@ -79,6 +79,25 @@ public class ClassModelManager
             return ModelVerification.ClassModel;
     }
 
+    /// <summary>
+    /// Removes classes that no longer exist.
+    /// </summary>
+    /// <param name="existingClassList">The list of existing classes.</param>
+    public void RemoveMissingClasses(List<string> existingClassList)
+    {
+        lock (ModelVerificationTable)
+        {
+            List<string> ToRemoveClassList = new();
+
+            foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
+                if (!existingClassList.Contains(Entry.Key))
+                    ToRemoveClassList.Add(Entry.Key);
+
+            foreach (string Key in ToRemoveClassList)
+                ModelVerificationTable.Remove(Key);
+        }
+    }
+
     private void GetClassModelInternal(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
     {
         isVerifyingAsynchronously = false;
@@ -137,25 +156,6 @@ public class ClassModelManager
         else
         {
             ModelVerificationTable[ClassName] = modelVerification;
-        }
-    }
-
-    /// <summary>
-    /// Removes classes that no longer exist.
-    /// </summary>
-    /// <param name="existingClassList">The list of existing classes.</param>
-    public void RemoveMissingClasses(List<string> existingClassList)
-    {
-        lock (ModelVerificationTable)
-        {
-            List<string> ToRemoveClassList = new();
-
-            foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
-                if (!existingClassList.Contains(Entry.Key))
-                    ToRemoveClassList.Add(Entry.Key);
-
-            foreach (string Key in ToRemoveClassList)
-                ModelVerificationTable.Remove(Key);
         }
     }
 
