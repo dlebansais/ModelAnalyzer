@@ -10,6 +10,9 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Verifier"/> class.
+    /// </summary>
     public Verifier()
     {
         // Need model generation turned on.
@@ -17,18 +20,47 @@ internal partial class Verifier : IDisposable
         Zero = ctx.MkInt(0);
     }
 
+    /// <summary>
+    /// Verifies the code.
+    /// </summary>
     public void Verify()
     {
-        Verify(0);
+        Verify(depth: 0);
     }
 
+    /// <summary>
+    /// Gets the max depth.
+    /// </summary>
     required public int MaxDepth { get; init; }
+
+    /// <summary>
+    /// Gets the class name.
+    /// </summary>
     required public string ClassName { get; init; }
+
+    /// <summary>
+    /// Gets the field table.
+    /// </summary>
     required public FieldTable FieldTable { get; init; }
+
+    /// <summary>
+    /// Gets the method table.
+    /// </summary>
     required public MethodTable MethodTable { get; init; }
+
+    /// <summary>
+    /// Gets the invariant list.
+    /// </summary>
     required public List<IInvariant> InvariantList { get; init; }
+
+    /// <summary>
+    /// Gets the logger.
+    /// </summary>
     public IAnalysisLogger Logger { get; init; } = new NullLogger();
 
+    /// <summary>
+    /// Gets a value indicating whether the invariant is violated.
+    /// </summary>
     public bool IsInvariantViolated { get; private set; }
 
     private void Verify(int depth)
