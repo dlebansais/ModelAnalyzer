@@ -1,6 +1,7 @@
 ﻿namespace DemoAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 /// <summary>
 /// Represents a collection of items and name keys.
@@ -10,13 +11,28 @@ using System.Collections.Generic;
 internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, TItem>>
 {
     /// <summary>
-    /// Adds an item to the collection. The item name must be unique.
+    /// Gets a value indicating whether the table is sealed.
+    /// </summary>
+    public bool IsSealed { get; private set; }
+
+    /// <summary>
+    /// Adds an item to the collection. The item name must be unique, and the table not sealed.
     /// </summary>
     /// <param name="itemName">The item name used as a key.</param>
     /// <param name="item">The item.</param>
     public void AddItem(TName itemName, TItem item)
     {
+        Debug.Assert(!IsSealed);
+
         Table.Add(itemName, item);
+    }
+
+    /// <summary>
+    /// Seals the table, forbiding subsequent calls to <see cref="AddItem(TName, TItem)"/>.
+    /// </summary>
+    public void Seal()
+    {
+        IsSealed = true;
     }
 
     /// <summary>

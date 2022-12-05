@@ -31,4 +31,9 @@ public class NullLogger : IAnalysisLogger
     public void LogException(Exception exception)
     {
     }
+
+    /// <inheritdoc/>
+    public void Clear()
+    {
+    }
 }

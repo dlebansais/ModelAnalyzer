@@ -50,10 +50,20 @@ public class ClassModelManager
     /// <param name="waitIfAsync">True if the method should wait until verification is completed.</param>
     public IClassModel GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
     {
+        ClearLogs();
+
+        string ClassName = classDeclaration.Identifier.ValueText;
+        Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a full analysis" : "not waiting for delayed analysis")}.");
+
         GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously && waitIfAsync)
+        {
+            Log("Waiting for the delayed analysis.");
             ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+        }
+
+        Log("Analysis complete.");
 
         return ModelVerification.ClassModel;
     }
@@ -65,18 +75,32 @@ public class ClassModelManager
     /// <param name="classDeclaration">The class declaration.</param>
     public async Task<IClassModel> GetClassModelAsync(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
     {
+        ClearLogs();
+
+        string ClassName = classDeclaration.Identifier.ValueText;
+        Log($"Getting model for class '{ClassName}' asynchronously.");
+
         GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously)
         {
+            Log("Waiting for the delayed analysis.");
+
             return await Task.Run(() =>
             {
                 ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+
+                Log("Analysis complete.");
+
                 return ModelVerification.ClassModel;
             });
         }
         else
+        {
+            Log("Analysis complete.");
+
             return ModelVerification.ClassModel;
+        }
     }
 
     /// <summary>
@@ -85,16 +109,26 @@ public class ClassModelManager
     /// <param name="existingClassList">The list of existing classes.</param>
     public void RemoveMissingClasses(List<string> existingClassList)
     {
+        Log("Cleaning up classes that no longer exist.");
+
         lock (ModelVerificationTable)
         {
             List<string> ToRemoveClassList = new();
 
             foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
-                if (!existingClassList.Contains(Entry.Key))
-                    ToRemoveClassList.Add(Entry.Key);
+            {
+                string ClassName = Entry.Key;
 
-            foreach (string Key in ToRemoveClassList)
-                ModelVerificationTable.Remove(Key);
+                if (!existingClassList.Contains(ClassName))
+                    ToRemoveClassList.Add(ClassName);
+            }
+
+            foreach (string ClassName in ToRemoveClassList)
+            {
+                Log($"Removing class '{ClassName}'.");
+
+                ModelVerificationTable.Remove(ClassName);
+            }
         }
     }
 
@@ -148,13 +182,14 @@ public class ClassModelManager
 
         if (!ModelVerificationTable.ContainsKey(ClassName))
         {
-            if (ModelVerificationTable.Count == 0)
-                ClearLogs();
+            Log($"Class '{ClassName}' is new, adding the class model.");
 
             ModelVerificationTable.Add(ClassName, modelVerification);
         }
         else
         {
+            Log($"Updating model for class '{ClassName}'.");
+
             ModelVerificationTable[ClassName] = modelVerification;
         }
     }
@@ -172,7 +207,7 @@ public class ClassModelManager
 
     private void StartThread()
     {
-        Log("StartThread()");
+        Log($"Starting the verification thread.");
 
         ThreadShouldBeRestarted = false;
         ModelThread = new Thread(new ThreadStart(ExecuteThread));
@@ -181,6 +216,8 @@ public class ClassModelManager
 
     private void ExecuteThread()
     {
+        Log($"Verification thread entered.");
+
         try
         {
             Dictionary<ModelVerification, ClassModel> CloneTable = new();
@@ -242,6 +279,8 @@ public class ClassModelManager
         {
             Logger.LogException(exception);
         }
+
+        Log($"Verification thread exited.");
     }
 
     private void Log(string message)
@@ -251,6 +290,8 @@ public class ClassModelManager
 
     private void ClearLogs()
     {
+        if (ModelVerificationTable.Count == 0)
+            Logger.Clear();
     }
 
     private Dictionary<string, ModelVerification> ModelVerificationTable = new();

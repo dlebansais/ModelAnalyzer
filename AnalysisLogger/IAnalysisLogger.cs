@@ -19,4 +19,9 @@ public interface IAnalysisLogger : ILogger
     /// </summary>
     /// <param name="exception">The exception to log.</param>
     void LogException(Exception exception);
+
+    /// <summary>
+    /// Clears the log, erasing all messages.
+    /// </summary>
+    void Clear();
 }
