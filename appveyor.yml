@@ -1,0 +1,95 @@
+# version format
+version: v{build}
+
+branches:
+  only:
+    - master
+    - deployment
+
+# Skipping commits with particular message or from specific user
+skip_commits:
+  message: "*[skip ci]*"
+
+image: Visual Studio 2022
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
+environment:
+  package_token:
+    secure: MvF+AGj2M3nN6iIqDZHxHsDOr6QcqKPhf6xaLwzWpukS+UFiaRDnjum5Rui0AiyF
+  opencover_version: 4.7.1221
+  codecov_version: 0.2.4
+  csharp-format_version: 0.0.9
+
+matrix:
+  fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
+
+before_build:
+  - ps: (Get-Content nuget.config).replace('Insert token here', $env:package_token) | Set-Content nuget.config
+  - nuget restore %APPVEYOR_PROJECT_NAME%.sln
+  - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
+  - nuget install CSharp-Format -Version %csharp-format_version% -OutputDirectory packages
+  - .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
+
+configuration:
+  - Release
+  - Debug
+
+build:
+  project: $(APPVEYOR_PROJECT_NAME).sln
+
+after_build:
+  - nuget install Packager -DependencyVersion Highest -OutputDirectory packages # Install Packager
+  - ps: $folder = Get-ChildItem -Path packages/Packager.* -Name | Out-String    # Get the installation folder (we don't know the actual version)
+  - ps: $firstline = ($folder -split '\r\n')[0]                                 # Get rid of carriage-return
+  - ps: $fullpath = ".\packages\$firstline\lib\net48\Packager.exe"              # Build full path
+  - ps: $env:PACKAGER_PATH=$fullpath
+  - '%PACKAGER_PATH% %CUSTOM_PACKAGER_OPTIONS%'                                 # Execute the packager: the output is nuget\%APPVEYOR_PROJECT_NAME%.nuspec
+  - if exist nuget\%APPVEYOR_PROJECT_NAME%.nuspec nuget pack nuget\%APPVEYOR_PROJECT_NAME%.nuspec
+  - '%PACKAGER_PATH% %CUSTOM_PACKAGER_OPTIONS% --debug'                         # Execute the packager: the output is nuget-debug\%APPVEYOR_PROJECT_NAME%-Debug.nuspec
+  - if exist nuget-debug\%APPVEYOR_PROJECT_NAME%-Debug.nuspec nuget pack nuget-debug\%APPVEYOR_PROJECT_NAME%-Debug.nuspec
+
+before_test:
+  - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
+  - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
+  - |-
+    printf "@echo ************************************************************** Starting Tests..\n" > runtests.bat
+    printf "dotnet test --no-build -l "console;verbosity=detailed" -c %CONFIGURATION%\n" >> runtests.bat
+
+test_script:
+  - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[Test%APPVEYOR_PROJECT_NAME%*]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+
+after_test:
+  - if '%CONFIGURATION%' == 'Debug' .\packages\CodecovUploader.%codecov_version%\tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+
+artifacts:
+  - path: $(APPVEYOR_PROJECT_NAME)-Debug.*.nupkg
+    name: $(APPVEYOR_PROJECT_NAME)-Package-Debug
+    type: NuGetPackage
+  - path: $(APPVEYOR_PROJECT_NAME).*.nupkg
+    name: $(APPVEYOR_PROJECT_NAME)-Package-Release
+    type: NuGetPackage
+
+deploy:
+  - provider: NuGet
+    server: https://nuget.pkg.github.com/dlebansais/index.json
+    symbol_server: https://nuget.pkg.github.com/dlebansais/index.json
+    artifact: $(APPVEYOR_PROJECT_NAME)-Package-Debug
+    username: dlebansais
+    api_key:
+      secure: GJOgNQLOuHBXfW2wXBaMXudFnnJDNI3od5hh9LFi1brPRK81RiLcbEW9hFbT8rIN
+    on:
+      branch: deployment
+      configuration: Debug
+  - provider: NuGet
+    server: https://nuget.pkg.github.com/dlebansais/index.json
+    artifact: $(APPVEYOR_PROJECT_NAME)-Package-Release
+    skip_symbols: true
+    username: dlebansais
+    api_key:
+      secure: GJOgNQLOuHBXfW2wXBaMXudFnnJDNI3od5hh9LFi1brPRK81RiLcbEW9hFbT8rIN
+    on:
+      branch: deployment
+      configuration: Release
