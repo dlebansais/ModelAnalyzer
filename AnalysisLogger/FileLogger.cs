@@ -11,27 +11,25 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public class FileLogger : IAnalysisLogger
 {
-    void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FileLogger"/> class.
+    /// </summary>
+    public FileLogger()
     {
-        Log(logLevel, formatter(state, exception));
+        FilePath = Environment.GetEnvironmentVariable("MODEL_ANALYZER_LOG_PATH") ?? Path.Combine(Path.GetTempPath(), "analyzer.txt");
     }
 
-    bool ILogger.IsEnabled(LogLevel logLevel)
-    {
-        return true;
-    }
-
-    IDisposable? ILogger.BeginScope<TState>(TState state)
-    {
-        return BeginScope(FileMode.Append);
-    }
+    /// <summary>
+    /// Gets the path to the file containing logs.
+    /// </summary>
+    public string FilePath { get; }
 
     /// <inheritdoc/>
     public void Log(string message)
     {
         lock (Mutex)
         {
-            WriteLogSync(message);
+            WriteLogSync(LogLevel.Information, message);
         }
     }
 
@@ -40,8 +38,8 @@ public class FileLogger : IAnalysisLogger
     {
         lock (Mutex)
         {
-            WriteLogSync(exception.Message);
-            WriteLogSync(exception.StackTrace);
+            WriteLogSync(LogLevel.Error, exception.Message);
+            WriteLogSync(LogLevel.Information, exception.StackTrace);
         }
     }
 
@@ -54,20 +52,26 @@ public class FileLogger : IAnalysisLogger
         }
     }
 
-    /// <summary>
-    /// Logs a message.
-    /// </summary>
-    /// <param name="logLevel">The log level.</param>
-    /// <param name="message">The message.</param>
-    private void Log(LogLevel logLevel, string message)
+    /// <inheritdoc/>
+    void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         lock (Mutex)
         {
-            WriteLogSync(message);
+            WriteLogSync(logLevel, formatter(state, exception));
         }
     }
 
-    private static readonly Mutex Mutex = new();
+    /// <inheritdoc/>
+    bool ILogger.IsEnabled(LogLevel logLevel)
+    {
+        return true;
+    }
+
+    /// <inheritdoc/>
+    IDisposable? ILogger.BeginScope<TState>(TState state)
+    {
+        return BeginScope(FileMode.Append);
+    }
 
     private void ClearSync()
     {
@@ -81,7 +85,13 @@ public class FileLogger : IAnalysisLogger
                 DateTime LastWriteTime = File.GetLastWriteTimeUtc(FilePath);
 
                 if (LastWriteTime + TimeSpan.FromMinutes(1) <= DateTime.UtcNow)
-                    WriteFile(FileMode.Create, $"Cleared {DateTime.Now}");
+                {
+                    using StreamWriter Writer = BeginScope(FileMode.Create);
+
+                    string Header = $"Process  Thread                Time (Cleared {DateTime.Now})";
+                    Writer.WriteLine(Header);
+                }
+
                 return;
             }
             catch
@@ -90,7 +100,7 @@ public class FileLogger : IAnalysisLogger
         }
     }
 
-    private void WriteLogSync(string message)
+    private void WriteLogSync(LogLevel logLevel, string message)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -99,7 +109,7 @@ public class FileLogger : IAnalysisLogger
 
             try
             {
-                WriteFile(FileMode.Append, message);
+                WriteFile(logLevel, message);
                 return;
             }
             catch
@@ -108,13 +118,18 @@ public class FileLogger : IAnalysisLogger
         }
     }
 
-    private const string FilePath = "C:\\Projects\\Temp\\analyzer.txt";
-
-    private void WriteFile(FileMode mode, string message)
+    private void WriteFile(LogLevel logLevel, string message)
     {
-        using StreamWriter Writer = BeginScope(mode);
+        using StreamWriter Writer = BeginScope(FileMode.Append);
 
-        string FullMessage = $"{Process.GetCurrentProcess().Id,5} {Thread.CurrentThread} {DateTime.Now} {message}";
+        string LogLevelString = logLevel switch
+        {
+            LogLevel.Error => "ERROR ",
+            LogLevel.Warning => "WARNING ",
+            _ => string.Empty,
+        };
+
+        string FullMessage = $"{Process.GetCurrentProcess().Id,7} {Thread.CurrentThread.ManagedThreadId,7} {DateTime.Now} {LogLevelString}{message}";
 
         Writer.WriteLine(FullMessage);
     }
@@ -126,4 +141,6 @@ public class FileLogger : IAnalysisLogger
 
         return Writer;
     }
+
+    private static readonly Mutex Mutex = new();
 }
