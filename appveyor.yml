@@ -10,7 +10,7 @@ branches:
 skip_commits:
   message: "*[skip ci]*"
 
-image: Previous Visual Studio 2022
+image: Visual Studio 2022
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -31,7 +31,7 @@ before_build:
   - nuget restore %APPVEYOR_PROJECT_NAME%.sln
   - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
   - nuget install CSharp-Format -Version %csharp-format_version% -OutputDirectory packages
-  - .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
+  - echo .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
 
 configuration:
   - Release
