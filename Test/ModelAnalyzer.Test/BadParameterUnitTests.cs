@@ -7,7 +7,6 @@ using VerifyCS = CSharpAnalyzerVerifier<BadParameterAnalyzer>;
 [TestClass]
 public class BadParameterUnitTests
 {
-
     [TestMethod]
     public async Task ParameterShouldNotHaveAttribute_Diagnostic()
     {
