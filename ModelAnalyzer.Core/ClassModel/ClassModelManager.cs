@@ -111,17 +111,21 @@ public class ClassModelManager
     {
         Log("Cleaning up classes that no longer exist.");
 
-        lock (ModelVerificationTable)
+        lock (Context.Lock)
         {
+            List<IClassModel> VerifiedClassList = new();
             List<string> ToRemoveClassList = new();
 
-            foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
+            // Don't remove classes still being analyzed yet.
+            foreach (ModelVerification ModelVerification in Context.VerificationList)
+                VerifiedClassList.Add(ModelVerification.ClassModel);
+
+            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
             {
                 string ClassName = Entry.Key;
-                ModelVerification ModelVerification = Entry.Value;
+                IClassModel ClassModel = Entry.Value;
 
-                // Don't remove classes still being analyzed yet.
-                if (!existingClassList.Contains(ClassName) && ModelVerification.IsUpToDate)
+                if (!existingClassList.Contains(ClassName) && VerifiedClassList.Contains(ClassModel))
                     ToRemoveClassList.Add(ClassName);
             }
 
@@ -129,7 +133,7 @@ public class ClassModelManager
             {
                 Log($"Removing class '{ClassName}'.");
 
-                ModelVerificationTable.Remove(ClassName);
+                Context.ClassModelTable.Remove(ClassName);
             }
         }
     }
@@ -138,19 +142,22 @@ public class ClassModelManager
     {
         isVerifyingAsynchronously = false;
 
-        int HashCode = context.Compilation.GetHashCode();
-        bool IsNewCompilationContext = LastHashCode != HashCode;
-        LastHashCode = HashCode;
-
         string ClassName = classDeclaration.Identifier.ValueText;
 
-        lock (ModelVerificationTable)
+        lock (Context.Lock)
         {
-            if (ClassName == string.Empty || IsNewCompilationContext || !ModelVerificationTable.ContainsKey(ClassName))
+            int HashCode = context.Compilation.GetHashCode();
+            bool IsNewCompilationContext = Context.LastHashCode != HashCode;
+            Context.LastHashCode = HashCode;
+
+            bool ClassModelMustBeUpdated = ClassName == string.Empty || IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
+            ModelVerification? ExistingModelVerification = FindInQueue(ClassName);
+
+            if (ClassModelMustBeUpdated || ExistingModelVerification is null)
             {
                 ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
 
-                IClassModel NewClassModel = new ClassModel()
+                ClassModel NewClassModel = new ClassModel()
                 {
                     Name = ClassName,
                     Manager = this,
@@ -164,7 +171,7 @@ public class ClassModelManager
 
                 if (ClassName != string.Empty)
                 {
-                    UpdateClassModel(modelVerification);
+                    UpdateClassModel(NewClassModel);
 
                     if (IsNewCompilationContext)
                     {
@@ -174,31 +181,40 @@ public class ClassModelManager
                 }
             }
             else
-                modelVerification = ModelVerificationTable[ClassName];
+                modelVerification = ExistingModelVerification;
         }
     }
 
-    private void UpdateClassModel(ModelVerification modelVerification)
+    private ModelVerification? FindInQueue(string className)
     {
-        string ClassName = modelVerification.ClassModel.Name;
+        foreach (ModelVerification Item in Context.VerificationList)
+            if (Item.ClassModel.Name == className)
+                return Item;
 
-        if (!ModelVerificationTable.ContainsKey(ClassName))
+        return null;
+    }
+
+    private void UpdateClassModel(ClassModel classModel)
+    {
+        string ClassName = classModel.Name;
+
+        if (!Context.ClassModelTable.ContainsKey(ClassName))
         {
             Log($"Class '{ClassName}' is new, adding the class model.");
 
-            ModelVerificationTable.Add(ClassName, modelVerification);
+            Context.ClassModelTable.Add(ClassName, classModel);
         }
         else
         {
             Log($"Updating model for class '{ClassName}'.");
 
-            ModelVerificationTable[ClassName] = modelVerification;
+            Context.ClassModelTable[ClassName] = classModel;
         }
     }
 
     private void ScheduleThreadStart()
     {
-        lock (ModelVerificationTable)
+        lock (Context.Lock)
         {
             if (ModelThread is null)
             {
@@ -221,17 +237,18 @@ public class ClassModelManager
         {
             Dictionary<ModelVerification, ClassModel> CloneTable = new();
 
-            lock (ModelVerificationTable)
+            lock (Context.Lock)
             {
-                foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
+                foreach (ModelVerification ModelVerification in Context.VerificationList)
                 {
-                    ModelVerification ModelVerification = Entry.Value;
                     ClassModel Original = (ClassModel)ModelVerification.ClassModel;
                     ClassModel Clone = Original with { };
 
-                    Log($"*** Class {Entry.Key} cloned.");
+                    Log($"*** Class {Original.Name} cloned.");
                     CloneTable.Add(ModelVerification, Clone);
                 }
+
+                Context.VerificationList.Clear();
             }
 
             foreach (KeyValuePair<ModelVerification, ClassModel> Entry in CloneTable)
@@ -265,7 +282,7 @@ public class ClassModelManager
 
             bool Restart = false;
 
-            lock (ModelVerificationTable)
+            lock (Context.Lock)
             {
                 ModelThread = null;
 
@@ -297,12 +314,14 @@ public class ClassModelManager
 
     private void ClearLogs()
     {
-        if (ModelVerificationTable.Count == 0)
-            Logger.Clear();
+        lock (Context.Lock)
+        {
+            if (Context.ClassModelTable.Count == 0)
+                Logger.Clear();
+        }
     }
 
-    private Dictionary<string, ModelVerification> ModelVerificationTable = new();
-    private int LastHashCode;
+    private SynchronizedVerificationContext Context = new();
     private Thread? ModelThread = null;
     private bool ThreadShouldBeRestarted;
 }

@@ -1,42 +1,44 @@
 ﻿namespace DemoAnalyzer;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 /// <summary>
 /// Represents a thread that synchronizes access to an object.
 /// </summary>
-/// <typeparam name="T">The type of the synchronized object.</typeparam>
-public class SynchronizedThread<T>
-    where T : class, ICloneable, System.Collections.IList
+/// <typeparam name="TSynch">The type of the synchronization object.</typeparam>
+/// <typeparam name="TItem">The type of the object being synchronized.</typeparam>
+public class SynchronizedThread<TSynch, TItem>
+    where TItem : class
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SynchronizedThread{T}"/> class.
+    /// Initializes a new instance of the <see cref="SynchronizedThread{TSynch,TItem}"/> class.
     /// </summary>
-    /// <param name="processedObject">The processed object.</param>
+    /// <param name="context">The synchronized context.</param>
     /// <param name="callback">The callback.</param>
-    public SynchronizedThread(T processedObject, Action<T> callback)
+    public SynchronizedThread(ISynchronizedContext<TSynch, TItem> context, Action<List<TSynch>, List<TItem>> callback)
     {
-        ProcessedObject = processedObject;
+        Context = context;
         Callback = callback;
     }
 
     /// <summary>
     /// Gets the processed object.
     /// </summary>
-    public T ProcessedObject { get; }
+    public ISynchronizedContext<TSynch, TItem> Context { get; }
 
     /// <summary>
     /// Gets the callback.
     /// </summary>
-    public Action<T> Callback { get; }
+    public Action<List<TSynch>, List<TItem>> Callback { get; }
 
     /// <summary>
     /// Starts the thread or ensures the thread will be restarted if currently executing.
     /// </summary>
     public void Start()
     {
-        lock (ProcessedObject)
+        lock (Context.Lock)
         {
             if (SynchronizationThread is null)
             {
@@ -51,19 +53,20 @@ public class SynchronizedThread<T>
 
     private void ExecuteThread()
     {
-        T Clone;
+        List<TSynch> SynchList;
+        List<TItem> ItemList;
 
-        lock (ProcessedObject)
+        lock (Context.Lock)
         {
-            Clone = (T)ProcessedObject.Clone();
+            Context.CloneAndRemove(out SynchList, out ItemList);
             ThreadShouldBeRestarted = false;
         }
 
-        Callback(Clone);
+        Callback(SynchList, ItemList);
 
         bool Restart = false;
 
-        lock (ProcessedObject)
+        lock (Context.Lock)
         {
             SynchronizationThread = null;
 
