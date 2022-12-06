@@ -69,7 +69,7 @@ public class ClassModelManager
         if (IsVerifyingAsynchronously && waitIfAsync)
         {
             Log("Waiting for the delayed analysis.");
-            ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+            ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan, out _);
         }
 
         Log("Analysis complete.");
@@ -97,7 +97,7 @@ public class ClassModelManager
 
             return await Task.Run(() =>
             {
-                ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
+                ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan, out _);
 
                 Log($"Analysis of '{ClassName}' complete.");
 

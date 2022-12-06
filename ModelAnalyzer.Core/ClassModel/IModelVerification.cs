@@ -20,6 +20,7 @@ public interface IModelVerification
     /// <summary>
     /// Waits for the class model to be up to date.
     /// </summary>
-    /// <param name="duration">The duration.</param>
-    void WaitForUpToDate(TimeSpan duration);
+    /// <param name="duration">The waiting duration.</param>
+    /// <param name="isCompleted">True if the model is up to date upon return.</param>
+    void WaitForUpToDate(TimeSpan duration, out bool isCompleted);
 }

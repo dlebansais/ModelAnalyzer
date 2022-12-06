@@ -15,9 +15,9 @@ internal class ModelVerification : IModelVerification
     public bool IsUpToDate { get; private set; }
 
     /// <inheritdoc/>
-    public void WaitForUpToDate(TimeSpan duration)
+    public void WaitForUpToDate(TimeSpan duration, out bool isCompleted)
     {
-        bool IsCompleted = PulseEvent.WaitOne(duration);
+        isCompleted = PulseEvent.WaitOne(duration);
     }
 
     /// <summary>
