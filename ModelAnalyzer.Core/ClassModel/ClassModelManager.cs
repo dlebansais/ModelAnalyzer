@@ -53,7 +53,7 @@ public class ClassModelManager
         ClearLogs();
 
         string ClassName = classDeclaration.Identifier.ValueText;
-        Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a full analysis" : "not waiting for delayed analysis")}.");
+        Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
 
         GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
 
@@ -90,14 +90,14 @@ public class ClassModelManager
             {
                 ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan);
 
-                Log("Analysis complete.");
+                Log($"Analysis of '{ClassName}' complete.");
 
                 return ModelVerification.ClassModel;
             });
         }
         else
         {
-            Log("Analysis complete.");
+            Log($"Analysis of '{ClassName}' complete.");
 
             return ModelVerification.ClassModel;
         }
@@ -118,8 +118,10 @@ public class ClassModelManager
             foreach (KeyValuePair<string, ModelVerification> Entry in ModelVerificationTable)
             {
                 string ClassName = Entry.Key;
+                ModelVerification ModelVerification = Entry.Value;
 
-                if (!existingClassList.Contains(ClassName))
+                // Don't remove classes still being analyzed yet.
+                if (!existingClassList.Contains(ClassName) && ModelVerification.IsUpToDate)
                     ToRemoveClassList.Add(ClassName);
             }
 
@@ -199,24 +201,21 @@ public class ClassModelManager
         lock (ModelVerificationTable)
         {
             if (ModelThread is null)
-                StartThread();
+            {
+                Log($"Starting the verification thread.");
+
+                ThreadShouldBeRestarted = false;
+                ModelThread = new Thread(new ThreadStart(ExecuteThread));
+                ModelThread.Start();
+            }
             else
                 ThreadShouldBeRestarted = true;
         }
     }
 
-    private void StartThread()
-    {
-        Log($"Starting the verification thread.");
-
-        ThreadShouldBeRestarted = false;
-        ModelThread = new Thread(new ThreadStart(ExecuteThread));
-        ModelThread.Start();
-    }
-
     private void ExecuteThread()
     {
-        Log($"Verification thread entered.");
+        Log("Verification thread entered.");
 
         try
         {
@@ -230,6 +229,7 @@ public class ClassModelManager
                     ClassModel Original = (ClassModel)ModelVerification.ClassModel;
                     ClassModel Clone = Original with { };
 
+                    Log($"*** Class {Entry.Key} cloned.");
                     CloneTable.Add(ModelVerification, Clone);
                 }
             }
@@ -260,6 +260,7 @@ public class ClassModelManager
                 ModelVerification.SetUpToDate();
             }
 
+            // Simulate an analysis that takes time.
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
             bool Restart = false;
@@ -273,14 +274,20 @@ public class ClassModelManager
             }
 
             if (Restart)
-                StartThread();
+            {
+                Log($"Restarting the verification thread.");
+
+                ThreadShouldBeRestarted = false;
+                ModelThread = new Thread(new ThreadStart(ExecuteThread));
+                ModelThread.Start();
+            }
         }
         catch (Exception exception)
         {
             Logger.LogException(exception);
         }
 
-        Log($"Verification thread exited.");
+        Log("Verification thread exited.");
     }
 
     private void Log(string message)

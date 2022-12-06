@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class InvariantViolationAnalyzer : DiagnosticAnalyzer
@@ -53,21 +54,35 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
             return;
 
         Location Location = classDeclaration.Identifier.GetLocation();
-        string ValueText = classDeclaration.Identifier.ValueText;
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         Task<IClassModel> GetClassModelTask = Manager.GetClassModelAsync(context, classDeclaration);
-        GetClassModelTask.Wait(TimeSpan.FromSeconds(2));
+
+        // Don't wait too long and get the analyzer stuck.
+        GetClassModelTask.Wait(TimeSpan.FromSeconds(5));
+
         if (!GetClassModelTask.IsCompleted)
+        {
+            Logger.Log(LogLevel.Error, $"Timeout waiting for analysis of class {ClassName} to complete.");
             return;
+        }
 
         IClassModel ClassModel = GetClassModelTask.Result;
 
         if (!ClassModel.Unsupported.IsEmpty)
+        {
+            Logger.Log(LogLevel.Error, $"*** {ClassName} empty unsupported.");
             return;
+        }
 
         if (!ClassModel.IsInvariantViolated)
+        {
+            Logger.Log(LogLevel.Error, $"*** {ClassName} no invariant violation.");
             return;
+        }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ValueText));
+        Logger.Log(LogLevel.Error, $"*** {ClassName}: invariant violated.");
+
+        context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ClassName));
     }
 }

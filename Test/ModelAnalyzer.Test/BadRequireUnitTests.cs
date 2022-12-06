@@ -13,7 +13,7 @@ public class BadRequireUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_0
 {
     int X;
 
@@ -32,7 +32,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_1
 {
     int X;
 
@@ -51,7 +51,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_2
 {
     int X;
 
@@ -70,7 +70,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_3
 {
     int X;
 
@@ -89,7 +89,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_4
 {
     int X;
 
@@ -108,7 +108,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadRequire_5
 {
     int X;
     // Require: [|X == 0|]

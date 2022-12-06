@@ -65,6 +65,7 @@ internal partial class Verifier : IDisposable
 
     private void Verify(int depth)
     {
+        // Stop analysing recursively if a violation has already been detected.
         if (IsInvariantViolated)
             return;
 
@@ -77,9 +78,6 @@ internal partial class Verifier : IDisposable
 
     private void CallMethods(int depth, List<Method> callSequence)
     {
-        if (IsInvariantViolated)
-            return;
-
         if (depth > 0)
         {
             foreach (KeyValuePair<MethodName, IMethod> Entry in MethodTable)

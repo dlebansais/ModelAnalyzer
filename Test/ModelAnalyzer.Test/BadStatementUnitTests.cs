@@ -13,7 +13,7 @@ public class BadStatementUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadStatement_0
 {
     int X;
     int Read()
@@ -30,7 +30,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadStatement_1
 {
     int X;
     void Write(int x)
@@ -47,7 +47,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadStatement_2
 {
     int X;
 
@@ -65,7 +65,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadStatement_3
 {
     int X;
 
@@ -84,7 +84,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadStatement_4
 {
     int X;
 

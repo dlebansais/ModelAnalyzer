@@ -13,7 +13,7 @@ public class BadInvarianttUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_0
 {
     int X;
 
@@ -37,7 +37,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_1
 {
     int X;
 
@@ -62,7 +62,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_2
 {
     int X;
 
@@ -87,7 +87,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_3
 {
     int X;
 
@@ -112,7 +112,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_4
 {
     int X;
 
@@ -137,7 +137,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_5
 {
     int X;
 
@@ -162,7 +162,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_6
 {
     int X;
 
@@ -187,7 +187,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_7
 {
     int X;
 
@@ -212,7 +212,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadInvariant_8
 {
     int X;
 

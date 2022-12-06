@@ -13,7 +13,7 @@ public class InvariantViolationUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program1
+class Program_InvariantViolation_0
 {
     int X;
 }
@@ -27,7 +27,7 @@ class Program1
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program2|]
+class [|Program_InvariantViolation_1|]
 {
     int X;
 }
@@ -41,7 +41,7 @@ class [|Program2|]
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program3
+class Program_InvariantViolation_2
 {
     int X;
 
@@ -60,7 +60,7 @@ class Program3
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program4|]
+class [|Program_InvariantViolation_3|]
 {
     int X;
 
@@ -79,7 +79,7 @@ class [|Program4|]
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program5
+class Program_InvariantViolation_4
 {
     int X;
 
@@ -101,7 +101,7 @@ class Program5
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program6|]
+class [|Program_InvariantViolation_5|]
 {
     int X;
 
@@ -123,7 +123,7 @@ class [|Program6|]
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program7|]
+class [|Program_InvariantViolation_6|]
 {
     int X;
 
@@ -145,7 +145,7 @@ class [|Program7|]
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class [|Program8|]
+class [|Program_InvariantViolation_7|]
 {
     int X;
 
@@ -164,7 +164,7 @@ class [|Program8|]
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program9
+class Program_InvariantViolation_8
 {
     int X;
 

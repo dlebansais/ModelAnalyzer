@@ -13,7 +13,7 @@ public class BadParameterUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadParameter_0
 {
     void Write([|[System.Runtime.InteropServices.In] int x|])
     {
@@ -28,7 +28,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadParameter_1
 {
     void Write([|ref int x|])
     {
@@ -43,7 +43,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadParameter_2
 {
     void Write([|string p|])
     {
@@ -58,9 +58,9 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadParameter_3
 {
-    void Write([|Program p|])
+    void Write([|Program_BadParameter_3 p|])
     {
     }
 }

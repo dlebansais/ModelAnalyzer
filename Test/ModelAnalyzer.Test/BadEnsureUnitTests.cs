@@ -13,7 +13,7 @@ public class BadEnsureUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_0
 {
     int X;
 
@@ -32,7 +32,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_1
 {
     int X;
 
@@ -48,7 +48,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_2
 {
     int X;
 
@@ -67,7 +67,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_3
 {
     int X;
 
@@ -86,7 +86,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_4
 {
     int X;
 
@@ -105,7 +105,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_5
 {
     int X;
 
@@ -124,7 +124,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadEnsure_6
 {
     int X;
     // Ensure: [|X == 0|]

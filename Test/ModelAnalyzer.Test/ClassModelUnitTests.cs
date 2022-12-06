@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VerifyCS = CSharpCodeFixVerifier<ClassModelAnalyzer, ClassModelCodeFixProvider>;
 
 [TestClass]
-public class ClassModeltUnitTests
+public class ClassModelUnitTests
 {
     [TestMethod]
     public async Task ClassWithNoMembers_NoDiagnostic()
@@ -13,7 +13,7 @@ public class ClassModeltUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_0
 {
 }
 ");
@@ -25,7 +25,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_1|]
 {
     static void Main()
     {
@@ -35,7 +35,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_1
 {
     static void Main()
     {
@@ -51,7 +51,7 @@ class Program
 using System;
 
 // No model
-class Program
+class Program_ClassModel_2
 {
     static void Main()
     {
@@ -68,7 +68,7 @@ using System;
 
 // Some comment
 // No model
-class Program
+class Program_ClassModel_3
 {
     static void Main()
     {
@@ -85,7 +85,7 @@ using System;
 
 // No model
 // Some comment
-class Program
+class Program_ClassModel_4
 {
     static void Main()
     {
@@ -101,7 +101,7 @@ class Program
 using System;
 
 // Some comment
-class [|Program|]
+class [|Program_ClassModel_5|]
 {
     static void Main()
     {
@@ -112,7 +112,7 @@ using System;
 
 // Some comment
 // No model
-class Program
+class Program_ClassModel_5
 {
     static void Main()
     {
@@ -128,7 +128,7 @@ class Program
 using System;
 
 [Serializable]
-class [|Program|]
+class [|Program_ClassModel_6|]
 {
 }
 ", @"
@@ -136,7 +136,7 @@ using System;
 
 // No model
 [Serializable]
-class Program
+class Program_ClassModel_6
 {
 }
 ");
@@ -148,7 +148,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-public class Program
+public class Program_ClassModel_7
 {
 }
 ");
@@ -160,7 +160,7 @@ public class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-internal class Program
+internal class Program_ClassModel_8
 {
 }
 ");
@@ -172,7 +172,7 @@ internal class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-partial class Program
+partial class Program_ClassModel_9
 {
 }
 ");
@@ -184,14 +184,14 @@ partial class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-static class [|Program|]
+static class [|Program_ClassModel_10|]
 {
 }
 ", @"
 using System;
 
 // No model
-static class Program
+static class Program_ClassModel_10
 {
 }
 ");
@@ -203,7 +203,7 @@ static class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|] : IDisposable
+class [|Program_ClassModel_11|] : IDisposable
 {
     public void Dispose()
     {
@@ -213,7 +213,7 @@ class [|Program|] : IDisposable
 using System;
 
 // No model
-class Program : IDisposable
+class Program_ClassModel_11 : IDisposable
 {
     public void Dispose()
     {
@@ -228,14 +228,14 @@ class Program : IDisposable
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]<T>
+class [|Program_ClassModel_12|]<T>
 {
 }
 ", @"
 using System;
 
 // No model
-class Program<T>
+class Program_ClassModel_12<T>
 {
 }
 ");
@@ -247,7 +247,7 @@ class Program<T>
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]<T>
+class [|Program_ClassModel_13|]<T>
 where T : class
 {
 }
@@ -255,7 +255,7 @@ where T : class
 using System;
 
 // No model
-class Program<T>
+class Program_ClassModel_13<T>
 where T : class
 {
 }
@@ -268,7 +268,7 @@ where T : class
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_14
 {
     int X;
 }
@@ -281,7 +281,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_15
 {
     int X;
     int Y;
@@ -295,7 +295,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_16|]
 {
     [ThreadStatic]
     int X;
@@ -304,7 +304,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_16
 {
     [ThreadStatic]
     int X;
@@ -318,7 +318,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_17
 {
     private int X;
 }
@@ -331,7 +331,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_18|]
 {
     static int X;
 }
@@ -339,7 +339,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_18
 {
     static int X;
 }
@@ -352,7 +352,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_19|]
 {
     public int X;
 }
@@ -360,7 +360,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_19
 {
     public int X;
 }
@@ -373,17 +373,17 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_20|]
 {
-    Program X;
+    Program_ClassModel_20 X;
 }
 ", @"
 using System;
 
 // No model
-class Program
+class Program_ClassModel_20
 {
-    Program X;
+    Program_ClassModel_20 X;
 }
 ");
     }
@@ -394,7 +394,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_21|]
 {
     string X;
 }
@@ -402,7 +402,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_21
 {
     string X;
 }
@@ -415,7 +415,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_22
 {
     int Read()
     {
@@ -431,7 +431,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_23
 {
     void Write()
     {
@@ -446,7 +446,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_24|]
 {
     [MTAThread]
     int Read()
@@ -458,7 +458,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_24
 {
     [MTAThread]
     int Read()
@@ -475,7 +475,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_25
 {
     private int Read()
     {
@@ -491,7 +491,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_26
 {
     public int Read()
     {
@@ -507,7 +507,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_26
 {
     internal int Read()
     {
@@ -523,7 +523,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_27|]
 {
     static int Read()
     {
@@ -534,7 +534,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_27
 {
     static int Read()
     {
@@ -550,9 +550,9 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_28|]
 {
-    Program Read()
+    Program_ClassModel_28 Read()
     {
         return null!;
     }
@@ -561,9 +561,9 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_28
 {
-    Program Read()
+    Program_ClassModel_28 Read()
     {
         return null!;
     }
@@ -577,7 +577,7 @@ class Program
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program|]
+class [|Program_ClassModel_29|]
 {
     string Read()
     {
@@ -588,7 +588,7 @@ class [|Program|]
 using System;
 
 // No model
-class Program
+class Program_ClassModel_29
 {
     string Read()
     {
@@ -604,7 +604,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_30
 {
     int Read(int x)
     {
@@ -620,7 +620,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_31
 {
     int Read(int x, int y)
     {
@@ -636,7 +636,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_ClassModel_32
 {
     int X;
 

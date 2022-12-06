@@ -13,7 +13,7 @@ public class BadExpressionUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadExpression_0
 {
     int X;
 
@@ -31,7 +31,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadExpression_1
 {
     int X;
 
@@ -49,7 +49,7 @@ class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
-class Program
+class Program_BadExpression_2
 {
     int X;
 
