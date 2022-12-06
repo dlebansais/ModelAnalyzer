@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AnalysisLogger\AnalysisLogger.csproj" />
+    <ProjectReference Include="..\CSharp11Support\CSharp11Support.csproj" />
   </ItemGroup>
 
 </Project>
