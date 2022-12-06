@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer.Test;
+﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

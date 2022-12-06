@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <IsPackable>false</IsPackable>
-    <RootNamespace>DemoAnalyzer</RootNamespace>
+    <RootNamespace>ModelAnalyzer</RootNamespace>
     <Product />
     <Description>A class model analyzer</Description>
     <Copyright>Copyright © 2022 David Le Bansais</Copyright>

@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer;
+﻿namespace ModelAnalyzer;
 
 using System;
 using Microsoft.Z3;

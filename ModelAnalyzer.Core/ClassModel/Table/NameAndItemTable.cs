@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer;
+﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
 using System.Diagnostics;

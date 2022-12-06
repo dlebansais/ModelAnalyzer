@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer;
+﻿namespace ModelAnalyzer;
 
 /// <summary>
 /// Provides information about an expression.

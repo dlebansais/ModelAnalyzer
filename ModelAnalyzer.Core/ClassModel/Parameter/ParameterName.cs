@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer;
+﻿namespace ModelAnalyzer;
 
 /// <summary>
 /// Represents a parameter name.

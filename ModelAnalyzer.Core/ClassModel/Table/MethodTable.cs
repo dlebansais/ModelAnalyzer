@@ -1,4 +1,4 @@
-﻿namespace DemoAnalyzer;
+﻿namespace ModelAnalyzer;
 
 /// <summary>
 /// Represents a collection of methods and name keys.

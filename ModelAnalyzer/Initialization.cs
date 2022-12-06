@@ -1,6 +1,6 @@
 ﻿using AnalysisLogger;
 
-namespace DemoAnalyzer;
+namespace ModelAnalyzer;
 
 public static class Initialization
 {

@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <IsPackable>false</IsPackable>
-    <RootNamespace>DemoAnalyzer</RootNamespace>
+    <RootNamespace>ModelAnalyzer</RootNamespace>
 
     <!-- Avoid ID conflicts with the package project. -->
     <PackageId>*$(MSBuildProjectFile)*</PackageId>
