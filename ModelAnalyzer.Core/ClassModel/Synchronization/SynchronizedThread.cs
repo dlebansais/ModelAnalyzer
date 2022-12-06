@@ -9,7 +9,7 @@ using System.Threading;
 /// </summary>
 /// <typeparam name="TSynch">The type of the synchronization object.</typeparam>
 /// <typeparam name="TItem">The type of the object being synchronized.</typeparam>
-public class SynchronizedThread<TSynch, TItem>
+internal class SynchronizedThread<TSynch, TItem>
     where TItem : class
 {
     /// <summary>

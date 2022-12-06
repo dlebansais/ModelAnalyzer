@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 /// <typeparam name="TSynch">The type of the synchronization object.</typeparam>
 /// <typeparam name="TItem">The type of the object being synchronized.</typeparam>
-public interface ISynchronizedContext<TSynch, TItem>
+internal interface ISynchronizedContext<TSynch, TItem>
     where TItem : class
 {
     /// <summary>

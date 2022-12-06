@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents a context for synchronized verification of a class model.
