@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents text patterns for a class model.
 /// </summary>
-public static class Modeling
+internal static class Modeling
 {
     /// <summary>
     /// Gets the pattern to turn off modeling.
