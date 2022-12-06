@@ -17,7 +17,7 @@ public class SynchronizedThread<TSynch, TItem>
     /// </summary>
     /// <param name="context">The synchronized context.</param>
     /// <param name="callback">The callback.</param>
-    public SynchronizedThread(ISynchronizedContext<TSynch, TItem> context, Action<List<TSynch>, List<TItem>> callback)
+    public SynchronizedThread(ISynchronizedContext<TSynch, TItem> context, Action<IDictionary<TSynch, TItem>> callback)
     {
         Context = context;
         Callback = callback;
@@ -31,7 +31,7 @@ public class SynchronizedThread<TSynch, TItem>
     /// <summary>
     /// Gets the callback.
     /// </summary>
-    public Action<List<TSynch>, List<TItem>> Callback { get; }
+    public Action<IDictionary<TSynch, TItem>> Callback { get; }
 
     /// <summary>
     /// Starts the thread or ensures the thread will be restarted if currently executing.
@@ -53,16 +53,15 @@ public class SynchronizedThread<TSynch, TItem>
 
     private void ExecuteThread()
     {
-        List<TSynch> SynchList;
-        List<TItem> ItemList;
+        IDictionary<TSynch, TItem> CloneTable;
 
         lock (Context.Lock)
         {
-            Context.CloneAndRemove(out SynchList, out ItemList);
+            Context.CloneAndRemove(out CloneTable);
             ThreadShouldBeRestarted = false;
         }
 
-        Callback(SynchList, ItemList);
+        Callback(CloneTable);
 
         bool Restart = false;
 

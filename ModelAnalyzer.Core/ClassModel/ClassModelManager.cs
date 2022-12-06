@@ -18,6 +18,15 @@ public class ClassModelManager
     private const int MaxDepth = 1;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="ClassModelManager"/> class.
+    /// </summary>
+    public ClassModelManager()
+    {
+        Context = new SynchronizedVerificationContext();
+        SynchronizedThread = new(Context, ExecuteVerification);
+    }
+
+    /// <summary>
     /// Gets the logger.
     /// </summary>
     public IAnalysisLogger Logger { get; init; } = new NullLogger();
@@ -151,7 +160,7 @@ public class ClassModelManager
             Context.LastHashCode = HashCode;
 
             bool ClassModelMustBeUpdated = ClassName == string.Empty || IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
-            ModelVerification? ExistingModelVerification = FindInQueue(ClassName);
+            ModelVerification? ExistingModelVerification = Context.FindByName(ClassName);
 
             if (ClassModelMustBeUpdated || ExistingModelVerification is null)
             {
@@ -171,11 +180,15 @@ public class ClassModelManager
 
                 if (ClassName != string.Empty)
                 {
-                    UpdateClassModel(NewClassModel);
+                    Context.UpdateClassModel(NewClassModel, out bool IsAdded);
+                    Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
 
                     if (IsNewCompilationContext)
                     {
-                        ScheduleThreadStart();
+                        Context.VerificationList.Add(modelVerification);
+
+                        Log("Starting the verification thread.");
+                        SynchronizedThread.Start();
                         isVerifyingAsynchronously = true;
                     }
                 }
@@ -185,79 +198,27 @@ public class ClassModelManager
         }
     }
 
-    private ModelVerification? FindInQueue(string className)
+    private void ExecuteVerification(IDictionary<ModelVerification, ClassModel> cloneTable)
     {
-        foreach (ModelVerification Item in Context.VerificationList)
-            if (Item.ClassModel.Name == className)
-                return Item;
+        Log("Executing verification started.");
 
-        return null;
-    }
+        List<ClassModel> VerifiedClassModelList = new();
 
-    private void UpdateClassModel(ClassModel classModel)
-    {
-        string ClassName = classModel.Name;
-
-        if (!Context.ClassModelTable.ContainsKey(ClassName))
+        foreach (KeyValuePair<ModelVerification, ClassModel> Entry in cloneTable)
         {
-            Log($"Class '{ClassName}' is new, adding the class model.");
+            ModelVerification ModelVerification = Entry.Key;
+            ClassModel ClassModel = Entry.Value;
+            string ClassName = ClassModel.Name;
 
-            Context.ClassModelTable.Add(ClassName, classModel);
-        }
-        else
-        {
-            Log($"Updating model for class '{ClassName}'.");
-
-            Context.ClassModelTable[ClassName] = classModel;
-        }
-    }
-
-    private void ScheduleThreadStart()
-    {
-        lock (Context.Lock)
-        {
-            if (ModelThread is null)
-            {
-                Log($"Starting the verification thread.");
-
-                ThreadShouldBeRestarted = false;
-                ModelThread = new Thread(new ThreadStart(ExecuteThread));
-                ModelThread.Start();
-            }
+            if (VerifiedClassModelList.Contains(ClassModel))
+                Log($"Not redoing verification for class '{ClassName}'.");
             else
-                ThreadShouldBeRestarted = true;
-        }
-    }
-
-    private void ExecuteThread()
-    {
-        Log("Verification thread entered.");
-
-        try
-        {
-            Dictionary<ModelVerification, ClassModel> CloneTable = new();
-
-            lock (Context.Lock)
             {
-                foreach (ModelVerification ModelVerification in Context.VerificationList)
-                {
-                    ClassModel Original = (ClassModel)ModelVerification.ClassModel;
-                    ClassModel Clone = Original with { };
+                VerifiedClassModelList.Add(ClassModel);
 
-                    Log($"*** Class {Original.Name} cloned.");
-                    CloneTable.Add(ModelVerification, Clone);
-                }
-
-                Context.VerificationList.Clear();
-            }
-
-            foreach (KeyValuePair<ModelVerification, ClassModel> Entry in CloneTable)
-            {
-                ModelVerification ModelVerification = Entry.Key;
-                ClassModel ClassModel = Entry.Value;
-                string ClassName = ClassModel.Name;
-
-                if (ClassModel.Unsupported.IsEmpty)
+                if (!ClassModel.Unsupported.IsEmpty)
+                    Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
+                else
                 {
                     Verifier Verifier = new()
                     {
@@ -273,38 +234,15 @@ public class ClassModelManager
 
                     ((ClassModel)ModelVerification.ClassModel).IsInvariantViolated = Verifier.IsInvariantViolated;
                 }
-
-                ModelVerification.SetUpToDate();
             }
 
-            // Simulate an analysis that takes time.
-            Thread.Sleep(TimeSpan.FromSeconds(1));
-
-            bool Restart = false;
-
-            lock (Context.Lock)
-            {
-                ModelThread = null;
-
-                if (ThreadShouldBeRestarted)
-                    Restart = true;
-            }
-
-            if (Restart)
-            {
-                Log($"Restarting the verification thread.");
-
-                ThreadShouldBeRestarted = false;
-                ModelThread = new Thread(new ThreadStart(ExecuteThread));
-                ModelThread.Start();
-            }
-        }
-        catch (Exception exception)
-        {
-            Logger.LogException(exception);
+            ModelVerification.SetUpToDate();
         }
 
-        Log("Verification thread exited.");
+        // Simulate an analysis that takes time.
+        Thread.Sleep(TimeSpan.FromSeconds(1));
+
+        Log("Executing verification completed.");
     }
 
     private void Log(string message)
@@ -321,7 +259,6 @@ public class ClassModelManager
         }
     }
 
-    private SynchronizedVerificationContext Context = new();
-    private Thread? ModelThread = null;
-    private bool ThreadShouldBeRestarted;
+    private SynchronizedVerificationContext Context;
+    private SynchronizedThread<ModelVerification, ClassModel> SynchronizedThread;
 }

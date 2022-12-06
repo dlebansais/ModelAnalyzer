@@ -18,7 +18,6 @@ public interface ISynchronizedContext<TSynch, TItem>
     /// <summary>
     /// Clones the synchronized context and removes cloned elements.
     /// </summary>
-    /// <param name="syncList">The list of synchronization objects.</param>
-    /// <param name="itemList">The list of clones of objects being synchronized.</param>
-    void CloneAndRemove(out List<TSynch> syncList, out List<TItem> itemList);
+    /// <param name="cloneTable">The table of synchronization objects.</param>
+    void CloneAndRemove(out IDictionary<TSynch, TItem> cloneTable);
 }
