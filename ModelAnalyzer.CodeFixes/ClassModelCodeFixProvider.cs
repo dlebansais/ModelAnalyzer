@@ -1,5 +1,6 @@
 ﻿namespace DemoAnalyzer;
 
+using System;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -57,7 +58,7 @@ public class ClassModelCodeFixProvider : CodeFixProvider
         SyntaxToken firstToken = classDeclaration.GetFirstToken();
         SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
         SyntaxTrivia commentTrivia = SyntaxFactory.Comment($"// {Modeling.None}");
-        SyntaxTrivia endOfLineTrivia = SyntaxFactory.ElasticCarriageReturnLineFeed;
+        SyntaxTrivia endOfLineTrivia = SyntaxFactory.ElasticLineFeed;
         SyntaxTriviaList modifiedTrivia = leadingTrivia.Add(commentTrivia).Add(endOfLineTrivia);
 
         ClassDeclarationSyntax newClassDeclaration = classDeclaration.ReplaceToken(
