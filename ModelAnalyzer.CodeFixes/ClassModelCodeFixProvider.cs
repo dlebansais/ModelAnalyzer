@@ -57,7 +57,7 @@ public class ClassModelCodeFixProvider : CodeFixProvider
         SyntaxToken firstToken = classDeclaration.GetFirstToken();
         SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
         SyntaxTrivia commentTrivia = SyntaxFactory.Comment($"// {Modeling.None}");
-        SyntaxTrivia endOfLineTrivia = SyntaxFactory.EndOfLine(string.Empty);
+        SyntaxTrivia endOfLineTrivia = SyntaxFactory.ElasticCarriageReturnLineFeed;
         SyntaxTriviaList modifiedTrivia = leadingTrivia.Add(commentTrivia).Add(endOfLineTrivia);
 
         ClassDeclarationSyntax newClassDeclaration = classDeclaration.ReplaceToken(
