@@ -31,7 +31,7 @@ before_build:
   - nuget restore %APPVEYOR_PROJECT_NAME%.sln
   - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
   - nuget install CSharp-Format -Version %csharp-format_version% -OutputDirectory packages
-  - echo .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
+  - echo Can restore when fixed .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
 
 configuration:
   - Release
@@ -62,6 +62,8 @@ test_script:
   - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[Test%APPVEYOR_PROJECT_NAME%*]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 after_test:
+  - ls "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
   - if '%CONFIGURATION%' == 'Debug' .\packages\CodecovUploader.%codecov_version%\tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 artifacts:

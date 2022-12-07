@@ -1,10 +1,10 @@
 @echo off
 setlocal
 
-call ..\Certification\set_tokens.bat
+call ..\..\Certification\set_tokens.bat
 
-set PROJECTNAME=FontLoader
-set PROJECT_TOKEN=%FONTLOADER_CODECOV_TOKEN%
+set PROJECTNAME=ModelAnalyzer
+set PROJECT_TOKEN=%MODELANALYZER_CODECOV_TOKEN%
 set TESTPROJECTNAME=Test-%PROJECTNAME%
 
 set OPENCOVER_VERSION=4.7.1221
