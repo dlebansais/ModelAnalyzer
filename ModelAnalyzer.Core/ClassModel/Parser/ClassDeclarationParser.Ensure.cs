@@ -52,6 +52,8 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
         {
             NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+
+            Log($"Ensure analyzed: '{NewEnsure}'.");
         }
         else
         {

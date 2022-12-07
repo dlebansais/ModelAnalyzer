@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -78,6 +79,8 @@ internal partial class ClassDeclarationParser
 
             NewStatement = UnsupportedStatement;
         }
+        else
+            Log($"Statement analyzed: '{NewStatement}'.");
 
         return NewStatement;
     }

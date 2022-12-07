@@ -49,6 +49,8 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
         {
             NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
+
+            Log($"Require analyzed: '{NewRequire}'.");
         }
         else
         {

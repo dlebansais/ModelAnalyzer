@@ -57,6 +57,8 @@ internal partial class ClassDeclarationParser
 
             NewExpression = UnsupportedExpression;
         }
+        else
+            Log($"Expression analyzed: '{NewExpression}'.");
 
         return NewExpression;
     }

@@ -57,6 +57,8 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, out IExpression BooleanExpression))
         {
             NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
+
+            Log($"Invariant analyzed: '{NewInvariant}'.");
         }
         else
         {
