@@ -82,7 +82,7 @@ internal class SynchronizedVerificationContext : ISynchronizedContext<ModelVerif
     public List<ModelVerification> VerificationList { get; } = new();
 
     /// <summary>
-    /// Gets or sets the last compilation context hash code.
+    /// Gets or sets the last compilation context.
     /// </summary>
-    public int LastHashCode { get; set; }
+    public CompilationContext LastCompilationContext { get; set; } = CompilationContext.Default;
 }

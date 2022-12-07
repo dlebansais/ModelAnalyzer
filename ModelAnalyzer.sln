@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisLogger", "AnalysisL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharp11Support", "CSharp11Support\CSharp11Support.csproj", "{527D837A-FCB5-4504-8634-69F582406FCB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelAnalyzer.Core.Test", "Test\ModelAnalyzer.Core.Test\ModelAnalyzer.Core.Test.csproj", "{2F2F7D02-914F-4387-8575-D7219CE437A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -63,6 +65,10 @@ Global
 		{527D837A-FCB5-4504-8634-69F582406FCB}.Debug|x64.Build.0 = Debug|x64
 		{527D837A-FCB5-4504-8634-69F582406FCB}.Release|x64.ActiveCfg = Release|x64
 		{527D837A-FCB5-4504-8634-69F582406FCB}.Release|x64.Build.0 = Release|x64
+		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Debug|x64.ActiveCfg = Debug|x64
+		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Debug|x64.Build.0 = Debug|x64
+		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Release|x64.ActiveCfg = Release|x64
+		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

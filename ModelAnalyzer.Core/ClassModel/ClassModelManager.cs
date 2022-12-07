@@ -54,17 +54,17 @@ public class ClassModelManager
     /// <summary>
     /// Gets the model of a class.
     /// </summary>
-    /// <param name="context">The analysis context.</param>
+    /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
     /// <param name="waitIfAsync">True if the method should wait until verification is completed.</param>
-    public IClassModel GetClassModel(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
+    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
     {
         ClearLogs();
 
         string ClassName = classDeclaration.Identifier.ValueText;
         Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
 
-        GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously && waitIfAsync)
         {
@@ -80,16 +80,16 @@ public class ClassModelManager
     /// <summary>
     /// Gets the model of a class.
     /// </summary>
-    /// <param name="context">The analysis context.</param>
+    /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
-    public async Task<IClassModel> GetClassModelAsync(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    public async Task<IClassModel> GetClassModelAsync(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
         ClearLogs();
 
         string ClassName = classDeclaration.Identifier.ValueText;
         Log($"Getting model for class '{ClassName}' asynchronously.");
 
-        GetClassModelInternal(context, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously)
         {
@@ -147,7 +147,7 @@ public class ClassModelManager
         }
     }
 
-    private void GetClassModelInternal(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
+    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
     {
         isVerifyingAsynchronously = false;
 
@@ -155,9 +155,8 @@ public class ClassModelManager
 
         lock (Context.Lock)
         {
-            int HashCode = context.Compilation.GetHashCode();
-            bool IsNewCompilationContext = Context.LastHashCode != HashCode;
-            Context.LastHashCode = HashCode;
+            bool IsNewCompilationContext = Context.LastCompilationContext != compilationContext;
+            Context.LastCompilationContext = compilationContext;
 
             bool ClassModelMustBeUpdated = ClassName == string.Empty || IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
             ModelVerification? ExistingModelVerification = Context.FindByName(ClassName);

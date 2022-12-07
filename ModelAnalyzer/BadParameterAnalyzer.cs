@@ -56,7 +56,8 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        IClassModel ClassModel = Manager.GetClassModel(context, classDeclaration);
+        CompilationContext CompilationContext = new(context);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
 
         foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
             context.ReportDiagnostic(Diagnostic.Create(BadParameterRule, Item.Location, Item.Name));
