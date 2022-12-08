@@ -9,56 +9,51 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private IExpression ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode)
+    private IExpression ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, bool isNested)
     {
-        IExpression NewExpression;
+        IExpression? NewExpression = null;
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            NewExpression = ParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression);
-        else if (expressionNode is IdentifierNameSyntax IdentifierName && TryFindVariableByName(fieldTable, parameterTable, IdentifierName.Identifier.ValueText, out IVariable Variable))
-            NewExpression = new VariableValueExpression { Variable = Variable };
-        else if (expressionNode is LiteralExpressionSyntax LiteralExpression && int.TryParse(LiteralExpression.Token.ValueText, out int Value))
-            NewExpression = new LiteralValueExpression { Value = Value };
+            NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression);
+        else if (expressionNode is IdentifierNameSyntax IdentifierName)
+            NewExpression = TryParseVariableValueExpression(fieldTable, parameterTable, IdentifierName);
+        else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
+            NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
-            NewExpression = ParseParenthesizedExpression(fieldTable, parameterTable, unsupported, ParenthesizedExpression);
-        else
+            NewExpression = TryParseParenthesizedExpression(fieldTable, parameterTable, unsupported, ParenthesizedExpression);
+
+        if (NewExpression is null)
         {
             Location Location = expressionNode.GetLocation();
             unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
         }
+        else if (!isNested) // Only log the top-level expression.
+            Log($"Expression analyzed: '{NewExpression}'.");
 
         return NewExpression;
     }
 
-    private IExpression ParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax expressionNode)
+    private IExpression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax binaryExpression)
     {
         IExpression? NewExpression = null;
-        IExpression LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Left);
-        IExpression RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Right);
+        IExpression LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Left, isNested: true);
+        IExpression RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Right, isNested: true);
 
         if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
-            if (IsBinaryArithmeticOperatorSupported(expressionNode.OperatorToken, out ArithmeticOperator ArithmeticOperator))
+            SyntaxToken OperatorToken = binaryExpression.OperatorToken;
+
+            if (IsBinaryArithmeticOperatorSupported(OperatorToken, out ArithmeticOperator ArithmeticOperator))
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = ArithmeticOperator, Right = Right };
-            else if (IsComparisonOperatorSupported(expressionNode.OperatorToken, out ComparisonOperator ComparisonOperator))
+            else if (IsComparisonOperatorSupported(OperatorToken, out ComparisonOperator ComparisonOperator))
                 NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
-            else if (IsBinaryLogicalOperatorSupported(expressionNode.OperatorToken, out LogicalOperator LogicalOperator))
-                NewExpression = new BinaryLogicalExpression { Left = Left, Operator = LogicalOperator, Right = Right };
+            else if (IsBinaryConditionalOperatorSupported(OperatorToken, out LogicalOperator LogicalOperator))
+                NewExpression = new BinaryConditionalExpression { Left = Left, Operator = LogicalOperator, Right = Right };
             else
-                Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
+                Log($"Unsupported expression type '{binaryExpression.GetType().Name}'.");
         }
-
-        if (NewExpression is null)
-        {
-            Location Location = expressionNode.OperatorToken.GetLocation();
-            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
-
-            NewExpression = UnsupportedExpression;
-        }
-        else
-            Log($"Expression analyzed: '{NewExpression}'.");
 
         return NewExpression;
     }
@@ -95,7 +90,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsBinaryLogicalOperatorSupported(SyntaxToken token, out LogicalOperator logicalOperator)
+    private bool IsBinaryConditionalOperatorSupported(SyntaxToken token, out LogicalOperator logicalOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 
@@ -111,22 +106,39 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private IExpression ParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax expressionNode)
+    private IExpression? TryParseVariableValueExpression(FieldTable fieldTable, ParameterTable parameterTable, IdentifierNameSyntax identifierName)
     {
-        IExpression NewExpression;
-        IExpression InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode.Expression);
+        IExpression? NewExpression = null;
+        string VariableName = identifierName.Identifier.ValueText;
+
+        if (TryFindVariableByName(fieldTable, parameterTable, VariableName, out IVariable Variable))
+            NewExpression = new VariableValueExpression { Variable = Variable };
+        else
+            Log($"Unknown variable '{VariableName}'.");
+
+        return NewExpression;
+    }
+
+    private IExpression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
+    {
+        IExpression? NewExpression = null;
+        string LiteralValue = literalExpression.Token.ValueText;
+
+        if (int.TryParse(LiteralValue, out int Value))
+            NewExpression = new LiteralValueExpression { Value = Value };
+        else
+            Log($"Failed to parse literal value '{LiteralValue}'.");
+
+        return NewExpression;
+    }
+
+    private IExpression? TryParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax parenthesizedExpression)
+    {
+        IExpression? NewExpression = null;
+        IExpression InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, parenthesizedExpression.Expression, isNested: true);
 
         if (InsideExpression is Expression Inside)
-        {
             NewExpression = new ParenthesizedExpression { Inside = Inside };
-        }
-        else
-        {
-            Location Location = expressionNode.Expression.GetLocation();
-            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
-
-            NewExpression = UnsupportedExpression;
-        }
 
         return NewExpression;
     }

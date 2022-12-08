@@ -18,8 +18,8 @@ internal partial class Verifier : IDisposable
             case BinaryArithmeticExpression BinaryArithmetic:
                 Result = BuildBinaryExpression(aliasTable, BinaryArithmetic);
                 break;
-            case BinaryLogicalExpression BinaryLogical:
-                Result = BuildBinaryLogicalExpression(aliasTable, BinaryLogical);
+            case BinaryConditionalExpression BinaryLogical:
+                Result = BuildBinaryConditionalExpression(aliasTable, BinaryLogical);
                 break;
             case ComparisonExpression Comparison:
                 Result = BuildComparisonExpression(aliasTable, Comparison);
@@ -48,7 +48,7 @@ internal partial class Verifier : IDisposable
         return binaryArithmeticExpression.Operator.Asserter(ctx, Left, Right);
     }
 
-    private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, BinaryLogicalExpression binaryLogicalExpression)
+    private BoolExpr BuildBinaryConditionalExpression(AliasTable aliasTable, BinaryConditionalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);

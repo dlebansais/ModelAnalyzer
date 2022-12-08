@@ -1,9 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 /// <summary>
-/// Represents a binary logical expression.
+/// Represents a binary conditional expression.
 /// </summary>
-internal class BinaryLogicalExpression : Expression
+internal class BinaryConditionalExpression : Expression
 {
     /// <inheritdoc/>
     public override bool IsSimple => false;

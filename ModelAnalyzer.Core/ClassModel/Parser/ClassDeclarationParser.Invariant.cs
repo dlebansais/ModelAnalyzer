@@ -28,10 +28,16 @@ internal partial class ClassDeclarationParser
             Location = TrailingTrivia.Last().GetLocation();
         }
 
-        var NextToken = classDeclaration.SyntaxTree.GetRoot().FindToken(Location.SourceSpan.End);
+        SyntaxNode Root = classDeclaration.SyntaxTree.GetRoot();
+        int EndPosition = Location.SourceSpan.End;
 
-        if (NextToken.HasLeadingTrivia)
-            AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, NextToken.LeadingTrivia);
+        if (Root.FullSpan.Contains(EndPosition))
+        {
+            var NextToken = Root.FindToken(EndPosition);
+
+            if (NextToken.HasLeadingTrivia)
+                AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, NextToken.LeadingTrivia);
+        }
 
         return InvariantList;
     }
@@ -116,7 +122,7 @@ internal partial class ClassDeclarationParser
 
     private bool IsValidInvariantExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
     {
-        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode);
+        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
 
         return booleanExpression is not UnsupportedExpression;
     }
