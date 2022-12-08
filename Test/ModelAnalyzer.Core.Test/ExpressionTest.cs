@@ -43,10 +43,10 @@ class Program_CoreExpression_1
 
     void Write(int x)
     {
-        X = x + 1;
-        X = x - 1;
-        X = x * 1;
-        X = x / 1;
+        X = x + 1 + x;
+        X = x - 1 - x;
+        X = x * 1 * x;
+        X = x / 1 / x;
     }
 }
 ");
@@ -104,10 +104,9 @@ class Program_CoreExpression_3
 {
     void Write(int x)
     {
-        if (x == 0 && x == 0)
-            if (x == 0 || x == 0)
-            {
-            }
+        if ((x == 0) && (x == 0 || x == 1) && (x == 0 || x == 1 || x == 2))
+        {
+        }
     }
 }
 ");
@@ -154,5 +153,29 @@ class Program_CoreExpression_4
         SyntaxToken Operator = BinaryExpression.OperatorToken;
 
         return Operator;
+    }
+
+    [Test]
+    public void ParenthesizedExpressionTest()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_5
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = ((x + 1) + (x - 1)) - ((x - 1) - (x + 1));
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
     }
 }
