@@ -3,7 +3,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-[TestFixture]
 public class EnsureTest
 {
     [Test]

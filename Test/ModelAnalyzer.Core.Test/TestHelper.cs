@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics;
-using System.Reflection;
 using System;
 
 internal class TestHelper
@@ -31,14 +30,33 @@ internal class TestHelper
         return ClassDeclaration;
     }
 
-    public static void ReplaceTokenKind(SyntaxToken token, SyntaxKind newKind, out SyntaxKind oldKind)
+    public static TokenReplacement BeginReplaceToken(ClassDeclarationSyntax classDeclaration)
     {
-        Type TokenType = typeof(SyntaxToken);
-        PropertyInfo NodeProperty = TokenType.GetProperty("Node", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        FieldInfo KindField = NodeProperty.PropertyType.GetField("_kind", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        return BeginReplaceToken(classDeclaration, classDeclaration => default, SyntaxKind.None);
+    }
 
-        object Node = NodeProperty.GetValue(token)!;
-        oldKind = (SyntaxKind)(ushort)KindField.GetValue(Node)!;
-        KindField.SetValue(Node, newKind);
+    public static TokenReplacement BeginReplaceToken(ClassDeclarationSyntax classDeclaration, Func<ClassDeclarationSyntax, SyntaxToken> locator, SyntaxKind newKind)
+    {
+        TokenReplacement Result;
+        SyntaxToken Token = locator(classDeclaration);
+
+        if (Token != default)
+            Result = new TokenReplacement(Token, newKind);
+        else
+            Result = TokenReplacement.None;
+
+        return Result;
+    }
+
+    public static IClassModel ToClassModel(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement)
+    {
+        tokenReplacement.Replace();
+
+        ClassModelManager Manager = new();
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.Default, classDeclaration);
+
+        tokenReplacement.Restore();
+
+        return ClassModel;
     }
 }
