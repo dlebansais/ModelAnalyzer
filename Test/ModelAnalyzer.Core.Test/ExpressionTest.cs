@@ -28,7 +28,7 @@ class Program_CoreExpression_0
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
@@ -55,7 +55,7 @@ class Program_CoreExpression_1
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
@@ -79,7 +79,8 @@ class Program_CoreExpression_2
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsFalse(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
@@ -115,7 +116,7 @@ class Program_CoreExpression_3
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
@@ -141,7 +142,8 @@ class Program_CoreExpression_4
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsFalse(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     private SyntaxToken LocateBinaryConditionalOperator(ClassDeclarationSyntax classDeclaration)
@@ -176,6 +178,6 @@ class Program_CoreExpression_5
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 }

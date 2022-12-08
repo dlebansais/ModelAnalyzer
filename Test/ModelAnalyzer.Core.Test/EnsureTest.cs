@@ -26,6 +26,6 @@ class Program_CoreEnsure_0
         ClassModelManager Manager = new();
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext.Default, ClassDeclaration);
 
-        Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
 using System.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 internal class TokenReplacement : IDisposable
 {
