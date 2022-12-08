@@ -6,6 +6,7 @@ using NUnit.Framework;
 public class FieldTest
 {
     [Test]
+    [Category("Core")]
     public void BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -24,6 +25,7 @@ class Program_CoreEnsure_0
     }
 
     [Test]
+    [Category("Core")]
     public void UnsupportedFieldTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadStatementAnalyzer>;
 public class BadStatementUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task StatementIsUnsupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -25,6 +26,7 @@ class Program_BadStatement_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidAssignmentDestination_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -42,6 +44,7 @@ class Program_BadStatement_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ValidReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -60,6 +63,7 @@ class Program_BadStatement_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidReturn_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -79,6 +83,7 @@ class Program_BadStatement_3
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidNestedReturns_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

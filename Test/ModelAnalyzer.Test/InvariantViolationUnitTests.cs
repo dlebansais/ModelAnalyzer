@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<InvariantViolationAnalyzer>;
 public class InvariantViolationUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ValidInitialState_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -22,6 +23,7 @@ class Program_InvariantViolation_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InitialStateViolateInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -36,6 +38,7 @@ class [|Program_InvariantViolation_1|]
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ValidInvariantAfterAssignment_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -55,6 +58,7 @@ class Program_InvariantViolation_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidInvariantAfterAssignment_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -74,6 +78,7 @@ class [|Program_InvariantViolation_3|]
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ValidInvariantAfterConditional_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -96,6 +101,7 @@ class Program_InvariantViolation_4
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -118,6 +124,7 @@ class [|Program_InvariantViolation_5|]
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional2_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -140,6 +147,7 @@ class [|Program_InvariantViolation_6|]
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task UnconstrainedInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -159,6 +167,7 @@ class [|Program_InvariantViolation_7|]
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ConstrainedInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

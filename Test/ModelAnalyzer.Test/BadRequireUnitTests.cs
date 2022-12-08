@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadRequireAnalyzer>;
 public class BadRequireUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ValidExpression_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -27,6 +28,7 @@ class Program_BadRequire_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task RequireWithInvalidCode_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -46,6 +48,7 @@ class Program_BadRequire_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task RequireWithTwoStatements_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -65,6 +68,7 @@ class Program_BadRequire_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task RequireWithUnsupportedExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -84,6 +88,7 @@ class Program_BadRequire_3
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task RequireWithUnknownField_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -103,6 +108,7 @@ class Program_BadRequire_4
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task MissplacedRequires_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

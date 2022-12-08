@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadEnsureAnalyzer>;
 public class BadEnsureUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ValidExpression_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -27,6 +28,7 @@ class Program_BadEnsure_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ValidEnsureAfterExpressionBody_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -43,6 +45,7 @@ class Program_BadEnsure_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task EnsureWithInvalidCode_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -62,6 +65,7 @@ class Program_BadEnsure_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task EnsureWithTwoStatements_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -81,6 +85,7 @@ class Program_BadEnsure_3
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task EnsureWithUnsupportedExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -100,6 +105,7 @@ class Program_BadEnsure_4
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task EnsureWithUnknownField_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -119,6 +125,7 @@ class Program_BadEnsure_5
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task MissplacedEnsures_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

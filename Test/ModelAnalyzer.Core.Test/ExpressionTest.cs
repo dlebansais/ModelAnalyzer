@@ -8,6 +8,7 @@ using NUnit.Framework;
 public class ExpressionTest
 {
     [Test]
+    [Category("Core")]
     public void BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -32,6 +33,7 @@ class Program_CoreExpression_0
     }
 
     [Test]
+    [Category("Core")]
     public void BinaryExpressionTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -59,6 +61,7 @@ class Program_CoreExpression_1
     }
 
     [Test]
+    [Category("Core")]
     public void BinaryExpressionInvalidOperatorTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -96,6 +99,7 @@ class Program_CoreExpression_2
     }
 
     [Test]
+    [Category("Core")]
     public void BinaryConditionalTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -120,6 +124,7 @@ class Program_CoreExpression_3
     }
 
     [Test]
+    [Category("Core")]
     public void BinaryConditionalInvalidOperatorTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -158,6 +163,7 @@ class Program_CoreExpression_4
     }
 
     [Test]
+    [Category("Core")]
     public void ParenthesizedExpressionTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadExpressionAnalyzer>;
 public class BadExpressionUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ExpressionIsUnsupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,6 +27,7 @@ class Program_BadExpression_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task InvalidBinaryExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -44,6 +46,7 @@ class Program_BadExpression_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ValidOperator_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

@@ -6,6 +6,7 @@ using NUnit.Framework;
 public class EnsureTest
 {
     [Test]
+    [Category("Core")]
     public void BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

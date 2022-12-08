@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadInvariantAnalyzer>;
 public class BadInvarianttUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithNoInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -32,6 +33,7 @@ class Program_BadInvariant_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -57,6 +59,7 @@ class Program_BadInvariant_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithErrorInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -82,6 +85,7 @@ class Program_BadInvariant_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithTwoStatementsInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -107,6 +111,7 @@ class Program_BadInvariant_3
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithBadExpressionInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -132,6 +137,7 @@ class Program_BadInvariant_4
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithInvertedExpressionInInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -157,6 +163,7 @@ class Program_BadInvariant_5
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithBadOperatorInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -182,6 +189,7 @@ class Program_BadInvariant_6
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithBadConstantInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -207,6 +215,7 @@ class Program_BadInvariant_7
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ClassWithUnknownFieldInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

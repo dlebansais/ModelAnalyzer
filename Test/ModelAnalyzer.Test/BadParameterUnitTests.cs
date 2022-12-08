@@ -8,6 +8,7 @@ using VerifyCS = CSharpAnalyzerVerifier<BadParameterAnalyzer>;
 public class BadParameterUnitTests
 {
     [Test]
+    [Category("Analyzer")]
     public async Task ParameterShouldNotHaveAttribute_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -23,6 +24,7 @@ class Program_BadParameter_0
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ParameterShouldNotHaveModifier_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -38,6 +40,7 @@ class Program_BadParameter_1
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ParameterPredefinedTypeIsNotSupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -53,6 +56,7 @@ class Program_BadParameter_2
     }
 
     [Test]
+    [Category("Analyzer")]
     public async Task ParameterTypeIsNotSupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
