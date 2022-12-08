@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadStatementAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadStatementUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task StatementIsUnsupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -24,7 +24,7 @@ class Program_BadStatement_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidAssignmentDestination_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -41,7 +41,7 @@ class Program_BadStatement_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -59,7 +59,7 @@ class Program_BadStatement_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidReturn_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -78,7 +78,7 @@ class Program_BadStatement_3
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidNestedReturns_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

@@ -1,12 +1,12 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
-[TestClass]
+[TestFixture]
 public class EnsureTest
 {
-    [TestMethod]
+    [Test]
     public void BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

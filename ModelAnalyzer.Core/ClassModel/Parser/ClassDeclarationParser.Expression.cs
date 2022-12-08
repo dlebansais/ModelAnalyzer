@@ -12,9 +12,10 @@ internal partial class ClassDeclarationParser
     private IExpression ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, bool isNested)
     {
         IExpression? NewExpression = null;
+        Location Location = expressionNode.GetLocation();
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression);
+            NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
             NewExpression = TryParseVariableValueExpression(fieldTable, parameterTable, IdentifierName);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
@@ -24,7 +25,6 @@ internal partial class ClassDeclarationParser
 
         if (NewExpression is null)
         {
-            Location Location = expressionNode.GetLocation();
             unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
 
             NewExpression = UnsupportedExpression;
@@ -35,7 +35,7 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private IExpression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax binaryExpression)
+    private IExpression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax binaryExpression, ref Location location)
     {
         IExpression? NewExpression = null;
         IExpression LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Left, isNested: true);
@@ -45,20 +45,26 @@ internal partial class ClassDeclarationParser
         {
             SyntaxToken OperatorToken = binaryExpression.OperatorToken;
 
-            if (IsBinaryArithmeticOperatorSupported(OperatorToken, out ArithmeticOperator ArithmeticOperator))
+            if (IsSupportedBinaryArithmeticOperator(OperatorToken, out ArithmeticOperator ArithmeticOperator))
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = ArithmeticOperator, Right = Right };
-            else if (IsComparisonOperatorSupported(OperatorToken, out ComparisonOperator ComparisonOperator))
+            else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
                 NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
-            else if (IsBinaryConditionalOperatorSupported(OperatorToken, out LogicalOperator LogicalOperator))
+            else if (IsSupportedBinaryConditionalOperator(OperatorToken, out LogicalOperator LogicalOperator))
                 NewExpression = new BinaryConditionalExpression { Left = Left, Operator = LogicalOperator, Right = Right };
             else
-                Log($"Unsupported expression type '{binaryExpression.GetType().Name}'.");
+            {
+                Log($"Unsupported operator '{OperatorToken.ValueText}'.");
+
+                location = OperatorToken.GetLocation();
+            }
         }
+        else
+            Log($"Unsupported expression type '{binaryExpression.GetType().Name}'.");
 
         return NewExpression;
     }
 
-    private bool IsBinaryArithmeticOperatorSupported(SyntaxToken token, out ArithmeticOperator arithmeticOperator)
+    private bool IsSupportedBinaryArithmeticOperator(SyntaxToken token, out ArithmeticOperator arithmeticOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 
@@ -74,7 +80,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsComparisonOperatorSupported(SyntaxToken token, out ComparisonOperator comparisonOperator)
+    private bool IsSupportedComparisonOperator(SyntaxToken token, out ComparisonOperator comparisonOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 
@@ -90,7 +96,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsBinaryConditionalOperatorSupported(SyntaxToken token, out LogicalOperator logicalOperator)
+    private bool IsSupportedBinaryConditionalOperator(SyntaxToken token, out LogicalOperator logicalOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 

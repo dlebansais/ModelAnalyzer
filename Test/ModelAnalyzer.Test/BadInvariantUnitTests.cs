@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadInvariantAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadInvarianttUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ClassWithNoInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -31,7 +31,7 @@ class Program_BadInvariant_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -56,7 +56,7 @@ class Program_BadInvariant_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithErrorInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -81,7 +81,7 @@ class Program_BadInvariant_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithTwoStatementsInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -106,7 +106,7 @@ class Program_BadInvariant_3
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithBadExpressionInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -131,7 +131,7 @@ class Program_BadInvariant_4
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithInvertedExpressionInInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -156,7 +156,7 @@ class Program_BadInvariant_5
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithBadOperatorInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -181,7 +181,7 @@ class Program_BadInvariant_6
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithBadConstantInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -206,7 +206,7 @@ class Program_BadInvariant_7
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnknownFieldInInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

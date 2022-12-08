@@ -4,12 +4,12 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
-[TestClass]
+[TestFixture]
 public class ExpressionTest
 {
-    [TestMethod]
+    [Test]
     public void BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -36,7 +36,7 @@ class Program_CoreExpression_0
         Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
     }
 
-    [TestMethod]
+    [Test]
     public void BinaryExpressionTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -66,7 +66,7 @@ class Program_CoreExpression_1
         Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
     }
 
-    [TestMethod]
+    [Test]
     public void BinaryExpressionInvalidOperatorTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -105,7 +105,7 @@ class Program_CoreExpression_2
         Assert.IsFalse(ClassModel.Unsupported.IsEmpty);
     }
 
-    [TestMethod]
+    [Test]
     public void BinaryConditionalTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
@@ -133,7 +133,7 @@ class Program_CoreExpression_3
         Assert.IsTrue(ClassModel.Unsupported.IsEmpty);
     }
 
-    [TestMethod]
+    [Test]
     public void BinaryConditionalInvalidOperatorTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadRequireAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadRequireUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ValidExpression_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,7 +26,7 @@ class Program_BadRequire_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task RequireWithInvalidCode_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -45,7 +45,7 @@ class Program_BadRequire_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task RequireWithTwoStatements_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -64,7 +64,7 @@ class Program_BadRequire_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task RequireWithUnsupportedExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -83,7 +83,7 @@ class Program_BadRequire_3
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task RequireWithUnknownField_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -102,7 +102,7 @@ class Program_BadRequire_4
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task MissplacedRequires_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

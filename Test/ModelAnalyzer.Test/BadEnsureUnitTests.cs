@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadEnsureAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadEnsureUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ValidExpression_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,7 +26,7 @@ class Program_BadEnsure_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidEnsureAfterExpressionBody_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -42,7 +42,7 @@ class Program_BadEnsure_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task EnsureWithInvalidCode_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -61,7 +61,7 @@ class Program_BadEnsure_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task EnsureWithTwoStatements_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -80,7 +80,7 @@ class Program_BadEnsure_3
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task EnsureWithUnsupportedExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -99,7 +99,7 @@ class Program_BadEnsure_4
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task EnsureWithUnknownField_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -118,7 +118,7 @@ class Program_BadEnsure_5
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task MissplacedEnsures_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpCodeFixVerifier<ClassModelAnalyzer, ClassModelCodeFixProvider>;
 
-[TestClass]
+[TestFixture]
 public class ClassModelUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ClassWithNoMembers_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -19,7 +19,7 @@ class Program_ClassModel_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -44,7 +44,7 @@ class Program_ClassModel_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassNotModeled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -60,7 +60,7 @@ class Program_ClassModel_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithCommentBeforeNotModeled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -77,7 +77,7 @@ class Program_ClassModel_3
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithCommentAfterNotModeled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -94,7 +94,7 @@ class Program_ClassModel_4
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithCommentCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -121,7 +121,7 @@ class Program_ClassModel_5
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithAttributeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -142,7 +142,7 @@ class Program_ClassModel_6
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPublicModifier_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -154,7 +154,7 @@ public class Program_ClassModel_7
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithInternalModifier_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -166,7 +166,7 @@ internal class Program_ClassModel_8
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPartialModifier_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -178,7 +178,7 @@ partial class Program_ClassModel_9
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedModifierCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -197,7 +197,7 @@ static class Program_ClassModel_10
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithBaseTypeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -222,7 +222,7 @@ class Program_ClassModel_11 : IDisposable
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithTypeParameterCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -241,7 +241,7 @@ class Program_ClassModel_12<T>
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithTypeConstraintCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -262,7 +262,7 @@ where T : class
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithFieldMember_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -275,7 +275,7 @@ class Program_ClassModel_14
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithTwoFieldMembers_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -289,7 +289,7 @@ class Program_ClassModel_15
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithFieldAttributeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -312,7 +312,7 @@ class Program_ClassModel_16
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPrivateFieldModifier_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -325,7 +325,7 @@ class Program_ClassModel_17
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedFieldModifierCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -346,7 +346,7 @@ class Program_ClassModel_18
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPublicFielCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -367,7 +367,7 @@ class Program_ClassModel_19
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedFieldTypeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -388,7 +388,7 @@ class Program_ClassModel_20
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedFieldPredefinedTypeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -409,7 +409,7 @@ class Program_ClassModel_21
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithMethodMemberNoParameters_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -425,7 +425,7 @@ class Program_ClassModel_22
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithMethodMemberWithNoReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -440,7 +440,7 @@ class Program_ClassModel_23
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithMethodAttributeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -469,7 +469,7 @@ class Program_ClassModel_24
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPrivateMethodMember_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -485,7 +485,7 @@ class Program_ClassModel_25
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithPublicMethodMember_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -501,7 +501,7 @@ class Program_ClassModel_26
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithInternalMethodMember_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -517,7 +517,7 @@ class Program_ClassModel_26
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedMethodModifierCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -544,7 +544,7 @@ class Program_ClassModel_27
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedReturnTypeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -571,7 +571,7 @@ class Program_ClassModel_28
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithUnsupportedReturnPredefinedTypeCouldHaveAModel_Diagnostic()
     {
         await VerifyCS.VerifyCodeFixAsync(@"
@@ -598,7 +598,7 @@ class Program_ClassModel_29
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithMethodMemberWithOneParameter_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -614,7 +614,7 @@ class Program_ClassModel_30
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithMethodMemberWithTwoParameters_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -630,7 +630,7 @@ class Program_ClassModel_31
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassWithValidInstructions_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

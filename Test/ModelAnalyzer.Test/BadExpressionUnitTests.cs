@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadExpressionAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadExpressionUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ExpressionIsUnsupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -25,7 +25,7 @@ class Program_BadExpression_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidBinaryExpression_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -43,7 +43,7 @@ class Program_BadExpression_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidOperator_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

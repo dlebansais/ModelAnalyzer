@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<BadParameterAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class BadParameterUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ParameterShouldNotHaveAttribute_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -22,7 +22,7 @@ class Program_BadParameter_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ParameterShouldNotHaveModifier_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -37,7 +37,7 @@ class Program_BadParameter_1
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ParameterPredefinedTypeIsNotSupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -52,7 +52,7 @@ class Program_BadParameter_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ParameterTypeIsNotSupported_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

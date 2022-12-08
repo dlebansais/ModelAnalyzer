@@ -1,13 +1,13 @@
 ﻿namespace ModelAnalyzer.Test;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<InvariantViolationAnalyzer>;
 
-[TestClass]
+[TestFixture]
 public class InvariantViolationUnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ValidInitialState_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -21,7 +21,7 @@ class Program_InvariantViolation_0
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitialStateViolateInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -35,7 +35,7 @@ class [|Program_InvariantViolation_1|]
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidInvariantAfterAssignment_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -54,7 +54,7 @@ class Program_InvariantViolation_2
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvariantAfterAssignment_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -73,7 +73,7 @@ class [|Program_InvariantViolation_3|]
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidInvariantAfterConditional_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -95,7 +95,7 @@ class Program_InvariantViolation_4
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvariantAfterConditional1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -117,7 +117,7 @@ class [|Program_InvariantViolation_5|]
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvariantAfterConditional2_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -139,7 +139,7 @@ class [|Program_InvariantViolation_6|]
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task UnconstrainedInvariant_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -158,7 +158,7 @@ class [|Program_InvariantViolation_7|]
 ");
     }
 
-    [TestMethod]
+    [Test]
     public async Task ConstrainedInvariant_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
