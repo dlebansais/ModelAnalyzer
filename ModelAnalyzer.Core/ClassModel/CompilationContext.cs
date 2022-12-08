@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Threading;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
@@ -15,9 +16,17 @@ public record CompilationContext
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationContext"/> class.
     /// </summary>
-    public CompilationContext()
+    private CompilationContext()
     {
         HashCode = 0;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompilationContext"/> class.
+    /// </summary>
+    private CompilationContext(int newHashCode)
+    {
+        HashCode = newHashCode;
     }
 
     /// <summary>
@@ -29,5 +38,15 @@ public record CompilationContext
         HashCode = context.Compilation.GetHashCode();
     }
 
+    /// <summary>
+    /// Gets a new compilation context to force verification.
+    /// </summary>
+    public static CompilationContext GetAnother()
+    {
+        int NewHashCode = Interlocked.Increment(ref UsedHashCodes);
+        return new CompilationContext(NewHashCode);
+    }
+
     private int HashCode;
+    private static int UsedHashCodes;
 }

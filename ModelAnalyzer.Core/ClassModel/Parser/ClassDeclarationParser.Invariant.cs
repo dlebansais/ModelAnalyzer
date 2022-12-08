@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -124,6 +125,11 @@ internal partial class ClassDeclarationParser
     {
         booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
 
-        return booleanExpression is not UnsupportedExpression;
+        return IsBooleanExpression(booleanExpression);
+    }
+
+    private bool IsBooleanExpression(IExpression expression)
+    {
+        return expression is BinaryConditionalExpression || expression is ComparisonExpression;
     }
 }

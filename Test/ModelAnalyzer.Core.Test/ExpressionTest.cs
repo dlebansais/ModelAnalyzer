@@ -62,7 +62,7 @@ class Program_CoreExpression_1
 
     [Test]
     [Category("Core")]
-    public void BinaryExpressionInvalidOperatorTest()
+    public void BinaryExpressionTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -125,7 +125,7 @@ class Program_CoreExpression_3
 
     [Test]
     [Category("Core")]
-    public void BinaryConditionalInvalidOperatorTest()
+    public void BinaryConditionalTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

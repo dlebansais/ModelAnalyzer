@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -53,7 +54,19 @@ internal class TestHelper
         tokenReplacement.Replace();
 
         ClassModelManager Manager = new();
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.Default, classDeclaration);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), classDeclaration);
+
+        tokenReplacement.Restore();
+
+        return ClassModel;
+    }
+
+    public static async Task<IClassModel> ToClassModelAsync(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement)
+    {
+        tokenReplacement.Replace();
+
+        ClassModelManager Manager = new();
+        IClassModel ClassModel = await Manager.GetClassModelAsync(CompilationContext.GetAnother(), classDeclaration);
 
         tokenReplacement.Restore();
 

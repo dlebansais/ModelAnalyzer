@@ -18,15 +18,16 @@ class Program_CoreEnsure_0
 }
 ");
 
-        ClassModelManager Manager = new();
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.Default, ClassDeclaration);
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest()
+    public void UnsupportedFieldTest_BadType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -37,8 +38,9 @@ class Program_CoreEnsure_0
 }
 ");
 
-        ClassModelManager Manager = new();
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.Default, ClassDeclaration);
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
