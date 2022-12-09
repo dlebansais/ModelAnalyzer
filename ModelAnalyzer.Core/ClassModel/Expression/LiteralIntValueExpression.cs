@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a literal value expression.
 /// </summary>
-internal class LiteralValueExpression : Expression
+internal class LiteralIntValueExpression : Expression
 {
     /// <inheritdoc/>
     public override bool IsSimple => true;

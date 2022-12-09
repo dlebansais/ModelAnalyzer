@@ -130,8 +130,12 @@ internal partial class ClassDeclarationParser
         IExpression? NewExpression = null;
         string LiteralValue = literalExpression.Token.ValueText;
 
-        if (int.TryParse(LiteralValue, out int Value))
-            NewExpression = new LiteralValueExpression { Value = Value };
+        if (LiteralValue == "true")
+            NewExpression = new LiteralBoolValueExpression { Value = true };
+        else if (LiteralValue == "false")
+            NewExpression = new LiteralBoolValueExpression { Value = false };
+        else if (int.TryParse(LiteralValue, out int Value))
+            NewExpression = new LiteralIntValueExpression { Value = Value };
         else
             Log($"Failed to parse literal value '{LiteralValue}'.");
 

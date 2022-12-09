@@ -24,8 +24,11 @@ internal partial class Verifier : IDisposable
             case ComparisonExpression Comparison:
                 Result = BuildComparisonExpression(aliasTable, Comparison);
                 break;
-            case LiteralValueExpression LiteralValue:
-                Result = BuildLiteralValueExpression(LiteralValue);
+            case LiteralIntValueExpression LiteralIntValue:
+                Result = BuildLiteralIntValueExpression(LiteralIntValue);
+                break;
+            case LiteralBoolValueExpression LiteralBoolValue:
+                Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
                 break;
             case ParenthesizedExpression Parenthesized:
                 Result = BuildParenthesizedExpression(aliasTable, Parenthesized);
@@ -62,9 +65,14 @@ internal partial class Verifier : IDisposable
         return comparisonExpression.Operator.Asserter(ctx, Left, Right);
     }
 
-    private ArithExpr BuildLiteralValueExpression(LiteralValueExpression literalValueExpression)
+    private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)
     {
-        return ctx.MkInt(literalValueExpression.Value);
+        return ctx.MkInt(literalIntValueExpression.Value);
+    }
+
+    private BoolExpr BuildLiteralBoolValueExpression(LiteralBoolValueExpression literalBoolValueExpression)
+    {
+        return ctx.MkBool(literalBoolValueExpression.Value);
     }
 
     private Expr BuildParenthesizedExpression(AliasTable aliasTable, ParenthesizedExpression parenthesizedExpression)

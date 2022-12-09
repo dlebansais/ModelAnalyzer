@@ -110,8 +110,10 @@ class Program_CoreExpression_3
     void Write(int x)
     {
         if ((x == 0) && (x == 0 || x == 1) && (x == 0 || x == 1 || x == 2))
-        {
-        }
+            if (true || false)
+                if (true && true)
+                {
+                }
     }
 }
 ");
