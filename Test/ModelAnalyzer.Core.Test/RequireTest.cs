@@ -33,12 +33,38 @@ class Program_CoreRequire_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedRequireTest_ExpressionNotBoolean()
+    public void BasicTest_ComplexRequire()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreRequire_1
+{
+    int X;
+
+    void Write(int x)
+    // Require: x >= 0 || x >= (0 + 1) || (x + 1) <= 0
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedRequireTest_ExpressionNotBoolean()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_2
 {
     int X;
 
@@ -68,7 +94,7 @@ class Program_CoreRequire_1
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_2
+class Program_CoreRequire_3
 {
     int X;
 

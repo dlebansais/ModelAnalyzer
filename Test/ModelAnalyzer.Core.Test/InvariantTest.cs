@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 

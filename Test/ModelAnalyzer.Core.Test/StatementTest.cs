@@ -3,7 +3,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class EnsureTest
+public class StatementTest
 {
     [Test]
     [Category("Core")]
@@ -12,7 +12,7 @@ public class EnsureTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreStatement_0
 {
     int X;
 
@@ -20,7 +20,6 @@ class Program_CoreEnsure_0
     {
         X = x;
     }
-    // Ensure: X == x
 }
 ");
 
@@ -33,20 +32,20 @@ class Program_CoreEnsure_0
 
     [Test]
     [Category("Core")]
-    public void BasicTest_ComplexEnsure()
+    public void AssignmentStatementTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_1
+class Program_CoreStatement_1
 {
-    int X;
+    int X, Y;
 
     void Write(int x)
     {
-        X = x;
+        X = x + 1;
+        Y = X;
     }
-    // Ensure: X == x || X != (x + 1) || (X + 1) != x
 }
 ");
 
@@ -59,20 +58,17 @@ class Program_CoreEnsure_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_ExpressionNotBoolean()
+    public void AssignmentStatementTest_InvalidDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_2
+class Program_CoreStatement_2
 {
-    int X;
-
     void Write(int x)
     {
-        X = x;
+        x = x + 1;
     }
-    // Ensure: 0
 }
 ");
 
@@ -81,28 +77,24 @@ class Program_CoreEnsure_2
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
-
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("0"));
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_TooManyInstructions()
+    public void IfStatementTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_3
+class Program_CoreStatement_3
 {
-    int X;
-
     void Write(int x)
     {
-        X = x;
+        if (x == 0)
+        {
+        }
     }
-    // Ensure: X == 0; break;
 }
 ");
 
@@ -110,10 +102,31 @@ class Program_CoreEnsure_3
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+    [Test]
+    [Category("Core")]
+    public void ReturnStatementTest()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_4
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 }
