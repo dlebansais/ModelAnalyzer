@@ -4,24 +4,22 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class EnsureTest
+public class MethodTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void BasicTest_NoReturnValue()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreMethod_0
 {
     int X;
 
-    void Write(int x)
+    void Write()
     {
-        X = x;
     }
-    // Ensure: X == x
 }
 ");
 
@@ -34,20 +32,19 @@ class Program_CoreEnsure_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_ExpressionNotBoolean()
+    public void BasicTest_WithReturnValue()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_1
+class Program_CoreMethod_1
 {
     int X;
 
-    void Write(int x)
+    int Read()
     {
-        X = x;
+        return X;
     }
-    // Ensure: 0
 }
 ");
 
@@ -55,29 +52,25 @@ class Program_CoreEnsure_1
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
-
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("0"));
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_TooManyInstructions()
+    public void UnsupportedMethodTest_InvalidReturnType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_2
+class Program_CoreMethod_2
 {
     int X;
 
-    void Write(int x)
+    string Write(int x)
     {
         X = x;
+        return ""*"";
     }
-    // Ensure: X == 0; break;
 }
 ");
 
@@ -86,9 +79,9 @@ class Program_CoreEnsure_2
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(1));
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+        IUnsupportedMethod UnsupportedMethod = ClassModel.Unsupported.Methods[0];
+        Assert.That(UnsupportedMethod.Name, Is.EqualTo("*"));
     }
 }

@@ -160,7 +160,8 @@ internal record Unsupported : IUnsupported
                            Requires.Count == 0 &&
                            Ensures.Count == 0 &&
                            Statements.Count == 0 &&
-                           Expressions.Count == 0;
+                           Expressions.Count == 0 &&
+                           Invariants.Count == 0;
 
     private List<IUnsupportedField> InternalFields = new();
     private List<IUnsupportedMethod> InternalMethods = new();

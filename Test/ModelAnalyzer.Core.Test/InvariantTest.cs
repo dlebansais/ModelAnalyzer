@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class EnsureTest
+public class InvariantTest
 {
     [Test]
     [Category("Core")]
@@ -13,7 +13,7 @@ public class EnsureTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreInvariant_0
 {
     int X;
 
@@ -21,25 +21,25 @@ class Program_CoreEnsure_0
     {
         X = x;
     }
-    // Ensure: X == x
 }
+// Invariant: X >= 0 || X < 0
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_ExpressionNotBoolean()
+    public void UnsupportedInvariantTest_ExpressionNotBoolean()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_1
+class Program_CoreInvariant_1
 {
     int X;
 
@@ -47,29 +47,29 @@ class Program_CoreEnsure_1
     {
         X = x;
     }
-    // Ensure: 0
 }
+// Invariant: 0
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Invariants.Count, Is.EqualTo(1));
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("0"));
+        IUnsupportedInvariant UnsupportedInvariant = ClassModel.Unsupported.Invariants[0];
+        Assert.That(UnsupportedInvariant.Text, Is.EqualTo("0"));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_TooManyInstructions()
+    public void UnsupportedInvariantTest_TooManyInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_2
+class Program_CoreInvariant_2
 {
     int X;
 
@@ -77,18 +77,18 @@ class Program_CoreEnsure_2
     {
         X = x;
     }
-    // Ensure: X == 0; break;
 }
+// Invariant: X == 0; break;
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Invariants.Count, Is.EqualTo(1));
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+        IUnsupportedInvariant UnsupportedInvariant = ClassModel.Unsupported.Invariants[0];
+        Assert.That(UnsupportedInvariant.Text, Is.EqualTo("X == 0; break;"));
     }
 }

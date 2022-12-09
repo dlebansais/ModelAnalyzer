@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 internal class TestHelper
 {
+    private static List<string> ClassNameList = new();
+
     public static ClassDeclarationSyntax FromSourceCode(string sourceCode)
     {
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
@@ -27,6 +29,11 @@ internal class TestHelper
 
         Debug.Assert(Root.Members.Count == 1);
         ClassDeclarationSyntax ClassDeclaration = (ClassDeclarationSyntax)Root.Members[0];
+
+        string ClassName = ClassDeclaration.Identifier.ValueText;
+
+        Debug.Assert(!ClassNameList.Contains(ClassName));
+        ClassNameList.Add(ClassName);
 
         return ClassDeclaration;
     }
@@ -49,12 +56,12 @@ internal class TestHelper
         return Result;
     }
 
-    public static IClassModel ToClassModel(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement)
+    public static IClassModel ToClassModel(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement, bool waitIfAsync = false)
     {
         tokenReplacement.Replace();
 
         ClassModelManager Manager = new();
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), classDeclaration);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), classDeclaration, waitIfAsync);
 
         tokenReplacement.Restore();
 

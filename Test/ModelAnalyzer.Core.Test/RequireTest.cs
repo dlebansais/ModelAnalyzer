@@ -1,10 +1,9 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class EnsureTest
+public class RequireTest
 {
     [Test]
     [Category("Core")]
@@ -13,15 +12,15 @@ public class EnsureTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreRequire_0
 {
     int X;
 
     void Write(int x)
+    // Require: x >= 0
     {
         X = x;
     }
-    // Ensure: X == x
 }
 ");
 
@@ -34,20 +33,20 @@ class Program_CoreEnsure_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_ExpressionNotBoolean()
+    public void UnsupportedRequireTest_ExpressionNotBoolean()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_1
+class Program_CoreRequire_1
 {
     int X;
 
     void Write(int x)
+    // Require: 0
     {
         X = x;
     }
-    // Ensure: 0
 }
 ");
 
@@ -56,28 +55,28 @@ class Program_CoreEnsure_1
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("0"));
+        IUnsupportedRequire UnsupportedRequire = ClassModel.Unsupported.Requires[0];
+        Assert.That(UnsupportedRequire.Text, Is.EqualTo("0"));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_TooManyInstructions()
+    public void UnsupportedRequireTest_TooManyInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_2
+class Program_CoreRequire_2
 {
     int X;
 
     void Write(int x)
+    // Require: X == 0; break;
     {
         X = x;
     }
-    // Ensure: X == 0; break;
 }
 ");
 
@@ -86,9 +85,9 @@ class Program_CoreEnsure_2
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
 
-        IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
-        Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+        IUnsupportedRequire UnsupportedRequire = ClassModel.Unsupported.Requires[0];
+        Assert.That(UnsupportedRequire.Text, Is.EqualTo("X == 0; break;"));
     }
 }

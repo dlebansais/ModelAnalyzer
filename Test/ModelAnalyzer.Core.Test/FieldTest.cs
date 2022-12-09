@@ -12,7 +12,7 @@ public class FieldTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreField_0
 {
     int X;
 }
@@ -32,7 +32,7 @@ class Program_CoreEnsure_0
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreEnsure_0
+class Program_CoreField_1
 {
     string X;
 }
