@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -22,7 +23,8 @@ internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, 
     /// <param name="item">The item.</param>
     public void AddItem(TName itemName, TItem item)
     {
-        Debug.Assert(!IsSealed);
+        if (IsSealed)
+            throw new InvalidOperationException("Cannot add items to a sealed table.");
 
         Table.Add(itemName, item);
     }

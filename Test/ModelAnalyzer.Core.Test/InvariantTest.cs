@@ -29,6 +29,13 @@ class Program_CoreInvariant_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreInvariant_0
+  int X
+  void Write(x)
+  * (X >= 0) || (X < 0)
+"));
     }
 
     [Test]

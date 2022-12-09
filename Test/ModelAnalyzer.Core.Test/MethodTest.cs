@@ -16,7 +16,7 @@ class Program_CoreMethod_0
 {
     int X;
 
-    void Write()
+    void Write(int x, int y)
     {
     }
 }
@@ -27,6 +27,12 @@ class Program_CoreMethod_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_0
+  int X
+  void Write(x, y)
+"));
     }
 
     [Test]
@@ -52,6 +58,12 @@ class Program_CoreMethod_1
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_1
+  int X
+  int Read()
+"));
     }
 
     [Test]
@@ -82,5 +94,10 @@ class Program_CoreMethod_2
 
         IUnsupportedMethod UnsupportedMethod = ClassModel.Unsupported.Methods[0];
         Assert.That(UnsupportedMethod.Name, Is.EqualTo("*"));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_2
+  int X
+"));
     }
 }

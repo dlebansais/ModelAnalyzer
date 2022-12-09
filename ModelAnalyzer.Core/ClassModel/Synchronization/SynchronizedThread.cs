@@ -9,7 +9,7 @@ using System.Threading;
 /// </summary>
 /// <typeparam name="TSynch">The type of the synchronization object.</typeparam>
 /// <typeparam name="TItem">The type of the object being synchronized.</typeparam>
-internal class SynchronizedThread<TSynch, TItem>
+internal class SynchronizedThread<TSynch, TItem> : IDisposable
     where TItem : class
 {
     /// <summary>
@@ -51,9 +51,25 @@ internal class SynchronizedThread<TSynch, TItem>
         }
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Thread? DisposedThread;
+
+        lock (Context.Lock)
+        {
+            DisposedThread = SynchronizationThread;
+            ThreadShouldBeRestarted = false;
+        }
+
+        if (DisposedThread is not null)
+            DisposedThread.Join();
+    }
+
     private void ExecuteThread()
     {
         IDictionary<TSynch, TItem> CloneTable;
+        Thread? RestartedThread;
 
         lock (Context.Lock)
         {
@@ -63,22 +79,21 @@ internal class SynchronizedThread<TSynch, TItem>
 
         Callback(CloneTable);
 
-        bool Restart = false;
-
         lock (Context.Lock)
         {
-            SynchronizationThread = null;
-
             if (ThreadShouldBeRestarted)
-                Restart = true;
+            {
+                ThreadShouldBeRestarted = false;
+                SynchronizationThread = new Thread(new ThreadStart(ExecuteThread));
+            }
+            else
+                SynchronizationThread = null;
+
+            RestartedThread = SynchronizationThread;
         }
 
-        if (Restart)
-        {
-            ThreadShouldBeRestarted = false;
-            SynchronizationThread = new Thread(new ThreadStart(ExecuteThread));
-            SynchronizationThread.Start();
-        }
+        if (RestartedThread is not null)
+            RestartedThread.Start();
     }
 
     private Thread? SynchronizationThread = null;

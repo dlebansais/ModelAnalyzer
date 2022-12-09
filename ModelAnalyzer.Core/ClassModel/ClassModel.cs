@@ -67,13 +67,11 @@ internal partial record ClassModel : IClassModel
                 string ReturnString = Method.HasReturnValue ? "int" : "void";
                 Result += @$"  {ReturnString} {Method.MethodName.Name}({Parameters})
 ";
-
-                foreach (Invariant Invariant in InvariantList)
-                {
-                    Result += @$"  * {Invariant.BooleanExpression}
-";
-                }
             }
+
+        foreach (Invariant Invariant in InvariantList)
+            Result += @$"  * {Invariant.BooleanExpression}
+";
 
         return Result;
     }

@@ -23,6 +23,11 @@ class Program_CoreField_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_0
+  int X
+"));
     }
 
     [Test]
@@ -47,5 +52,9 @@ class Program_CoreField_1
 
         IUnsupportedField UnsupportedField = ClassModel.Unsupported.Fields[0];
         Assert.That(UnsupportedField.Name, Is.EqualTo("*"));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_1
+"));
     }
 }
