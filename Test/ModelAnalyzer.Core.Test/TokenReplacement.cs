@@ -13,7 +13,7 @@ internal class TokenReplacement : IDisposable
     private TokenReplacement()
     {
         Token = default;
-        NewKind = SyntaxKind.None;
+        NewKind = NullTokenKind;
     }
 
     public TokenReplacement(SyntaxToken token, SyntaxKind newKind)
@@ -25,11 +25,11 @@ internal class TokenReplacement : IDisposable
     public SyntaxToken Token { get; }
     public SyntaxKind NewKind { get; }
 
-    public bool IsReplaced => OldKind != SyntaxKind.None;
+    public bool IsReplaced => OldKind != NullTokenKind;
 
     public void Replace()
     {
-        if (NewKind != SyntaxKind.None && OldKind == SyntaxKind.None)
+        if (NewKind != NullTokenKind && OldKind == NullTokenKind)
         {
             TokenManipulationMutex.WaitOne();
 
@@ -39,10 +39,10 @@ internal class TokenReplacement : IDisposable
 
     public void Restore()
     {
-        if (OldKind != SyntaxKind.None)
+        if (OldKind != NullTokenKind)
         {
             ChangeTokenKind(Token, OldKind);
-            OldKind = SyntaxKind.None;
+            OldKind = NullTokenKind;
 
             TokenManipulationMutex.ReleaseMutex();
         }
@@ -53,7 +53,7 @@ internal class TokenReplacement : IDisposable
         Restore();
     }
 
-    private SyntaxKind OldKind = SyntaxKind.None;
+    private SyntaxKind OldKind = NullTokenKind;
 
     private static SyntaxKind ChangeTokenKind(SyntaxToken token, SyntaxKind newKind)
     {
@@ -70,4 +70,5 @@ internal class TokenReplacement : IDisposable
 
     // When replacing a token, the replacement is for all compiled programs. Therefore, use this mutex to compile programs only one at a time, and make sure you restore the replaced token once done.
     private static Mutex TokenManipulationMutex = new();
+    private const SyntaxKind NullTokenKind = (SyntaxKind)0x7FF;
 }

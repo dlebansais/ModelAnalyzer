@@ -3,7 +3,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class ParameterTest
+public class ClassTest
 {
     [Test]
     [Category("Core")]
@@ -12,64 +12,8 @@ public class ParameterTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreParameter_0
+class Program_CoreClass_0
 {
-    int X;
-
-    void Write(int x)
-    {
-    }
-}
-");
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void UnsupportedParameterTest_InvalidParameterType()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreParameter_2
-{
-    int X;
-
-    void Write(string x)
-    {
-    }
-}
-");
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
-        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
-
-        IUnsupportedParameter UnsupportedParameter = ClassModel.Unsupported.Parameters[0];
-        Assert.That(UnsupportedParameter.Name, Is.EqualTo("*"));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ParameterTest_DuplicateParameterName()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreParameter_3
-{
-    void Write(int x, int x)
-    {
-    }
 }
 ");
 
@@ -80,23 +24,20 @@ class Program_CoreParameter_3
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreParameter_3
-  void Write(x)
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_0
 "));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_Attribute()
+    public void InvalidClassTest_Attribute()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreParameter_4
+[Serializable]
+class Program_CoreClass_1
 {
-    void Write([System.Runtime.InteropServices.In]int x)
-    {
-    }
 }
 ");
 
@@ -105,22 +46,17 @@ class Program_CoreParameter_4
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
-        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_Modifier()
+    public void ClassTest_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreParameter_5
+public class Program_CoreClass_2
 {
-    void Write(ref int x)
-    {
-    }
 }
 ");
 
@@ -128,23 +64,42 @@ class Program_CoreParameter_5
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
-        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_2
+"));
     }
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_NameCollisionWithField()
+    public void InvalidClassTest_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreParameter_6
+static class Program_CoreClass_3
 {
-    int X;
+}
+");
 
-    void Write(int X)
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InvalidClassTest_Base()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClass_4 : IDisposable
+{
+    public void Dispose()
     {
     }
 }
@@ -155,7 +110,46 @@ class Program_CoreParameter_6
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
-        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InvalidClassTest_TypeParameter()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClass_5<T>
+{
+    T X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InvalidClassTest_Constraint()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClass_6<T>
+    where T : class
+{
+    T X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
     }
 }

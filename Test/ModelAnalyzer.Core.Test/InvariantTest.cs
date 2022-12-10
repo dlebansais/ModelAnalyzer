@@ -97,4 +97,82 @@ class Program_CoreInvariant_2
         IUnsupportedInvariant UnsupportedInvariant = ClassModel.Unsupported.Invariants[0];
         Assert.That(UnsupportedInvariant.Text, Is.EqualTo("X == 0; break;"));
     }
+
+    [Test]
+    [Category("Core")]
+    public void InvariantTest_NoNewLineAtEndofFile()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreInvariant_3
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InvariantTest_InNamespace()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+namespace Invariant
+{
+    using System;
+
+    class Program_CoreInvariant_4
+    {
+        int X;
+
+        void Write(int x)
+        {
+            X = x;
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InvariantTest_NoKeyword()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreInvariant_5
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+// Invariant
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
 }

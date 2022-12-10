@@ -72,13 +72,6 @@ internal partial class ClassDeclarationParser
             IField NewField;
             bool IsFieldSupported = true;
 
-            if (variable.ArgumentList is BracketedArgumentListSyntax BracketedArgumentList && BracketedArgumentList.Arguments.Count > 0)
-            {
-                LogWarning($"Unsupported bracketed syntax for field.");
-
-                IsFieldSupported = false;
-            }
-
             if (variable.Initializer is not null)
             {
                 LogWarning($"Unsupported field initializer.");

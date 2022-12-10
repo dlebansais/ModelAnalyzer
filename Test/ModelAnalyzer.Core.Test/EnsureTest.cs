@@ -40,7 +40,7 @@ class Program_CoreEnsure_0
 
     [Test]
     [Category("Core")]
-    public void BasicTest_ComplexEnsure()
+    public void EnsureTest_ComplexEnsure()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

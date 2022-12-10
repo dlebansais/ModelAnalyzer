@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -60,17 +59,14 @@ internal partial class ClassDeclarationParser
     {
         IStatement? NewStatement = null;
 
-        if (statementNode.AttributeLists.Count == 0)
-        {
-            if (statementNode is ExpressionStatementSyntax ExpressionStatement)
-                NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
-            else if (statementNode is IfStatementSyntax IfStatement)
-                NewStatement = TryParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
-            else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
-                NewStatement = TryParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
-            else
-                Log($"Unsupported statement type '{statementNode.GetType().Name}'.");
-        }
+        if (statementNode is ExpressionStatementSyntax ExpressionStatement)
+            NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
+        else if (statementNode is IfStatementSyntax IfStatement)
+            NewStatement = TryParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
+        else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
+            NewStatement = TryParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
+        else
+            Log($"Unsupported statement type '{statementNode.GetType().Name}'.");
 
         if (NewStatement is null)
         {
@@ -85,13 +81,14 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private IStatement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax node)
+    private IStatement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement)
     {
         IStatement? NewStatement = null;
 
-        if (node.Expression is AssignmentExpressionSyntax AssignmentExpression &&
-            AssignmentExpression.Left is IdentifierNameSyntax IdentifierName &&
-            TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
+        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)expressionStatement.Expression;
+        IdentifierNameSyntax IdentifierName = (IdentifierNameSyntax)AssignmentExpression.Left;
+
+        if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
         {
             IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
             NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
@@ -102,13 +99,13 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private IStatement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax node)
+    private IStatement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement)
     {
-        IExpression Condition = ParseExpression(fieldTable, parameterTable, unsupported, node.Condition, isNested: false);
-        List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, node.Statement);
+        IExpression Condition = ParseExpression(fieldTable, parameterTable, unsupported, ifStatement.Condition, isNested: false);
+        List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ifStatement.Statement);
         List<IStatement> WhenFalseStatementList;
 
-        if (node.Else is ElseClauseSyntax ElseClause)
+        if (ifStatement.Else is ElseClauseSyntax ElseClause)
             WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
         else
             WhenFalseStatementList = new();
@@ -116,12 +113,12 @@ internal partial class ClassDeclarationParser
         return new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
     }
 
-    private IStatement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax node)
+    private IStatement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement)
     {
         IExpression? ReturnExpression;
 
-        if (node.Expression is not null)
-            ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, node.Expression, isNested: false);
+        if (returnStatement.Expression is not null)
+            ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, returnStatement.Expression, isNested: false);
         else
             ReturnExpression = null;
 

@@ -146,4 +146,25 @@ class Program_CoreField_5
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedFieldTest_Initializer()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_6
+{
+    int X = 0;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
+    }
 }

@@ -1,8 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -76,60 +74,5 @@ internal partial class ClassDeclarationParser
         }
 
         invariantList.Add(NewInvariant);
-    }
-
-    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
-    {
-        bool IsInvariantSupported = true;
-
-        CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
-
-        if (Root.AttributeLists.Count > 0)
-        {
-            Log($"Attributes not supported in assertions.");
-            IsInvariantSupported = false;
-        }
-
-        if (Root.Usings.Count > 0)
-        {
-            Log($"Using directive not supported in assertions.");
-            IsInvariantSupported = false;
-        }
-
-        booleanExpression = null!;
-
-        if (Root.Members.Count != 1)
-        {
-            Log($"There can be only one expression in an assertion.");
-            IsInvariantSupported = false;
-        }
-        else if (Root.Members[0] is not GlobalStatementSyntax GlobalStatement ||
-                 GlobalStatement.Statement is not ExpressionStatementSyntax ExpressionStatement ||
-                 ExpressionStatement.Expression is not AssignmentExpressionSyntax AssignmentExpression)
-        {
-            Log($"Unsupported assertion syntax.");
-            IsInvariantSupported = false;
-        }
-        else
-        {
-            ExpressionSyntax Expression = AssignmentExpression.Right;
-
-            if (!IsValidInvariantExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression))
-                IsInvariantSupported = false;
-        }
-
-        return IsInvariantSupported;
-    }
-
-    private bool IsValidInvariantExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
-    {
-        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
-
-        return IsBooleanExpression(booleanExpression);
-    }
-
-    private bool IsBooleanExpression(IExpression expression)
-    {
-        return expression is BinaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }
 }

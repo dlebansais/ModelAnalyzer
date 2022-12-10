@@ -341,4 +341,32 @@ class Program_CoreExpression_10
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(3));
     }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedExpressionTest_Literal()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_11
+{
+    int X;
+
+    void Write(int x)
+    {
+        if (x == ""*"")
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+    }
 }

@@ -28,7 +28,12 @@ internal class TestHelper
         CompilationUnitSyntax Root = SyntaxTree.GetCompilationUnitRoot();
 
         Debug.Assert(Root.Members.Count == 1);
-        ClassDeclarationSyntax ClassDeclaration = (ClassDeclarationSyntax)Root.Members[0];
+
+        ClassDeclarationSyntax ClassDeclaration;
+        if (Root.Members[0] is ClassDeclarationSyntax AsClassDeclaration)
+            ClassDeclaration = AsClassDeclaration;
+        else
+            ClassDeclaration = (ClassDeclarationSyntax)((NamespaceDeclarationSyntax)Root.Members[0]).Members[0];
 
         string ClassName = ClassDeclaration.Identifier.ValueText;
 

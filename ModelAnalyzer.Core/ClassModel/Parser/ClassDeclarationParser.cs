@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
@@ -25,19 +26,23 @@ internal partial class ClassDeclarationParser
 
         Log($"Parsing declaration of class '{ClassName}'");
 
-        if (ClassName == string.Empty || !IsClassDeclarationSupported(classDeclaration))
-        {
-            Unsupported.InvalidDeclaration = true;
-            FieldTable = new FieldTable();
-            MethodTable = new MethodTable();
-            InvariantList = new List<IInvariant>();
-        }
-        else
+        bool IsClassSupported = true;
+        IsClassSupported &= ClassName != string.Empty; // Only happens during edition of invalid programs. For code coverage purpose, the boolean value is always tested.
+        IsClassSupported &= IsClassDeclarationSupported(classDeclaration);
+
+        if (IsClassSupported)
         {
             Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(classDeclaration);
             FieldTable = ParseFields(classDeclaration, Unsupported);
             MethodTable = ParseMethods(classDeclaration, FieldTable, Unsupported);
             InvariantList = ParseInvariants(classDeclaration, FieldTable, Unsupported);
+        }
+        else
+        {
+            Unsupported.InvalidDeclaration = true;
+            FieldTable = new FieldTable();
+            MethodTable = new MethodTable();
+            InvariantList = new List<IInvariant>();
         }
     }
 
@@ -176,6 +181,44 @@ internal partial class ClassDeclarationParser
         List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
 
         return ErrorList.Count == 0 && IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
+    }
+
+    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
+    {
+        bool IsInvariantSupported = true;
+
+        CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
+        Debug.Assert(Root.AttributeLists.Count == 0 && Root.Usings.Count == 0, "The root begins with an assignment and no attributes.");
+
+        booleanExpression = null!;
+
+        if (Root.Members.Count != 1)
+        {
+            Log($"There can be only one expression in an assertion.");
+            IsInvariantSupported = false;
+        }
+
+        GlobalStatementSyntax GlobalStatement = (GlobalStatementSyntax)Root.Members[0];
+        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)GlobalStatement.Statement;
+        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
+        ExpressionSyntax Expression = AssignmentExpression.Right;
+
+        if (!IsValidAssertionExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression))
+            IsInvariantSupported = false;
+
+        return IsInvariantSupported;
+    }
+
+    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
+    {
+        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
+
+        return IsBooleanExpression(booleanExpression);
+    }
+
+    private bool IsBooleanExpression(IExpression expression)
+    {
+        return expression is BinaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }
 
     private bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)

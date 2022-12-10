@@ -40,7 +40,7 @@ class Program_CoreRequire_0
 
     [Test]
     [Category("Core")]
-    public void BasicTest_ComplexRequire()
+    public void RequireTest_ComplexRequire()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -239,6 +239,34 @@ class Program_CoreRequire_6
   int X
   void Write(x)
     require x >= 0
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void RequireTest_ExpressionBody()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_7
+{
+    int X;
+
+    int Read() => X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_7
+  int X
+  int Read()
 "));
     }
 }
