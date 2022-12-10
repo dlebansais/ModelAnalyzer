@@ -188,4 +188,157 @@ class Program_CoreExpression_5
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void ExpressionInAssertionTest()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_6
+{
+    int X;
+
+    void Write(int x)
+    // Require: x >= 0
+    // Require: (x + 1) >= (0)
+    // Require: true
+    {
+        X = x;
+    }
+    // Ensure: (X) >= 0
+    // Ensure: X >= 0 && (X >= 1)
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_6
+  int X
+  void Write(x)
+    require x >= 0
+    require x + 1 >= 0
+    require True
+    ensure X >= 0
+    ensure X >= 0 && X >= 1
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedExpressionTest()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_7
+{
+    int X;
+
+    void Write(int x)
+    {
+        if (x is string)
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedExpressionTest_Nested()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_8
+{
+    int X;
+
+    void Write(int x)
+    {
+        if (x is string || x is double)
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(5));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedExpressionTest_InvalidFieldName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_9
+{
+    int X;
+
+    void Write(int x)
+    {
+        if (Y == 0)
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedExpressionTest_Parenthesized()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_10
+{
+    int X;
+
+    void Write(int x)
+    {
+        if ((x is string))
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(3));
+    }
 }

@@ -22,6 +22,6 @@ internal class ParenthesizedExpression : Expression
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return ToString();
+        return Inside.ToSimpleString();
     }
 }

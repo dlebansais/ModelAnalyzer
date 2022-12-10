@@ -26,8 +26,8 @@ internal class ComparisonExpression : Expression
     /// <inheritdoc/>
     public override string ToString()
     {
-        string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
-        string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
+        string LeftString = Left.IsSimple ? $"{Left}" : $"({Left.ToSimpleString()})";
+        string RightString = Right.IsSimple ? $"{Right}" : $"({Right.ToSimpleString()})";
         return $"{LeftString} {Operator.Text} {RightString}";
     }
 

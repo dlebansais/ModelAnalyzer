@@ -130,6 +130,6 @@ internal partial class ClassDeclarationParser
 
     private bool IsBooleanExpression(IExpression expression)
     {
-        return expression is BinaryConditionalExpression || expression is ComparisonExpression;
+        return expression is BinaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }
 }
