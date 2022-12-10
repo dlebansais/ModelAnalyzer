@@ -125,8 +125,7 @@ internal partial class Verifier : IDisposable
             IsInvariantViolated = true;
             Log($"Invariant violation for class {ClassName}");
 
-            string ModelString = solver.Model.ToString();
-            ModelString = ModelString.Replace("\n", "\r\n");
+            string ModelString = TextBuilder.Normalized(solver.Model.ToString());
             Log(ModelString);
         }
         else

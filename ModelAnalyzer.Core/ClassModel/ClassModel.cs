@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents the model of a class.
@@ -52,7 +51,7 @@ internal partial record ClassModel : IClassModel
         AppendMethods(Builder);
         AppendInvariants(Builder);
 
-        return Builder.ToString();
+        return TextBuilder.Normalized(Builder.ToString());
     }
 
     private void AppendClassName(StringBuilder builder)

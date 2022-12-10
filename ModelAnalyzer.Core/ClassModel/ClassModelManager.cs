@@ -8,7 +8,6 @@ using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
 /// Represents a manager for class models.
