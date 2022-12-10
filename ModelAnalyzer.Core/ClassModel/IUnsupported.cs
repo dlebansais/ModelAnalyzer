@@ -13,6 +13,16 @@ public interface IUnsupported
     bool IsEmpty { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the class declaration is not supported.
+    /// </summary>
+    bool InvalidDeclaration { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the class contains unsupported members (other than fields and methods).
+    /// </summary>
+    bool HasUnsupporteMember { get; }
+
+    /// <summary>
     /// Gets the list of unsupported fields.
     /// </summary>
     IReadOnlyList<IUnsupportedField> Fields { get; }

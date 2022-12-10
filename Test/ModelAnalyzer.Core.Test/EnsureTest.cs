@@ -155,4 +155,83 @@ class Program_CoreEnsure_4
   void Write(x)
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void EnsureTest_MultipleMethods()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_5
+{
+    int X;
+
+    void Write1(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == x
+
+    void Write2(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == x
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_5
+  int X
+  void Write1(x)
+    ensure X == x
+  void Write2(x)
+    ensure X == x
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void EnsureTest_UnsupportedMember()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_6
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == x
+
+    int Getter { get; }
+    // Ensure: X == x
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.HasUnsupporteMember, Is.True);
+        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_6
+  int X
+  void Write(x)
+    ensure X == x
+"));
+    }
 }

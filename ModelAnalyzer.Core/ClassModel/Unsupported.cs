@@ -8,19 +8,25 @@ using Microsoft.CodeAnalysis;
 /// </summary>
 internal record Unsupported : IUnsupported
 {
-    /// <summary>
-    /// Gets or sets a value indicating whether the class declaration is not supported.
-    /// </summary>
+    /// <inheritdoc/>
+    public bool IsEmpty => !InvalidDeclaration &&
+                           !HasUnsupporteMember &&
+                           Fields.Count == 0 &&
+                           Methods.Count == 0 &&
+                           Parameters.Count == 0 &&
+                           Requires.Count == 0 &&
+                           Ensures.Count == 0 &&
+                           Statements.Count == 0 &&
+                           Expressions.Count == 0 &&
+                           Invariants.Count == 0;
+
+    /// <inheritdoc/>
     public bool InvalidDeclaration { get; set; }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the class contains unsupported members (other than fields and methods).
-    /// </summary>
+    /// <inheritdoc/>
     public bool HasUnsupporteMember { get; set; }
 
-    /// <summary>
-    /// Gets the list of unsupported fields.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedField> Fields => InternalFields.AsReadOnly();
 
     /// <summary>
@@ -34,9 +40,7 @@ internal record Unsupported : IUnsupported
         InternalFields.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported methods.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedMethod> Methods => InternalMethods.AsReadOnly();
 
     /// <summary>
@@ -50,9 +54,7 @@ internal record Unsupported : IUnsupported
         InternalMethods.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported parameters.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedParameter> Parameters => InternalParameters.AsReadOnly();
 
     /// <summary>
@@ -66,9 +68,7 @@ internal record Unsupported : IUnsupported
         InternalParameters.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported requirements.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedRequire> Requires => InternalRequires.AsReadOnly();
 
     /// <summary>
@@ -83,9 +83,7 @@ internal record Unsupported : IUnsupported
         InternalRequires.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported guarantees.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedEnsure> Ensures => InternalEnsures.AsReadOnly();
 
     /// <summary>
@@ -100,9 +98,7 @@ internal record Unsupported : IUnsupported
         InternalEnsures.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported statements.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedStatement> Statements => InternalStatements.AsReadOnly();
 
     /// <summary>
@@ -116,9 +112,7 @@ internal record Unsupported : IUnsupported
         InternalStatements.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported expressions.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedExpression> Expressions => InternalExpressions.AsReadOnly();
 
     /// <summary>
@@ -132,9 +126,7 @@ internal record Unsupported : IUnsupported
         InternalExpressions.Add(newItem);
     }
 
-    /// <summary>
-    /// Gets the list of unsupported invariants.
-    /// </summary>
+    /// <inheritdoc/>
     public IReadOnlyList<IUnsupportedInvariant> Invariants => InternalInvariants.AsReadOnly();
 
     /// <summary>
@@ -148,20 +140,6 @@ internal record Unsupported : IUnsupported
         newItem = new UnsupportedInvariant { Text = text, Location = location };
         InternalInvariants.Add(newItem);
     }
-
-    /// <summary>
-    /// Gets a value indicating whether there is nothing unsupported.
-    /// </summary>
-    public bool IsEmpty => !InvalidDeclaration &&
-                           !HasUnsupporteMember &&
-                           Fields.Count == 0 &&
-                           Methods.Count == 0 &&
-                           Parameters.Count == 0 &&
-                           Requires.Count == 0 &&
-                           Ensures.Count == 0 &&
-                           Statements.Count == 0 &&
-                           Expressions.Count == 0 &&
-                           Invariants.Count == 0;
 
     private List<IUnsupportedField> InternalFields = new();
     private List<IUnsupportedMethod> InternalMethods = new();
