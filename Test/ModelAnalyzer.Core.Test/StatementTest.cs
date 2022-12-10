@@ -89,10 +89,13 @@ using System;
 
 class Program_CoreStatement_3
 {
+    int X;
+
     void Write(int x)
     {
         if (x == 0)
         {
+            X = x;
         }
     }
 }
@@ -114,13 +117,17 @@ using System;
 
 class Program_CoreStatement_4
 {
+    int X;
+
     void Write(int x)
     {
         if (x == 0)
         {
+            X = 0;
         }
         else
         {
+            X = x;
         }
     }
 }

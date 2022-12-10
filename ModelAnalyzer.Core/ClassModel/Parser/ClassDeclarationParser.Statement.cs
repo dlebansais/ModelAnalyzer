@@ -15,7 +15,8 @@ internal partial class ClassDeclarationParser
 
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
             StatementList = ParseExpressionBody(fieldTable, parameterTable, unsupported, ArrowExpressionClause.Expression);
-        else if (methodDeclaration.Body is BlockSyntax Block)
+
+        if (methodDeclaration.Body is BlockSyntax Block)
             StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block, isMainBlock: true);
 
         return StatementList;

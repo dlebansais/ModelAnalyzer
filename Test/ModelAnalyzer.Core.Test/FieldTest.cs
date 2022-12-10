@@ -167,4 +167,30 @@ class Program_CoreField_6
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void FieldTest_InvalidFieldTestedAsDestination()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_7
+{
+    string X;
+    int Y;
+
+    void Write(int y)
+    {
+        Y = y;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
 }

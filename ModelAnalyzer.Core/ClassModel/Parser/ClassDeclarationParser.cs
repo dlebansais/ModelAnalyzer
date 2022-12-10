@@ -188,9 +188,8 @@ internal partial class ClassDeclarationParser
         bool IsInvariantSupported = true;
 
         CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
-        Debug.Assert(Root.AttributeLists.Count == 0 && Root.Usings.Count == 0, "The root begins with an assignment and no attributes.");
-
-        booleanExpression = null!;
+        Debug.Assert(Root.AttributeLists.Count == 0, "The root begins with an assignment and no attributes.");
+        Debug.Assert(Root.Usings.Count == 0, "The root begins with an assignment and no usings.");
 
         if (Root.Members.Count != 1)
         {
