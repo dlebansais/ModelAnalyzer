@@ -34,6 +34,7 @@ class Program_CoreEnsure_0
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_0
   int X
   void Write(x)
+    ensure X == x
 "));
     }
 
@@ -121,5 +122,37 @@ class Program_CoreEnsure_3
 
         IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
         Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnparsedEnsureTest_NoKeyword()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_4
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_4
+  int X
+  void Write(x)
+"));
     }
 }

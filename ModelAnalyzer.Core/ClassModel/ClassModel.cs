@@ -1,6 +1,8 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Text;
+using Microsoft.Z3;
 
 /// <summary>
 /// Represents the model of a class.
@@ -43,36 +45,67 @@ internal partial record ClassModel : IClassModel
     /// <inheritdoc/>
     public override string ToString()
     {
-        string Result = @$"{Name}
-";
+        StringBuilder Builder = new();
 
+        AppendClassName(Builder);
+        AppendFields(Builder);
+        AppendMethods(Builder);
+        AppendInvariants(Builder);
+
+        return Builder.ToString();
+    }
+
+    private void AppendClassName(StringBuilder builder)
+    {
+        builder.AppendLine(Name);
+    }
+
+    private void AppendFields(StringBuilder builder)
+    {
         foreach (KeyValuePair<FieldName, IField> FieldEntry in FieldTable)
             if (FieldEntry.Value is Field Field)
-                Result += @$"  int {Field.Name}
-";
+                builder.AppendLine($"  int {Field.Name}");
+    }
 
+    private void AppendMethods(StringBuilder builder)
+    {
         foreach (KeyValuePair<MethodName, IMethod> MethodEntry in MethodTable)
             if (MethodEntry.Value is Method Method)
-            {
-                string Parameters = string.Empty;
+                MethodToString(builder, Method);
+    }
 
-                foreach (KeyValuePair<ParameterName, IParameter> ParameterEntry in Method.ParameterTable)
-                {
-                    if (Parameters.Length > 0)
-                        Parameters += ", ";
+    private void MethodToString(StringBuilder builder, Method method)
+    {
+        string Parameters = string.Empty;
 
-                    Parameters += ParameterEntry.Key.Name;
-                }
+        foreach (KeyValuePair<ParameterName, IParameter> ParameterEntry in method.ParameterTable)
+        {
+            if (Parameters.Length > 0)
+                Parameters += ", ";
 
-                string ReturnString = Method.HasReturnValue ? "int" : "void";
-                Result += @$"  {ReturnString} {Method.MethodName.Name}({Parameters})
-";
-            }
+            Parameters += ParameterEntry.Key.Name;
+        }
 
+        string ReturnString = method.HasReturnValue ? "int" : "void";
+        builder.AppendLine($"  {ReturnString} {method.MethodName.Name}({Parameters})");
+
+        foreach (IRequire Item in method.RequireList)
+            if (Item is Require Require && Require.BooleanExpression is Expression BooleanExpression)
+                AppendAssertion(builder, "require", BooleanExpression);
+
+        foreach (IEnsure Item in method.EnsureList)
+            if (Item is Ensure Ensure && Ensure.BooleanExpression is Expression BooleanExpression)
+                AppendAssertion(builder, "ensure", BooleanExpression);
+    }
+
+    private void AppendAssertion(StringBuilder builder, string text, Expression booleanExpression)
+    {
+        builder.AppendLine($"    {text} {booleanExpression.ToSimpleString()}");
+    }
+
+    private void AppendInvariants(StringBuilder builder)
+    {
         foreach (Invariant Invariant in InvariantList)
-            Result += @$"  * {Invariant.BooleanExpression}
-";
-
-        return Result;
+            builder.AppendLine($"  * {Invariant.BooleanExpression}");
     }
 }

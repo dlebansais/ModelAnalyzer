@@ -18,4 +18,10 @@ internal class ParenthesizedExpression : Expression
     {
         return Inside.ToString();
     }
+
+    /// <inheritdoc/>
+    public override string ToSimpleString()
+    {
+        return ToString();
+    }
 }

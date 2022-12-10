@@ -29,6 +29,13 @@ class Program_CoreRequire_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_0
+  int X
+  void Write(x)
+    require x >= 0
+"));
     }
 
     [Test]
@@ -55,6 +62,13 @@ class Program_CoreRequire_1
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_1
+  int X
+  void Write(x)
+    require (x >= 0) || (x >= (0 + 1)) || (x + 1) <= 0
+"));
     }
 
     [Test]

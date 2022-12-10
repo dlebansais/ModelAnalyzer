@@ -30,4 +30,10 @@ internal class BinaryArithmeticExpression : Expression
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
         return $"{LeftString} {Operator.Text} {RightString}";
     }
+
+    /// <inheritdoc/>
+    public override string ToSimpleString()
+    {
+        return $"{Left} {Operator.Text} {Right}";
+    }
 }

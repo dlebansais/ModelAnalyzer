@@ -18,4 +18,10 @@ internal class LiteralIntValueExpression : Expression
     {
         return $"{Value}";
     }
+
+    /// <inheritdoc/>
+    public override string ToSimpleString()
+    {
+        return ToString();
+    }
 }

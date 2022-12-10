@@ -18,4 +18,10 @@ internal class VariableValueExpression : Expression
     {
         return Variable.Name;
     }
+
+    /// <inheritdoc/>
+    public override string ToSimpleString()
+    {
+        return ToString();
+    }
 }
