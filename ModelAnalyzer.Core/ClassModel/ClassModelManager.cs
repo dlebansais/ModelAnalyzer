@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 public class ClassModelManager
 {
-    private const int MaxDepth = 1;
+    private const int MaxDepth = 2;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassModelManager"/> class.

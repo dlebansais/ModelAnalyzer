@@ -94,12 +94,39 @@ class Program_CoreVerifier_2
 
     [Test]
     [Category("Core")]
-    public void VerifierTest_WithUnsupportedField()
+    public void VerifierTest_ViolationAtDepth2()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreVerifier_3
+{
+    int X;
+
+    void Write()
+    {
+        X = X + 1;
+    }
+}
+// Invariant: X <= 1
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel.IsInvariantViolated, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void VerifierTest_WithUnsupportedField()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreVerifier_4
 {
     int X;
     string Y;
@@ -129,7 +156,7 @@ class Program_CoreVerifier_3
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreVerifier_4
+class Program_CoreVerifier_5
 {
     int X;
 
@@ -163,7 +190,7 @@ class Program_CoreVerifier_4
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreVerifier_5
+class Program_CoreVerifier_6
 {
     int X;
 
@@ -196,7 +223,7 @@ class Program_CoreVerifier_5
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreVerifier_6
+class Program_CoreVerifier_7
 {
     int X;
 

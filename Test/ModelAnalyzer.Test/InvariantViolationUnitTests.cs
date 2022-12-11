@@ -96,7 +96,7 @@ class Program_InvariantViolation_4
             X = 2;
     }
 }
-// Invariant: X == 0 || X == 1
+// Invariant: X == 0 || X == 1 || X == 2
 ");
     }
 

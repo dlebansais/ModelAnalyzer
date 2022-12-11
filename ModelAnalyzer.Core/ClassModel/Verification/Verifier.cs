@@ -172,29 +172,46 @@ internal partial class Verifier : IDisposable
 
     private void AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
     {
-        List<IntExpr> ExpressionList = new();
+        AddMethodParameterStates(solver, aliasTable, method);
+        AddMethodRequires(solver, aliasTable, method);
 
+        BoolExpr MainBranch = ctx.MkBool(true);
+
+        AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
+        AddMethodEnsures(solver, aliasTable, method);
+    }
+
+    private void AddMethodParameterStates(Solver solver, AliasTable aliasTable, Method method)
+    {
         foreach (KeyValuePair<ParameterName, IParameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = (Parameter)Entry.Value; // This line can only be executed if there are no unsupported parameters.
             string ParameterName = Parameter.Name;
-            aliasTable.AddName(ParameterName);
+            aliasTable.AddOrIncrementName(ParameterName);
             string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
 
-            IntExpr ParameterExpr = ctx.MkIntConst(ParameterNameAlias);
-            ExpressionList.Add(ParameterExpr);
+            ctx.MkIntConst(ParameterNameAlias);
         }
+    }
 
+    private void AddMethodRequires(Solver solver, AliasTable aliasTable, Method method)
+    {
         foreach (IRequire Item in method.RequireList)
         {
             Require Require = (Require)Item; // This line can only be executed if there are no unsupported require.
             BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
             solver.Assert(RequireExpr);
         }
+    }
 
-        BoolExpr MainBranch = ctx.MkBool(true);
-
-        AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
+    private void AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
+    {
+        foreach (IEnsure Item in method.EnsureList)
+        {
+            Ensure Ensure = (Ensure)Item; // This line can only be executed if there are no unsupported ensure.
+            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, Ensure.BooleanExpression);
+            solver.Assert(EnsureExpr);
+        }
     }
 
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)

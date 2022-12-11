@@ -44,6 +44,26 @@ internal class AliasTable
     }
 
     /// <summary>
+    /// Adds a variable name to the table and creates its first alias.
+    /// If the name already exists, increment the alias.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    public void AddOrIncrementName(string name)
+    {
+        if (Table.ContainsKey(name))
+        {
+            AllAliases.Remove(Table[name].Alias);
+            Table[name].Increment();
+            AllAliases.Add(Table[name].Alias);
+        }
+        else
+        {
+            Table.Add(name, new AliasName { VariableName = name });
+            AllAliases.Add(Table[name].Alias);
+        }
+    }
+
+    /// <summary>
     /// Gets the current alias of a name.
     /// </summary>
     /// <param name="name">The name.</param>

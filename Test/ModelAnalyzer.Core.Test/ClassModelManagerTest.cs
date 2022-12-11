@@ -163,6 +163,10 @@ class Program_CoreClassModelManager_5
     {
         ClassDeclarationSyntax ClassDeclaration = SyntaxFactory.ClassDeclaration(string.Empty);
 
+        bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
+
+        Assert.IsTrue(IsIgnored);
+
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
         Assert.ThrowsAsync<ArgumentException>(() => TestHelper.ToClassModelAsync(ClassDeclaration, TokenReplacement));
