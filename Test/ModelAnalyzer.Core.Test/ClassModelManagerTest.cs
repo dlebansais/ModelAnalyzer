@@ -1,11 +1,11 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Z3;
 using NUnit.Framework;
 
-public class ClassManagerTest
+public class ClassModelManagerTest
 {
     [Test]
     [Category("Core")]
@@ -14,7 +14,7 @@ public class ClassManagerTest
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassManager_0
+class Program_CoreClassModelManager_0
 {
 }
 ");
@@ -30,7 +30,7 @@ class Program_CoreClassManager_0
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassManager_0
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassModelManager_0
 "));
     }
 
@@ -42,7 +42,7 @@ class Program_CoreClassManager_0
 using System;
 
 // No model
-class Program_CoreClassManager_1
+class Program_CoreClassModelManager_1
 {
 }
 ");
@@ -60,7 +60,7 @@ class Program_CoreClassManager_1
 using System;
 
 // None
-class Program_CoreClassManager_2
+class Program_CoreClassModelManager_2
 {
 }
 ");
@@ -77,19 +77,19 @@ class Program_CoreClassManager_2
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassManager_3
+class Program_CoreClassModelManager_3
 {
 }
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<string>() { "Program_CoreClassManager_3" }));
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<string>() { "Program_CoreClassModelManager_3" }));
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassManager_3
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassModelManager_3
 "));
     }
 
@@ -100,7 +100,7 @@ class Program_CoreClassManager_3
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassManager_4
+class Program_CoreClassModelManager_4
 {
 }
 ");
@@ -112,12 +112,35 @@ class Program_CoreClassManager_4
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassManager_4
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClassModelManager_4
 "));
     }
 
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
+    }
+
+    [Test]
+    [Category("Core")]
+    public async Task ClassModelManagerTest_DuplicateVerification()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_5
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+        ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
+        ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
+
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.True);
     }
 }

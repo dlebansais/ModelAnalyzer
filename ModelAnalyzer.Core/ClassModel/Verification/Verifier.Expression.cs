@@ -49,7 +49,7 @@ internal partial class Verifier : IDisposable
 
         Debug.Assert(IsAssigned);
 
-        return Result as T ?? throw new InvalidOperationException($"Expected expression of type {typeof(T).Name}");
+        return (T)Result;
     }
 
     private ArithExpr BuildBinaryExpression(AliasTable aliasTable, BinaryArithmeticExpression binaryArithmeticExpression)

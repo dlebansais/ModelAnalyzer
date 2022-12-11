@@ -202,6 +202,7 @@ class Program_CoreSynchronizedThread_4
         bool IsAdded;
 
         List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration1, ClassDeclaration2 }, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
         ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
         ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
 

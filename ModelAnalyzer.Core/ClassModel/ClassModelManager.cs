@@ -31,6 +31,11 @@ public class ClassModelManager
     public IAnalysisLogger Logger { get; init; } = new NullLogger();
 
     /// <summary>
+    /// Gets or sets the thread start mode.
+    /// </summary>
+    public SynchronizedThreadStartMode StartMode { get; set; }
+
+    /// <summary>
     /// Checks whether a class is ignored for modeling.
     /// </summary>
     /// <param name="classDeclaration">The class declaration.</param>
@@ -146,6 +151,15 @@ public class ClassModelManager
         }
     }
 
+    /// <summary>
+    /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="SynchronizedThreadStartMode.Auto"/>.
+    /// </summary>
+    public void StartVerification()
+    {
+        Log("Starting the verification thread.");
+        SynchronizedThread.Start();
+    }
+
     private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
     {
         isVerifyingAsynchronously = false;
@@ -185,8 +199,12 @@ public class ClassModelManager
                     {
                         Context.VerificationList.Add(modelVerification);
 
-                        Log("Starting the verification thread.");
-                        SynchronizedThread.Start();
+                        if (StartMode == SynchronizedThreadStartMode.Auto)
+                        {
+                            Log("Starting the verification thread.");
+                            SynchronizedThread.Start();
+                        }
+
                         isVerifyingAsynchronously = true;
                     }
                 }
