@@ -50,19 +50,11 @@ internal partial class ClassDeclarationParser
             IsFieldSupported = false;
         }
 
-        if (!IsFieldSupported)
-        {
-            Location Location = Declaration.GetLocation();
-            unsupported.AddUnsupportedField(Location, out _);
-        }
-        else
-        {
-            foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-                AddField(Variable, fieldTable, unsupported);
-        }
+        foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
+            AddField(Variable, fieldTable, unsupported, IsFieldSupported);
     }
 
-    private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported)
+    private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported)
     {
         FieldName FieldName = new(variable.Identifier.ValueText);
 
@@ -70,7 +62,7 @@ internal partial class ClassDeclarationParser
         if (!fieldTable.ContainsItem(FieldName))
         {
             IField NewField;
-            bool IsFieldSupported = true;
+            bool IsFieldSupported = isFieldSupported; // Initialize with the result of previous checks (type etc.)
 
             if (variable.Initializer is not null)
             {
