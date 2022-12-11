@@ -59,7 +59,7 @@ before_test:
     printf "dotnet test --no-build -l "console;verbosity=detailed" -c %CONFIGURATION% --filter TestCategory~Core\n" >> runtests.bat
 
 test_script:
-  - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[Test%APPVEYOR_PROJECT_NAME%*]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 after_test:
   - dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"

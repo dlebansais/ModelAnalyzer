@@ -137,7 +137,7 @@ class Program_CoreClassModelManager_5
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement);
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<string>() { "Program_CoreClassModelManager_5" }));
         Assert.That(ClassModelList.Count, Is.EqualTo(2));
         ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
         ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
