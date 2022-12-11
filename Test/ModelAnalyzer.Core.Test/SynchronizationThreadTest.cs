@@ -31,7 +31,7 @@ public class SynchronizationThreadTest
 
     [Test]
     [Category("Core")]
-    public void ScheduleRestartTest()
+    public void SynchronizationThreadTest_ScheduleRestart()
     {
         SynchronizedVerificationContext Context = new();
         AutoResetEvent ThreadStartedEvent = new(initialState: false);
@@ -61,7 +61,7 @@ public class SynchronizationThreadTest
 
     [Test]
     [Category("Core")]
-    public void ClassModelTest_SingleClassModel()
+    public void SynchronizationThreadTest_SingleClassModel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -100,7 +100,7 @@ class Program_CoreSynchronizedThread_0
 
     [Test]
     [Category("Core")]
-    public void ClassModelTest_FindClassModel()
+    public void SynchronizationThreadTest_FindClassModel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +133,7 @@ class Program_CoreSynchronizedThread_1
 
     [Test]
     [Category("Core")]
-    public void ClassModelTest_OneClassModelTwoVerifiers()
+    public void SynchronizationThreadTest_OneClassModelTwoVerifiers()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -177,7 +177,7 @@ class Program_CoreSynchronizedThread_2
 
     [Test]
     [Category("Core")]
-    public async Task ClassModelTest_TwoClassModels()
+    public async Task SynchronizationThreadTest_TwoClassModels()
     {
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;

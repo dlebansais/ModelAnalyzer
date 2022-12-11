@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalysisLogger;
@@ -41,6 +42,13 @@ public class ClassModelManager
     /// <param name="classDeclaration">The class declaration.</param>
     public static bool IsClassIgnoredForModeling(ClassDeclarationSyntax classDeclaration)
     {
+        string ClassName = classDeclaration.Identifier.ValueText;
+
+        return ClassName == string.Empty || IsClassWithNoModelPrefix(classDeclaration);
+    }
+
+    private static bool IsClassWithNoModelPrefix(ClassDeclarationSyntax classDeclaration)
+    {
         SyntaxToken firstToken = classDeclaration.GetFirstToken();
         SyntaxTriviaList leadingTrivia = firstToken.LeadingTrivia;
 
@@ -61,11 +69,15 @@ public class ClassModelManager
     /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
     /// <param name="waitIfAsync">True if the method should wait until verification is completed.</param>
+    /// <exception cref="ArgumentException">Class name empty.</exception>
     public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
     {
         ClearLogs();
 
         string ClassName = classDeclaration.Identifier.ValueText;
+        if (ClassName == string.Empty)
+            throw new ArgumentException("Class name must not be empty.");
+
         Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
 
         GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
@@ -86,11 +98,15 @@ public class ClassModelManager
     /// </summary>
     /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
+    /// <exception cref="ArgumentException">Class name empty.</exception>
     public async Task<IClassModel> GetClassModelAsync(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
         ClearLogs();
 
         string ClassName = classDeclaration.Identifier.ValueText;
+        if (ClassName == string.Empty)
+            throw new ArgumentException("Class name must not be empty.");
+
         Log($"Getting model for class '{ClassName}' asynchronously.");
 
         GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
@@ -165,13 +181,14 @@ public class ClassModelManager
         isVerifyingAsynchronously = false;
 
         string ClassName = classDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
 
         lock (Context.Lock)
         {
             bool IsNewCompilationContext = Context.LastCompilationContext != compilationContext;
             Context.LastCompilationContext = compilationContext;
 
-            bool ClassModelMustBeUpdated = ClassName == string.Empty || IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
+            bool ClassModelMustBeUpdated = IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
             ModelVerification? ExistingModelVerification = Context.FindByName(ClassName);
 
             if (ClassModelMustBeUpdated || ExistingModelVerification is null)
@@ -190,23 +207,20 @@ public class ClassModelManager
 
                 modelVerification = new() { ClassModel = NewClassModel };
 
-                if (ClassName != string.Empty)
+                Context.UpdateClassModel(NewClassModel, out bool IsAdded);
+                Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
+
+                if (IsNewCompilationContext)
                 {
-                    Context.UpdateClassModel(NewClassModel, out bool IsAdded);
-                    Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
+                    Context.VerificationList.Add(modelVerification);
 
-                    if (IsNewCompilationContext)
+                    if (StartMode == SynchronizedThreadStartMode.Auto)
                     {
-                        Context.VerificationList.Add(modelVerification);
-
-                        if (StartMode == SynchronizedThreadStartMode.Auto)
-                        {
-                            Log("Starting the verification thread.");
-                            SynchronizedThread.Start();
-                        }
-
-                        isVerifyingAsynchronously = true;
+                        Log("Starting the verification thread.");
+                        SynchronizedThread.Start();
                     }
+
+                    isVerifyingAsynchronously = true;
                 }
             }
             else

@@ -101,7 +101,7 @@ internal class TestHelper
     {
         tokenReplacement.Replace();
 
-        ClassModelManager Manager = new() { Logger = TestInitialization.Logger };
+        ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
         List<Task<IClassModel>> TaskList = new();
         CompilationContext CompilationContext = CompilationContext.Default;
         ClassDeclarationSyntax? PreviousClassDeclaration = null;
@@ -118,6 +118,9 @@ internal class TestHelper
 
         if (managerHandler is not null)
             managerHandler(Manager);
+
+        if (Manager.StartMode == SynchronizedThreadStartMode.Manual)
+            Manager.StartVerification();
 
         List<IClassModel> ClassModelList = await Task.Run(async () =>
         {

@@ -65,8 +65,13 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         foreach (MemberDeclarationSyntax NamespaceMember in members)
             if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
             {
-                ExistingClassList.Add(ClassDeclaration.Identifier.ValueText);
-                AnalyzeClass(context, ClassDeclaration);
+                string ClassName = ClassDeclaration.Identifier.ValueText;
+
+                if (ClassName != string.Empty)
+                {
+                    ExistingClassList.Add(ClassName);
+                    AnalyzeClass(context, ClassDeclaration);
+                }
             }
 
         Manager.RemoveMissingClasses(ExistingClassList);

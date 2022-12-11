@@ -36,7 +36,7 @@ class Program_CoreVerifier_0
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_ViolationAtDepth0()
+    public void VerifierTest_ViolationAtDepth0()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -65,7 +65,7 @@ class Program_CoreVerifier_1
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_ViolationAtDepth1()
+    public void VerifierTest_ViolationAtDepth1()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -94,7 +94,7 @@ class Program_CoreVerifier_2
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_WithUnsupportedField()
+    public void VerifierTest_WithUnsupportedField()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -124,7 +124,7 @@ class Program_CoreVerifier_3
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_WithUnsupportedMethod()
+    public void VerifierTest_WithUnsupportedMethod()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -158,7 +158,7 @@ class Program_CoreVerifier_4
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_WithUnsupportedParameter()
+    public void VerifierTest_WithUnsupportedParameter()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -191,7 +191,7 @@ class Program_CoreVerifier_5
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_WithUnsupportedExpression()
+    public void VerifierTest_WithUnsupportedExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

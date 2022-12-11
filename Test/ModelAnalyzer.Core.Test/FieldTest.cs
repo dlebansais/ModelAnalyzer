@@ -103,7 +103,7 @@ class Program_CoreField_3
 
     [Test]
     [Category("Core")]
-    public void ModifierTest()
+    public void FieldTest_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

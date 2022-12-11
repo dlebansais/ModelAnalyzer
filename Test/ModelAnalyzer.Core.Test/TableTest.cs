@@ -19,7 +19,7 @@ public class TableTest
 
     [Test]
     [Category("Core")]
-    public void AddItemTest()
+    public void TableTest_AddItem()
     {
         NameAndItemTable<string, int> TestTable = new();
 
@@ -46,7 +46,7 @@ public class TableTest
 
     [Test]
     [Category("Core")]
-    public void SealingTest()
+    public void TableTest_Sealing()
     {
         NameAndItemTable<string, int> TestTable = new();
 

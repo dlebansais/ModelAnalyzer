@@ -1,7 +1,9 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -142,5 +144,27 @@ class Program_CoreClassModelManager_5
 
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_EmptyClassName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = SyntaxFactory.ClassDeclaration(string.Empty);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        Assert.Throws<ArgumentException>(() => TestHelper.ToClassModel(ClassDeclaration, TokenReplacement));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_EmptyClassNameAsync()
+    {
+        ClassDeclarationSyntax ClassDeclaration = SyntaxFactory.ClassDeclaration(string.Empty);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        Assert.ThrowsAsync<ArgumentException>(() => TestHelper.ToClassModelAsync(ClassDeclaration, TokenReplacement));
     }
 }
