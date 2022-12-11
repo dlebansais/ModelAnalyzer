@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -160,6 +161,63 @@ class Program_CoreSynchronizedThread_2
         ModelVerification ModelVerification1 = new() { ClassModel = ClassModel };
         ModelVerification ModelVerification2 = new() { ClassModel = ClassModel };
         Context.VerificationList.Add(ModelVerification1);
+        Context.VerificationList.Add(ModelVerification2);
+        Assert.That(Context.VerificationList.Count, Is.EqualTo(2));
+
+        using (SynchronizedThread<ModelVerification, ClassModel> SynchronizedThread = new(Context, (IDictionary<ModelVerification, ClassModel> table) =>
+        {
+            TableCount = table.Count;
+        }))
+        {
+            SynchronizedThread.Start();
+        }
+
+        Assert.That(TableCount, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public async Task ClassModelTest_TwoClassModels()
+    {
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreSynchronizedThread_3
+{
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration2 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreSynchronizedThread_4
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration1);
+
+        SynchronizedVerificationContext Context = new();
+        int TableCount = 0;
+        bool IsAdded;
+
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration1, ClassDeclaration2 }, TokenReplacement);
+        ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
+        ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
+
+        Context.UpdateClassModel(ClassModel1, out IsAdded);
+        Assert.IsTrue(IsAdded);
+        Assert.That(Context.ClassModelTable.Count, Is.EqualTo(1));
+
+        ModelVerification ModelVerification1 = new() { ClassModel = ClassModel1 };
+        Context.VerificationList.Add(ModelVerification1);
+        Assert.That(Context.VerificationList.Count, Is.EqualTo(1));
+
+        Context.UpdateClassModel(ClassModel2, out IsAdded);
+        Assert.IsTrue(IsAdded);
+        Assert.That(Context.ClassModelTable.Count, Is.EqualTo(2));
+
+        ModelVerification ModelVerification2 = new() { ClassModel = ClassModel2 };
         Context.VerificationList.Add(ModelVerification2);
         Assert.That(Context.VerificationList.Count, Is.EqualTo(2));
 

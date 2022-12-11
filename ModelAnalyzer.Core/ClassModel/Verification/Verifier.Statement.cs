@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Z3;
 
 /// <summary>
@@ -12,21 +13,30 @@ internal partial class Verifier : IDisposable
     private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<IStatement> statementList)
     {
         foreach (IStatement Statement in statementList)
-            switch (Statement)
-            {
-                case AssignmentStatement Assignment:
-                    AddAssignmentExecution(solver, aliasTable, branch, Assignment);
-                    break;
-                case ConditionalStatement Conditional:
-                    AddConditionalExecution(solver, aliasTable, branch, Conditional);
-                    break;
-                case ReturnStatement Return:
-                    AddReturnExecution(solver, aliasTable, branch, Return);
-                    break;
-                case UnsupportedStatement:
-                default:
-                    throw new InvalidOperationException("Unexpected unsupported statement");
-            }
+            AddStatementExecution(solver, aliasTable, branch, Statement);
+    }
+
+    private void AddStatementExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, IStatement statement)
+    {
+        bool IsAdded = false;
+
+        switch (statement)
+        {
+            case AssignmentStatement Assignment:
+                AddAssignmentExecution(solver, aliasTable, branch, Assignment);
+                IsAdded = true;
+                break;
+            case ConditionalStatement Conditional:
+                AddConditionalExecution(solver, aliasTable, branch, Conditional);
+                IsAdded = true;
+                break;
+            case ReturnStatement Return:
+                AddReturnExecution(solver, aliasTable, branch, Return);
+                IsAdded = true;
+                break;
+        }
+
+        Debug.Assert(IsAdded);
     }
 
     private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, AssignmentStatement assignmentStatement)

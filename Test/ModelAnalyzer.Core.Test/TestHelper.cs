@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -61,27 +62,63 @@ internal class TestHelper
         return Result;
     }
 
-    public static IClassModel ToClassModel(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement, bool waitIfAsync = false)
+    public static IClassModel ToClassModel(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement, bool waitIfAsync = false, Action<ClassModelManager>? managerHandler = null)
     {
-        tokenReplacement.Replace();
-
-        ClassModelManager Manager = new();
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), classDeclaration, waitIfAsync);
-
-        tokenReplacement.Restore();
-
-        return ClassModel;
+        List<IClassModel> ClassModelList = ToClassModel(new List<ClassDeclarationSyntax>() { classDeclaration }, tokenReplacement, waitIfAsync, managerHandler);
+        return ClassModelList.First();
     }
 
-    public static async Task<IClassModel> ToClassModelAsync(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement)
+    public static List<IClassModel> ToClassModel(List<ClassDeclarationSyntax> classDeclarationList, TokenReplacement tokenReplacement, bool waitIfAsync = false, Action<ClassModelManager>? managerHandler = null)
     {
         tokenReplacement.Replace();
 
         ClassModelManager Manager = new();
-        IClassModel ClassModel = await Manager.GetClassModelAsync(CompilationContext.GetAnother(), classDeclaration);
+        List<IClassModel> ClassModelList = new();
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, waitIfAsync));
+
+        if (managerHandler is not null)
+            managerHandler(Manager);
 
         tokenReplacement.Restore();
 
-        return ClassModel;
+        Manager.RemoveMissingClasses(new List<string>());
+
+        return ClassModelList;
+    }
+
+    public static async Task<IClassModel> ToClassModelAsync(ClassDeclarationSyntax classDeclaration, TokenReplacement tokenReplacement, Action<ClassModelManager>? managerHandler = null)
+    {
+        List<IClassModel> ClassModelList = await ToClassModelAsync(new List<ClassDeclarationSyntax>() { classDeclaration }, tokenReplacement, managerHandler);
+        return ClassModelList.First();
+    }
+
+    public static async Task<List<IClassModel>> ToClassModelAsync(List<ClassDeclarationSyntax> classDeclarationList, TokenReplacement tokenReplacement, Action<ClassModelManager>? managerHandler = null)
+    {
+        tokenReplacement.Replace();
+
+        ClassModelManager Manager = new() { Logger = TestInitialization.Logger };
+        List<Task<IClassModel>> TaskList = new();
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+            TaskList.Add(Manager.GetClassModelAsync(CompilationContext.GetAnother(), ClassDeclaration));
+
+        if (managerHandler is not null)
+            managerHandler(Manager);
+
+        List<IClassModel> ClassModelList = await Task.Run(async () =>
+        {
+            List<IClassModel> ClassModelList = new();
+
+            foreach (Task<IClassModel> Task in TaskList)
+                ClassModelList.Add(await Task);
+
+            return ClassModelList;
+        });
+
+        tokenReplacement.Restore();
+
+        return ClassModelList;
     }
 }

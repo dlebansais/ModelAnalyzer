@@ -122,6 +122,12 @@ class Program_CoreEnsure_3
 
         IUnsupportedEnsure UnsupportedEnsure = ClassModel.Unsupported.Ensures[0];
         Assert.That(UnsupportedEnsure.Text, Is.EqualTo("X == 0; break;"));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_3
+  int X
+  void Write(x)
+"));
     }
 
     [Test]

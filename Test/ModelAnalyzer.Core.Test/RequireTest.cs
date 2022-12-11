@@ -99,6 +99,12 @@ class Program_CoreRequire_2
 
         IUnsupportedRequire UnsupportedRequire = ClassModel.Unsupported.Requires[0];
         Assert.That(UnsupportedRequire.Text, Is.EqualTo("0"));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_2
+  int X
+  void Write(x)
+"));
     }
 
     [Test]

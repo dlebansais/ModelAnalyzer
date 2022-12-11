@@ -218,7 +218,7 @@ public class ClassModelManager
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
                 else
                 {
-                    Verifier Verifier = new()
+                    using Verifier Verifier = new()
                     {
                         MaxDepth = MaxDepth,
                         ClassName = ClassName,

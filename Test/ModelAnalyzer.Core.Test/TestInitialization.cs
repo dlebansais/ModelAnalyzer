@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using AnalysisLogger;
 using NUnit.Framework;
 
 [SetUpFixture]
@@ -11,4 +12,6 @@ public class TestInitialization
         TextBuilder.NewLine = @"
 ";
     }
+
+    public static FileLogger Logger { get; } = new();
 }

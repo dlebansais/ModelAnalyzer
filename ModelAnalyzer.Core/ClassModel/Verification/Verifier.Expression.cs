@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
+using System.Diagnostics;
 using Microsoft.Z3;
 
 /// <summary>
@@ -11,35 +12,42 @@ internal partial class Verifier : IDisposable
     private T BuildExpression<T>(AliasTable aliasTable, IExpression expression)
         where T : Expr
     {
-        Expr Result;
+        Expr Result = null!;
+        bool IsAssigned = false;
 
         switch (expression)
         {
             case BinaryArithmeticExpression BinaryArithmetic:
                 Result = BuildBinaryExpression(aliasTable, BinaryArithmetic);
+                IsAssigned = true;
                 break;
             case BinaryConditionalExpression BinaryLogical:
                 Result = BuildBinaryConditionalExpression(aliasTable, BinaryLogical);
+                IsAssigned = true;
                 break;
             case ComparisonExpression Comparison:
                 Result = BuildComparisonExpression(aliasTable, Comparison);
+                IsAssigned = true;
                 break;
             case LiteralIntValueExpression LiteralIntValue:
                 Result = BuildLiteralIntValueExpression(LiteralIntValue);
+                IsAssigned = true;
                 break;
             case LiteralBoolValueExpression LiteralBoolValue:
                 Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
+                IsAssigned = true;
                 break;
             case ParenthesizedExpression Parenthesized:
                 Result = BuildParenthesizedExpression(aliasTable, Parenthesized);
+                IsAssigned = true;
                 break;
             case VariableValueExpression VariableValue:
                 Result = BuildVariableValueExpression(aliasTable, VariableValue);
+                IsAssigned = true;
                 break;
-            case UnsupportedExpression:
-            default:
-                throw new InvalidOperationException("Unexpected unsupported expression");
         }
+
+        Debug.Assert(IsAssigned);
 
         return Result as T ?? throw new InvalidOperationException($"Expected expression of type {typeof(T).Name}");
     }

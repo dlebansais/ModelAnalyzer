@@ -81,14 +81,14 @@ internal partial class Verifier : IDisposable
         if (depth > 0)
         {
             foreach (KeyValuePair<MethodName, IMethod> Entry in MethodTable)
-                if (Entry.Value is Method Method)
-                {
-                    List<Method> NewCallSequence = new();
-                    NewCallSequence.AddRange(callSequence);
-                    NewCallSequence.Add(Method);
+            {
+                Method Method = (Method)Entry.Value; // This line can only be executed if there are no unsupported methods.
+                List<Method> NewCallSequence = new();
+                NewCallSequence.AddRange(callSequence);
+                NewCallSequence.Add(Method);
 
-                    CallMethods(depth - 1, NewCallSequence);
-                }
+                CallMethods(depth - 1, NewCallSequence);
+            }
         }
         else
             AddMethodCalls(callSequence);
@@ -157,11 +157,11 @@ internal partial class Verifier : IDisposable
         List<BoolExpr> AssertionList = new();
 
         foreach (IInvariant Item in InvariantList)
-            if (Item is Invariant Invariant)
-            {
-                BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, Invariant.BooleanExpression);
-                AssertionList.Add(InvariantExpression);
-            }
+        {
+            Invariant Invariant = (Invariant)Item; // This line can only be executed if there are no unsupported invariants.
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, Invariant.BooleanExpression);
+            AssertionList.Add(InvariantExpression);
+        }
 
         BoolExpr AllInvariants = ctx.MkAnd(AssertionList);
         BoolExpr AllInvariantsOpposite = ctx.MkNot(AllInvariants);
@@ -175,22 +175,22 @@ internal partial class Verifier : IDisposable
         List<IntExpr> ExpressionList = new();
 
         foreach (KeyValuePair<ParameterName, IParameter> Entry in method.ParameterTable)
-            if (Entry.Value is Parameter Parameter)
-            {
-                string ParameterName = Parameter.Name;
-                aliasTable.AddName(ParameterName);
-                string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
+        {
+            Parameter Parameter = (Parameter)Entry.Value; // This line can only be executed if there are no unsupported parameters.
+            string ParameterName = Parameter.Name;
+            aliasTable.AddName(ParameterName);
+            string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
 
-                IntExpr ParameterExpr = ctx.MkIntConst(ParameterNameAlias);
-                ExpressionList.Add(ParameterExpr);
-            }
+            IntExpr ParameterExpr = ctx.MkIntConst(ParameterNameAlias);
+            ExpressionList.Add(ParameterExpr);
+        }
 
         foreach (IRequire Item in method.RequireList)
-            if (Item is Require Require)
-            {
-                BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
-                solver.Assert(RequireExpr);
-            }
+        {
+            Require Require = (Require)Item; // This line can only be executed if there are no unsupported require.
+            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
+            solver.Assert(RequireExpr);
+        }
 
         BoolExpr MainBranch = ctx.MkBool(true);
 
