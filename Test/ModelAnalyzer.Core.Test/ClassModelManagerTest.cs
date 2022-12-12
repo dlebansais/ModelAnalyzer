@@ -171,4 +171,27 @@ class Program_CoreClassModelManager_5
 
         Assert.ThrowsAsync<ArgumentException>(() => TestHelper.ToClassModelAsync(ClassDeclaration, TokenReplacement));
     }
+
+    [Test]
+    [Category("Core")]
+    public async Task ClassModelManagerTest_DuplicateClassRemoved()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_6
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<string>()));
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+        ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
+        ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
+
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.True);
+    }
 }
