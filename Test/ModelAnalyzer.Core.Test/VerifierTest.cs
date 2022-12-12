@@ -273,4 +273,11 @@ class Program_CoreVerifier_7
             TestObject.FakeFinalize();
         }
     }
+
+    [Test]
+    [Category("Core")]
+    public void VerifierTest_Destructor()
+    {
+        using VerifierContainer Container = new();
+    }
 }

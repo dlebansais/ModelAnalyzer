@@ -2,8 +2,13 @@
 
 using System;
 
-public class ClassModelManagerExtended : ClassModelManager, IDisposable
+internal class ClassModelManagerExtended : ClassModelManager, IDisposable
 {
+    public ClassModelManagerExtended()
+        : base()
+    {
+    }
+
     public void FakeFinalize()
     {
         Dispose(false);

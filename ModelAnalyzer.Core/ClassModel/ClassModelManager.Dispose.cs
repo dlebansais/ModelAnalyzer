@@ -49,10 +49,8 @@ public partial class ClassModelManager : IDisposable
     /// </summary>
     private void DisposeNow()
     {
-        if (SynchronizedThread is not null)
+        using (SynchronizedThread)
         {
-            SynchronizedThread.Dispose();
-            SynchronizedThread = null!;
         }
     }
 }

@@ -261,4 +261,11 @@ class Program_CoreSynchronizedThread_4
             TestObject.FakeFinalize();
         }
     }
+
+    [Test]
+    [Category("Core")]
+    public void SynchronizedThreadTest_Destructor()
+    {
+        using SynchronizedThreadContainer Container = new();
+    }
 }

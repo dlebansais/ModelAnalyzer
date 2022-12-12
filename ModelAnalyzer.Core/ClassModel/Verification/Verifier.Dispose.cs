@@ -48,14 +48,12 @@ internal partial class Verifier : IDisposable
     /// </summary>
     private void DisposeNow()
     {
-        using (Context DisposedCtx = ctx)
+        using (Context)
         {
-            ctx = null!;
         }
 
-        using (IntExpr DisposedZero = Zero)
+        using (Zero)
         {
-            Zero = null!;
         }
     }
 }

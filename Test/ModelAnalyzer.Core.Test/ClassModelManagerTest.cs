@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -118,11 +119,6 @@ class Program_CoreClassModelManager_4
 "));
     }
 
-    private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
-    {
-        manager.RemoveMissingClasses(existingClassNameList);
-    }
-
     [Test]
     [Category("Core")]
     public async Task ClassModelManagerTest_DuplicateVerification()
@@ -212,6 +208,11 @@ class Program_CoreClassModelManager_7
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, DuplicateVerificationWithUpdate);
     }
 
+    private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
+    {
+        manager.RemoveMissingClasses(existingClassNameList);
+    }
+
     private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
     {
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
@@ -251,5 +252,12 @@ class Program_CoreClassModelManager_7
         {
             TestObject.FakeFinalize();
         }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_Destructor()
+    {
+        using ClassModelManagerContainer Container = new();
     }
 }

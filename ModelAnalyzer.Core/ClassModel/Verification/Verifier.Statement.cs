@@ -46,16 +46,16 @@ internal partial class Verifier : IDisposable
         string DestinationName = assignmentStatement.Destination.Name;
         aliasTable.IncrementNameAlias(DestinationName);
         string DestinationNameAlias = aliasTable.GetAlias(DestinationName);
-        IntExpr DestinationExpr = ctx.MkIntConst(DestinationNameAlias);
+        IntExpr DestinationExpr = Context.MkIntConst(DestinationNameAlias);
 
-        AddToSolver(solver, branch, ctx.MkEq(DestinationExpr, SourceExpr));
+        AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
 
     private void AddConditionalExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, ConditionalStatement conditionalStatement)
     {
         BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, conditionalStatement.Condition);
-        BoolExpr TrueBranchExpr = ctx.MkAnd(branch, ConditionExpr);
-        BoolExpr FalseBranchExpr = ctx.MkAnd(branch, ctx.MkNot(ConditionExpr));
+        BoolExpr TrueBranchExpr = Context.MkAnd(branch, ConditionExpr);
+        BoolExpr FalseBranchExpr = Context.MkAnd(branch, Context.MkNot(ConditionExpr));
 
         AliasTable BeforeWhenTrue = aliasTable.Clone();
         AddStatementListExecution(solver, aliasTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
@@ -73,30 +73,30 @@ internal partial class Verifier : IDisposable
 
         foreach (string NameAlias in AliasesOnlyWhenFalse)
         {
-            IntExpr AliasExpr = ctx.MkIntConst(NameAlias);
-            BoolExpr InitExpr = ctx.MkEq(AliasExpr, Zero);
+            IntExpr AliasExpr = Context.MkIntConst(NameAlias);
+            BoolExpr InitExpr = Context.MkEq(AliasExpr, Zero);
             AddToSolver(solver, TrueBranchExpr, InitExpr);
         }
 
         foreach (string NameAlias in AliasesOnlyWhenTrue)
         {
-            IntExpr AliasExpr = ctx.MkIntConst(NameAlias);
-            BoolExpr InitExpr = ctx.MkEq(AliasExpr, Zero);
+            IntExpr AliasExpr = Context.MkIntConst(NameAlias);
+            BoolExpr InitExpr = Context.MkEq(AliasExpr, Zero);
             AddToSolver(solver, FalseBranchExpr, InitExpr);
         }
 
         foreach (string Name in UpdatedNameList)
         {
             string NameAlias = aliasTable.GetAlias(Name);
-            IntExpr DestinationExpr = ctx.MkIntConst(NameAlias);
+            IntExpr DestinationExpr = Context.MkIntConst(NameAlias);
 
             string WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Name);
-            IntExpr WhenTrueSourceExpr = ctx.MkIntConst(WhenTrueNameAlias);
-            BoolExpr WhenTrueInitExpr = ctx.MkEq(DestinationExpr, WhenTrueSourceExpr);
+            IntExpr WhenTrueSourceExpr = Context.MkIntConst(WhenTrueNameAlias);
+            BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
             string WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Name);
-            IntExpr WhenFalseSourceExpr = ctx.MkIntConst(WhenFalseNameAlias);
-            BoolExpr WhenFalseInitExpr = ctx.MkEq(DestinationExpr, WhenFalseSourceExpr);
+            IntExpr WhenFalseSourceExpr = Context.MkIntConst(WhenFalseNameAlias);
+            BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
             AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
             AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);

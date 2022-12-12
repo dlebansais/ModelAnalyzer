@@ -16,8 +16,8 @@ internal partial class Verifier : IDisposable
     public Verifier()
     {
         // Need model generation turned on.
-        ctx = new Context(new Dictionary<string, string>() { { "model", "true" } });
-        Zero = ctx.MkInt(0);
+        Context = new Context(new Dictionary<string, string>() { { "model", "true" } });
+        Zero = Context.MkInt(0);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ internal partial class Verifier : IDisposable
 
     private void AddMethodCalls(List<Method> callSequence)
     {
-        using Solver solver = ctx.MkSolver();
+        using Solver solver = Context.MkSolver();
 
         AliasTable aliasTable = new();
 
@@ -143,8 +143,8 @@ internal partial class Verifier : IDisposable
             aliasTable.AddName(FieldName);
             string FieldNameAlias = aliasTable.GetAlias(FieldName);
 
-            IntExpr FieldExpr = ctx.MkIntConst(FieldNameAlias);
-            BoolExpr InitExpr = ctx.MkEq(FieldExpr, Zero);
+            IntExpr FieldExpr = Context.MkIntConst(FieldNameAlias);
+            BoolExpr InitExpr = Context.MkEq(FieldExpr, Zero);
 
             Log($"Adding {InitExpr}");
             solver.Assert(InitExpr);
@@ -164,8 +164,8 @@ internal partial class Verifier : IDisposable
             AssertionList.Add(InvariantExpression);
         }
 
-        BoolExpr AllInvariants = ctx.MkAnd(AssertionList);
-        BoolExpr AllInvariantsOpposite = ctx.MkNot(AllInvariants);
+        BoolExpr AllInvariants = Context.MkAnd(AssertionList);
+        BoolExpr AllInvariantsOpposite = Context.MkNot(AllInvariants);
 
         Log($"Adding invariant opposite {AllInvariantsOpposite}");
         solver.Assert(AllInvariantsOpposite);
@@ -176,7 +176,7 @@ internal partial class Verifier : IDisposable
         AddMethodParameterStates(solver, aliasTable, method);
         AddMethodRequires(solver, aliasTable, method);
 
-        BoolExpr MainBranch = ctx.MkBool(true);
+        BoolExpr MainBranch = Context.MkBool(true);
 
         AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
         AddMethodEnsures(solver, aliasTable, method);
@@ -191,7 +191,7 @@ internal partial class Verifier : IDisposable
             aliasTable.AddOrIncrementName(ParameterName);
             string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
 
-            ctx.MkIntConst(ParameterNameAlias);
+            Context.MkIntConst(ParameterNameAlias);
         }
     }
 
@@ -217,7 +217,7 @@ internal partial class Verifier : IDisposable
 
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)
     {
-        solver.Assert(ctx.MkImplies(branch, boolExpr));
+        solver.Assert(Context.MkImplies(branch, boolExpr));
         Log($"Adding {branch} => {boolExpr}");
     }
 
@@ -226,6 +226,6 @@ internal partial class Verifier : IDisposable
         Logger.Log(message);
     }
 
-    private Context ctx;
+    private Context Context;
     private IntExpr Zero;
 }

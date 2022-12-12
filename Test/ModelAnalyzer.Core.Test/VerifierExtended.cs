@@ -7,6 +7,7 @@ internal class VerifierExtended : Verifier, IDisposable
 {
     [SetsRequiredMembers]
     public VerifierExtended()
+        : base()
     {
         MaxDepth = 0;
         ClassName = string.Empty;

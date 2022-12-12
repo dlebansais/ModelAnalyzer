@@ -56,31 +56,31 @@ internal partial class Verifier : IDisposable
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Right);
-        return binaryArithmeticExpression.Operator.Asserter(ctx, Left, Right);
+        return binaryArithmeticExpression.Operator.Asserter(Context, Left, Right);
     }
 
     private BoolExpr BuildBinaryConditionalExpression(AliasTable aliasTable, BinaryConditionalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);
-        return binaryLogicalExpression.Operator.Asserter(ctx, Left, Right);
+        return binaryLogicalExpression.Operator.Asserter(Context, Left, Right);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Right);
-        return comparisonExpression.Operator.Asserter(ctx, Left, Right);
+        return comparisonExpression.Operator.Asserter(Context, Left, Right);
     }
 
     private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)
     {
-        return ctx.MkInt(literalIntValueExpression.Value);
+        return Context.MkInt(literalIntValueExpression.Value);
     }
 
     private BoolExpr BuildLiteralBoolValueExpression(LiteralBoolValueExpression literalBoolValueExpression)
     {
-        return ctx.MkBool(literalBoolValueExpression.Value);
+        return Context.MkBool(literalBoolValueExpression.Value);
     }
 
     private Expr BuildParenthesizedExpression(AliasTable aliasTable, ParenthesizedExpression parenthesizedExpression)
@@ -93,6 +93,6 @@ internal partial class Verifier : IDisposable
         string VariableName = variableValueExpression.Variable.Name;
         string VariableAliasName = aliasTable.GetAlias(VariableName);
 
-        return ctx.MkIntConst(VariableAliasName);
+        return Context.MkIntConst(VariableAliasName);
     }
 }
