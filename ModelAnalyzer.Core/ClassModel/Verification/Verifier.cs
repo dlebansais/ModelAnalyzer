@@ -96,7 +96,8 @@ internal partial class Verifier : IDisposable
 
     private void AddMethodCalls(List<Method> callSequence)
     {
-        Solver solver = ctx.MkSolver();
+        using Solver solver = ctx.MkSolver();
+
         AliasTable aliasTable = new();
 
         AddInitialState(solver, aliasTable);
@@ -223,11 +224,6 @@ internal partial class Verifier : IDisposable
     private void Log(string message)
     {
         Logger.Log(message);
-    }
-
-    public void Dispose()
-    {
-        ctx.Dispose();
     }
 
     private Context ctx;

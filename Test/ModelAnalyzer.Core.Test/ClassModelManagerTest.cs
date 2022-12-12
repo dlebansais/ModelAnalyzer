@@ -194,4 +194,62 @@ class Program_CoreClassModelManager_6
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_DuplicateVerificationWithUpdate()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_7
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, DuplicateVerificationWithUpdate);
+    }
+
+    private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = SynchronizedThreadStartMode.Manual };
+
+        Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Manager.StartVerification();
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_Dispose()
+    {
+        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
+        {
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_DoubleDispose()
+    {
+        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
+        {
+            TestObject.Dispose();
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_FakeFinalize()
+    {
+        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
+        {
+            TestObject.FakeFinalize();
+        }
+    }
 }

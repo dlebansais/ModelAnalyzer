@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class SynchronizationThreadTest
+public class SynchronizedThreadTest
 {
     [Test]
     [Category("Core")]
@@ -31,7 +31,7 @@ public class SynchronizationThreadTest
 
     [Test]
     [Category("Core")]
-    public void SynchronizationThreadTest_ScheduleRestart()
+    public void SynchronizedThreadTest_ScheduleRestart()
     {
         SynchronizedVerificationContext Context = new();
         AutoResetEvent ThreadStartedEvent = new(initialState: false);
@@ -61,7 +61,7 @@ public class SynchronizationThreadTest
 
     [Test]
     [Category("Core")]
-    public void SynchronizationThreadTest_SingleClassModel()
+    public void SynchronizedThreadTest_SingleClassModel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -100,7 +100,7 @@ class Program_CoreSynchronizedThread_0
 
     [Test]
     [Category("Core")]
-    public void SynchronizationThreadTest_FindClassModel()
+    public void SynchronizedThreadTest_FindClassModel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +133,7 @@ class Program_CoreSynchronizedThread_1
 
     [Test]
     [Category("Core")]
-    public void SynchronizationThreadTest_OneClassModelTwoVerifiers()
+    public void SynchronizedThreadTest_OneClassModelTwoVerifiers()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -177,7 +177,7 @@ class Program_CoreSynchronizedThread_2
 
     [Test]
     [Category("Core")]
-    public async Task SynchronizationThreadTest_TwoClassModels()
+    public async Task SynchronizedThreadTest_TwoClassModels()
     {
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -231,5 +231,34 @@ class Program_CoreSynchronizedThread_4
         }
 
         Assert.That(TableCount, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void SynchronizedThreadTest_Dispose()
+    {
+        using (SynchronizedThreadExtended TestObject = new SynchronizedThreadExtended())
+        {
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void SynchronizedThreadTest_DoubleDispose()
+    {
+        using (SynchronizedThreadExtended TestObject = new SynchronizedThreadExtended())
+        {
+            TestObject.Dispose();
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void SynchronizedThreadTest_FakeFinalize()
+    {
+        using (SynchronizedThreadExtended TestObject = new SynchronizedThreadExtended())
+        {
+            TestObject.FakeFinalize();
+        }
     }
 }

@@ -244,4 +244,33 @@ class Program_CoreVerifier_7
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.IsInvariantViolated, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void VerifierTest_Dispose()
+    {
+        using (VerifierExtended TestObject = new VerifierExtended())
+        {
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void VerifierTest_DoubleDispose()
+    {
+        using (VerifierExtended TestObject = new VerifierExtended())
+        {
+            TestObject.Dispose();
+        }
+    }
+
+    [Test]
+    [Category("Core")]
+    public void VerifierTest_FakeFinalize()
+    {
+        using (VerifierExtended TestObject = new VerifierExtended())
+        {
+            TestObject.FakeFinalize();
+        }
+    }
 }

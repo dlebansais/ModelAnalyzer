@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// <summary>
 /// Represents a manager for class models.
 /// </summary>
-public class ClassModelManager
+public partial class ClassModelManager : IDisposable
 {
     private const int MaxDepth = 2;
 

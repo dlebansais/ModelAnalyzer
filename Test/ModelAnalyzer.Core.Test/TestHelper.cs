@@ -72,7 +72,8 @@ internal class TestHelper
     {
         tokenReplacement.Replace();
 
-        ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+
         List<IClassModel> ClassModelList = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
@@ -101,7 +102,8 @@ internal class TestHelper
     {
         tokenReplacement.Replace();
 
-        ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+
         List<Task<IClassModel>> TaskList = new();
         CompilationContext CompilationContext = CompilationContext.Default;
         ClassDeclarationSyntax? PreviousClassDeclaration = null;
@@ -135,5 +137,14 @@ internal class TestHelper
         tokenReplacement.Restore();
 
         return ClassModelList;
+    }
+
+    public static void ExecuteClassModelTest(List<ClassDeclarationSyntax> classDeclarationList, TokenReplacement tokenReplacement, Action<List<ClassDeclarationSyntax>> handler)
+    {
+        tokenReplacement.Replace();
+
+        handler(classDeclarationList);
+
+        tokenReplacement.Restore();
     }
 }
