@@ -154,7 +154,7 @@ class Program_CoreExpression_5
 
     void Write(int x)
     {
-        X = ((x + 1) + (x - 1)) - ((x - 1) - (x + 1));
+        X = ((x + 1) + (x - 1)) - ((x - 1) - (x + 1) + (-(x + 1)));
     }
 }
 ");
