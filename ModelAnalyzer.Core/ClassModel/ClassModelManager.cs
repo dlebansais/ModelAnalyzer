@@ -210,18 +210,15 @@ public partial class ClassModelManager : IDisposable
                 Context.UpdateClassModel(NewClassModel, out bool IsAdded);
                 Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
 
-                if (IsNewCompilationContext)
+                Context.VerificationList.Add(modelVerification);
+
+                if (StartMode == SynchronizedThreadStartMode.Auto)
                 {
-                    Context.VerificationList.Add(modelVerification);
-
-                    if (StartMode == SynchronizedThreadStartMode.Auto)
-                    {
-                        Log("Starting the verification thread.");
-                        SynchronizedThread.Start();
-                    }
-
-                    isVerifyingAsynchronously = true;
+                    Log("Starting the verification thread.");
+                    SynchronizedThread.Start();
                 }
+
+                isVerifyingAsynchronously = true;
             }
             else
                 modelVerification = ExistingModelVerification;

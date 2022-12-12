@@ -105,10 +105,10 @@ class Program_CoreVerifier_3
 
     void Write()
     {
-        X = X + 1;
+        X = X - 1;
     }
 }
-// Invariant: X <= 1
+// Invariant: X >= -1
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);

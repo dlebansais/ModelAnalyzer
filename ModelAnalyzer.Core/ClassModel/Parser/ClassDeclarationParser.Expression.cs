@@ -16,6 +16,8 @@ internal partial class ClassDeclarationParser
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
             NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, unsupported, BinaryExpression, ref Location);
+        else if (expressionNode is PrefixUnaryExpressionSyntax PrefixUnaryExpression)
+            NewExpression = TryParsePrefixUnaryExpression(fieldTable, parameterTable, unsupported, PrefixUnaryExpression, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
             NewExpression = TryParseVariableValueExpression(fieldTable, parameterTable, IdentifierName);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
@@ -45,8 +47,8 @@ internal partial class ClassDeclarationParser
         {
             SyntaxToken OperatorToken = binaryExpression.OperatorToken;
 
-            if (IsSupportedBinaryArithmeticOperator(OperatorToken, out ArithmeticOperator ArithmeticOperator))
-                NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = ArithmeticOperator, Right = Right };
+            if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
+                NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
             else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
                 NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
             else if (IsSupportedBinaryConditionalOperator(OperatorToken, out LogicalOperator LogicalOperator))
@@ -64,13 +66,53 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private bool IsSupportedBinaryArithmeticOperator(SyntaxToken token, out ArithmeticOperator arithmeticOperator)
+    private IExpression? TryParsePrefixUnaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref Location location)
+    {
+        IExpression? NewExpression = null;
+        IExpression OperandExpression = ParseExpression(fieldTable, parameterTable, unsupported, prefixUnaryExpression.Operand, isNested: true);
+
+        if (OperandExpression is Expression Operand)
+        {
+            SyntaxToken OperatorToken = prefixUnaryExpression.OperatorToken;
+
+            if (IsSupportedUnaryArithmeticOperator(OperatorToken, out UnaryArithmeticOperator UnaryArithmeticOperator))
+                NewExpression = new UnaryArithmeticExpression { Operator = UnaryArithmeticOperator, Operand = Operand };
+            else
+            {
+                Log($"Unsupported operator '{OperatorToken.ValueText}'.");
+
+                location = OperatorToken.GetLocation();
+            }
+        }
+        else
+            Log($"Unsupported expression type '{prefixUnaryExpression.GetType().Name}'.");
+
+        return NewExpression;
+    }
+
+    private bool IsSupportedBinaryArithmeticOperator(SyntaxToken token, out BinaryArithmeticOperator arithmeticOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 
-        if (SupportedOperators.Arithmetic.ContainsKey(OperatorKind))
+        if (SupportedOperators.BinaryArithmetic.ContainsKey(OperatorKind))
         {
-            arithmeticOperator = SupportedOperators.Arithmetic[OperatorKind];
+            arithmeticOperator = SupportedOperators.BinaryArithmetic[OperatorKind];
+            return true;
+        }
+        else
+            Log($"Unsupported arithmetic operator '{token.ValueText}'.");
+
+        arithmeticOperator = null!;
+        return false;
+    }
+
+    private bool IsSupportedUnaryArithmeticOperator(SyntaxToken token, out UnaryArithmeticOperator arithmeticOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (SupportedOperators.UnaryArithmetic.ContainsKey(OperatorKind))
+        {
+            arithmeticOperator = SupportedOperators.UnaryArithmetic[OperatorKind];
             return true;
         }
         else

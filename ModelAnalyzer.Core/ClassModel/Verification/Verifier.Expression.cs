@@ -21,6 +21,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildBinaryExpression(aliasTable, BinaryArithmetic);
                 IsAssigned = true;
                 break;
+            case UnaryArithmeticExpression UnaryArithmetic:
+                Result = BuildUnaryExpression(aliasTable, UnaryArithmetic);
+                IsAssigned = true;
+                break;
             case BinaryConditionalExpression BinaryLogical:
                 Result = BuildBinaryConditionalExpression(aliasTable, BinaryLogical);
                 IsAssigned = true;
@@ -57,6 +61,12 @@ internal partial class Verifier : IDisposable
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Right);
         return binaryArithmeticExpression.Operator.Asserter(Context, Left, Right);
+    }
+
+    private ArithExpr BuildUnaryExpression(AliasTable aliasTable, UnaryArithmeticExpression unaryArithmeticExpression)
+    {
+        ArithExpr Operand = BuildExpression<ArithExpr>(aliasTable, unaryArithmeticExpression.Operand);
+        return unaryArithmeticExpression.Operator.Asserter(Context, Operand);
     }
 
     private BoolExpr BuildBinaryConditionalExpression(AliasTable aliasTable, BinaryConditionalExpression binaryLogicalExpression)

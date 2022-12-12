@@ -14,9 +14,9 @@ internal class BinaryArithmeticExpression : Expression
     required public Expression Left { get; init; }
 
     /// <summary>
-    /// Gets the arithmetic operator.
+    /// Gets the binary arithmetic operator.
     /// </summary>
-    required public ArithmeticOperator Operator { get; init; }
+    required public BinaryArithmeticOperator Operator { get; init; }
 
     /// <summary>
     /// Gets the right expression.
