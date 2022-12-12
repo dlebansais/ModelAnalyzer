@@ -56,7 +56,7 @@ before_test:
   - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
   - |-
     printf "@echo ************************************************************** Starting Tests..\n" > runtests.bat
-    printf "dotnet test --no-build -l "console;verbosity=detailed" -c %CONFIGURATION% --filter TestCategory~Core\n" >> runtests.bat
+    printf "dotnet test --no-build -l "console" -c %CONFIGURATION% --filter TestCategory~Core\n" >> runtests.bat
 
 test_script:
   - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
