@@ -56,7 +56,7 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         Location Location = classDeclaration.Identifier.GetLocation();
         string ClassName = classDeclaration.Identifier.ValueText;
 
-        CompilationContext CompilationContext = new(context);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         Task<IClassModel> GetClassModelTask = Manager.GetClassModelAsync(CompilationContext, classDeclaration);
 
         // Don't wait too long and get the analyzer stuck.

@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Threading;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
 /// Represents a compilation context.
@@ -24,18 +23,10 @@ public record CompilationContext
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationContext"/> class.
     /// </summary>
-    private CompilationContext(int newHashCode)
+    /// <param name="newHashCode">The hash code initialization the context.</param>
+    internal CompilationContext(int newHashCode)
     {
         HashCode = newHashCode;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CompilationContext"/> class.
-    /// </summary>
-    /// <param name="context">The syntax node analysis context.</param>
-    public CompilationContext(SyntaxNodeAnalysisContext context)
-    {
-        HashCode = context.Compilation.GetHashCode();
     }
 
     /// <summary>

@@ -232,38 +232,29 @@ public class ClassModelManager
     {
         Log("Executing verification started.");
 
-        List<ClassModel> VerifiedClassModelList = new();
-
         foreach (KeyValuePair<ModelVerification, ClassModel> Entry in cloneTable)
         {
             ModelVerification ModelVerification = Entry.Key;
             ClassModel ClassModel = Entry.Value;
             string ClassName = ClassModel.Name;
 
-            if (VerifiedClassModelList.Contains(ClassModel))
-                Log($"Not redoing verification for class '{ClassName}'.");
+            if (!ClassModel.Unsupported.IsEmpty)
+                Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
             else
             {
-                VerifiedClassModelList.Add(ClassModel);
-
-                if (!ClassModel.Unsupported.IsEmpty)
-                    Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
-                else
+                using Verifier Verifier = new()
                 {
-                    using Verifier Verifier = new()
-                    {
-                        MaxDepth = MaxDepth,
-                        ClassName = ClassName,
-                        FieldTable = ClassModel.FieldTable,
-                        MethodTable = ClassModel.MethodTable,
-                        InvariantList = ClassModel.InvariantList,
-                        Logger = Logger,
-                    };
+                    MaxDepth = MaxDepth,
+                    ClassName = ClassName,
+                    FieldTable = ClassModel.FieldTable,
+                    MethodTable = ClassModel.MethodTable,
+                    InvariantList = ClassModel.InvariantList,
+                    Logger = Logger,
+                };
 
-                    Verifier.Verify();
+                Verifier.Verify();
 
-                    ((ClassModel)ModelVerification.ClassModel).IsInvariantViolated = Verifier.IsInvariantViolated;
-                }
+                ((ClassModel)ModelVerification.ClassModel).IsInvariantViolated = Verifier.IsInvariantViolated;
             }
 
             ModelVerification.SetUpToDate();
