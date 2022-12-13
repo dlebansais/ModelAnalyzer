@@ -31,7 +31,7 @@ before_build:
   - nuget restore %APPVEYOR_PROJECT_NAME%.sln
   - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
   - nuget install CSharp-Format -Version %csharp-format_version% -OutputDirectory packages
-  - echo Can restore when fixed .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
+  - echo Can restore this line by removing echo when fixed .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
 
 configuration:
   - Release
@@ -58,11 +58,13 @@ before_test:
     printf "@echo ************************************************************** Starting Tests..\n" > runtests.bat
     printf "timeout 10\n" >> runtests.bat
     printf "dotnet test --no-build -l 'console;verbosity=detailed' -c %CONFIGURATION%\n" >> runtests.bat
-  - set ENV_OPENCOVER_VERSION=%opencover_version%
+  - set OPENCOVER_PATH=.\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe
+  - echo %OPENCOVER_PATH%
   - |-
     printf ":retrying\n" > testscript.bat
+    printf "echo %OPENCOVER_PATH%\n" >> testscript.bat
     printf "timeout 10\n" >> testscript.bat
-    printf ".\packages\OpenCover.%ENV_OPENCOVER_VERSION%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:'runtests.bat' -filter:'+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*' -output:'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
+    printf "%OPENCOVER_PATH% -register:user -returntargetcode -target:'runtests.bat' -filter:'+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*' -output:'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
     printf "dir 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
     printf "powershell Get-Content 'Coverage-%APPVEYOR_PROJECT_NAME%.xml' -Head 100\n" >> testscript.bat
     printf "grep 'numSequencePoints="0"' 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
