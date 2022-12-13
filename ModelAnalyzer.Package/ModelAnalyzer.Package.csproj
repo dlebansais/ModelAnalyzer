@@ -21,8 +21,8 @@
     <PackageTags>formal-verification,analyzers</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-	<ApplicationIcon>main.png</ApplicationIcon>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageIcon>main.png</PackageIcon>
+	<PackageLicenseExpression>0BSD</PackageLicenseExpression>
 
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
