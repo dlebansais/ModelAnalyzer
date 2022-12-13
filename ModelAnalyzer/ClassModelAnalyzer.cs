@@ -16,21 +16,6 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    private static bool X = Created();
-    private static bool Created()
-    {
-        if (!Directory.Exists("C:\\Projects\\Temp"))
-            return false;
-
-        using FileStream Stream = new("C:\\Projects\\Temp\\an.txt", FileMode.Create, FileAccess.Write);
-        using StreamWriter Writer = new(Stream);
-
-        Writer.WriteLine($"Current directory: {Environment.CurrentDirectory}");
-        Writer.WriteLine($"Assembly location: {Assembly.GetExecutingAssembly().Location}");
-
-        return true;
-    }
-
     public const string ClassModelDiagnosticId = "ClassModel";
     private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString ClassModelMessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));

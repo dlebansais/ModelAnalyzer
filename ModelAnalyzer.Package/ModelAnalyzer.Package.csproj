@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <PackageId>Test.CSharp.ModelAnalyzer</PackageId>
-    <PackageVersion>0.0.7</PackageVersion>
+    <PackageVersion>0.0.9</PackageVersion>
     <Authors>David Le Bansais</Authors>
     <PackageProjectUrl>https://github.com/dlebansais/ModelAnalyzer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dlebansais/ModelAnalyzer</RepositoryUrl>
@@ -48,9 +48,9 @@
       <TfmSpecificPackageFile Include="$(OutputPath)\AnalysisLogger.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\CSharp11Support.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\Libz3Extractor.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Extensions.Logging.Abstractions.dll" PackagePath="analyzers/dotnet/cs" />
 	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
-	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="runtimes/win-x64/native" />
 	</ItemGroup>
   </Target>
 

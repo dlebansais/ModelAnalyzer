@@ -50,7 +50,7 @@ class Program_CoreClass_1
 
     [Test]
     [Category("Core")]
-    public void ClassTest_Modifier()
+    public void ClassTest_PublicModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -73,12 +73,81 @@ public class Program_CoreClass_2
 
     [Test]
     [Category("Core")]
+    public void ClassTest_PrivateModifier()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+private class Program_CoreClass_3
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_3
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassTest_InternalModifier()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+internal class Program_CoreClass_4
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_4
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassTest_PartialModifier()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+partial class Program_CoreClass_5
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_5
+"));
+    }
+
+    [Test]
+    [Category("Core")]
     public void InvalidClassTest_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-static class Program_CoreClass_3
+static class Program_CoreClass_6
 {
 }
 ");
@@ -97,7 +166,7 @@ static class Program_CoreClass_3
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_4 : IDisposable
+class Program_CoreClass_7 : IDisposable
 {
     public void Dispose()
     {
@@ -119,7 +188,7 @@ class Program_CoreClass_4 : IDisposable
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_5<T>
+class Program_CoreClass_8<T>
 {
     T X;
 }
@@ -139,7 +208,7 @@ class Program_CoreClass_5<T>
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_6<T>
+class Program_CoreClass_9<T>
     where T : class
 {
     T X;

@@ -260,8 +260,10 @@ public partial class ClassModelManager : IDisposable
             ModelVerification.SetUpToDate();
         }
 
+#if DEBUG
         // Simulate an analysis that takes time.
         Thread.Sleep(TimeSpan.FromSeconds(1));
+#endif
 
         Log("Executing verification completed.");
     }
