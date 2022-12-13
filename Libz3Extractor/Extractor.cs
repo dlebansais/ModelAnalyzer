@@ -49,7 +49,7 @@ public class Extractor
 
                     // Get a stream to the dll loaded inside us.
                     string[] ResourceNames = ExecutingAssembly.GetManifestResourceNames();
-                    using Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream("libz3.dll");
+                    using Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream("Libz3Extractor.libz3.dll");
 
                     foreach (string Name in ResourceNames)
                         LogWriter.WriteLine($"Resource: {Name}");
