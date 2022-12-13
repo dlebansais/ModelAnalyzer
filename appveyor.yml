@@ -62,15 +62,12 @@ before_test:
     printf "+[%APPVEYOR_PROJECT_NAME%*]*\n-[%APPVEYOR_PROJECT_NAME%*.Test]*\n" > filterfile.txt
     type filterfile.txt
   - |-
+    printf ".\packages\OpenCover.%opencover_version%^\tools\OpenCover.Console.exe %*\n" > startopencover.bat
+    type startopencover.bat
+  - |-
     printf ":retrying\n" > testscript.bat
     printf "timeout 10\n" >> testscript.bat
-    printf "cd packages\n" >> testscript.bat
-    printf "cd OpenCover.%opencover_version%\n" >> testscript.bat
-    printf "cd tools\n" >> testscript.bat
-    printf "OpenCover.Console.exe -register:user -returntargetcode -target:../../../runtests.bat -filterfile:../../../filterfile.txt -output:../../../Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
-    printf "cd ..\n" >> testscript.bat
-    printf "cd ..\n" >> testscript.bat
-    printf "cd ..\n" >> testscript.bat
+    printf "startopencover.bat -register:user -returntargetcode -target:runtests.bat -filterfile:filterfile.txt -output:Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
     printf "dir 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
     printf "powershell Get-Content 'Coverage-%APPVEYOR_PROJECT_NAME%.xml' -Head 100\n" >> testscript.bat
     printf "grep 'numSequencePoints="0"' 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
