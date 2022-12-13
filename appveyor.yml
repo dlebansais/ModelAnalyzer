@@ -57,14 +57,22 @@ before_test:
   - |-
     printf "@echo ************************************************************** Starting Tests..\n" > runtests.bat
     printf "dotnet test --no-build -l "console;verbosity=detailed" -c %CONFIGURATION%\n" >> runtests.bat
+  - |-
+    printf ":retrying"\n" > testscript.bat
+    printf ".\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"\n" >> testscript.bat
+    printf "dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"\n" >> testscript.bat
+    printf "powershell Get-Content "Coverage-*.xml" -Head 100\n" >> testscript.bat
+    printf "grep 'numSequencePoints="0"' "Coverage-%APPVEYOR_PROJECT_NAME%.xml"\n" >> testscript.bat
+    printf "if ERRORLEVEL 1 echo NotFound"\n" >> testscript.bat
+    printf "if ERRORLEVEL 1 goto retrying"\n" >> testscript.bat
 
 test_script:
-  - .\packages\OpenCover.%opencover_version%\tools\OpenCover.Console.exe -register:user -returntargetcode -target:"runtests.bat" -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - testscript.bat
 
 after_test:
   - dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
   - ps: Get-Content "Coverage-*.xml" -Head 100
-  - grep Test "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - grep 'numSequencePoints="0"' "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
   - if '%CONFIGURATION%' == 'Debug' .\packages\CodecovUploader.%codecov_version%\tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 artifacts:

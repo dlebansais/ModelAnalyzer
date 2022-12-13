@@ -10,12 +10,12 @@ public struct CompilationContext
     /// <summary>
     /// The first value for incrementally growing hash codes.
     /// </summary>
-    private const long UsedHashCodesFirst = 0x7FFFFFFF00000000;
+    private const long FirstCollisionlessHashCode = 0x7FFFFFFF00000000;
 
     /// <summary>
     /// Gets the default compilation context.
     /// </summary>
-    public static CompilationContext Default { get; } = new CompilationContext(UsedHashCodesFirst, isAsyncRunRequested: false);
+    public static CompilationContext Default { get; } = new CompilationContext(FirstCollisionlessHashCode);
 
     /// <summary>
     /// Gets a new compilation context to force verification.
@@ -23,17 +23,27 @@ public struct CompilationContext
     public static CompilationContext GetAnother()
     {
         long NewHashCode = Interlocked.Increment(ref UsedHashCodes);
-        return new CompilationContext(NewHashCode, isAsyncRunRequested: false);
+        return new CompilationContext(NewHashCode);
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationContext"/> struct.
     /// </summary>
     /// <param name="newHashCode">The hash code initialization the context.</param>
-    /// <param name="isAsyncRunRequested">Whether an asynchronous run is already request.</param>
-    internal CompilationContext(long newHashCode, bool isAsyncRunRequested)
+    private CompilationContext(long newHashCode)
     {
         HashCode = newHashCode;
+        IsAsyncRunRequested = false;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompilationContext"/> struct.
+    /// </summary>
+    /// <param name="obj">An object whose hash code is used to initialize the context.</param>
+    /// <param name="isAsyncRunRequested">Whether this context is to request an asynchronous run.</param>
+    public CompilationContext(object obj, bool isAsyncRunRequested)
+    {
+        HashCode = obj.GetHashCode();
         IsAsyncRunRequested = isAsyncRunRequested;
     }
 
@@ -57,5 +67,5 @@ public struct CompilationContext
     }
 
     // By starting at high value, we exploit the fact that object.GetHashCode() returns an int and therefore cannot collide with this global value.
-    private static long UsedHashCodes = UsedHashCodesFirst;
+    private static long UsedHashCodes = FirstCollisionlessHashCode;
 }
