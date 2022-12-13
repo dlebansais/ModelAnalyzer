@@ -68,8 +68,9 @@ before_test:
     printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests.bat -filterfile:filterfile.txt -output:Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
     printf "dir Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
     printf "powershell Get-Content 'Coverage-%APPVEYOR_PROJECT_NAME%.xml' -Head 100\n" >> testscript.bat
-    printf "echo grep -r numSequencePoints=\"0\" Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
-    printf "grep -r numSequencePoints=\"0\" Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
+    printf "echo grep -r \"numSequencePoints=\\\"0\\\"\" Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
+    printf "grep -r \"numSequencePoints=\\\"0\\\"\" Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
+    printf "echo ERRORLEVEL is %%ERRORLEVEL%%\n" >> testscript.bat
     printf "if ERRORLEVEL 1 echo Test result recorded\n" >> testscript.bat
     printf "if ERRORLEVEL 1 goto done\n" >> testscript.bat
     printf "goto retrying\n" >> testscript.bat
