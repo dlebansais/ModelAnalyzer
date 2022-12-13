@@ -57,7 +57,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context, isAsyncRunRequested: false);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
         string ClassName = classDeclaration.Identifier.ValueText;
 

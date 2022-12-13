@@ -185,9 +185,8 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            bool IsNewCompilationContext = Context.LastCompilationContext != compilationContext;
-            Context.LastCompilationContext = compilationContext;
-
+            // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
+            bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
             bool ClassModelMustBeUpdated = IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
             ModelVerification? ExistingModelVerification = Context.FindByName(ClassName);
 
@@ -219,9 +218,13 @@ public partial class ClassModelManager : IDisposable
                 }
 
                 isVerifyingAsynchronously = true;
+                Context.LastCompilationContext = compilationContext with { IsAsyncRunRequested = true };
             }
             else
+            {
                 modelVerification = ExistingModelVerification;
+                Context.LastCompilationContext = compilationContext;
+            }
         }
     }
 
