@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadStatementAnalyzer : DiagnosticAnalyzer
@@ -58,8 +59,12 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad statement.");
             context.ReportDiagnostic(Diagnostic.Create(BadStatementRule, Item.Location));
+        }
     }
 }

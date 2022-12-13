@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadExpressionAnalyzer : DiagnosticAnalyzer
@@ -58,8 +59,12 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad expression.");
             context.ReportDiagnostic(Diagnostic.Create(BadExpressionRule, Item.Location));
+        }
     }
 }

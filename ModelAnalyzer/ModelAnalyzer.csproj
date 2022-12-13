@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <IsPackable>false</IsPackable>
+    <Version>0.0.3</Version>
     <RootNamespace>ModelAnalyzer</RootNamespace>
 
     <!-- Avoid ID conflicts with the package project. -->
@@ -22,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ModelAnalyzer.Core\ModelAnalyzer.Core.csproj" />
+	  <ProjectReference Include="..\ModelAnalyzer.Core\ModelAnalyzer.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadParameterAnalyzer : DiagnosticAnalyzer
@@ -58,8 +59,12 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad parameter.");
             context.ReportDiagnostic(Diagnostic.Create(BadParameterRule, Item.Location, Item.Name));
+        }
     }
 }

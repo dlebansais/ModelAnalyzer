@@ -10,17 +10,15 @@
 
   <PropertyGroup>
     <PackageId>ModelAnalyzer</PackageId>
-    <PackageVersion>1.0.0.0</PackageVersion>
-    <Authors>DLB</Authors>
-    <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
-    <PackageProjectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</PackageProjectUrl>
-    <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
-    <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
+    <PackageVersion>0.0.3</PackageVersion>
+    <Authors>David Le Bansais</Authors>
+    <PackageProjectUrl>https://github.com/dlebansais/ModelAnalyzer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dlebansais/ModelAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>Model Analyzer</Description>
-    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    <Copyright>Copyright</Copyright>
-    <PackageTags>ModelAnalyzer, analyzers</PackageTags>
+    <Description>Roslyn-based analysis of class models with informal contracts.</Description>
+    <PackageReleaseNotes>Initial package.</PackageReleaseNotes>
+    <Copyright>Copyright © 2022 David Le Bansais</Copyright>
+    <PackageTags>formal-verification,analyzers</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
@@ -41,9 +39,12 @@
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\AnalysisLogger.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\CSharp11Support.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
-	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\runtimes\win-x64\native\libz3.dll" PackagePath="runtimes/win-x64/native" />
+      <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Extensions.Logging.Abstractions.dll" PackagePath="analyzers/dotnet/cs" />
+	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="runtimes/win-x64/native" />
 	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
 	</ItemGroup>
   </Target>

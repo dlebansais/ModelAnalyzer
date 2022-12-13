@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassModelAnalyzer : DiagnosticAnalyzer
@@ -58,10 +59,12 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         if (ClassModel.Unsupported.IsEmpty)
             return;
 
+        Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting unsupported elements.");
         context.ReportDiagnostic(Diagnostic.Create(ClassModelRule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }
 }

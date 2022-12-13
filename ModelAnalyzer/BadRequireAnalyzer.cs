@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadRequireAnalyzer : DiagnosticAnalyzer
@@ -58,8 +59,12 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad require.");
             context.ReportDiagnostic(Diagnostic.Create(BadRequireRule, Item.Location));
+        }
     }
 }

@@ -11,12 +11,18 @@
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" Version="[4.5,)" />
   </Dependencies>
   <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="AnalysisLogger.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="AnalysisLogger.dll" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="CSharp11Support.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="CSharp11Support.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="ModelAnalyzer.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="ModelAnalyzer.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="ModelAnalyzer.Core.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="ModelAnalyzer.Core.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="ModelAnalyzer.CodeFixes.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="ModelAnalyzer.CodeFixes.dll" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="Microsoft.Extensions.Logging.Abstractions.dll" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" Path="Microsoft.Extensions.Logging.Abstractions.dll" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" Path="Microsoft.Z3.dll" />
     <Asset Type="Microsoft.VisualStudio.Analyzer" Path="Microsoft.Z3.dll" />
   </Assets>

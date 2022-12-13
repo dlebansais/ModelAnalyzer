@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadInvariantAnalyzer : DiagnosticAnalyzer
@@ -85,8 +86,12 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedInvariant Item in ClassModel.Unsupported.Invariants)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad invariant.");
             context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Item.Location, Item.Text));
+        }
     }
 }

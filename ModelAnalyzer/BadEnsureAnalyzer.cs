@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadEnsureAnalyzer : DiagnosticAnalyzer
@@ -58,8 +59,12 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+        string ClassName = classDeclaration.Identifier.ValueText;
 
         foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad ensure.");
             context.ReportDiagnostic(Diagnostic.Create(BadEnsureRule, Item.Location));
+        }
     }
 }
