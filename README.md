@@ -11,7 +11,7 @@ Roslyn-based analysis of class models with informal contracts.
 
 To install this analyzer, in Visual Studio:
 
-+ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
++ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution`. The `NuGet - Solution` window appears.  
 + In the top right corner, make sure `Package Source` is selected to be either `nuget.org` or `All`.
 + Click the `Browse` tab and in the search prompt type `ModelAnalyzer`.
 + A list of packages appears, one one them called `CSharp.ModelAnalyzer`.
@@ -22,7 +22,7 @@ To install this analyzer, in Visual Studio:
 
 To uninstall this analyzer, in Visual Studio:
 
-+ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
++ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution`. The `NuGet - Solution` window appears.  
 + Click to select the `CSharp.ModelAnalyzer` package and in the right pane uncheck projects you no longer want to be analyzed.
 + Click the `Uninstall` button.
 
@@ -107,7 +107,7 @@ public class Test
 
 ## Suppressing warnings
 
-If the code includes unsupported features, this is reported as one or more warnings. To remove these warnings and turn off analysis of a class, put a line starting with `// No model` before the class declaration. For example:
+If the code includes unsupported features, this is reported as one or more warnings. To remove these warnings and turn off analysis for a class, put a line starting with `// No model` before the class declaration. For example:
 
 ````csharp
 // No model
