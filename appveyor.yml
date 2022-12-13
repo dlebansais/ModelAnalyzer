@@ -63,12 +63,9 @@ before_test:
     type filterfile.txt
   - rename .\packages\OpenCover.%opencover_version%\tools Tools
   - |-
-    printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe %*\n" > startopencover.bat
-    type startopencover.bat
-  - |-
     printf ":retrying\n" > testscript.bat
     printf "timeout 10\n" >> testscript.bat
-    printf "startopencover.bat -register:user -returntargetcode -target:runtests.bat -filterfile:filterfile.txt -output:Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
+    printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests.bat -filterfile:filterfile.txt -output:Coverage-%APPVEYOR_PROJECT_NAME%.xml\n" >> testscript.bat
     printf "dir 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
     printf "powershell Get-Content 'Coverage-%APPVEYOR_PROJECT_NAME%.xml' -Head 100\n" >> testscript.bat
     printf "grep 'numSequencePoints="0"' 'Coverage-%APPVEYOR_PROJECT_NAME%.xml'\n" >> testscript.bat
