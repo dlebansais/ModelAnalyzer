@@ -11,9 +11,9 @@ Roslyn-based analysis of class models with informal contracts.
 
 To install this analyzer, in Visual Studio:
 
-+ Go to the menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
-+ In top right corner, make sure `Package Source` is selected to be either `nuget.org` or `All`.
-+ Click the `Browse` tab and in the serach prompt type `ModelAnalyzer`.
++ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
++ In the top right corner, make sure `Package Source` is selected to be either `nuget.org` or `All`.
++ Click the `Browse` tab and in the search prompt type `ModelAnalyzer`.
 + A list of packages appears, one one them called `CSharp.ModelAnalyzer`.
 + Click to select this package and in the right pane check projects you want to be analyzed.
 + Click the `Install` button.
@@ -22,7 +22,7 @@ To install this analyzer, in Visual Studio:
 
 To uninstall this analyzer, in Visual Studio:
 
-+ Go to the menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
++ Open menu `Tools` -> `NuGet Package Manager` -> `Manage NuGet Packages for Solution..`. The `NuGet - Solution` window appears.  
 + Click to select the `CSharp.ModelAnalyzer` package and in the right pane uncheck projects you no longer want to be analyzed.
 + Click the `Uninstall` button.
 
@@ -32,10 +32,10 @@ This analyzer looks for inconsistencies by creating a model of a class from the 
 
 ## Caveat
 
-A big caveat to what might look like magic is that this analyzer only support a very restricted subset of C# (see below for a list). Anything that is not supported prevents the analysis from starting.
+A big caveat to what might look like magic is that this analyzer only supports a very restricted subset of C# (see below for a list). Anything that is not supported prevents the analysis from starting and displays a warning.
 
 ## Contracts
-To help the analyzer programmers can add contract clauses:
+To help the analyzer, programmers can add contract clauses:
 
 + A require clause puts some requirement to the input of a method.
 + An ensure clause provides some guarantees when a method exits.
@@ -45,11 +45,11 @@ To help the analyzer programmers can add contract clauses:
 
 The analyzer supports:
 
-+ Private fields of type `int`. Ex: `private int X, Y;`
++ Private fields of type `int`. Ex: `private int X, Y;`. Fields can only use default initialization (to zero).
 + Private or public methods that return either `void` or `int` and take zero or more `int` parameters.
   * Parameters are not allowed to have the same name as fields.
   * Parameters cannot be assigned, they are read-only.
-+ Assignemnt of an expression to a field.
++ Assignment of an expression to a field.
 + `return`, but at the end of a method only.
 + The `if` `else` statement.
 + A restricted subset of expressions:
@@ -58,13 +58,14 @@ The analyzer supports:
   * Parenthesis.
   * The `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
-  * Integer constants (ex: `0`).
+  * Integer constants (ex: `0`), `true` and `false`.
+  * Variables, either fields or parameters.
 
 Everything else, attributes, preprocessor directives etc. is not supported.
 
 ## Method contract
 
-To add a require clause to a method, put a line starting with `// Require: ` below the method declaration and before the opening brace. To add an ensure clause put a line starting with `// Ensure: ` below the method's closing brace.
+To add a require clause to a method, put a line starting with `// Require:` below the method declaration and before the opening brace. To add an ensure clause put a line starting with `// Ensure:` below the method's closing brace.
 
 For example:
 
@@ -81,9 +82,11 @@ int Sum(int x, int y)
 // Ensure: N >= 0 && N <= 512
 ````
 
+Assertions support the same subset of expressions as the code.
+ 
 ## Class contract
 
-To add an invariant, put a line starting with `// Invariant: ` below the class' closing brace. For example:
+To add an invariant, put a line starting with `// Invariant:` below the class' closing brace. For example:
 
 ````csharp
 public class Test
@@ -95,9 +98,27 @@ public class Test
   // Require: y >= 16 && y <= 256 
   {
     N = x + y;
-	return N;
+    return N;
   }
   // Ensure: N >= 32 && N <= 512
 }
 // Invariant: N == 0 || (N >= 32 && N <= 512)
 ````
+
+## Suppressing warnings
+
+If the code includes unsupported features, this is reported as one or more warnings. To remove these warnings and turn off analysis of a class, put a line starting with `// No model` before the class declaration. For example:
+
+````csharp
+// No model
+public class Test
+{
+  /* ... */
+}
+````
+
+## List of diagnostics
+
+| Code          | Diagnostic    |
+| ------------- | ------------- |
+| BadEnsure     | Bad assertion |
