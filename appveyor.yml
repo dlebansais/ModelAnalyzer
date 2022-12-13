@@ -63,6 +63,9 @@ test_script:
 
 after_test:
   - dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - set /p TEXT=< "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
+  - echo %TEXT%
+  - powershell Get-Content "Coverage-%APPVEYOR_PROJECT_NAME%.xml" -Head 100
   - if '%CONFIGURATION%' == 'Debug' .\packages\CodecovUploader.%codecov_version%\tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
 artifacts:
