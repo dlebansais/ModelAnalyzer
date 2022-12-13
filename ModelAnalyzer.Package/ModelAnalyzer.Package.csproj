@@ -14,6 +14,7 @@
     <Authors>David Le Bansais</Authors>
     <PackageProjectUrl>https://github.com/dlebansais/ModelAnalyzer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dlebansais/ModelAnalyzer</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Roslyn-based analysis of class models with informal contracts.</Description>
     <PackageReleaseNotes>Initial package.</PackageReleaseNotes>
