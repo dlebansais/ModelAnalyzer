@@ -61,8 +61,9 @@ before_test:
   - |-
     printf "+[%APPVEYOR_PROJECT_NAME%*]*\n-[%APPVEYOR_PROJECT_NAME%*.Test]*\n" > filterfile.txt
     type filterfile.txt
+  - rename .\packages\OpenCover.%opencover_version%\tools Tools
   - |-
-    printf ".\packages\OpenCover.%opencover_version%\\tools\OpenCover.Console.exe %*\n" > startopencover.bat
+    printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe %*\n" > startopencover.bat
     type startopencover.bat
   - |-
     printf ":retrying\n" > testscript.bat
