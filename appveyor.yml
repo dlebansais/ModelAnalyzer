@@ -63,7 +63,7 @@ test_script:
 
 after_test:
   - dir "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
-  - ps: Get-Content "Coverage-%APPVEYOR_PROJECT_NAME%.xml" -Head 100
+  - ps: Get-Content "Coverage-*.xml" -Head 100
   - grep Test "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
   - if '%CONFIGURATION%' == 'Debug' .\packages\CodecovUploader.%codecov_version%\tools\codecov.exe -f "Coverage-%APPVEYOR_PROJECT_NAME%.xml"
 
