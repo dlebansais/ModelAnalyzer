@@ -37,6 +37,7 @@
 
   <Target Name="_AddAnalyzersToOutput">
     <ItemGroup>
+      <TfmSpecificPackageFile Include="main.ico" PackagePath="" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
