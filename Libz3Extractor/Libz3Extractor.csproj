@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>11</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <IsPackable>false</IsPackable>
+    <Version>0.0.3</Version>
+    <RootNamespace>Libz3Extractor</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="..\ModelAnalyzer.Core\bin\x64\Debug\netstandard2.0\libz3.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\ModelAnalyzer.Core\bin\x64\Debug\netstandard2.0\libz3.dll" />
+  </ItemGroup>
+
+</Project>

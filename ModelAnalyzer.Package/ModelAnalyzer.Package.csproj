@@ -49,8 +49,7 @@
       <TfmSpecificPackageFile Include="$(OutputPath)\CSharp11Support.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Extensions.Logging.Abstractions.dll" PackagePath="analyzers/dotnet/cs" />
-	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="lib/netstandard2.0" />
-	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
+	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
 	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="runtimes/win-x64/native" />
 	</ItemGroup>
   </Target>

@@ -19,11 +19,15 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     private static bool X = Created();
     private static bool Created()
     {
+        if (!Directory.Exists("C:\\Projects\\Temp"))
+            return false;
+
         using FileStream Stream = new("C:\\Projects\\Temp\\an.txt", FileMode.Create, FileAccess.Write);
         using StreamWriter Writer = new(Stream);
 
         Writer.WriteLine($"Current directory: {Environment.CurrentDirectory}");
         Writer.WriteLine($"Assembly location: {Assembly.GetExecutingAssembly().Location}");
+
         return true;
     }
 
