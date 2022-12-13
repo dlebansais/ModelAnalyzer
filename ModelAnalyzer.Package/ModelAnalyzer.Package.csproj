@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <PackageId>Test.CSharp.ModelAnalyzer</PackageId>
-    <PackageVersion>0.0.4</PackageVersion>
+    <PackageVersion>0.0.5</PackageVersion>
     <Authors>David Le Bansais</Authors>
     <PackageProjectUrl>https://github.com/dlebansais/ModelAnalyzer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dlebansais/ModelAnalyzer</RepositoryUrl>
@@ -21,7 +21,8 @@
     <PackageTags>formal-verification,analyzers</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-	<ApplicationIcon>main.ico</ApplicationIcon>
+	<ApplicationIcon>main.png</ApplicationIcon>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
@@ -37,7 +38,7 @@
 
   <Target Name="_AddAnalyzersToOutput">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="main.ico" PackagePath="" />
+      <TfmSpecificPackageFile Include="main.png" PackagePath="" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
@@ -46,6 +47,7 @@
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Extensions.Logging.Abstractions.dll" PackagePath="analyzers/dotnet/cs" />
 	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="runtimes/win-x64/native" />
+	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\libz3.dll" PackagePath="lib/netstandard2.0" />
 	  <TfmSpecificPackageFile Include="..\Test\ModelAnalyzer.Test\bin\$(Platform)\$(Configuration)\netcoreapp3.1\Microsoft.Z3.dll" PackagePath="lib/netstandard2.0" />
 	</ItemGroup>
   </Target>
