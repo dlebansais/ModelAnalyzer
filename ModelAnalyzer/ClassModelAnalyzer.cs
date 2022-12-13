@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Immutable;
+using System.IO;
+using System.Reflection;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +15,17 @@ using Microsoft.Extensions.Logging;
 public class ClassModelAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
+
+    private static bool X = Created();
+    private static bool Created()
+    {
+        using FileStream Stream = new("C:\\Projects\\Temp\\an.txt", FileMode.Create, FileAccess.Write);
+        using StreamWriter Writer = new(Stream);
+
+        Writer.WriteLine($"Current directory: {Environment.CurrentDirectory}");
+        Writer.WriteLine($"Assembly location: {Assembly.GetExecutingAssembly().Location}");
+        return true;
+    }
 
     public const string ClassModelDiagnosticId = "ClassModel";
     private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
