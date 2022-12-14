@@ -14,7 +14,7 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadRequireDiagnosticId = "BadRequire";
+    public const string BadRequireDiagnosticId = "MA0005";
     private static readonly LocalizableString BadRequireTitle = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadRequireMessageFormat = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadRequireDescription = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerDescription), Resources.ResourceManager, typeof(Resources));

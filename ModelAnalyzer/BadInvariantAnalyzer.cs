@@ -15,7 +15,7 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadInvariantDiagnosticId = "BadInvariant";
+    public const string BadInvariantDiagnosticId = "MA0003";
     private static readonly LocalizableString BadInvariantTitle = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadInvariantMessageFormat = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadInvariantDescription = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerDescription), Resources.ResourceManager, typeof(Resources));

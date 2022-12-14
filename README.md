@@ -119,6 +119,13 @@ public class Test
 
 ## List of diagnostics
 
-| Code          | Diagnostic    |
-| ------------- | ------------- |
-| BadEnsure     | Bad assertion |
+| Code          | Diagnostic               |
+| ------------- | ------------------------ |
+| MA0001        | Invalid ensure clause    |
+| MA0002        | Invalid expression       |
+| MA0003        | Invalid invariant clause |
+| MA0004        | Invalid parameter        |
+| MA0005        | Invalid require clause   |
+| MA0006        | Invalid statement        |
+| MA0007        | Error in class model     |
+| MA0008        | Invariant violation      |

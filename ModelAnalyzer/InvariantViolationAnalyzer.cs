@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class InvariantViolationAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "InvariantViolation";
+    public const string DiagnosticId = "MA0008";
 
     private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.InvariantViolationAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.InvariantViolationAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));

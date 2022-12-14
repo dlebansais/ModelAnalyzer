@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.IO;
-using System.Reflection;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +14,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string ClassModelDiagnosticId = "ClassModel";
+    public const string ClassModelDiagnosticId = "MA0007";
     private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString ClassModelMessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString ClassModelDescription = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));

@@ -14,7 +14,7 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadStatementDiagnosticId = "BadStatement";
+    public const string BadStatementDiagnosticId = "MA0006";
     private static readonly LocalizableString BadStatementTitle = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadStatementMessageFormat = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadStatementDescription = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerDescription), Resources.ResourceManager, typeof(Resources));

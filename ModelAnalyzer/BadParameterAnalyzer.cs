@@ -14,7 +14,7 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadParameterDiagnosticId = "BadParameter";
+    public const string BadParameterDiagnosticId = "MA0004";
     private static readonly LocalizableString BadParameterTitle = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadParameterMessageFormat = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadParameterDescription = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
