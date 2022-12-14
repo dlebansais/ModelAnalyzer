@@ -119,13 +119,13 @@ public class Test
 
 ## List of diagnostics
 
-| Code          | Diagnostic               |
-| ------------- | ------------------------ |
-| MA0001        | Invalid ensure clause    |
-| MA0002        | Invalid expression       |
-| MA0003        | Invalid invariant clause |
-| MA0004        | Invalid parameter        |
-| MA0005        | Invalid require clause   |
-| MA0006        | Invalid statement        |
-| MA0007        | Error in class model     |
-| MA0008        | Invariant violation      |
+| Code   | Diagnostic               |
+| ------ | ------------------------ |
+| [MA0001](doc/MA0001.md) | Invalid ensure clause    |
+| [MA0002](doc/MA0002.md) | Invalid expression       |
+| [MA0003](doc/MA0003.md) | Invalid invariant clause |
+| [MA0004](doc/MA0004.md) | Invalid parameter        |
+| [MA0005](doc/MA0005.md) | Invalid require clause   |
+| [MA0006](doc/MA0006.md) | Invalid statement        |
+| [MA0007](doc/MA0007.md) | Error in class model     |
+| [MA0008](doc/MA0008.md) | Invariant violation      |
