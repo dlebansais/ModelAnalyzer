@@ -40,7 +40,7 @@ internal partial record ClassModel : IClassModel
     required public IUnsupported Unsupported { get; init; }
 
     /// <inheritdoc/>
-    public ManualResetEvent InvariantViolationVerified { get; } = new ManualResetEvent(initialState: false);
+    public ManualResetEvent InvariantViolationVerified { get; } = new(initialState: false);
 
     /// <inheritdoc/>
     public bool IsInvariantViolated { get; internal set; }

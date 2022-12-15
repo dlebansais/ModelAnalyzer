@@ -9,6 +9,7 @@ using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Z3;
 
 /// <summary>
 /// Represents a manager for class models.
@@ -25,6 +26,7 @@ public partial class ClassModelManager : IDisposable
         Context = new SynchronizedVerificationContext();
         SynchronizedThread = new(Context, ExecuteVerification);
         VerificationThread = InitThread();
+        StartThread();
     }
 
     /// <summary>
@@ -86,7 +88,6 @@ public partial class ClassModelManager : IDisposable
         if (IsVerifyingAsynchronously && waitIfAsync)
         {
             Log("Waiting for the delayed analysis.");
-            RequestVerification();
 
             ClassModel.InvariantViolationVerified.WaitOne(Timeout.InfiniteTimeSpan);
 
@@ -123,7 +124,6 @@ public partial class ClassModelManager : IDisposable
         if (IsVerifyingAsynchronously)
         {
             Log("Waiting for the delayed analysis.");
-            RequestVerification();
 
             return await Task.Run(() =>
             {
@@ -165,7 +165,8 @@ public partial class ClassModelManager : IDisposable
                 IClassModel ClassModel = Entry.Value;
 
                 if (!existingClassList.Contains(ClassName) && VerifiedClassList.Contains(ClassModel))
-                    ToRemoveClassList.Add(ClassName);
+                    if (!ClassModel.Unsupported.IsEmpty || ClassModel.InvariantViolationVerified.WaitOne(0))
+                        ToRemoveClassList.Add(ClassName);
             }
 
             foreach (string ClassName in ToRemoveClassList)
@@ -231,6 +232,8 @@ public partial class ClassModelManager : IDisposable
                     Log("Starting the verification thread.");
                     SynchronizedThread.Start();
                 }
+
+                ScheduleAsynchronousVerification();
 
                 isVerifyingAsynchronously = true;
                 Context.LastCompilationContext = compilationContext with { IsAsyncRunRequested = true };

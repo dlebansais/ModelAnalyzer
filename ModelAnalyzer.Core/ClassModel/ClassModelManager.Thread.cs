@@ -11,39 +11,49 @@ public partial class ClassModelManager : IDisposable
 {
     private Thread InitThread()
     {
-        VerificationThreadShutdown = false;
-        RunVerification = false;
+        IsVerificationThreadShutdownRequested = false;
+        IsAsynchronousVerificationScheduled = false;
         Thread NewThread = new Thread(new ThreadStart(ExecuteThread));
         return NewThread;
     }
 
+    /// <summary>
+    /// Starts the verification thread.
+    /// </summary>
+    public void StartThread()
+    {
+        VerificationThread.Start();
+    }
+
     private void CleanupThread()
     {
-        RunVerification = false;
-        VerificationThreadShutdown = true;
+        IsAsynchronousVerificationScheduled = false;
+        IsVerificationThreadShutdownRequested = true;
         VerificationThread.Join();
     }
 
-    private void RequestVerification()
+    private void ScheduleAsynchronousVerification()
     {
         lock (Context.Lock)
         {
-            RunVerification = true;
+            IsAsynchronousVerificationScheduled = true;
         }
     }
 
     private void ExecuteThread()
     {
-        while (!VerificationThreadShutdown)
+        Log("Entering ExecuteThread.");
+
+        while (!IsVerificationThreadShutdownRequested)
         {
             List<ClassModel> ClonedClassModelList = new();
             bool IsVerificationRequested = false;
 
             lock (Context.Lock)
             {
-                if (RunVerification)
+                if (IsAsynchronousVerificationScheduled)
                 {
-                    RunVerification = false;
+                    IsAsynchronousVerificationScheduled = false;
                     IsVerificationRequested = true;
 
                     foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
@@ -75,6 +85,8 @@ public partial class ClassModelManager : IDisposable
             else
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));
         }
+
+        Log("Leaving ExecuteThread.");
     }
 
     private void ExecuteVerification(List<ClassModel> clonedClassModelList)
@@ -102,8 +114,9 @@ public partial class ClassModelManager : IDisposable
                 Verifier.Verify();
 
                 ClassModel.IsInvariantViolated = Verifier.IsInvariantViolated;
-                ClassModel.InvariantViolationVerified.Set();
             }
+
+            ClassModel.InvariantViolationVerified.Set();
         }
 
 #if DEBUG
@@ -115,6 +128,6 @@ public partial class ClassModelManager : IDisposable
     }
 
     private Thread VerificationThread;
-    private bool VerificationThreadShutdown;
-    private bool RunVerification;
+    private bool IsVerificationThreadShutdownRequested;
+    private bool IsAsynchronousVerificationScheduled;
 }

@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +25,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
             NewExpression = TryParseParenthesizedExpression(fieldTable, parameterTable, unsupported, ParenthesizedExpression);
+        else
+            Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
         if (NewExpression is null)
         {
@@ -60,8 +63,6 @@ internal partial class ClassDeclarationParser
                 location = OperatorToken.GetLocation();
             }
         }
-        else
-            Log($"Unsupported expression type '{binaryExpression.GetType().Name}'.");
 
         return NewExpression;
     }
