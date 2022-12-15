@@ -213,7 +213,6 @@ public partial class ClassModelManager : IDisposable
                 ClassModel NewClassModel = new ClassModel()
                 {
                     Name = ClassName,
-                    Manager = this,
                     FieldTable = Parser.FieldTable,
                     MethodTable = Parser.MethodTable,
                     InvariantList = Parser.InvariantList,

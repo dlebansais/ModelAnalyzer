@@ -85,11 +85,16 @@ public partial class ClassModelManager : IDisposable
                     string JSonString = JsonConvert.SerializeObject(ClassModel);
                     byte[] EncodedString = Encoding.UTF8.GetBytes(JSonString);
 
-                    if (EncodedString.Length <= ToServerChannel.GetFreeLength())
-                    {
-                        ToServerChannel.Write(EncodedString);
+                    int DataLength = sizeof(int) + EncodedString.Length;
+                    byte[] EncodedStringWithHeader = new byte[DataLength];
+                    Array.Copy(BitConverter.GetBytes(DataLength), 0, EncodedStringWithHeader, 0, sizeof(int));
+                    Array.Copy(EncodedString, 0, EncodedStringWithHeader, sizeof(int), EncodedString.Length);
 
-                        Log($"Data send for class '{ClassName}'.");
+                    if (EncodedStringWithHeader.Length <= ToServerChannel.GetFreeLength())
+                    {
+                        ToServerChannel.Write(EncodedStringWithHeader);
+
+                        Log($"Data send {EncodedStringWithHeader.Length} bytes for class '{ClassName}'.");
                     }
                     else
                         Log($"Unable to send data for class '{ClassName}', buffer full.");

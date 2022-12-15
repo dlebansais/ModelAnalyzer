@@ -15,11 +15,6 @@ internal partial record ClassModel : IClassModel
     required public string Name { get; init; }
 
     /// <summary>
-    /// Gets the class manager.
-    /// </summary>
-    required public ClassModelManager Manager { get; init; }
-
-    /// <summary>
     /// Gets the field table.
     /// </summary>
     required public FieldTable FieldTable { get; init; }

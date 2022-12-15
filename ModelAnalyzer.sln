@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libz3Extractor", "Libz3Extr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessCommunication", "ProcessCommunication\ProcessCommunication.csproj", "{BC2BD800-4C7D-4848-97D2-C0B13C2299E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Verifier", "Verifier\Verifier.csproj", "{F58E745E-014E-4CDC-AB67-CF6143F3425B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Verifier", "Verifier\Verifier.csproj", "{F58E745E-014E-4CDC-AB67-CF6143F3425B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelAnalyzer.Data", "ModelAnalyzer.Data\ModelAnalyzer.Data.csproj", "{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,10 @@ Global
 		{F58E745E-014E-4CDC-AB67-CF6143F3425B}.Debug|x64.Build.0 = Debug|x64
 		{F58E745E-014E-4CDC-AB67-CF6143F3425B}.Release|x64.ActiveCfg = Release|x64
 		{F58E745E-014E-4CDC-AB67-CF6143F3425B}.Release|x64.Build.0 = Release|x64
+		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Debug|x64.ActiveCfg = Debug|x64
+		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Debug|x64.Build.0 = Debug|x64
+		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Release|x64.ActiveCfg = Release|x64
+		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

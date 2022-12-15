@@ -4,11 +4,17 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
+using ModelAnalyzer;
+using Newtonsoft.Json;
 using ProcessCommunication;
 
 internal class Program
 {
+    private const int MaxDepth = 2;
+
     public static void Main()
     {
         string Location = Assembly.GetExecutingAssembly().Location;
@@ -46,7 +52,51 @@ internal class Program
 
         if (ToClientChannel.IsOpen)
         {
-            byte[] Data = new byte[10];
+            int DecodedCount = 0;
+            int VerifiedCount = 0;
+            int Offset = 0;
+            while (Offset + sizeof(int) <= data.Length)
+            {
+                int EncodedStringLength = BitConverter.ToInt32(data, Offset);
+
+                if (Offset + EncodedStringLength <= data.Length)
+                {
+                    byte[] EncodedString = new byte[EncodedStringLength - sizeof(int)];
+                    Array.Copy(data, Offset + sizeof(int), EncodedString, 0, EncodedString.Length);
+
+                    string JsonString = Encoding.UTF8.GetString(EncodedString);
+                    ClassModel? ClassModel = JsonConvert.DeserializeObject(JsonString) as ClassModel;
+                    if (ClassModel is not null)
+                    {
+                        DecodedCount++;
+
+                        try
+                        {
+                            using Verifier Verifier = new()
+                            {
+                                MaxDepth = MaxDepth,
+                                ClassName = ClassModel.Name,
+                                FieldTable = ClassModel.FieldTable,
+                                MethodTable = ClassModel.MethodTable,
+                                InvariantList = ClassModel.InvariantList,
+                            };
+
+                            Verifier.Verify();
+
+                            ClassModel.IsInvariantViolated = Verifier.IsInvariantViolated;
+
+                            VerifiedCount += 10;
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+                Offset += EncodedStringLength;
+            }
+
+            byte[] Data = new byte[10 + DecodedCount + VerifiedCount];
 
             if (Data.Length <= ToClientChannel.GetFreeLength())
                 ToClientChannel.Write(Data);

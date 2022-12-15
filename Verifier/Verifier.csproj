@@ -19,6 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnalysisLogger\AnalysisLogger.csproj" />
+    <ProjectReference Include="..\CSharp11Support\CSharp11Support.csproj" />
+    <ProjectReference Include="..\ModelAnalyzer.Data\ModelAnalyzer.Data.csproj" />
     <ProjectReference Include="..\ProcessCommunication\ProcessCommunication.csproj" />
   </ItemGroup>
 
