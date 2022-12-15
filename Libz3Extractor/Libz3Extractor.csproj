@@ -12,10 +12,12 @@
 
   <ItemGroup>
     <None Remove="..\ModelAnalyzer.Core\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
+    <None Remove="..\ModelAnalyzer.Core\bin\$(Platform)\$(Configuration)\$(TargetFramework)\ProcessCommunication.dll" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\ModelAnalyzer.Core\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
+    <EmbeddedResource Include="..\ModelAnalyzer.Core\bin\$(Platform)\$(Configuration)\$(TargetFramework)\ProcessCommunication.dll" />
   </ItemGroup>
 
 </Project>

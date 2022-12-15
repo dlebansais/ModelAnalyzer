@@ -32,11 +32,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AnalysisLogger\AnalysisLogger.csproj" />
     <ProjectReference Include="..\CSharp11Support\CSharp11Support.csproj" />
+    <ProjectReference Include="..\ProcessCommunication\ProcessCommunication.csproj" />
   </ItemGroup>
 
 </Project>

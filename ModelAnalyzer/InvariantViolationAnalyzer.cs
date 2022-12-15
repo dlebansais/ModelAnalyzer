@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Immutable;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +25,10 @@ public class InvariantViolationAnalyzer : Analyzer
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
+        Logger.Log("Starting the process.");
+        Process.Start(@"C:\Projects\Temp\ModelAnalyzer\Verifier\bin\x64\Debug\net48\Verifier.exe");
+        Logger.Log("Started.");
+
         if (!classModel.Unsupported.IsEmpty)
             return;
 

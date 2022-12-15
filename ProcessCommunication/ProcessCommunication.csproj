@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>11</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>ProcessCommunication</RootNamespace>
+    <Product />
+    <Description>A library to communicate between processes</Description>
+    <Copyright>Copyright © 2022 David Le Bansais</Copyright>
+    <Version>0.0.3</Version>
+    <NeutralLanguage>en-US</NeutralLanguage>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>David Le Bansais</Authors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

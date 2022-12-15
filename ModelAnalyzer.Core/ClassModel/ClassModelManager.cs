@@ -9,7 +9,6 @@ using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents a manager for class models.
@@ -26,7 +25,8 @@ public partial class ClassModelManager : IDisposable
         Context = new SynchronizedVerificationContext();
         SynchronizedThread = new(Context, ExecuteVerification);
         VerificationThread = InitThread();
-        StartThread();
+
+        // StartThread();
     }
 
     /// <summary>

@@ -2,7 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
+using ProcessCommunication;
 
 /// <summary>
 /// Represents a manager for class models.
@@ -37,6 +40,51 @@ public partial class ClassModelManager : IDisposable
         lock (Context.Lock)
         {
             IsAsynchronousVerificationScheduled = true;
+        }
+
+        Log("Creating the channel.");
+        Channel Channel = new Channel(Channel.SharedGuid, Mode.Client);
+        if (Channel.Open())
+        {
+            Log("Channel opened.");
+
+            List<ClassModel> ClonedClassModelList = new();
+
+            lock (Context.Lock)
+            {
+                foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+                {
+                    ClassModel ClassModel = Entry.Value;
+
+                    if (!ClassModel.InvariantViolationVerified.WaitOne(0))
+                    {
+                        ClassModel ClonedModel = ClassModel with { };
+                        ClonedClassModelList.Add(ClonedModel);
+                    }
+                }
+            }
+
+            foreach (ClassModel ClassModel in ClonedClassModelList)
+            {
+                string ClassName = ClassModel.Name;
+
+                if (!ClassModel.Unsupported.IsEmpty)
+                    Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
+                else
+                {
+                    JsonSerializerOptions Options = new();
+                    string JSonString = JsonSerializer.Serialize(ClassModel, Options);
+                    byte[] EncodedString = Encoding.UTF8.GetBytes(JSonString);
+                    Channel.Write(EncodedString);
+
+                    Log($"Data send for class '{ClassName}'.");
+                }
+
+                ClassModel.InvariantViolationVerified.Set();
+            }
+
+            Channel.Close();
+            Log("Channel closed.");
         }
     }
 

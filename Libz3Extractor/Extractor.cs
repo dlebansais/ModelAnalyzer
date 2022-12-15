@@ -42,22 +42,28 @@ public class Extractor
                     if (!PathEnvironmentVariable.Contains(NativeLocation))
                         Environment.SetEnvironmentVariable(PathEnvironmentVariableName, PathEnvironmentVariable + $";{NativeLocation}");
 
-                    string Libz3FilePath = Path.Combine(NativeLocation, "libz3.dll");
-
-                    // Get a stream to the dll loaded inside us.
-                    using Stream ResourceStream = ExecutingAssembly.GetManifestResourceStream("Libz3Extractor.libz3.dll");
-
-                    // Create a file stream in the new folder.
-                    using FileStream DllStream = new(Libz3FilePath, FileMode.Create, FileAccess.Write);
-
-                    // Copy the stream to have a new dll ready to load.
-                    ResourceStream.CopyTo(DllStream);
-                    ResourceStream.Flush();
+                    ExtractFile(ExecutingAssembly, NativeLocation, "libz3.dll");
+                    ExtractFile(ExecutingAssembly, NativeLocation, "ProcessCommunication.dll");
                 }
             }
         }
         catch
         {
         }
+    }
+
+    private static void ExtractFile(Assembly executingAssembly, string nativeLocation, string fileName)
+    {
+        string DestinationPath = Path.Combine(nativeLocation, fileName);
+
+        // Get a stream to the dll loaded inside us.
+        using Stream ResourceStream = executingAssembly.GetManifestResourceStream($"Libz3Extractor.{fileName}");
+
+        // Create a file stream in the new folder.
+        using FileStream DllStream = new(DestinationPath, FileMode.Create, FileAccess.Write);
+
+        // Copy the stream to have a new dll ready to load.
+        ResourceStream.CopyTo(DllStream);
+        ResourceStream.Flush();
     }
 }
