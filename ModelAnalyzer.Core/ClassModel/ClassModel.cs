@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 /// <summary>
 /// Represents the model of a class.
@@ -37,6 +38,9 @@ internal partial record ClassModel : IClassModel
     /// Gets unsupported class elements.
     /// </summary>
     required public IUnsupported Unsupported { get; init; }
+
+    /// <inheritdoc/>
+    public ManualResetEvent InvariantViolationVerified { get; } = new ManualResetEvent(initialState: false);
 
     /// <inheritdoc/>
     public bool IsInvariantViolated { get; internal set; }

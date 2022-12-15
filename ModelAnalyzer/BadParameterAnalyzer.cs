@@ -15,16 +15,16 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0004";
-    private static readonly LocalizableString BadParameterTitle = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadParameterMessageFormat = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadParameterDescription = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadParameterRule = new DiagnosticDescriptor(DiagnosticId, BadParameterTitle, BadParameterMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadParameterDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadParameterRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -64,7 +64,7 @@ public class BadParameterAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad parameter.");
-            context.ReportDiagnostic(Diagnostic.Create(BadParameterRule, Item.Location, Item.Name));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location, Item.Name));
         }
     }
 }

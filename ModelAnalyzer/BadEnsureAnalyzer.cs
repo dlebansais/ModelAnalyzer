@@ -15,16 +15,16 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0001";
-    private static readonly LocalizableString BadEnsureTitle = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadEnsureMessageFormat = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadEnsureDescription = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadEnsureRule = new DiagnosticDescriptor(DiagnosticId, BadEnsureTitle, BadEnsureMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadEnsureDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadEnsureRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -64,7 +64,7 @@ public class BadEnsureAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad ensure.");
-            context.ReportDiagnostic(Diagnostic.Create(BadEnsureRule, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location));
         }
     }
 }

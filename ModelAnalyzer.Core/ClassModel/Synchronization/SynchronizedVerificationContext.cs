@@ -77,6 +77,11 @@ internal class SynchronizedVerificationContext : ISynchronizedContext<ModelVerif
     public Dictionary<string, ClassModel> ClassModelTable { get; } = new();
 
     /// <summary>
+    /// Gets the list of class names for wich the invariant is violated.
+    /// </summary>
+    public List<string> ClassNameWithInvariantViolation { get; } = new();
+
+    /// <summary>
     /// Gets the list of verification objects.
     /// </summary>
     public List<ModelVerification> VerificationList { get; } = new();

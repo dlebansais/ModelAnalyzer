@@ -52,5 +52,7 @@ public partial class ClassModelManager : IDisposable
         using (SynchronizedThread)
         {
         }
+
+        CleanupThread();
     }
 }

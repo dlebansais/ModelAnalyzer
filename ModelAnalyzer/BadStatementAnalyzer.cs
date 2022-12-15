@@ -15,16 +15,16 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0006";
-    private static readonly LocalizableString BadStatementTitle = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadStatementMessageFormat = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadStatementDescription = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadStatementRule = new DiagnosticDescriptor(DiagnosticId, BadStatementTitle, BadStatementMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadStatementDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadStatementRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -64,7 +64,7 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad statement.");
-            context.ReportDiagnostic(Diagnostic.Create(BadStatementRule, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location));
         }
     }
 }

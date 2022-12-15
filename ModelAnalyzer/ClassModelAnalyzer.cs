@@ -15,16 +15,16 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0007";
-    private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString ClassModelMessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString ClassModelDescription = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor ClassModelRule = new DiagnosticDescriptor(DiagnosticId, ClassModelTitle, ClassModelMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: ClassModelDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(ClassModelRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -65,6 +65,6 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
             return;
 
         Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting unsupported elements.");
-        context.ReportDiagnostic(Diagnostic.Create(ClassModelRule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }
 }

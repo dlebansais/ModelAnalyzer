@@ -15,16 +15,16 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0002";
-    private static readonly LocalizableString BadExpressionTitle = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadExpressionMessageFormat = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadExpressionDescription = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadExpressionRule = new DiagnosticDescriptor(DiagnosticId, BadExpressionTitle, BadExpressionMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadExpressionDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadExpressionRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -64,7 +64,7 @@ public class BadExpressionAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad expression.");
-            context.ReportDiagnostic(Diagnostic.Create(BadExpressionRule, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location));
         }
     }
 }

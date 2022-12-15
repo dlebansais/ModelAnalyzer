@@ -53,23 +53,9 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        /*
-        Location Location = classDeclaration.Identifier.GetLocation();
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(DiagnosticId, classDeclaration, isAsyncRunRequested: false);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
         string ClassName = classDeclaration.Identifier.ValueText;
-
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(DiagnosticId, classDeclaration, isAsyncRunRequested: true);
-        Task<IClassModel> GetClassModelTask = Manager.GetClassModelAsync(CompilationContext, classDeclaration);
-
-        // Don't wait too long and get the analyzer stuck.
-        GetClassModelTask.Wait(TimeSpan.FromSeconds(5));
-
-        if (!GetClassModelTask.IsCompleted)
-        {
-            Logger.Log(LogLevel.Warning, $"Timeout waiting for analysis of class '{ClassName}' to complete.");
-            return;
-        }
-
-        IClassModel ClassModel = GetClassModelTask.Result;
 
         if (!ClassModel.Unsupported.IsEmpty)
             return;
@@ -77,8 +63,9 @@ public class InvariantViolationAnalyzer : DiagnosticAnalyzer
         if (!ClassModel.IsInvariantViolated)
             return;
 
+        Location Location = classDeclaration.Identifier.GetLocation();
+
         Logger.Log(LogLevel.Error, $"Class '{ClassName}': reporting invariant violated.");
         context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ClassName));
-        */
     }
 }

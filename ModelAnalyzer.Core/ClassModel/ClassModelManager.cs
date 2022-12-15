@@ -24,6 +24,7 @@ public partial class ClassModelManager : IDisposable
     {
         Context = new SynchronizedVerificationContext();
         SynchronizedThread = new(Context, ExecuteVerification);
+        VerificationThread = InitThread();
     }
 
     /// <summary>
@@ -80,17 +81,25 @@ public partial class ClassModelManager : IDisposable
 
         Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
 
-        GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out _, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously && waitIfAsync)
         {
             Log("Waiting for the delayed analysis.");
-            ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan, out _);
+            RequestVerification();
+
+            ClassModel.InvariantViolationVerified.WaitOne(Timeout.InfiniteTimeSpan);
+
+            Log("Analysis complete.");
+
+            return ClassModel;
         }
+        else
+        {
+            Log("Synchronous analysis complete.");
 
-        Log("Analysis complete.");
-
-        return ModelVerification.ClassModel;
+            return ClassModel;
+        }
     }
 
     /// <summary>
@@ -109,26 +118,27 @@ public partial class ClassModelManager : IDisposable
 
         Log($"Getting model for class '{ClassName}' asynchronously.");
 
-        GetClassModelInternal(compilationContext, classDeclaration, out ModelVerification ModelVerification, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out _, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously)
         {
             Log("Waiting for the delayed analysis.");
+            RequestVerification();
 
             return await Task.Run(() =>
             {
-                ModelVerification.WaitForUpToDate(Timeout.InfiniteTimeSpan, out _);
+                ClassModel.InvariantViolationVerified.WaitOne(Timeout.InfiniteTimeSpan);
 
                 Log($"Analysis of '{ClassName}' complete.");
 
-                return ModelVerification.ClassModel;
+                return ClassModel;
             });
         }
         else
         {
             Log($"Analysis of '{ClassName}' complete.");
 
-            return ModelVerification.ClassModel;
+            return ClassModel;
         }
     }
 
@@ -163,6 +173,7 @@ public partial class ClassModelManager : IDisposable
                 Log($"Removing class '{ClassName}'.");
 
                 Context.ClassModelTable.Remove(ClassName);
+                Context.ClassNameWithInvariantViolation.Remove(ClassName);
             }
         }
     }
@@ -176,7 +187,7 @@ public partial class ClassModelManager : IDisposable
         SynchronizedThread.Start();
     }
 
-    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
+    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out IClassModel classModel, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
     {
         isVerifyingAsynchronously = false;
 
@@ -208,6 +219,7 @@ public partial class ClassModelManager : IDisposable
                 };
 
                 modelVerification = new() { ClassModel = NewClassModel };
+                classModel = NewClassModel;
 
                 Context.UpdateClassModel(NewClassModel, out bool IsAdded);
                 Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
@@ -226,6 +238,7 @@ public partial class ClassModelManager : IDisposable
             else
             {
                 modelVerification = ExistingModelVerification;
+                classModel = Context.ClassModelTable[ClassName];
                 Context.LastCompilationContext = compilationContext;
             }
         }

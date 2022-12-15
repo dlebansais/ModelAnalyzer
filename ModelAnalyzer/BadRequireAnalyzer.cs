@@ -15,16 +15,16 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0005";
-    private static readonly LocalizableString BadRequireTitle = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadRequireMessageFormat = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadRequireDescription = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadRequireRule = new DiagnosticDescriptor(DiagnosticId, BadRequireTitle, BadRequireMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadRequireDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadRequireRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -64,7 +64,7 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad require.");
-            context.ReportDiagnostic(Diagnostic.Create(BadRequireRule, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location));
         }
     }
 }

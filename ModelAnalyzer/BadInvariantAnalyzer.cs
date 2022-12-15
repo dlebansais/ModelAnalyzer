@@ -16,16 +16,16 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
     private const string Category = "Design";
 
     public const string DiagnosticId = "MA0003";
-    private static readonly LocalizableString BadInvariantTitle = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadInvariantMessageFormat = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString BadInvariantDescription = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadInvariantRule = new DiagnosticDescriptor(DiagnosticId, BadInvariantTitle, BadInvariantMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadInvariantDescription);
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get
         {
-            return ImmutableArray.Create(BadInvariantRule);
+            return ImmutableArray.Create(Rule);
         }
     }
 
@@ -91,7 +91,7 @@ public class BadInvariantAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedInvariant Item in ClassModel.Unsupported.Invariants)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassName}': reporting bad invariant.");
-            context.ReportDiagnostic(Diagnostic.Create(BadInvariantRule, Item.Location, Item.Text));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Item.Location, Item.Text));
         }
     }
 }
