@@ -14,11 +14,11 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadRequireDiagnosticId = "MA0005";
+    public const string DiagnosticId = "MA0005";
     private static readonly LocalizableString BadRequireTitle = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadRequireMessageFormat = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadRequireDescription = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadRequireRule = new DiagnosticDescriptor(BadRequireDiagnosticId, BadRequireTitle, BadRequireMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadRequireDescription);
+    private static readonly DiagnosticDescriptor BadRequireRule = new DiagnosticDescriptor(DiagnosticId, BadRequireTitle, BadRequireMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadRequireDescription);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
@@ -57,7 +57,7 @@ public class BadRequireAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context, isAsyncRunRequested: false);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(DiagnosticId, classDeclaration, isAsyncRunRequested: false);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
         string ClassName = classDeclaration.Identifier.ValueText;
 

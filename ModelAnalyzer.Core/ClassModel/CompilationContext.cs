@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
 using System.Threading;
 
 /// <summary>
@@ -39,11 +40,32 @@ public struct CompilationContext
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationContext"/> struct.
     /// </summary>
+    /// <param name="diagnosticId">A diagnostic id.</param>
     /// <param name="obj">An object whose hash code is used to initialize the context.</param>
     /// <param name="isAsyncRunRequested">Whether this context is to request an asynchronous run.</param>
-    public CompilationContext(object obj, bool isAsyncRunRequested)
+    public CompilationContext(string diagnosticId, object obj, bool isAsyncRunRequested)
     {
-        HashCode = obj.GetHashCode();
+        long newHashCode = obj.GetHashCode();
+
+        if (HashCode == newHashCode)
+        {
+            // If the hash code is the same for a diagnostic id already encountered, this hash code is tainted.
+            // We handle this by increasing the counter so that comparison with a context with the same hash code will report not compatible.
+            if (DiagnosticIdList.Contains(diagnosticId))
+            {
+                DiagnosticIdList.Clear();
+                SameHashCounter++;
+            }
+
+            DiagnosticIdList.Add(diagnosticId);
+        }
+        else
+        {
+            HashCode = newHashCode;
+            SameHashCounter = 0;
+            DiagnosticIdList.Clear();
+        }
+
         IsAsyncRunRequested = isAsyncRunRequested;
     }
 
@@ -51,6 +73,16 @@ public struct CompilationContext
     /// Gets a unique value indentifying the compilation context.
     /// </summary>
     internal long HashCode { get; }
+
+    /// <summary>
+    /// Gets the number of time the same hash code has been reused.
+    /// </summary>
+    internal int SameHashCounter { get; }
+
+    /// <summary>
+    /// Gets the list of diagnostic ids that have been used for a particular pair of hash code and counter.
+    /// </summary>
+    internal List<string> DiagnosticIdList { get; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether the comilation context has at least one asynchrounous run requested.
@@ -63,7 +95,22 @@ public struct CompilationContext
     /// <param name="other">The other instance.</param>
     public bool IsCompatibleWith(CompilationContext other)
     {
-        return HashCode == other.HashCode && (IsAsyncRunRequested || IsAsyncRunRequested == other.IsAsyncRunRequested);
+        if (HashCode != other.HashCode)
+            return false;
+
+        if (SameHashCounter != other.SameHashCounter)
+            return false;
+
+        if (!IsAsyncRunRequested && other.IsAsyncRunRequested)
+            return false;
+
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{HashCode:X16};{SameHashCounter:X2};{IsAsyncRunRequested}";
     }
 
     // By starting at high value, we exploit the fact that object.GetHashCode() returns an int and therefore cannot collide with this global value.

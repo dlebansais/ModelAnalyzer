@@ -14,11 +14,11 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string ClassModelDiagnosticId = "MA0007";
+    public const string DiagnosticId = "MA0007";
     private static readonly LocalizableString ClassModelTitle = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString ClassModelMessageFormat = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString ClassModelDescription = new LocalizableResourceString(nameof(Resources.ClassModelAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor ClassModelRule = new DiagnosticDescriptor(ClassModelDiagnosticId, ClassModelTitle, ClassModelMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: ClassModelDescription);
+    private static readonly DiagnosticDescriptor ClassModelRule = new DiagnosticDescriptor(DiagnosticId, ClassModelTitle, ClassModelMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: ClassModelDescription);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
@@ -57,7 +57,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context, isAsyncRunRequested: false);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(DiagnosticId, classDeclaration, isAsyncRunRequested: false);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
         string ClassName = classDeclaration.Identifier.ValueText;
 

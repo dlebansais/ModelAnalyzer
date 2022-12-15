@@ -185,6 +185,8 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
+            Log($"Compilation Context: {compilationContext}");
+
             // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
             bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
             bool ClassModelMustBeUpdated = IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
@@ -193,6 +195,7 @@ public partial class ClassModelManager : IDisposable
             if (ClassModelMustBeUpdated || ExistingModelVerification is null)
             {
                 ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
+                Parser.Parse();
 
                 ClassModel NewClassModel = new ClassModel()
                 {

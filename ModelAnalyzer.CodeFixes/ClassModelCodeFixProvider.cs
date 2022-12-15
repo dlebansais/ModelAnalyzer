@@ -18,7 +18,7 @@ public class ClassModelCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds
     {
-        get { return ImmutableArray.Create(ClassModelAnalyzer.ClassModelDiagnosticId); }
+        get { return ImmutableArray.Create(ClassModelAnalyzer.DiagnosticId); }
     }
 
     public sealed override FixAllProvider GetFixAllProvider()

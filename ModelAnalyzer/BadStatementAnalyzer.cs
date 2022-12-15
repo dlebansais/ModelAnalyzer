@@ -14,11 +14,11 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
 {
     private const string Category = "Design";
 
-    public const string BadStatementDiagnosticId = "MA0006";
+    public const string DiagnosticId = "MA0006";
     private static readonly LocalizableString BadStatementTitle = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadStatementMessageFormat = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString BadStatementDescription = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor BadStatementRule = new DiagnosticDescriptor(BadStatementDiagnosticId, BadStatementTitle, BadStatementMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadStatementDescription);
+    private static readonly DiagnosticDescriptor BadStatementRule = new DiagnosticDescriptor(DiagnosticId, BadStatementTitle, BadStatementMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: BadStatementDescription);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
@@ -57,7 +57,7 @@ public class BadStatementAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(context, isAsyncRunRequested: false);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(DiagnosticId, classDeclaration, isAsyncRunRequested: false);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
         string ClassName = classDeclaration.Identifier.ValueText;
 

@@ -4,11 +4,17 @@ using AnalysisLogger;
 
 public static class Initialization
 {
+    static Initialization()
+    {
 #if DEBUG
-    public static IAnalysisLogger Logger { get; } = new FileLogger();
+        Logger = new FileLogger();
 #else
-    public static IAnalysisLogger Logger { get; } = new NullLogger();
+        Logger = new NullLogger();
 #endif
-    public static ClassModelManager Manager { get; } = new ClassModelManager() { Logger = Logger };
-    public static bool ExtractionStatus { get; } = Libz3Extractor.Extractor.Extract();
+        Libz3Extractor.Extractor.Extract();
+        Manager = new ClassModelManager() { Logger = Logger, StartMode = SynchronizedThreadStartMode.Manual };
+    }
+
+    public static IAnalysisLogger Logger { get; }
+    public static ClassModelManager Manager { get; }
 }

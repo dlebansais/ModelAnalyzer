@@ -28,9 +28,11 @@ public class CompilationContextTest
     [Category("Core")]
     public void CompilationContextTestTest_HashCodeComparison()
     {
-        CompilationContext Context1 = new CompilationContext(10, false);
-        CompilationContext Context2 = new CompilationContext(10, false);
-        CompilationContext Context3 = new CompilationContext(11, false);
+        string DiagnosticId = "MA";
+
+        CompilationContext Context1 = new CompilationContext(DiagnosticId, 10, false);
+        CompilationContext Context2 = new CompilationContext(DiagnosticId, 10, false);
+        CompilationContext Context3 = new CompilationContext(DiagnosticId, 11, false);
 
         Assert.IsTrue(Context1.IsCompatibleWith(Context1));
         Assert.IsTrue(Context2.IsCompatibleWith(Context2));
@@ -48,9 +50,11 @@ public class CompilationContextTest
     [Category("Core")]
     public void CompilationContextTestTest_IsAsyncRunRequestedComparison()
     {
-        CompilationContext Context1 = new CompilationContext(10, false);
-        CompilationContext Context2 = new CompilationContext(10, true);
-        CompilationContext Context3 = new CompilationContext(11, true);
+        string DiagnosticId = "MA";
+
+        CompilationContext Context1 = new CompilationContext(DiagnosticId, 10, false);
+        CompilationContext Context2 = new CompilationContext(DiagnosticId, 10, true);
+        CompilationContext Context3 = new CompilationContext(DiagnosticId, 11, true);
 
         Assert.IsFalse(Context1.IsCompatibleWith(Context2));
         Assert.IsFalse(Context1.IsCompatibleWith(Context3));

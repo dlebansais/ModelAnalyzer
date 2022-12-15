@@ -21,21 +21,27 @@ internal partial class ClassDeclarationParser
     /// <param name="classDeclaration">The class declaration.</param>
     public ClassDeclarationParser(ClassDeclarationSyntax classDeclaration)
     {
-        string ClassName = classDeclaration.Identifier.ValueText;
-        Unsupported = new Unsupported();
+        ClassDeclaration = classDeclaration;
+    }
+
+    /// <summary>
+    /// Parses the class declaration.
+    /// </summary>
+    public void Parse()
+    {
+        string ClassName = ClassDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
 
         Log($"Parsing declaration of class '{ClassName}'");
 
-        bool IsClassSupported = true;
-        IsClassSupported &= ClassName != string.Empty; // Only happens during edition of invalid programs. For code coverage purpose, the boolean value is always tested.
-        IsClassSupported &= IsClassDeclarationSupported(classDeclaration);
+        Unsupported = new Unsupported();
 
-        if (IsClassSupported)
+        if (IsClassDeclarationSupported(ClassDeclaration))
         {
-            Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(classDeclaration);
-            FieldTable = ParseFields(classDeclaration, Unsupported);
-            MethodTable = ParseMethods(classDeclaration, FieldTable, Unsupported);
-            InvariantList = ParseInvariants(classDeclaration, FieldTable, Unsupported);
+            Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
+            FieldTable = ParseFields(ClassDeclaration, Unsupported);
+            MethodTable = ParseMethods(ClassDeclaration, FieldTable, Unsupported);
+            InvariantList = ParseInvariants(ClassDeclaration, FieldTable, Unsupported);
         }
         else
         {
@@ -47,6 +53,11 @@ internal partial class ClassDeclarationParser
     }
 
     /// <summary>
+    /// Gets the class declaration to be parsed.
+    /// </summary>
+    public ClassDeclarationSyntax ClassDeclaration { get; }
+
+    /// <summary>
     /// Gets the logger.
     /// </summary>
     public IAnalysisLogger Logger { get; init; } = new NullLogger();
@@ -54,22 +65,22 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Gets the field table.
     /// </summary>
-    public FieldTable FieldTable { get; }
+    public FieldTable FieldTable { get; private set; } = new();
 
     /// <summary>
     /// Gets the method table.
     /// </summary>
-    public MethodTable MethodTable { get; }
+    public MethodTable MethodTable { get; private set; } = new();
 
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    public List<IInvariant> InvariantList { get; }
+    public List<IInvariant> InvariantList { get; private set; } = new();
 
     /// <summary>
     /// Gets unsupported elements.
     /// </summary>
-    public Unsupported Unsupported { get; }
+    public Unsupported Unsupported { get; private set; } = new();
 
     private bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
     {
@@ -179,8 +190,15 @@ internal partial class ClassDeclarationParser
         SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
         var Diagnostics = SyntaxTree.GetDiagnostics();
         List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
+        Log($"Parsed: '{text}' ErrorCount={ErrorList.Count}");
 
-        return ErrorList.Count == 0 && IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
+        if (ErrorList.Count > 0)
+        {
+            Log($"Expression '{text}' contains an error.");
+            return false;
+        }
+        else
+            return IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
     }
 
     private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
@@ -212,7 +230,13 @@ internal partial class ClassDeclarationParser
     {
         booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
 
-        return IsBooleanExpression(booleanExpression);
+        if (!IsBooleanExpression(booleanExpression))
+        {
+            Log($"Boolean expression expected.");
+            return false;
+        }
+
+        return true;
     }
 
     private bool IsBooleanExpression(IExpression expression)

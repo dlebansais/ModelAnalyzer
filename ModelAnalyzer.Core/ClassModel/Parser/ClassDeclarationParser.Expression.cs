@@ -99,8 +99,6 @@ internal partial class ClassDeclarationParser
             arithmeticOperator = SupportedOperators.BinaryArithmetic[OperatorKind];
             return true;
         }
-        else
-            Log($"Unsupported arithmetic operator '{token.ValueText}'.");
 
         arithmeticOperator = null!;
         return false;
@@ -115,8 +113,6 @@ internal partial class ClassDeclarationParser
             arithmeticOperator = SupportedOperators.UnaryArithmetic[OperatorKind];
             return true;
         }
-        else
-            Log($"Unsupported arithmetic operator '{token.ValueText}'.");
 
         arithmeticOperator = null!;
         return false;
@@ -131,8 +127,6 @@ internal partial class ClassDeclarationParser
             comparisonOperator = SupportedOperators.Comparison[OperatorKind];
             return true;
         }
-        else
-            Log($"Unsupported comparison operator '{token.ValueText}'.");
 
         comparisonOperator = null!;
         return false;
@@ -147,8 +141,6 @@ internal partial class ClassDeclarationParser
             logicalOperator = SupportedOperators.Logical[OperatorKind];
             return true;
         }
-        else
-            Log($"Unsupported logical operator '{token.ValueText}'.");
 
         logicalOperator = null!;
         return false;
