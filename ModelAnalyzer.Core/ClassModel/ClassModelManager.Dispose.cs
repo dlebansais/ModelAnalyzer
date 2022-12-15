@@ -54,5 +54,9 @@ public partial class ClassModelManager : IDisposable
         }
 
         CleanupThread();
+
+        using (FromServerChannel)
+        {
+        }
     }
 }

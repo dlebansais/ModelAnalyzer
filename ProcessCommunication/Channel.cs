@@ -6,12 +6,17 @@ using System.IO.MemoryMappedFiles;
 /// <summary>
 /// Represents a communication channel.
 /// </summary>
-public class Channel
+public class Channel : IDisposable
 {
     /// <summary>
-    /// Gets a shared guid.
+    /// Gets a shared guid from client to server.
     /// </summary>
-    public static Guid SharedGuid { get; } = new Guid("{03C9C797-C924-415E-A6F9-9112AE75E56F}");
+    public static Guid ClientToServerGuid { get; } = new Guid("{03C9C797-C924-415E-A6F9-9112AE75E56F}");
+
+    /// <summary>
+    /// Gets a shared guid from server to client.
+    /// </summary>
+    public static Guid ServerToClientGuid { get; } = new Guid("{30AC0040-5412-4DF0-AAB3-28D66599E7D2}");
 
     /// <summary>
     /// Gets the max channel capacity.
@@ -42,43 +47,68 @@ public class Channel
     /// <summary>
     /// Opens the chanel.
     /// </summary>
-    public bool Open()
+    public void Open()
     {
+        if (IsOpen)
+            throw new InvalidOperationException();
+
         try
         {
             int CapacityWithHeadTail = Capacity + sizeof(int) * 2;
             string ChannelName = Guid.ToString("B");
 
-            if (Mode == Mode.Server)
-                File = MemoryMappedFile.CreateNew(ChannelName, CapacityWithHeadTail, MemoryMappedFileAccess.ReadWrite);
-            else
-                File = MemoryMappedFile.OpenExisting(ChannelName, MemoryMappedFileRights.ReadWrite);
+            switch (Mode)
+            {
+                default:
+                case Mode.Send:
+                    File = MemoryMappedFile.OpenExisting(ChannelName, MemoryMappedFileRights.ReadWrite);
+                    break;
+                case Mode.Receive:
+                    File = MemoryMappedFile.CreateNew(ChannelName, CapacityWithHeadTail, MemoryMappedFileAccess.ReadWrite);
+                    break;
+                case Mode.ReceiveShared:
+                    File = MemoryMappedFile.CreateOrOpen(ChannelName, CapacityWithHeadTail, MemoryMappedFileAccess.ReadWrite);
+                    break;
+            }
 
             Accessor = File.CreateViewAccessor();
-            return true;
         }
-        catch
+        catch (Exception e)
         {
-            return false;
+            LastError = e.Message;
+            Close();
         }
     }
+
+    /// <summary>
+    /// Gets a value indicating whether the channel is open.
+    /// </summary>
+    public bool IsOpen { get => File is not null && Accessor is not null; }
+
+    /// <summary>
+    /// Gets the last error.
+    /// </summary>
+    public string LastError { get; private set; } = string.Empty;
 
     /// <summary>
     /// Closes the chanel.
     /// </summary>
     public void Close()
     {
-        if (File is null || Accessor is null)
-            return;
-
-        using (MemoryMappedViewAccessor DisposedAccessor = Accessor)
+        if (Accessor is not null)
         {
-            Accessor = null;
+            using (MemoryMappedViewAccessor DisposedAccessor = Accessor)
+            {
+                Accessor = null;
+            }
         }
 
-        using (MemoryMappedFile DisposedFile = File)
+        if (File is not null)
         {
-            File = null;
+            using (MemoryMappedFile DisposedFile = File)
+            {
+                File = null;
+            }
         }
     }
 
@@ -179,6 +209,12 @@ public class Channel
 
         // Copy the new head.
         Accessor.Write(EndOfBuffer, Head);
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Close();
     }
 
     private MemoryMappedFile? File;

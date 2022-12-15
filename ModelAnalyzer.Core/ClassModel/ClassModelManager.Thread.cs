@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
+using Newtonsoft.Json;
 using ProcessCommunication;
 
 /// <summary>
@@ -18,6 +18,14 @@ public partial class ClassModelManager : IDisposable
         IsAsynchronousVerificationScheduled = false;
         Thread NewThread = new Thread(new ThreadStart(ExecuteThread));
         return NewThread;
+    }
+
+    private Channel InitChannel()
+    {
+        Channel Channel = new Channel(Channel.ServerToClientGuid, Mode.ReceiveShared);
+        Channel.Open();
+
+        return Channel;
     }
 
     /// <summary>
@@ -43,8 +51,10 @@ public partial class ClassModelManager : IDisposable
         }
 
         Log("Creating the channel.");
-        Channel Channel = new Channel(Channel.SharedGuid, Mode.Client);
-        if (Channel.Open())
+        Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
+        ToServerChannel.Open();
+
+        if (ToServerChannel.IsOpen)
         {
             Log("Channel opened.");
 
@@ -72,20 +82,37 @@ public partial class ClassModelManager : IDisposable
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
                 else
                 {
-                    JsonSerializerOptions Options = new();
-                    string JSonString = JsonSerializer.Serialize(ClassModel, Options);
+                    string JSonString = JsonConvert.SerializeObject(ClassModel);
                     byte[] EncodedString = Encoding.UTF8.GetBytes(JSonString);
-                    Channel.Write(EncodedString);
 
-                    Log($"Data send for class '{ClassName}'.");
+                    if (EncodedString.Length <= ToServerChannel.GetFreeLength())
+                    {
+                        ToServerChannel.Write(EncodedString);
+
+                        Log($"Data send for class '{ClassName}'.");
+                    }
+                    else
+                        Log($"Unable to send data for class '{ClassName}', buffer full.");
                 }
 
                 ClassModel.InvariantViolationVerified.Set();
             }
 
-            Channel.Close();
+            ToServerChannel.Close();
             Log("Channel closed.");
         }
+
+        if (FromServerChannel.IsOpen)
+        {
+            byte[]? Data = FromServerChannel.Read();
+
+            if (Data is null)
+                Log("No data read from verifier.");
+            else
+                Log($"{Data.Length} bytes read from verifier.");
+        }
+        else
+            Log($"verifier channel not open, last error={FromServerChannel.LastError}.");
     }
 
     private void ExecuteThread()
@@ -178,4 +205,5 @@ public partial class ClassModelManager : IDisposable
     private Thread VerificationThread;
     private bool IsVerificationThreadShutdownRequested;
     private bool IsAsynchronousVerificationScheduled;
+    private Channel FromServerChannel;
 }

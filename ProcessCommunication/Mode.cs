@@ -6,12 +6,17 @@
 public enum Mode
 {
     /// <summary>
-    /// The server mode.
+    /// The send mode.
     /// </summary>
-    Server,
+    Send,
 
     /// <summary>
-    /// The client mode.
+    /// The receive mode.
     /// </summary>
-    Client,
+    Receive,
+
+    /// <summary>
+    /// The receive mode, can be shared.
+    /// </summary>
+    ReceiveShared,
 }

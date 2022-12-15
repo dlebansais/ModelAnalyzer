@@ -25,6 +25,7 @@ public partial class ClassModelManager : IDisposable
         Context = new SynchronizedVerificationContext();
         SynchronizedThread = new(Context, ExecuteVerification);
         VerificationThread = InitThread();
+        FromServerChannel = InitChannel();
 
         // StartThread();
     }

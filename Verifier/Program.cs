@@ -14,9 +14,10 @@ internal class Program
         string Location = Assembly.GetExecutingAssembly().Location;
         Environment.CurrentDirectory = Path.GetDirectoryName(Location);
 
-        Channel Channel = new(Channel.SharedGuid, Mode.Server);
+        Channel FromClientChannel = new(Channel.ClientToServerGuid, Mode.Receive);
+        FromClientChannel.Open();
 
-        if (!Channel.Open())
+        if (!FromClientChannel.IsOpen)
             return;
 
         TimeSpan Timeout = TimeSpan.FromSeconds(60);
@@ -25,7 +26,7 @@ internal class Program
 
         while (Watch.Elapsed < Timeout)
         {
-            byte[]? Data = Channel.Read();
+            byte[]? Data = FromClientChannel.Read();
             if (Data is not null)
             {
                 ProcessData(Data);
@@ -35,10 +36,22 @@ internal class Program
                 Thread.Sleep(TimeSpan.FromMilliseconds(10));
         }
 
-        Channel.Close();
+        FromClientChannel.Close();
     }
 
     private static void ProcessData(byte[] data)
     {
+        Channel ToClientChannel = new(Channel.ServerToClientGuid, Mode.Send);
+        ToClientChannel.Open();
+
+        if (ToClientChannel.IsOpen)
+        {
+            byte[] Data = new byte[10];
+
+            if (Data.Length <= ToClientChannel.GetFreeLength())
+                ToClientChannel.Write(Data);
+
+            ToClientChannel.Close();
+        }
     }
 }

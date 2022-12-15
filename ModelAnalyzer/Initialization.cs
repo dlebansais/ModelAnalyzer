@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Diagnostics;
 using AnalysisLogger;
 
 public static class Initialization
