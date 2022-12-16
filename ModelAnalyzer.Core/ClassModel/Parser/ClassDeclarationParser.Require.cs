@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<IRequire> ParseRequires(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Require> ParseRequires(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
-        List<IRequire> RequireList;
+        List<Require> RequireList;
 
         if (methodDeclaration.Body is BlockSyntax Block && Block.HasLeadingTrivia)
             RequireList = ParseRequires(Block.GetLeadingTrivia(), fieldTable, parameterTable, unsupported);
@@ -22,9 +22,9 @@ internal partial class ClassDeclarationParser
         return RequireList;
     }
 
-    private List<IRequire> ParseRequires(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Require> ParseRequires(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
-        List<IRequire> RequireList = new();
+        List<Require> RequireList = new();
 
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -39,28 +39,25 @@ internal partial class ClassDeclarationParser
         return RequireList;
     }
 
-    private void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<IRequire> requireList, SyntaxTrivia trivia, string comment, string pattern)
+    private void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
-        IRequire NewRequire;
 
         Log($"Analyzing require '{Text}'.");
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out Expression BooleanExpression))
         {
-            NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
+            Require NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
 
             Log($"Require analyzed: '{NewRequire}'.");
+
+            requireList.Add(NewRequire);
         }
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedRequire(Text, Location, out IUnsupportedRequire UnsupportedRequire);
-
-            NewRequire = UnsupportedRequire;
+            unsupported.AddUnsupportedRequire(Text, Location, out UnsupportedRequire UnsupportedRequire);
         }
-
-        requireList.Add(NewRequire);
     }
 
     private void ReportUnsupportedRequires(Unsupported unsupported, SyntaxTriviaList triviaList)

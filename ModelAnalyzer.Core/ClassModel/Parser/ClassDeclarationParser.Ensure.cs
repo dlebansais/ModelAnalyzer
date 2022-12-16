@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<IEnsure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
-        List<IEnsure> EnsureList;
+        List<Ensure> EnsureList;
 
         SyntaxToken LastToken = methodDeclaration.GetLastToken();
         SyntaxToken NextToken = LastToken.GetNextToken();
@@ -25,9 +25,9 @@ internal partial class ClassDeclarationParser
         return EnsureList;
     }
 
-    private List<IEnsure> ParseEnsures(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
-        List<IEnsure> EnsureList = new();
+        List<Ensure> EnsureList = new();
 
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -42,28 +42,25 @@ internal partial class ClassDeclarationParser
         return EnsureList;
     }
 
-    private void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<IEnsure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
+    private void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
-        IEnsure NewEnsure;
 
         Log($"Analyzing ensure '{Text}'.");
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out IExpression BooleanExpression))
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out Expression BooleanExpression))
         {
-            NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+            Ensure NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
 
             Log($"Ensure analyzed: '{NewEnsure}'.");
+
+            ensureList.Add(NewEnsure);
         }
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedEnsure(Text, Location, out IUnsupportedEnsure UnsupportedEnsure);
-
-            NewEnsure = UnsupportedEnsure;
+            unsupported.AddUnsupportedEnsure(Text, Location, out UnsupportedEnsure UnsupportedEnsure);
         }
-
-        ensureList.Add(NewEnsure);
     }
 
     private void ReportUnsupportedEnsures(Unsupported unsupported, SyntaxTriviaList triviaList)

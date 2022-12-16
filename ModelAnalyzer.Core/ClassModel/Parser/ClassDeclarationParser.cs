@@ -48,7 +48,7 @@ internal partial class ClassDeclarationParser
             Unsupported.InvalidDeclaration = true;
             FieldTable = new FieldTable();
             MethodTable = new MethodTable();
-            InvariantList = new List<IInvariant>();
+            InvariantList = new List<Invariant>();
         }
     }
 
@@ -75,7 +75,7 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    public List<IInvariant> InvariantList { get; private set; } = new();
+    public List<Invariant> InvariantList { get; private set; } = new();
 
     /// <summary>
     /// Gets unsupported elements.
@@ -182,7 +182,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, out IExpression booleanExpression)
+    private bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, out Expression booleanExpression)
     {
         booleanExpression = null!;
 
@@ -201,7 +201,7 @@ internal partial class ClassDeclarationParser
             return IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
     }
 
-    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out IExpression booleanExpression)
+    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out Expression booleanExpression)
     {
         bool IsInvariantSupported = true;
 
@@ -226,20 +226,26 @@ internal partial class ClassDeclarationParser
         return IsInvariantSupported;
     }
 
-    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out IExpression booleanExpression)
+    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out Expression booleanExpression)
     {
-        booleanExpression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
+        booleanExpression = null!;
 
-        if (!IsBooleanExpression(booleanExpression))
+        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
+        if (Expression is not null)
         {
-            Log($"Boolean expression expected.");
-            return false;
+            if (IsBooleanExpression(Expression))
+            {
+                booleanExpression = Expression;
+                return true;
+            }
+            else
+                Log($"Boolean expression expected.");
         }
 
-        return true;
+        return false;
     }
 
-    private bool IsBooleanExpression(IExpression expression)
+    private bool IsBooleanExpression(Expression expression)
     {
         return expression is BinaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }

@@ -1,11 +1,14 @@
 ﻿namespace ModelAnalyzer;
 
+using Newtonsoft.Json;
+
 /// <summary>
 /// Represents a comparison expression.
 /// </summary>
 internal class ComparisonExpression : Expression
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public override bool IsSimple => false;
 
     /// <summary>
@@ -28,12 +31,12 @@ internal class ComparisonExpression : Expression
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left.ToSimpleString()})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right.ToSimpleString()})";
-        return $"{LeftString} {Operator.Text} {RightString}";
+        return $"{LeftString} {OperatorText.Comparison[Operator]} {RightString}";
     }
 
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Left} {Operator.Text} {Right}";
+        return $"{Left} {OperatorText.Comparison[Operator]} {Right}";
     }
 }

@@ -35,22 +35,20 @@ internal partial class ClassDeclarationParser
     private void AddMethod(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
     {
         string Name = methodDeclaration.Identifier.ValueText;
-        MethodName MethodName = new(Name);
+        MethodName MethodName = new() { Name = Name };
 
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
         {
-            IMethod NewMethod;
-
             if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue))
             {
                 bool IsSupported = true;
                 ParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
-                List<IRequire> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
-                List<IStatement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
-                List<IEnsure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
+                List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
+                List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
+                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
 
-                NewMethod = new Method
+                Method NewMethod = new Method
                 {
                     MethodName = MethodName,
                     IsSupported = IsSupported,
@@ -60,6 +58,8 @@ internal partial class ClassDeclarationParser
                     StatementList = StatementList,
                     EnsureList = EnsureList,
                 };
+
+                methodTable.AddItem(MethodName, NewMethod);
             }
             else
             {
@@ -67,12 +67,8 @@ internal partial class ClassDeclarationParser
                     ReportUnsupportedEnsures(unsupported, TriviaList);
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
-                unsupported.AddUnsupportedMethod(Location, out IUnsupportedMethod UnsupportedMethod);
-
-                NewMethod = UnsupportedMethod;
+                unsupported.AddUnsupportedMethod(Location, out UnsupportedMethod UnsupportedMethod);
             }
-
-            methodTable.AddItem(MethodName, NewMethod);
         }
     }
 
@@ -114,26 +110,21 @@ internal partial class ClassDeclarationParser
 
         foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
-            ParameterName ParameterName = new(Parameter.Identifier.ValueText);
+            ParameterName ParameterName = new() { Name = Parameter.Identifier.ValueText };
 
             // Ignore duplicate names, the compiler will catch them.
             if (!ParameterTable.ContainsItem(ParameterName))
             {
-                IParameter NewParameter;
-
                 if (IsParameterSupported(Parameter, fieldTable))
                 {
-                    NewParameter = new Parameter() { ParameterName = ParameterName };
+                    Parameter NewParameter = new Parameter() { ParameterName = ParameterName };
+                    ParameterTable.AddItem(ParameterName, NewParameter);
                 }
                 else
                 {
                     Location Location = Parameter.GetLocation();
-                    unsupported.AddUnsupportedParameter(Location, out IUnsupportedParameter UnsupportedParameter);
-
-                    NewParameter = UnsupportedParameter;
+                    unsupported.AddUnsupportedParameter(Location, out UnsupportedParameter UnsupportedParameter);
                 }
-
-                ParameterTable.AddItem(ParameterName, NewParameter);
             }
         }
 
@@ -181,10 +172,10 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindParameterByName(ParameterTable parameterTable, string parameterName, out IParameter parameter)
     {
-        foreach (KeyValuePair<ParameterName, IParameter> Entry in parameterTable)
-            if (Entry.Value is Parameter ValidParameter && ValidParameter.ParameterName.Name == parameterName)
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
+            if (Entry.Value.ParameterName.Name == parameterName)
             {
-                parameter = ValidParameter;
+                parameter = Entry.Value;
                 return true;
             }
 

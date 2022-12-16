@@ -2,19 +2,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 /// <summary>
 /// Represents a collection of items and name keys.
 /// </summary>
 /// <typeparam name="TName">The name type.</typeparam>
 /// <typeparam name="TItem">The item type.</typeparam>
-internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, TItem>>
+internal class NameAndItemTable<TName, TItem>
+    where TName : IEquatable<TName>
 {
     /// <summary>
-    /// Gets a value indicating whether the table is sealed.
+    /// Gets or sets a value indicating whether the table is sealed.
     /// </summary>
-    public bool IsSealed { get; private set; }
+    public bool IsSealed { get; set; }
 
     /// <summary>
     /// Adds an item to the collection. The item name must be unique, and the table not sealed.
@@ -26,7 +26,7 @@ internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, 
         if (IsSealed)
             throw new InvalidOperationException("Cannot add items to a sealed table.");
 
-        Table.Add(itemName, item);
+        List.Add(new KeyValuePair<TName, TItem>(itemName, item));
     }
 
     /// <summary>
@@ -44,12 +44,16 @@ internal class NameAndItemTable<TName, TItem> : IEnumerable<KeyValuePair<TName, 
     /// <returns><see langword="true"/> if the collection contains an item with this name; otherwise, <see langword="false"/>.</returns>
     public bool ContainsItem(TName itemName)
     {
-        return Table.ContainsKey(itemName);
+        return List.Exists((KeyValuePair<TName, TItem> entry) => entry.Key is TName Key && Key.Equals(itemName));
     }
 
-    /// <inheritdoc/>
-    public IEnumerator<KeyValuePair<TName, TItem>> GetEnumerator() => Table.GetEnumerator();
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    /// <summary>
+    /// Enumerates the collection.
+    /// </summary>
+    public IEnumerator<KeyValuePair<TName, TItem>> GetEnumerator() => List.GetEnumerator();
 
-    private Dictionary<TName, TItem> Table = new();
+    /// <summary>
+    /// Gets or sets the table.
+    /// </summary>
+    public List<KeyValuePair<TName, TItem>> List { get; set; } = new();
 }

@@ -1,9 +1,17 @@
 ﻿namespace ModelAnalyzer;
 
-using System;
-using Microsoft.Z3;
-
 /// <summary>
 /// Represents a logical operator.
 /// </summary>
-internal record LogicalOperator(string Text, Func<Context, BoolExpr, BoolExpr, BoolExpr> Asserter);
+internal enum LogicalOperator
+{
+    /// <summary>
+    /// The || operator.
+    /// </summary>
+    Or,
+
+    /// <summary>
+    /// The &amp;&amp; operator.
+    /// </summary>
+    And,
+}

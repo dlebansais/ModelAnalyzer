@@ -56,12 +56,11 @@ internal partial class ClassDeclarationParser
 
     private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported)
     {
-        FieldName FieldName = new(variable.Identifier.ValueText);
+        FieldName FieldName = new() { Name = variable.Identifier.ValueText };
 
         // Ignore duplicate names, the compiler will catch them.
         if (!fieldTable.ContainsItem(FieldName))
         {
-            IField NewField;
             bool IsFieldSupported = isFieldSupported; // Initialize with the result of previous checks (type etc.)
 
             if (variable.Initializer is not null)
@@ -73,26 +72,23 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                NewField = new Field { FieldName = FieldName };
+                Field NewField = new Field { FieldName = FieldName };
+                fieldTable.AddItem(FieldName, NewField);
             }
             else
             {
                 Location Location = variable.Identifier.GetLocation();
-                unsupported.AddUnsupportedField(Location, out IUnsupportedField UnsupportedField);
-
-                NewField = UnsupportedField;
+                unsupported.AddUnsupportedField(Location, out UnsupportedField UnsupportedField);
             }
-
-            fieldTable.AddItem(FieldName, NewField);
         }
     }
 
     private bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out IField field)
     {
-        foreach (KeyValuePair<FieldName, IField> Entry in fieldTable)
-            if (Entry.Value is Field ValidField && ValidField.FieldName.Name == fieldName)
+        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
+            if (Entry.Value.FieldName.Name == fieldName)
             {
-                field = ValidField;
+                field = Entry.Value;
                 return true;
             }
 

@@ -73,7 +73,7 @@ class Program_CoreSynchronizedThread_0
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         SynchronizedVerificationContext Context = new();
         int TableCount = 0;
@@ -112,7 +112,7 @@ class Program_CoreSynchronizedThread_1
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         SynchronizedVerificationContext Context = new();
 
@@ -145,7 +145,7 @@ class Program_CoreSynchronizedThread_2
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: true);
+        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         SynchronizedVerificationContext Context = new();
         int TableCount = 0;

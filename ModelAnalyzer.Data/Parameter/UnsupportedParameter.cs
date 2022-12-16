@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 /// Represents an unsupported parameter.
 /// </summary>
 [DebuggerDisplay("{ParameterName.Name}")]
-internal class UnsupportedParameter : IUnsupportedParameter
+public class UnsupportedParameter : IUnsupportedParameter
 {
     /// <inheritdoc/>
     public string Name => "*";

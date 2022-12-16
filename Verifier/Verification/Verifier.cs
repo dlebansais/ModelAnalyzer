@@ -51,7 +51,7 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets the invariant list.
     /// </summary>
-    required public List<IInvariant> InvariantList { get; init; }
+    required public List<Invariant> InvariantList { get; init; }
 
     /// <summary>
     /// Gets the logger.
@@ -80,7 +80,7 @@ internal partial class Verifier : IDisposable
     {
         if (depth > 0)
         {
-            foreach (KeyValuePair<MethodName, IMethod> Entry in MethodTable)
+            foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
             {
                 Method Method = (Method)Entry.Value; // This line can only be executed if there are no unsupported methods.
                 List<Method> NewCallSequence = new();
@@ -137,7 +137,7 @@ internal partial class Verifier : IDisposable
     {
         Log($"Initial state for class {ClassName}");
 
-        foreach (KeyValuePair<FieldName, IField> Entry in FieldTable)
+        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
         {
             string FieldName = Entry.Key.Name;
             aliasTable.AddName(FieldName);
@@ -184,7 +184,7 @@ internal partial class Verifier : IDisposable
 
     private void AddMethodParameterStates(Solver solver, AliasTable aliasTable, Method method)
     {
-        foreach (KeyValuePair<ParameterName, IParameter> Entry in method.ParameterTable)
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = (Parameter)Entry.Value; // This line can only be executed if there are no unsupported parameters.
             string ParameterName = Parameter.Name;

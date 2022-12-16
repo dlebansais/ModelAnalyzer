@@ -1,17 +1,20 @@
 ﻿namespace ModelAnalyzer;
 
+using Newtonsoft.Json;
+
 /// <summary>
 /// Represents a literal boolean value expression.
 /// </summary>
 internal class LiteralBoolValueExpression : Expression
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public override bool IsSimple => true;
 
     /// <summary>
-    /// Gets a value indicating whether the literal value is true.
+    /// Gets or sets a value indicating whether the literal value is true.
     /// </summary>
-    required public bool Value { get; init; }
+    public bool Value { get; set; }
 
     /// <inheritdoc/>
     public override string ToString()

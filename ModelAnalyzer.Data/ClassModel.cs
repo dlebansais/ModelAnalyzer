@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents the model of a class.
@@ -27,18 +28,20 @@ internal partial record ClassModel : IClassModel
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    required public List<IInvariant> InvariantList { get; init; }
+    required public List<Invariant> InvariantList { get; init; }
 
     /// <summary>
     /// Gets unsupported class elements.
     /// </summary>
-    required public IUnsupported Unsupported { get; init; }
+    required public Unsupported Unsupported { get; init; }
 
     /// <inheritdoc/>
+    [JsonIgnore]
     public ManualResetEvent InvariantViolationVerified { get; } = new(initialState: false);
 
     /// <inheritdoc/>
-    public bool IsInvariantViolated { get; internal set; }
+    [JsonIgnore]
+    public bool IsInvariantViolated { get; set; }
 
     /// <inheritdoc/>
     public override string ToString()
@@ -60,23 +63,21 @@ internal partial record ClassModel : IClassModel
 
     private void AppendFields(StringBuilder builder)
     {
-        foreach (KeyValuePair<FieldName, IField> FieldEntry in FieldTable)
-            if (FieldEntry.Value is Field Field)
-                builder.AppendLine($"  int {Field.Name}");
+        foreach (KeyValuePair<FieldName, Field> FieldEntry in FieldTable)
+            builder.AppendLine($"  int {FieldEntry.Value.Name}");
     }
 
     private void AppendMethods(StringBuilder builder)
     {
-        foreach (KeyValuePair<MethodName, IMethod> MethodEntry in MethodTable)
-            if (MethodEntry.Value is Method Method)
-                MethodToString(builder, Method);
+        foreach (KeyValuePair<MethodName, Method> MethodEntry in MethodTable)
+            MethodToString(builder, MethodEntry.Value);
     }
 
     private void MethodToString(StringBuilder builder, Method method)
     {
         string Parameters = string.Empty;
 
-        foreach (KeyValuePair<ParameterName, IParameter> ParameterEntry in method.ParameterTable)
+        foreach (KeyValuePair<ParameterName, Parameter> ParameterEntry in method.ParameterTable)
         {
             if (Parameters.Length > 0)
                 Parameters += ", ";

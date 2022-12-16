@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported field.
 /// </summary>
-internal class UnsupportedField : IUnsupportedField
+public class UnsupportedField : IUnsupportedField
 {
     /// <inheritdoc/>
     public string Name => "*";

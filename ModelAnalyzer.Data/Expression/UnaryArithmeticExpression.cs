@@ -1,11 +1,14 @@
 ﻿namespace ModelAnalyzer;
 
+using Newtonsoft.Json;
+
 /// <summary>
 /// Represents a unary arithmetic expression.
 /// </summary>
 internal class UnaryArithmeticExpression : Expression
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public override bool IsSimple => false;
 
     /// <summary>
@@ -22,12 +25,12 @@ internal class UnaryArithmeticExpression : Expression
     public override string ToString()
     {
         string OperandString = Operand.IsSimple ? $"{Operand}" : $"({Operand.ToSimpleString()})";
-        return $"{Operator.Text}{OperandString}";
+        return $"{OperatorText.UnaryArithmetic[Operator]}{OperandString}";
     }
 
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Operator.Text}{Operand}";
+        return $"{OperatorText.UnaryArithmetic[Operator]}{Operand}";
     }
 }

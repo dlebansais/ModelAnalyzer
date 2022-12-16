@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<IInvariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    private List<Invariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
     {
-        List<IInvariant> InvariantList = new();
+        List<Invariant> InvariantList = new();
 
         SyntaxToken LastToken = classDeclaration.GetLastToken();
         var Location = LastToken.GetLocation();
@@ -41,7 +41,7 @@ internal partial class ClassDeclarationParser
         return InvariantList;
     }
 
-    private void AddInvariantsInTrivia(List<IInvariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
+    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -54,25 +54,22 @@ internal partial class ClassDeclarationParser
             }
     }
 
-    private void AddInvariantsInTrivia(List<IInvariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
     {
         string Text = comment.Substring(pattern.Length);
-        IInvariant NewInvariant;
 
-        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, out IExpression BooleanExpression))
+        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, out Expression BooleanExpression))
         {
-            NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
+            Invariant NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
 
             Log($"Invariant analyzed: '{NewInvariant}'.");
+
+            invariantList.Add(NewInvariant);
         }
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedInvariant(Text, Location, out IUnsupportedInvariant UnsupportedInvariant);
-
-            NewInvariant = UnsupportedInvariant;
+            unsupported.AddUnsupportedInvariant(Text, Location, out UnsupportedInvariant UnsupportedInvariant);
         }
-
-        invariantList.Add(NewInvariant);
     }
 }

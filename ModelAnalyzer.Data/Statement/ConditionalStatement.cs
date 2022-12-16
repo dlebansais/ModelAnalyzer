@@ -12,15 +12,15 @@ internal class ConditionalStatement : Statement
     /// <summary>
     /// Gets the condition.
     /// </summary>
-    required public IExpression Condition { get; init; }
+    required public Expression Condition { get; init; }
 
     /// <summary>
     /// Gets statements when the condition is true.
     /// </summary>
-    required public List<IStatement> WhenTrueStatementList { get; init; }
+    required public List<Statement> WhenTrueStatementList { get; init; }
 
     /// <summary>
     /// Gets statements when the condition is false.
     /// </summary>
-    required public List<IStatement> WhenFalseStatementList { get; init; }
+    required public List<Statement> WhenFalseStatementList { get; init; }
 }

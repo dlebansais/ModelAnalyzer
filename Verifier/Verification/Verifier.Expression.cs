@@ -60,27 +60,27 @@ internal partial class Verifier : IDisposable
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, binaryArithmeticExpression.Right);
-        return binaryArithmeticExpression.Operator.Asserter(Context, Left, Right);
+        return OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
     }
 
     private ArithExpr BuildUnaryExpression(AliasTable aliasTable, UnaryArithmeticExpression unaryArithmeticExpression)
     {
         ArithExpr Operand = BuildExpression<ArithExpr>(aliasTable, unaryArithmeticExpression.Operand);
-        return unaryArithmeticExpression.Operator.Asserter(Context, Operand);
+        return OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
     }
 
     private BoolExpr BuildBinaryConditionalExpression(AliasTable aliasTable, BinaryConditionalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);
-        return binaryLogicalExpression.Operator.Asserter(Context, Left, Right);
+        return OperatorBuilder.Logical[binaryLogicalExpression.Operator](Context, Left, Right);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)
     {
         ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Left);
         ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, comparisonExpression.Right);
-        return comparisonExpression.Operator.Asserter(Context, Left, Right);
+        return OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
     }
 
     private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)

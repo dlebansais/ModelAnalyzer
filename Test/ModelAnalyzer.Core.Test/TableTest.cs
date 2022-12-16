@@ -34,14 +34,6 @@ public class TableTest
                 IsFound = true;
 
         Assert.IsTrue(IsFound);
-
-        // Test the IEnumerable interface.
-        IsFound = false;
-        foreach (var Item in (IEnumerable)TestTable)
-            if (Item is KeyValuePair<string, int> Entry && Entry.Key == "*" && Entry.Value == 0)
-                IsFound = true;
-
-        Assert.IsTrue(IsFound);
     }
 
     [Test]

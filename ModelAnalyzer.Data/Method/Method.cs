@@ -32,17 +32,17 @@ internal class Method : IMethod
     /// <summary>
     /// Gets the method requirements.
     /// </summary>
-    required public List<IRequire> RequireList { get; init; }
+    required public List<Require> RequireList { get; init; }
 
     /// <summary>
     /// Gets the method statements.
     /// </summary>
-    required public List<IStatement> StatementList { get; init; }
+    required public List<Statement> StatementList { get; init; }
 
     /// <summary>
     /// Gets the method guarantees.
     /// </summary>
-    required public List<IEnsure> EnsureList { get; init; }
+    required public List<Ensure> EnsureList { get; init; }
 
     /// <inheritdoc/>
     public string Name { get { return MethodName.Name; } }

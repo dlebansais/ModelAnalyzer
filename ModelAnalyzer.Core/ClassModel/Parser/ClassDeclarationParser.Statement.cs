@@ -9,9 +9,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<IStatement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Statement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
     {
-        List<IStatement> StatementList = new();
+        List<Statement> StatementList = new();
 
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
             StatementList = ParseExpressionBody(fieldTable, parameterTable, unsupported, ArrowExpressionClause.Expression);
@@ -22,43 +22,50 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private List<IStatement> ParseExpressionBody(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
+    private List<Statement> ParseExpressionBody(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
-        IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionBody, isNested: false);
-        return new List<IStatement>() { new ReturnStatement { Expression = Expression } };
+        List<Statement> Result = new();
+
+        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionBody, isNested: false);
+        if (Expression is not null)
+            Result.Add(new ReturnStatement { Expression = Expression });
+
+        return Result;
     }
 
-    private List<IStatement> ParseBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
+    private List<Statement> ParseBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
     {
-        List<IStatement> StatementList = new();
+        List<Statement> StatementList = new();
 
         foreach (StatementSyntax Item in block.Statements)
         {
-            IStatement NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, Item, isMainBlock && Item == block.Statements.Last());
-            StatementList.Add(NewStatement);
+            Statement? NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, Item, isMainBlock && Item == block.Statements.Last());
+            if (NewStatement is not null)
+                StatementList.Add(NewStatement);
         }
 
         return StatementList;
     }
 
-    private List<IStatement> ParseStatementOrBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax node)
+    private List<Statement> ParseStatementOrBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax node)
     {
-        List<IStatement> StatementList;
+        List<Statement> StatementList = new();
 
         if (node is BlockSyntax Block)
             StatementList = ParseBlock(fieldTable, parameterTable, unsupported, Block, isMainBlock: false);
         else
         {
-            IStatement Statement = ParseStatement(fieldTable, parameterTable, unsupported, node, isLastStatement: false);
-            StatementList = new List<IStatement> { Statement };
+            Statement? NewStatement = ParseStatement(fieldTable, parameterTable, unsupported, node, isLastStatement: false);
+            if (NewStatement is not null)
+                StatementList.Add(NewStatement);
         }
 
         return StatementList;
     }
 
-    private IStatement ParseStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
+    private Statement? ParseStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
     {
-        IStatement? NewStatement = null;
+        Statement? NewStatement = null;
 
         if (statementNode is ExpressionStatementSyntax ExpressionStatement)
             NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
@@ -72,9 +79,7 @@ internal partial class ClassDeclarationParser
         if (NewStatement is null)
         {
             Location Location = statementNode.GetLocation();
-            unsupported.AddUnsupportedStatement(Location, out IUnsupportedStatement UnsupportedStatement);
-
-            NewStatement = UnsupportedStatement;
+            unsupported.AddUnsupportedStatement(Location, out UnsupportedStatement UnsupportedStatement);
         }
         else
             Log($"Statement analyzed: '{NewStatement}'.");
@@ -82,16 +87,17 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private IStatement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement)
+    private Statement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement)
     {
-        IStatement? NewStatement = null;
+        Statement? NewStatement = null;
 
         if (expressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression && AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
         {
             if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
             {
-                IExpression Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
-                NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
+                if (Expression is not null)
+                    NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
             }
             else
                 Log($"Unsupported assignment statement destination.");
@@ -102,29 +108,41 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private IStatement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement)
+    private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement)
     {
-        IExpression Condition = ParseExpression(fieldTable, parameterTable, unsupported, ifStatement.Condition, isNested: false);
-        List<IStatement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ifStatement.Statement);
-        List<IStatement> WhenFalseStatementList;
+        Statement? NewStatement = null;
 
-        if (ifStatement.Else is ElseClauseSyntax ElseClause)
-            WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
-        else
-            WhenFalseStatementList = new();
+        Expression? Condition = ParseExpression(fieldTable, parameterTable, unsupported, ifStatement.Condition, isNested: false);
+        if (Condition is not null)
+        {
+            List<Statement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ifStatement.Statement);
+            List<Statement> WhenFalseStatementList;
 
-        return new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+            if (ifStatement.Else is ElseClauseSyntax ElseClause)
+                WhenFalseStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ElseClause.Statement);
+            else
+                WhenFalseStatementList = new();
+
+            NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+        }
+
+        return NewStatement;
     }
 
-    private IStatement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement)
+    private Statement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement)
     {
-        IExpression? ReturnExpression;
+        Statement? NewStatement = null;
 
         if (returnStatement.Expression is not null)
-            ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, returnStatement.Expression, isNested: false);
-        else
-            ReturnExpression = null;
+        {
+            Expression? ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, returnStatement.Expression, isNested: false);
 
-        return new ReturnStatement { Expression = ReturnExpression };
+            if (ReturnExpression is not null)
+                NewStatement = new ReturnStatement { Expression = ReturnExpression };
+        }
+        else
+            NewStatement = new ReturnStatement() { Expression = null };
+
+        return NewStatement;
     }
 }

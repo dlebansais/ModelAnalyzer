@@ -2,7 +2,7 @@
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
-
+#if REMOVED
 public class VerifierTest
 {
     [Test]
@@ -281,3 +281,4 @@ class Program_CoreVerifier_7
         using VerifierContainer Container = new();
     }
 }
+#endif

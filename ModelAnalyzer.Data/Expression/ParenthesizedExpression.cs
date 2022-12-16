@@ -1,11 +1,14 @@
 ﻿namespace ModelAnalyzer;
 
+using Newtonsoft.Json;
+
 /// <summary>
 /// Represents a parenthesized expression.
 /// </summary>
 internal class ParenthesizedExpression : Expression
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public override bool IsSimple => false;
 
     /// <summary>

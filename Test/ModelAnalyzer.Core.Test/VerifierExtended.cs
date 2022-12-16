@@ -2,7 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-
+/*
 internal class VerifierExtended : Verifier, IDisposable
 {
     [SetsRequiredMembers]
@@ -20,4 +20,4 @@ internal class VerifierExtended : Verifier, IDisposable
     {
         Dispose(false);
     }
-}
+}*/

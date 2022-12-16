@@ -1,11 +1,14 @@
 ﻿namespace ModelAnalyzer;
 
+using Newtonsoft.Json;
+
 /// <summary>
 /// Represents a binary arithmetic expression.
 /// </summary>
 internal class BinaryArithmeticExpression : Expression
 {
     /// <inheritdoc/>
+    [JsonIgnore]
     public override bool IsSimple => false;
 
     /// <summary>
@@ -28,12 +31,12 @@ internal class BinaryArithmeticExpression : Expression
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left.ToSimpleString()})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right.ToSimpleString()})";
-        return $"{LeftString} {Operator.Text} {RightString}";
+        return $"{LeftString} {OperatorText.BinaryArithmetic[Operator]} {RightString}";
     }
 
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Left} {Operator.Text} {Right}";
+        return $"{Left} {OperatorText.BinaryArithmetic[Operator]} {Right}";
     }
 }

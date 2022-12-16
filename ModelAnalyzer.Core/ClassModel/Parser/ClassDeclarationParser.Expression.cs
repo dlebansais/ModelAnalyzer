@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private IExpression ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, bool isNested)
+    private Expression? ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, bool isNested)
     {
-        IExpression? NewExpression = null;
+        Expression? NewExpression = null;
         Location Location = expressionNode.GetLocation();
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
@@ -30,9 +30,7 @@ internal partial class ClassDeclarationParser
 
         if (NewExpression is null)
         {
-            unsupported.AddUnsupportedExpression(Location, out IUnsupportedExpression UnsupportedExpression);
-
-            NewExpression = UnsupportedExpression;
+            unsupported.AddUnsupportedExpression(Location, out UnsupportedExpression UnsupportedExpression);
         }
         else if (!isNested) // Only log the top-level expression.
             Log($"Expression analyzed: '{NewExpression}'.");
@@ -40,11 +38,11 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private IExpression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax binaryExpression, ref Location location)
+    private Expression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BinaryExpressionSyntax binaryExpression, ref Location location)
     {
-        IExpression? NewExpression = null;
-        IExpression LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Left, isNested: true);
-        IExpression RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Right, isNested: true);
+        Expression? NewExpression = null;
+        Expression? LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Left, isNested: true);
+        Expression? RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, binaryExpression.Right, isNested: true);
 
         if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
@@ -67,10 +65,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private IExpression? TryParsePrefixUnaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref Location location)
+    private Expression? TryParsePrefixUnaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref Location location)
     {
-        IExpression? NewExpression = null;
-        IExpression OperandExpression = ParseExpression(fieldTable, parameterTable, unsupported, prefixUnaryExpression.Operand, isNested: true);
+        Expression? NewExpression = null;
+        Expression? OperandExpression = ParseExpression(fieldTable, parameterTable, unsupported, prefixUnaryExpression.Operand, isNested: true);
 
         if (OperandExpression is Expression Operand)
         {
@@ -95,13 +93,13 @@ internal partial class ClassDeclarationParser
     {
         SyntaxKind OperatorKind = token.Kind();
 
-        if (SupportedOperators.BinaryArithmetic.ContainsKey(OperatorKind))
+        if (OperatorSyntaxKind.BinaryArithmetic.ContainsKey(OperatorKind))
         {
-            arithmeticOperator = SupportedOperators.BinaryArithmetic[OperatorKind];
+            arithmeticOperator = OperatorSyntaxKind.BinaryArithmetic[OperatorKind];
             return true;
         }
 
-        arithmeticOperator = null!;
+        arithmeticOperator = default;
         return false;
     }
 
@@ -109,13 +107,13 @@ internal partial class ClassDeclarationParser
     {
         SyntaxKind OperatorKind = token.Kind();
 
-        if (SupportedOperators.UnaryArithmetic.ContainsKey(OperatorKind))
+        if (OperatorSyntaxKind.UnaryArithmetic.ContainsKey(OperatorKind))
         {
-            arithmeticOperator = SupportedOperators.UnaryArithmetic[OperatorKind];
+            arithmeticOperator = OperatorSyntaxKind.UnaryArithmetic[OperatorKind];
             return true;
         }
 
-        arithmeticOperator = null!;
+        arithmeticOperator = default;
         return false;
     }
 
@@ -123,13 +121,13 @@ internal partial class ClassDeclarationParser
     {
         SyntaxKind OperatorKind = token.Kind();
 
-        if (SupportedOperators.Comparison.ContainsKey(OperatorKind))
+        if (OperatorSyntaxKind.Comparison.ContainsKey(OperatorKind))
         {
-            comparisonOperator = SupportedOperators.Comparison[OperatorKind];
+            comparisonOperator = OperatorSyntaxKind.Comparison[OperatorKind];
             return true;
         }
 
-        comparisonOperator = null!;
+        comparisonOperator = default;
         return false;
     }
 
@@ -137,19 +135,19 @@ internal partial class ClassDeclarationParser
     {
         SyntaxKind OperatorKind = token.Kind();
 
-        if (SupportedOperators.Logical.ContainsKey(OperatorKind))
+        if (OperatorSyntaxKind.Logical.ContainsKey(OperatorKind))
         {
-            logicalOperator = SupportedOperators.Logical[OperatorKind];
+            logicalOperator = OperatorSyntaxKind.Logical[OperatorKind];
             return true;
         }
 
-        logicalOperator = null!;
+        logicalOperator = default;
         return false;
     }
 
-    private IExpression? TryParseVariableValueExpression(FieldTable fieldTable, ParameterTable parameterTable, IdentifierNameSyntax identifierName)
+    private Expression? TryParseVariableValueExpression(FieldTable fieldTable, ParameterTable parameterTable, IdentifierNameSyntax identifierName)
     {
-        IExpression? NewExpression = null;
+        Expression? NewExpression = null;
         string VariableName = identifierName.Identifier.ValueText;
 
         if (TryFindVariableByName(fieldTable, parameterTable, VariableName, out IVariable Variable))
@@ -160,9 +158,9 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private IExpression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
+    private Expression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
     {
-        IExpression? NewExpression = null;
+        Expression? NewExpression = null;
         string LiteralValue = literalExpression.Token.ValueText;
 
         if (LiteralValue == "true")
@@ -177,10 +175,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private IExpression? TryParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax parenthesizedExpression)
+    private Expression? TryParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax parenthesizedExpression)
     {
-        IExpression? NewExpression = null;
-        IExpression InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, parenthesizedExpression.Expression, isNested: true);
+        Expression? NewExpression = null;
+        Expression? InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, parenthesizedExpression.Expression, isNested: true);
 
         if (InsideExpression is Expression Inside)
             NewExpression = new ParenthesizedExpression { Inside = Inside };

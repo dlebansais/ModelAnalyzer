@@ -261,19 +261,6 @@ public partial class ClassModelManager : IDisposable
                 Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
             else
             {
-                using Verifier Verifier = new()
-                {
-                    MaxDepth = MaxDepth,
-                    ClassName = ClassName,
-                    FieldTable = ClassModel.FieldTable,
-                    MethodTable = ClassModel.MethodTable,
-                    InvariantList = ClassModel.InvariantList,
-                    Logger = Logger,
-                };
-
-                Verifier.Verify();
-
-                ((ClassModel)ModelVerification.ClassModel).IsInvariantViolated = Verifier.IsInvariantViolated;
             }
 
             ModelVerification.SetUpToDate();

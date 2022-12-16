@@ -3,6 +3,6 @@
 /// <summary>
 /// Represents a collection of parameter and name keys.
 /// </summary>
-internal class ParameterTable : NameAndItemTable<ParameterName, IParameter>
+internal class ParameterTable : NameAndItemTable<ParameterName, Parameter>
 {
 }

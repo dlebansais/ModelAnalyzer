@@ -40,7 +40,8 @@ public partial class ClassModelManager : IDisposable
     {
         IsAsynchronousVerificationScheduled = false;
         IsVerificationThreadShutdownRequested = true;
-        VerificationThread.Join();
+
+        // VerificationThread.Join();
     }
 
     private void ScheduleAsynchronousVerification()
@@ -82,7 +83,7 @@ public partial class ClassModelManager : IDisposable
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
                 else
                 {
-                    string JSonString = JsonConvert.SerializeObject(ClassModel);
+                    string JSonString = JsonConvert.SerializeObject(ClassModel, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
                     byte[] EncodedString = Encoding.UTF8.GetBytes(JSonString);
 
                     int DataLength = sizeof(int) + EncodedString.Length;
@@ -181,19 +182,6 @@ public partial class ClassModelManager : IDisposable
                 Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
             else
             {
-                using Verifier Verifier = new()
-                {
-                    MaxDepth = MaxDepth,
-                    ClassName = ClassName,
-                    FieldTable = ClassModel.FieldTable,
-                    MethodTable = ClassModel.MethodTable,
-                    InvariantList = ClassModel.InvariantList,
-                    Logger = Logger,
-                };
-
-                Verifier.Verify();
-
-                ClassModel.IsInvariantViolated = Verifier.IsInvariantViolated;
             }
 
             ClassModel.InvariantViolationVerified.Set();

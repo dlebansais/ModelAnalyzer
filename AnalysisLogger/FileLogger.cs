@@ -20,6 +20,15 @@ public class FileLogger : IAnalysisLogger
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="FileLogger"/> class.
+    /// </summary>
+    /// <param name="filePath">The file path.</param>
+    public FileLogger(string filePath)
+    {
+        FilePath = filePath;
+    }
+
+    /// <summary>
     /// Gets the path to the file containing logs.
     /// </summary>
     public string FilePath { get; }

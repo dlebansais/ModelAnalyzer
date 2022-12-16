@@ -10,13 +10,13 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<IStatement> statementList)
+    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<Statement> statementList)
     {
-        foreach (IStatement Statement in statementList)
+        foreach (Statement Statement in statementList)
             AddStatementExecution(solver, aliasTable, branch, Statement);
     }
 
-    private void AddStatementExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, IStatement statement)
+    private void AddStatementExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, Statement statement)
     {
         bool IsAdded = false;
 
