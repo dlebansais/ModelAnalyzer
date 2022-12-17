@@ -84,18 +84,13 @@ public partial class ClassModelManager : IDisposable
                 else
                 {
                     string JSonString = JsonConvert.SerializeObject(ClassModel, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-                    byte[] EncodedString = Encoding.UTF8.GetBytes(JSonString);
+                    byte[] EncodedString = Converter.EncodeString(JSonString);
 
-                    int DataLength = sizeof(int) + EncodedString.Length;
-                    byte[] EncodedStringWithHeader = new byte[DataLength];
-                    Array.Copy(BitConverter.GetBytes(DataLength), 0, EncodedStringWithHeader, 0, sizeof(int));
-                    Array.Copy(EncodedString, 0, EncodedStringWithHeader, sizeof(int), EncodedString.Length);
-
-                    if (EncodedStringWithHeader.Length <= ToServerChannel.GetFreeLength())
+                    if (EncodedString.Length <= ToServerChannel.GetFreeLength())
                     {
-                        ToServerChannel.Write(EncodedStringWithHeader);
+                        ToServerChannel.Write(EncodedString);
 
-                        Log($"Data send {EncodedStringWithHeader.Length} bytes for class '{ClassName}'.");
+                        Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
                     }
                     else
                         Log($"Unable to send data for class '{ClassName}', buffer full.");
@@ -115,7 +110,38 @@ public partial class ClassModelManager : IDisposable
             if (Data is null)
                 Log("No data read from verifier.");
             else
+            {
                 Log($"{Data.Length} bytes read from verifier.");
+
+                int Offset = 0;
+                while (Converter.TryDecodeString(Data, ref Offset, out string JsonString))
+                {
+                    Log(JsonString);
+
+                    VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                    if (VerificationResult is not null)
+                    {
+                        string ClassName = VerificationResult.ClassName;
+                        bool IsInvariantViolated = VerificationResult.IsInvariantViolated;
+
+                        Log($"Verification result decoded for class '{ClassName}': {IsInvariantViolated}");
+
+                        lock (Context.Lock)
+                        {
+                            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+                            {
+                                ClassModel ClassModel = Entry.Value;
+
+                                if (ClassModel.Name == ClassName)
+                                {
+                                    ClassModel.IsInvariantViolated = IsInvariantViolated;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         else
             Log($"verifier channel not open, last error={FromServerChannel.LastError}.");

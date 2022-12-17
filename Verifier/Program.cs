@@ -101,68 +101,53 @@ internal class Program
         {
             Log($"Client channel opened");
 
-            int DecodedCount = 0;
-            int VerifiedCount = 0;
             int Offset = 0;
-            while (Offset + sizeof(int) <= data.Length)
+            while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
             {
-                int EncodedStringLength = BitConverter.ToInt32(data, Offset);
+                Log(JsonString);
 
-                if (Offset + EncodedStringLength <= data.Length)
+                ClassModel? ClassModel = JsonConvert.DeserializeObject<ClassModel>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
+                if (ClassModel is not null)
                 {
-                    Log($"Valid packet, {EncodedStringLength} bytes to read");
+                    Log($"Class model decoded");
 
-                    byte[] EncodedString = new byte[EncodedStringLength - sizeof(int)];
-                    Array.Copy(data, Offset + sizeof(int), EncodedString, 0, EncodedString.Length);
+                    bool IsInvariantViolated = false;
 
-                    string JsonString = Encoding.UTF8.GetString(EncodedString);
-
-                    Log(JsonString);
-
-                    ClassModel? ClassModel = JsonConvert.DeserializeObject<ClassModel>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
-                    if (ClassModel is not null)
+                    try
                     {
-                        Log($"Class model decoded");
-
-                        DecodedCount++;
-
-                        try
+                        using Verifier Verifier = new()
                         {
-                            using Verifier Verifier = new()
-                            {
-                                MaxDepth = MaxDepth,
-                                ClassName = ClassModel.Name,
-                                Logger = Logger,
-                                FieldTable = ClassModel.FieldTable,
-                                MethodTable = ClassModel.MethodTable,
-                                InvariantList = ClassModel.InvariantList,
-                            };
+                            MaxDepth = MaxDepth,
+                            ClassName = ClassModel.Name,
+                            Logger = Logger,
+                            FieldTable = ClassModel.FieldTable,
+                            MethodTable = ClassModel.MethodTable,
+                            InvariantList = ClassModel.InvariantList,
+                        };
 
-                            Verifier.Verify();
+                        Verifier.Verify();
 
-                            ClassModel.IsInvariantViolated = Verifier.IsInvariantViolated;
-                            Log($"Class model verified: {Verifier.IsInvariantViolated}");
-
-                            VerifiedCount += 10;
-                        }
-                        catch
-                        {
-                        }
+                        IsInvariantViolated = Verifier.IsInvariantViolated;
+                        Log($"Class model verified: {IsInvariantViolated}");
                     }
+                    catch
+                    {
+                    }
+
+                    VerificationResult Result = new() { ClassName = ClassModel.Name, IsInvariantViolated = IsInvariantViolated };
+
+                    JsonString = JsonConvert.SerializeObject(Result, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                    byte[] EncodedString = Converter.EncodeString(JsonString);
+
+                    if (EncodedString.Length <= ToClientChannel.GetFreeLength())
+                    {
+                        ToClientChannel.Write(EncodedString);
+                        Log("Ack sent");
+                    }
+                    else
+                        Log("No room for ack");
                 }
-
-                Offset += EncodedStringLength;
             }
-
-            byte[] Data = new byte[10 + DecodedCount + VerifiedCount];
-
-            if (Data.Length <= ToClientChannel.GetFreeLength())
-            {
-                ToClientChannel.Write(Data);
-                Log("Ack sent");
-            }
-            else
-                Log("No room for ack");
 
             ToClientChannel.Close();
         }
