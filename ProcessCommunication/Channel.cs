@@ -199,8 +199,8 @@ public class Channel : IDisposable
             int FirstCopyLength = Math.Min(EndOfBuffer - Head, Length);
             int SecondCopyLength = Length - FirstCopyLength;
 
-            Accessor.WriteArray(Tail, data, 0, FirstCopyLength);
-            Accessor.WriteArray(Tail + FirstCopyLength, data, FirstCopyLength, SecondCopyLength);
+            Accessor.WriteArray(Head, data, 0, FirstCopyLength);
+            Accessor.WriteArray(Head + FirstCopyLength, data, FirstCopyLength, SecondCopyLength);
         }
 
         Head += Length;

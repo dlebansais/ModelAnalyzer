@@ -36,7 +36,7 @@ public static class Converter
         {
             int DecodedStringLength = BitConverter.ToInt32(data, offset);
 
-            if (offset + DecodedStringLength <= data.Length)
+            if (DecodedStringLength >= sizeof(int) && offset + DecodedStringLength <= data.Length)
             {
                 byte[] DecodedString = new byte[DecodedStringLength - sizeof(int)];
                 Array.Copy(data, offset + sizeof(int), DecodedString, 0, DecodedString.Length);

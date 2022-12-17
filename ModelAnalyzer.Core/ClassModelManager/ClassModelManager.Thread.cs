@@ -40,6 +40,9 @@ public partial class ClassModelManager : IDisposable
             return classModel;
         }
 
+        if (StartMode == SynchronizedThreadStartMode.Manual)
+            ScheduleAsynchronousVerification();
+
         Log("Starting the verification loop.");
 
         TimeSpan Timeout = TimeSpan.FromSeconds(5);
@@ -109,6 +112,8 @@ public partial class ClassModelManager : IDisposable
         int Offset = 0;
         while (Converter.TryDecodeString(Data, ref Offset, out string JsonString))
         {
+            Log($"New offset: {Offset}.");
+
             Log(JsonString);
 
             VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
@@ -163,6 +168,8 @@ public partial class ClassModelManager : IDisposable
         }
         else
             Log("Could not open the channel.");
+
+        UpdateVerificationEvents();
     }
 
     private void SendClassModelDataForVerification(Channel channel)

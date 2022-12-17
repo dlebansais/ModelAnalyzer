@@ -128,7 +128,7 @@ internal class Program
                         Verifier.Verify();
 
                         IsInvariantViolated = Verifier.IsInvariantViolated;
-                        Log($"Class model verified: {IsInvariantViolated}");
+                        Log($"Class model verified: {(IsInvariantViolated ? "invariant violated" : "no invariant violation")}");
                     }
                     catch
                     {

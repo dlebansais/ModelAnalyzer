@@ -12,7 +12,7 @@ public static class Initialization
         Logger = new NullLogger();
 #endif
         Libz3Extractor.Extractor.Extract();
-        Manager = new ClassModelManager() { Logger = Logger, StartMode = SynchronizedThreadStartMode.Manual };
+        Manager = new ClassModelManager() { Logger = Logger, StartMode = SynchronizedThreadStartMode.Auto };
     }
 
     public static IAnalysisLogger Logger { get; }
