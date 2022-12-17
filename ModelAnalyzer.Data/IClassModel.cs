@@ -21,9 +21,4 @@ public interface IClassModel
     /// Gets an event signaled when invariant violation has been verified.
     /// </summary>
     ManualResetEvent InvariantViolationVerified { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the class invariant is violated.
-    /// </summary>
-    bool IsInvariantViolated { get; }
 }

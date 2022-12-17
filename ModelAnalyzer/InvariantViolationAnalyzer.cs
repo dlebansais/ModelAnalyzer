@@ -32,7 +32,7 @@ public class InvariantViolationAnalyzer : Analyzer
         if (!classModel.Unsupported.IsEmpty)
             return;
 
-        if (!classModel.IsInvariantViolated)
+        if (!Manager.IsInvariantViolated(classModel))
             return;
 
         Location Location = classDeclaration.Identifier.GetLocation();

@@ -49,12 +49,6 @@ public partial class ClassModelManager : IDisposable
     /// </summary>
     private void DisposeNow()
     {
-        using (SynchronizedThread)
-        {
-        }
-
-        CleanupThread();
-
         using (FromServerChannel)
         {
         }

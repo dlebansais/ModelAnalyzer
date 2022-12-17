@@ -15,19 +15,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 public partial class ClassModelManager : IDisposable
 {
-    private const int MaxDepth = 2;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassModelManager"/> class.
     /// </summary>
     public ClassModelManager()
     {
         Context = new SynchronizedVerificationContext();
-        SynchronizedThread = new(Context, ExecuteVerification);
-        VerificationThread = InitThread();
         FromServerChannel = InitChannel();
-
-        // StartThread();
     }
 
     /// <summary>
@@ -84,7 +78,7 @@ public partial class ClassModelManager : IDisposable
 
         Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
 
-        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out _, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously && waitIfAsync)
         {
@@ -120,7 +114,7 @@ public partial class ClassModelManager : IDisposable
 
         Log($"Getting model for class '{ClassName}' asynchronously.");
 
-        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out _, out bool IsVerifyingAsynchronously);
+        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out bool IsVerifyingAsynchronously);
 
         if (IsVerifyingAsynchronously)
         {
@@ -153,19 +147,14 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            List<IClassModel> VerifiedClassList = new();
             List<string> ToRemoveClassList = new();
-
-            // Don't remove classes still being analyzed yet.
-            foreach (ModelVerification ModelVerification in Context.VerificationList)
-                VerifiedClassList.Add(ModelVerification.ClassModel);
 
             foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
             {
                 string ClassName = Entry.Key;
                 IClassModel ClassModel = Entry.Value;
 
-                if (!existingClassList.Contains(ClassName) && VerifiedClassList.Contains(ClassModel))
+                if (!existingClassList.Contains(ClassName))
                     if (!ClassModel.Unsupported.IsEmpty || ClassModel.InvariantViolationVerified.WaitOne(0))
                         ToRemoveClassList.Add(ClassName);
             }
@@ -180,16 +169,7 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    /// <summary>
-    /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="SynchronizedThreadStartMode.Auto"/>.
-    /// </summary>
-    public void StartVerification()
-    {
-        Log("Starting the verification thread.");
-        SynchronizedThread.Start();
-    }
-
-    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out IClassModel classModel, out ModelVerification modelVerification, out bool isVerifyingAsynchronously)
+    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out IClassModel classModel, out bool isVerifyingAsynchronously)
     {
         isVerifyingAsynchronously = false;
 
@@ -203,9 +183,8 @@ public partial class ClassModelManager : IDisposable
             // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
             bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
             bool ClassModelMustBeUpdated = IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
-            ModelVerification? ExistingModelVerification = Context.FindByName(ClassName);
 
-            if (ClassModelMustBeUpdated || ExistingModelVerification is null)
+            if (ClassModelMustBeUpdated)
             {
                 ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
                 Parser.Parse();
@@ -219,59 +198,28 @@ public partial class ClassModelManager : IDisposable
                     Unsupported = Parser.Unsupported,
                 };
 
-                modelVerification = new() { ClassModel = NewClassModel };
                 classModel = NewClassModel;
 
                 Context.UpdateClassModel(NewClassModel, out bool IsAdded);
                 Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
 
-                Context.VerificationList.Add(modelVerification);
+                ScheduleAsynchronousVerification();
 
                 if (StartMode == SynchronizedThreadStartMode.Auto)
                 {
                     Log("Starting the verification thread.");
-                    SynchronizedThread.Start();
+                    StartVerification();
                 }
-
-                ScheduleAsynchronousVerification();
 
                 isVerifyingAsynchronously = true;
                 Context.LastCompilationContext = compilationContext with { IsAsyncRunRequested = true };
             }
             else
             {
-                modelVerification = ExistingModelVerification;
                 classModel = Context.ClassModelTable[ClassName];
                 Context.LastCompilationContext = compilationContext;
             }
         }
-    }
-
-    private void ExecuteVerification(IDictionary<ModelVerification, ClassModel> cloneTable)
-    {
-        Log("Executing verification started.");
-
-        foreach (KeyValuePair<ModelVerification, ClassModel> Entry in cloneTable)
-        {
-            ModelVerification ModelVerification = Entry.Key;
-            ClassModel ClassModel = Entry.Value;
-            string ClassName = ClassModel.Name;
-
-            if (!ClassModel.Unsupported.IsEmpty)
-                Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
-            else
-            {
-            }
-
-            ModelVerification.SetUpToDate();
-        }
-
-#if DEBUG
-        // Simulate an analysis that takes time.
-        Thread.Sleep(TimeSpan.FromSeconds(1));
-#endif
-
-        Log("Executing verification completed.");
     }
 
     private void Log(string message)
@@ -288,6 +236,14 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
+    /// <summary>
+    /// Checks whether the invariant of a class is violated.
+    /// </summary>
+    /// <param name="classModel">The class model.</param>
+    public bool IsInvariantViolated(IClassModel classModel)
+    {
+        return Context.GetIsInvariantViolated(classModel.Name);
+    }
+
     private SynchronizedVerificationContext Context;
-    private SynchronizedThread<ModelVerification, ClassModel> SynchronizedThread;
 }

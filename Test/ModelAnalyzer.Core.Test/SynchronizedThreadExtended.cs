@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 
+#if REMOVED
 internal class SynchronizedThreadExtended : SynchronizedThread<ModelVerification, ClassModel>, IDisposable
 {
     public SynchronizedThreadExtended()
@@ -24,3 +25,4 @@ internal class SynchronizedThreadExtended : SynchronizedThread<ModelVerification
     {
     }
 }
+#endif

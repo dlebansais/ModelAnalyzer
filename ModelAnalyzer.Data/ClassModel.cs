@@ -40,10 +40,6 @@ internal partial record ClassModel : IClassModel
     public ManualResetEvent InvariantViolationVerified { get; } = new(initialState: false);
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public bool IsInvariantViolated { get; set; }
-
-    /// <inheritdoc/>
     public override string ToString()
     {
         StringBuilder Builder = new();

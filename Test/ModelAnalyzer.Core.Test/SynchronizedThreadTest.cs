@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+#if REMOVED
 public class SynchronizedThreadTest
 {
     [Test]
@@ -269,3 +270,4 @@ class Program_CoreSynchronizedThread_4
         using SynchronizedThreadContainer Container = new();
     }
 }
+#endif

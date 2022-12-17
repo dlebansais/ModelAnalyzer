@@ -2,40 +2,17 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Z3;
 
 /// <summary>
 /// Represents a context for synchronized verification of a class model.
 /// </summary>
-internal class SynchronizedVerificationContext : ISynchronizedContext<ModelVerification, ClassModel>
+internal class SynchronizedVerificationContext
 {
-    /// <inheritdoc/>
-    public object Lock => ((ICollection)VerificationList).SyncRoot;
-
-    /// <inheritdoc/>
-    public void CloneAndRemove(out IDictionary<ModelVerification, ClassModel> cloneTable)
-    {
-        cloneTable = new Dictionary<ModelVerification, ClassModel>();
-
-        Dictionary<ClassModel, ClassModel> ClonedClassModelTable = new();
-
-        foreach (ModelVerification ModelVerification in VerificationList)
-        {
-            ClassModel OriginalModel = (ClassModel)ModelVerification.ClassModel;
-            ClassModel ClonedModel;
-
-            if (!ClonedClassModelTable.ContainsKey(OriginalModel))
-            {
-                ClonedModel = OriginalModel with { };
-                ClonedClassModelTable.Add(OriginalModel, ClonedModel);
-            }
-            else
-                ClonedModel = ClonedClassModelTable[OriginalModel];
-
-            cloneTable.Add(ModelVerification, ClonedModel);
-        }
-
-        VerificationList.Clear();
-    }
+    /// <summary>
+    /// Gets the synchronization lock.
+    /// </summary>
+    public object Lock => ((ICollection)ClassModelTable).SyncRoot;
 
     /// <summary>
     /// Adds or updates a class model.
@@ -59,16 +36,25 @@ internal class SynchronizedVerificationContext : ISynchronizedContext<ModelVerif
     }
 
     /// <summary>
-    /// Finds a model verification by the class name. Returns <see langword="null"/> if not found.
+    /// Checks whether the invariant of a class is violated.
     /// </summary>
     /// <param name="className">The class name.</param>
-    public ModelVerification? FindByName(string className)
+    public bool GetIsInvariantViolated(string className)
     {
-        foreach (ModelVerification Item in VerificationList)
-            if (Item.ClassModel.Name == className)
-                return Item;
+        return ClassNameWithInvariantViolation.Contains(className);
+    }
 
-        return null;
+    /// <summary>
+    /// Sets whether the invariant of a class is violated.
+    /// </summary>
+    /// <param name="className">The class name.</param>
+    /// <param name="isViolated">True if violated.</param>
+    public void SetIsInvariantViolated(string className, bool isViolated)
+    {
+        if (isViolated && !ClassNameWithInvariantViolation.Contains(className))
+            ClassNameWithInvariantViolation.Add(className);
+        else if (!isViolated && ClassNameWithInvariantViolation.Contains(className))
+            ClassNameWithInvariantViolation.Remove(className);
     }
 
     /// <summary>
@@ -80,11 +66,6 @@ internal class SynchronizedVerificationContext : ISynchronizedContext<ModelVerif
     /// Gets the list of class names for wich the invariant is violated.
     /// </summary>
     public List<string> ClassNameWithInvariantViolation { get; } = new();
-
-    /// <summary>
-    /// Gets the list of verification objects.
-    /// </summary>
-    public List<ModelVerification> VerificationList { get; } = new();
 
     /// <summary>
     /// Gets or sets the last compilation context.
