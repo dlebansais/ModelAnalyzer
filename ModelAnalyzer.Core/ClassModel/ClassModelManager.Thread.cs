@@ -23,46 +23,75 @@ public partial class ClassModelManager : IDisposable
     /// <summary>
     /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="SynchronizedThreadStartMode.Auto"/>.
     /// </summary>
-    public void StartVerification()
+    /// <param name="classModel">The class classModel.</param>
+    private IClassModel WaitForVerification(IClassModel classModel)
     {
+        string ClassName = classModel.Name;
+
+        if (!classModel.Unsupported.IsEmpty)
+        {
+            Log($"Model for class '{ClassName}' contains unsupported elements, aborting verification.");
+            return classModel;
+        }
+
         if (!FromServerChannel.IsOpen)
         {
             Log("Channel not open to receive verification results, aborting.");
-            return;
+            return classModel;
         }
 
-        Log("Starting the verification thread.");
+        Log("Starting the verification loop.");
 
         TimeSpan Timeout = TimeSpan.FromSeconds(5);
         Stopwatch Watch = new();
         Watch.Start();
 
-        while (!IsAllClassesVerified() && Watch.Elapsed < Timeout)
+        for (; ;)
         {
+            if (Watch.Elapsed >= Timeout)
+            {
+                Log($"Verification loop ended on timeout.");
+                return classModel;
+            }
+
+            CheckVerificationStatus(ClassName, out bool IsFound, out bool IsVerified, out bool IsInvariantViolated);
+
+            if (!IsFound)
+            {
+                Log($"Class '{ClassName}' no longer in the list of models.");
+                return classModel;
+            }
+
+            if (IsVerified)
+            {
+                Log($"Verification loop completed, class {ClassName} verified, invariant violation: {IsInvariantViolated}.");
+                return ((ClassModel)classModel) with { IsVerified = IsVerified, IsInvariantViolated = IsInvariantViolated };
+            }
+
             UpdateVerificationEvents();
             Thread.Sleep(TimeSpan.FromMilliseconds(100));
         }
     }
 
-    private bool IsAllClassesVerified()
+    private void CheckVerificationStatus(string className, out bool isFound, out bool isVerified, out bool isInvariantViolated)
     {
-        bool Result = true;
-
         lock (Context.Lock)
         {
-            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+            if (Context.ClassModelTable.ContainsKey(className))
             {
-                ClassModel ClassModel = Entry.Value;
+                isFound = true;
 
-                if (!ClassModel.InvariantViolationVerified.WaitOne(0))
-                {
-                    Result = false;
-                    break;
-                }
+                ClassModel ClassModel = Context.ClassModelTable[className];
+                isVerified = ClassModel.IsVerified;
+                isInvariantViolated = ClassModel.IsInvariantViolated;
+            }
+            else
+            {
+                isFound = false;
+                isVerified = false;
+                isInvariantViolated = false;
             }
         }
-
-        return Result;
     }
 
     private void UpdateVerificationEvents()
@@ -85,6 +114,8 @@ public partial class ClassModelManager : IDisposable
             VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             if (VerificationResult is not null)
                 UpdateVerificationEvent(VerificationResult);
+            else
+                Log("Failed to deserialize the verification result.");
         }
     }
 
@@ -103,17 +134,23 @@ public partial class ClassModelManager : IDisposable
 
                 if (ClassModel.Name == ClassName)
                 {
-                    Context.SetIsInvariantViolated(ClassName, IsInvariantViolated);
-                    ClassModel.InvariantViolationVerified.Set();
-                    break;
+                    Context.ClassModelTable[ClassName] = ClassModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
+                    return;
                 }
             }
         }
+
+        Log($"Class '{ClassName}' no longer in the list of models, verification result lost.");
     }
 
     private void ScheduleAsynchronousVerification()
     {
-        Log("Creating the channel.");
+        Logger.Log("Starting the verification process.");
+
+        Process.Start(@"C:\Projects\Temp\ModelAnalyzer\Verifier\bin\x64\Debug\net48\Verifier.exe");
+
+        Log("Creating the channel to send class models.");
+
         Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
         ToServerChannel.Open();
 
@@ -121,48 +158,48 @@ public partial class ClassModelManager : IDisposable
         {
             Log("Channel opened.");
 
-            List<ClassModel> ClonedClassModelList = new();
+            SendClassModelDataForVerification(ToServerChannel);
+            ToServerChannel.Close();
+        }
+        else
+            Log("Could not open the channel.");
+    }
 
-            lock (Context.Lock)
+    private void SendClassModelDataForVerification(Channel channel)
+    {
+        List<ClassModel> ToVerifyList = new();
+
+        lock (Context.Lock)
+        {
+            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
             {
-                foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
-                {
-                    ClassModel ClassModel = Entry.Value;
-
-                    if (!ClassModel.InvariantViolationVerified.WaitOne(0))
-                    {
-                        ClassModel ClonedModel = ClassModel with { };
-                        ClonedClassModelList.Add(ClonedModel);
-                    }
-                }
-            }
-
-            foreach (ClassModel ClassModel in ClonedClassModelList)
-            {
+                ClassModel ClassModel = Entry.Value;
                 string ClassName = ClassModel.Name;
 
                 if (!ClassModel.Unsupported.IsEmpty)
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
+                else if (ClassModel.IsVerified)
+                    Log($"Skipping complete verification for class '{ClassName}', it's already verified.");
                 else
-                {
-                    string JSonString = JsonConvert.SerializeObject(ClassModel, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-                    byte[] EncodedString = Converter.EncodeString(JSonString);
-
-                    if (EncodedString.Length <= ToServerChannel.GetFreeLength())
-                    {
-                        ToServerChannel.Write(EncodedString);
-
-                        Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
-                    }
-                    else
-                        Log($"Unable to send data for class '{ClassName}', buffer full.");
-                }
-
-                ClassModel.InvariantViolationVerified.Set();
+                    ToVerifyList.Add(ClassModel);
             }
+        }
 
-            ToServerChannel.Close();
-            Log("Channel closed.");
+        foreach (ClassModel ClassModel in ToVerifyList)
+        {
+            string ClassName = ClassModel.Name;
+
+            string JSonString = JsonConvert.SerializeObject(ClassModel, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            byte[] EncodedString = Converter.EncodeString(JSonString);
+
+            if (EncodedString.Length <= channel.GetFreeLength())
+            {
+                channel.Write(EncodedString);
+
+                Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
+            }
+            else
+                Log($"Unable to send data for class '{ClassName}', buffer full.");
         }
     }
 

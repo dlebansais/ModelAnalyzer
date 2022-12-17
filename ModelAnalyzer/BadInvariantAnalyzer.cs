@@ -21,6 +21,7 @@ public class BadInvariantAnalyzer : Analyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get => ImmutableArray.Create(Rule); }
     protected override string Id { get => DiagnosticId; }
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.CompilationUnit; }
+    protected override bool IsAsyncRunRequested { get => false; }
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {

@@ -22,17 +22,17 @@ public class InvariantViolationAnalyzer : Analyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get => ImmutableArray.Create(Rule); }
     protected override string Id { get => DiagnosticId; }
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.ClassDeclaration; }
+    protected override bool IsAsyncRunRequested { get => true; }
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
-        Logger.Log("Starting the process.");
-        Process.Start(@"C:\Projects\Temp\ModelAnalyzer\Verifier\bin\x64\Debug\net48\Verifier.exe");
-        Logger.Log("Started.");
-
         if (!classModel.Unsupported.IsEmpty)
             return;
 
-        if (!Manager.IsInvariantViolated(classModel))
+        if (!classModel.IsVerified)
+            return;
+
+        if (!classModel.IsInvariantViolated)
             return;
 
         Location Location = classDeclaration.Identifier.GetLocation();

@@ -216,13 +216,14 @@ class Program_CoreClassModelManager_7
     private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
     {
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = SynchronizedThreadStartMode.Manual };
 
-        Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
-        Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
 
-        Manager.StartVerification();
+        Manager.GetVerifiedModel(ClassModel);
     }
 
     [Test]

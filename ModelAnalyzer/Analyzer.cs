@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 public abstract class Analyzer : DiagnosticAnalyzer
 {
@@ -16,6 +15,7 @@ public abstract class Analyzer : DiagnosticAnalyzer
     
     protected abstract string Id { get; }
     protected abstract SyntaxKind DiagnosticKind { get; }
+    protected abstract bool IsAsyncRunRequested { get; }
 
     public override void Initialize(AnalysisContext context)
     {
@@ -96,7 +96,7 @@ public abstract class Analyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(Id, classDeclaration, isAsyncRunRequested: false);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(Id, classDeclaration, isAsyncRunRequested: IsAsyncRunRequested);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
 
         ReportDiagnostic(context, classDeclaration, ClassModel);

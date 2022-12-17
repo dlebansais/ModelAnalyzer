@@ -77,13 +77,15 @@ internal class TestHelper
         List<IClassModel> ClassModelList = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, waitIfAsync));
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration));
 
         if (managerHandler is not null)
             managerHandler(Manager);
 
+        /*
         if (Manager.StartMode == SynchronizedThreadStartMode.Manual)
-            Manager.StartVerification();
+            Manager.GetVerifiedModel();
+        */
 
         tokenReplacement.Restore();
 
@@ -106,6 +108,8 @@ internal class TestHelper
 
         List<Task<IClassModel>> TaskList = new();
         CompilationContext CompilationContext = CompilationContext.Default;
+
+        /*
         ClassDeclarationSyntax? PreviousClassDeclaration = null;
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
@@ -123,6 +127,7 @@ internal class TestHelper
 
         if (Manager.StartMode == SynchronizedThreadStartMode.Manual)
             Manager.StartVerification();
+        */
 
         List<IClassModel> ClassModelList = await Task.Run(async () =>
         {

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
@@ -66,75 +65,40 @@ public partial class ClassModelManager : IDisposable
     /// </summary>
     /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
-    /// <param name="waitIfAsync">True if the method should wait until verification is completed.</param>
     /// <exception cref="ArgumentException">Class name empty.</exception>
-    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, bool waitIfAsync = false)
+    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
-        ClearLogs();
-
         string ClassName = classDeclaration.Identifier.ValueText;
         if (ClassName == string.Empty)
             throw new ArgumentException("Class name must not be empty.");
 
-        Log($"Getting model for class '{ClassName}', {(waitIfAsync ? "waiting for a delayed analysis" : "not waiting for delayed analysis")}.");
+        // We clear logs only after the constructor has exited.
+        ClearLogs();
 
-        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out bool IsVerifyingAsynchronously);
+        Log($"Getting model for class '{ClassName}'.");
 
-        if (IsVerifyingAsynchronously && waitIfAsync)
-        {
-            Log("Waiting for the delayed analysis.");
-
-            ClassModel.InvariantViolationVerified.WaitOne(Timeout.InfiniteTimeSpan);
-
-            Log("Analysis complete.");
-
-            return ClassModel;
-        }
-        else
-        {
-            Log("Synchronous analysis complete.");
-
-            return ClassModel;
-        }
+        return GetClassModelInternal(compilationContext, classDeclaration);
     }
 
     /// <summary>
-    /// Gets the model of a class.
+    /// Gets the verified version of a class model synchronously.
     /// </summary>
-    /// <param name="compilationContext">The compilation context.</param>
-    /// <param name="classDeclaration">The class declaration.</param>
-    /// <exception cref="ArgumentException">Class name empty.</exception>
-    public async Task<IClassModel> GetClassModelAsync(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
+    /// <param name="classModel">The class model.</param>
+    public IClassModel GetVerifiedModel(IClassModel classModel)
     {
-        ClearLogs();
+        return WaitForVerification(classModel);
+    }
 
-        string ClassName = classDeclaration.Identifier.ValueText;
-        if (ClassName == string.Empty)
-            throw new ArgumentException("Class name must not be empty.");
-
-        Log($"Getting model for class '{ClassName}' asynchronously.");
-
-        GetClassModelInternal(compilationContext, classDeclaration, out IClassModel ClassModel, out bool IsVerifyingAsynchronously);
-
-        if (IsVerifyingAsynchronously)
+    /// <summary>
+    /// Gets the verified version of a class model synchronously.
+    /// </summary>
+    /// <param name="classModel">The class model.</param>
+    public async Task<IClassModel> GetVerifiedModelAsync(IClassModel classModel)
+    {
+        return await Task.Run(() =>
         {
-            Log("Waiting for the delayed analysis.");
-
-            return await Task.Run(() =>
-            {
-                ClassModel.InvariantViolationVerified.WaitOne(Timeout.InfiniteTimeSpan);
-
-                Log($"Analysis of '{ClassName}' complete.");
-
-                return ClassModel;
-            });
-        }
-        else
-        {
-            Log($"Analysis of '{ClassName}' complete.");
-
-            return ClassModel;
-        }
+            return WaitForVerification(classModel);
+        });
     }
 
     /// <summary>
@@ -155,8 +119,7 @@ public partial class ClassModelManager : IDisposable
                 IClassModel ClassModel = Entry.Value;
 
                 if (!existingClassList.Contains(ClassName))
-                    if (!ClassModel.Unsupported.IsEmpty || ClassModel.InvariantViolationVerified.WaitOne(0))
-                        ToRemoveClassList.Add(ClassName);
+                    ToRemoveClassList.Add(ClassName);
             }
 
             foreach (string ClassName in ToRemoveClassList)
@@ -164,62 +127,76 @@ public partial class ClassModelManager : IDisposable
                 Log($"Removing class '{ClassName}'.");
 
                 Context.ClassModelTable.Remove(ClassName);
-                Context.ClassNameWithInvariantViolation.Remove(ClassName);
             }
         }
     }
 
-    private void GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, out IClassModel classModel, out bool isVerifyingAsynchronously)
+    private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
-        isVerifyingAsynchronously = false;
-
         string ClassName = classDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
 
+        ClassModel NewClassModel;
+
         lock (Context.Lock)
         {
-            Log($"Compilation Context: {compilationContext}");
+            Log($"Compilation context: {compilationContext}");
 
             // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
             bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
-            bool ClassModelMustBeUpdated = IsNewCompilationContext || !Context.ClassModelTable.ContainsKey(ClassName);
+            bool ClassModelAlreadyExists = Context.ClassModelTable.ContainsKey(ClassName);
 
-            if (ClassModelMustBeUpdated)
+            if (IsNewCompilationContext || !ClassModelAlreadyExists)
             {
                 ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
                 Parser.Parse();
 
-                ClassModel NewClassModel = new ClassModel()
+                if (ClassModelAlreadyExists)
                 {
-                    Name = ClassName,
-                    FieldTable = Parser.FieldTable,
-                    MethodTable = Parser.MethodTable,
-                    InvariantList = Parser.InvariantList,
-                    Unsupported = Parser.Unsupported,
-                };
+                    ClassModel OldClassModel = Context.ClassModelTable[ClassName];
 
-                classModel = NewClassModel;
+                    NewClassModel = OldClassModel with
+                    {
+                        FieldTable = Parser.FieldTable,
+                        MethodTable = Parser.MethodTable,
+                        InvariantList = Parser.InvariantList,
+                        Unsupported = Parser.Unsupported,
+                        IsVerified = false,
+                        IsInvariantViolated = false,
+                    };
 
-                Context.UpdateClassModel(NewClassModel, out bool IsAdded);
-                Log(IsAdded ? $"Class model for '{ClassName}' is new and has been added." : $"Updated model for class '{ClassName}'.");
+                    Context.UpdateClassModel(NewClassModel);
 
-                ScheduleAsynchronousVerification();
-
-                if (StartMode == SynchronizedThreadStartMode.Auto)
+                    Log($"Updated model for class '{ClassName}'.");
+                }
+                else
                 {
-                    Log("Starting the verification thread.");
-                    StartVerification();
+                    NewClassModel = new ClassModel()
+                    {
+                        Name = ClassName,
+                        FieldTable = Parser.FieldTable,
+                        MethodTable = Parser.MethodTable,
+                        InvariantList = Parser.InvariantList,
+                        Unsupported = Parser.Unsupported,
+                        IsVerified = false,
+                        IsInvariantViolated = false,
+                    };
+
+                    Context.AddClassModel(NewClassModel);
+
+                    Log($"Class model for '{ClassName}' is new and has been added.");
                 }
 
-                isVerifyingAsynchronously = true;
-                Context.LastCompilationContext = compilationContext with { IsAsyncRunRequested = true };
+                if (StartMode == SynchronizedThreadStartMode.Auto)
+                    ScheduleAsynchronousVerification();
             }
             else
-            {
-                classModel = Context.ClassModelTable[ClassName];
-                Context.LastCompilationContext = compilationContext;
-            }
+                NewClassModel = Context.ClassModelTable[ClassName];
+
+            Context.LastCompilationContext = compilationContext;
         }
+
+        return NewClassModel;
     }
 
     private void Log(string message)
@@ -234,15 +211,6 @@ public partial class ClassModelManager : IDisposable
             if (Context.ClassModelTable.Count == 0)
                 Logger.Clear();
         }
-    }
-
-    /// <summary>
-    /// Checks whether the invariant of a class is violated.
-    /// </summary>
-    /// <param name="classModel">The class model.</param>
-    public bool IsInvariantViolated(IClassModel classModel)
-    {
-        return Context.GetIsInvariantViolated(classModel.Name);
     }
 
     private SynchronizedVerificationContext Context;

@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -36,8 +35,10 @@ internal partial record ClassModel : IClassModel
     required public Unsupported Unsupported { get; init; }
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public ManualResetEvent InvariantViolationVerified { get; } = new(initialState: false);
+    required public bool IsVerified { get; init; }
+
+    /// <inheritdoc/>
+    required public bool IsInvariantViolated { get; init; }
 
     /// <inheritdoc/>
     public override string ToString()

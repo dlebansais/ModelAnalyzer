@@ -1,7 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Threading;
-
 /// <summary>
 /// Provides information about a class model.
 /// </summary>
@@ -18,7 +16,12 @@ public interface IClassModel
     Unsupported Unsupported { get; }
 
     /// <summary>
-    /// Gets an event signaled when invariant violation has been verified.
+    /// Gets a value indicating whether the model is verified.
     /// </summary>
-    ManualResetEvent InvariantViolationVerified { get; }
+    bool IsVerified { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the invariant is violated.
+    /// </summary>
+    bool IsInvariantViolated { get; }
 }
