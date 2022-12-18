@@ -11,6 +11,8 @@ public class BadInvarianttUnitTests
     [Category("Analyzer")]
     public async Task ClassWithNoInvariant_NoDiagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -36,6 +38,8 @@ class Program_BadInvariant_0
     [Category("Analyzer")]
     public async Task ClassWithInvariant_NoDiagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -62,6 +66,8 @@ class Program_BadInvariant_1
     [Category("Analyzer")]
     public async Task ClassWithErrorInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -88,6 +94,8 @@ class Program_BadInvariant_2
     [Category("Analyzer")]
     public async Task ClassWithTwoStatementsInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -114,6 +122,8 @@ class Program_BadInvariant_3
     [Category("Analyzer")]
     public async Task ClassWithBadExpressionInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -140,6 +150,8 @@ class Program_BadInvariant_4
     [Category("Analyzer")]
     public async Task ClassWithInvertedExpressionInInvariant_NoDiagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -166,6 +178,8 @@ class Program_BadInvariant_5
     [Category("Analyzer")]
     public async Task ClassWithBadOperatorInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -192,6 +206,8 @@ class Program_BadInvariant_6
     [Category("Analyzer")]
     public async Task ClassWithBadConstantInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -218,6 +234,8 @@ class Program_BadInvariant_7
     [Category("Analyzer")]
     public async Task ClassWithUnknownFieldInInvariant_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 

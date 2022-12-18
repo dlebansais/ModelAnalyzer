@@ -142,6 +142,10 @@ public partial class ClassModelManager : IDisposable
                 if (ClassModel.Name == ClassName)
                 {
                     Context.ClassModelTable[ClassName] = ClassModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
+
+                    if (Interlocked.Decrement(ref VerificationRequestCount) == 0)
+                        VerifierCallWatch.Stop();
+
                     return;
                 }
             }
@@ -233,11 +237,16 @@ public partial class ClassModelManager : IDisposable
                 channel.Write(EncodedString);
 
                 Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
+
+                Interlocked.Increment(ref VerificationRequestCount);
+                VerifierCallWatch.Restart();
             }
             else
                 Log($"Unable to send data for class '{ClassName}', buffer full.");
         }
     }
 
+    private static Stopwatch VerifierCallWatch = new();
+    private static int VerificationRequestCount;
     private Channel FromServerChannel;
 }

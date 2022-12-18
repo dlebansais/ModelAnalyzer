@@ -11,6 +11,8 @@ public class BadRequireUnitTests
     [Category("Analyzer")]
     public async Task ValidExpression_NoDiagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -31,6 +33,8 @@ class Program_BadRequire_0
     [Category("Analyzer")]
     public async Task RequireWithInvalidCode_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -51,6 +55,8 @@ class Program_BadRequire_1
     [Category("Analyzer")]
     public async Task RequireWithTwoStatements_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -71,6 +77,8 @@ class Program_BadRequire_2
     [Category("Analyzer")]
     public async Task RequireWithUnsupportedExpression_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -91,6 +99,8 @@ class Program_BadRequire_3
     [Category("Analyzer")]
     public async Task RequireWithUnknownField_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -111,6 +121,8 @@ class Program_BadRequire_4
     [Category("Analyzer")]
     public async Task MissplacedRequires_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 

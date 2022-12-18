@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using AnalysisLogger;
 using Libz3Extractor;
@@ -133,6 +134,14 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
+    /// <summary>
+    /// Waits for the verifier to finish processing data.
+    /// </summary>
+    public static async Task SynchronizeWithVerifierAsync()
+    {
+        await Task.Run(SynchronizeWithVerifier);
+    }
+
     private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
@@ -198,6 +207,15 @@ public partial class ClassModelManager : IDisposable
         }
 
         return NewClassModel;
+    }
+
+    private static void SynchronizeWithVerifier()
+    {
+        while (VerificationRequestCount > 0 && VerifierCallWatch.Elapsed < TimeSpan.FromSeconds(5))
+            Thread.Sleep(100);
+
+        Interlocked.Exchange(ref VerificationRequestCount, 0);
+        VerifierCallWatch.Stop();
     }
 
     private void Log(string message)

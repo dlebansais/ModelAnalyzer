@@ -11,6 +11,8 @@ public class BadExpressionUnitTests
     [Category("Analyzer")]
     public async Task ExpressionIsUnsupported_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -30,6 +32,8 @@ class Program_BadExpression_0
     [Category("Analyzer")]
     public async Task InvalidBinaryExpression_Diagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 
@@ -49,6 +53,8 @@ class Program_BadExpression_1
     [Category("Analyzer")]
     public async Task ValidOperator_NoDiagnostic()
     {
+        await ClassModelManager.SynchronizeWithVerifierAsync();
+
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
 

@@ -92,42 +92,7 @@ internal class Program
                 if (ClassModel is not null)
                 {
                     Log($"Class model decoded\n{ClassModel}");
-
-                    string ClassName = ClassModel.Name;
-                    VerificationResult VerificationResult;
-
-                    try
-                    {
-                        using Verifier Verifier = new()
-                        {
-                            MaxDepth = MaxDepth,
-                            ClassName = ClassName,
-                            Logger = Logger,
-                            FieldTable = ClassModel.FieldTable,
-                            MethodTable = ClassModel.MethodTable,
-                            InvariantList = ClassModel.InvariantList,
-                        };
-
-                        Verifier.Verify();
-
-                        VerificationResult = Verifier.VerificationResult;
-                        Log($"Class model verified: {VerificationResult}");
-                    }
-                    catch
-                    {
-                        VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
-                    }
-
-                    JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-                    byte[] EncodedString = Converter.EncodeString(JsonString);
-
-                    if (EncodedString.Length <= ToClientChannel.GetFreeLength())
-                    {
-                        ToClientChannel.Write(EncodedString);
-                        Log("Ack sent");
-                    }
-                    else
-                        Log("No room for ack");
+                    ProcessClassModel(ToClientChannel, ClassModel);
                 }
             }
 
@@ -135,5 +100,44 @@ internal class Program
         }
         else
             Log($"Failed to open client channel, {ToClientChannel.LastError}");
+    }
+
+    private static void ProcessClassModel(Channel toClientChannel, ClassModel classModel)
+    {
+        string ClassName = classModel.Name;
+        VerificationResult VerificationResult;
+
+        try
+        {
+            using Verifier Verifier = new()
+            {
+                MaxDepth = MaxDepth,
+                ClassName = ClassName,
+                Logger = Logger,
+                FieldTable = classModel.FieldTable,
+                MethodTable = classModel.MethodTable,
+                InvariantList = classModel.InvariantList,
+            };
+
+            Verifier.Verify();
+
+            VerificationResult = Verifier.VerificationResult;
+            Log($"Class model verified: {VerificationResult}");
+        }
+        catch
+        {
+            VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
+        }
+
+        string JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+        byte[] EncodedString = Converter.EncodeString(JsonString);
+
+        if (EncodedString.Length <= toClientChannel.GetFreeLength())
+        {
+            toClientChannel.Write(EncodedString);
+            Log("Ack sent");
+        }
+        else
+            Log("No room for ack");
     }
 }
