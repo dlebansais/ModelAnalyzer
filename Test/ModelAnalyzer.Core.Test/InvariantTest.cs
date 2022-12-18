@@ -34,6 +34,9 @@ class Program_CoreInvariant_0
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreInvariant_0
   int X
   void Write(x)
+  {
+    X = x;
+  }
   * (X >= 0) || (X < 0)
 "));
     }

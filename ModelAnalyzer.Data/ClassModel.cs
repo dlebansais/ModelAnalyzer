@@ -142,8 +142,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
     {
-        AppendIndentation(builder, indentation);
-        builder.AppendLine($"{statement.Destination.Name} = {statement.Expression}");
+        AppendStatementText(builder, $"{statement.Destination.Name} = {statement.Expression}", indentation);
     }
 
     private void AppendConditionalStatement(StringBuilder builder, ConditionalStatement statement, int indentation)
@@ -163,9 +162,9 @@ internal partial record ClassModel : IClassModel
     private void AppendReturnStatement(StringBuilder builder, ReturnStatement statement, int indentation)
     {
         if (statement.Expression is null)
-            AppendStatementText(builder, $"return {statement.Expression}", indentation);
-        else
             AppendStatementText(builder, "return", indentation);
+        else
+            AppendStatementText(builder, $"return {statement.Expression}", indentation);
     }
 
     private void AppendStatementText(StringBuilder builder, string text, int indentation)

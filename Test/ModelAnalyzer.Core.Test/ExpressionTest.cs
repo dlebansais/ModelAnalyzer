@@ -199,11 +199,14 @@ class Program_CoreExpression_6
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_6
   int X
   void Write(x)
-    require x >= 0
-    require x + 1 >= 0
-    require True
-    ensure X >= 0
-    ensure X >= 0 && X >= 1
+  # require x >= 0
+  # require x + 1 >= 0
+  # require True
+  {
+    X = x;
+  }
+  # ensure X >= 0
+  # ensure X >= 0 && X >= 1
 "));
     }
 

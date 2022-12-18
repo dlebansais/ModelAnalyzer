@@ -32,6 +32,8 @@ class Program_CoreMethod_0
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_0
   int X
   void Write(x, y)
+  {
+  }
 "));
     }
 
@@ -63,6 +65,9 @@ class Program_CoreMethod_1
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_1
   int X
   int Read()
+  {
+    return X;
+  }
 "));
     }
 
@@ -124,6 +129,8 @@ class Program_CoreMethod_3
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_3
   void Write()
+  {
+  }
 "));
     }
 
@@ -155,6 +162,8 @@ class Program_CoreMethod_4
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_4
   void Write()
+  {
+  }
 "));
     }
 
@@ -239,6 +248,8 @@ class Program_CoreMethod_7
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_7
   int X
   void Write(x, y)
+  {
+  }
 "));
     }
 

@@ -82,10 +82,15 @@ internal class TestHelper
         if (managerHandler is not null)
             managerHandler(Manager);
 
-        /*
-        if (Manager.StartMode == SynchronizedThreadStartMode.Manual)
-            Manager.GetVerifiedModel();
-        */
+        if (waitIfAsync)
+        {
+            List<IClassModel> VerifiedClassModelList = new();
+
+            foreach (IClassModel ClassModel in ClassModelList)
+                VerifiedClassModelList.Add(Manager.GetVerifiedModel(ClassModel));
+
+            ClassModelList = VerifiedClassModelList;
+        }
 
         tokenReplacement.Restore();
 
@@ -109,15 +114,15 @@ internal class TestHelper
         List<Task<IClassModel>> TaskList = new();
         CompilationContext CompilationContext = CompilationContext.Default;
 
-        /*
         ClassDeclarationSyntax? PreviousClassDeclaration = null;
+        List<IClassModel> ClassModelList = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
             if (PreviousClassDeclaration != ClassDeclaration)
                 CompilationContext = CompilationContext.GetAnother();
 
-            TaskList.Add(Manager.GetClassModelAsync(CompilationContext, ClassDeclaration));
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration));
 
             PreviousClassDeclaration = ClassDeclaration;
         }
@@ -125,18 +130,14 @@ internal class TestHelper
         if (managerHandler is not null)
             managerHandler(Manager);
 
-        if (Manager.StartMode == SynchronizedThreadStartMode.Manual)
-            Manager.StartVerification();
-        */
-
-        List<IClassModel> ClassModelList = await Task.Run(async () =>
+        ClassModelList = await Task.Run(async () =>
         {
-            List<IClassModel> ClassModelList = new();
+            List<IClassModel> VerifiedClassModelList = new();
 
-            foreach (Task<IClassModel> Task in TaskList)
-                ClassModelList.Add(await Task);
+            foreach (IClassModel ClassModel in ClassModelList)
+                VerifiedClassModelList.Add(await Manager.GetVerifiedModelAsync(ClassModel));
 
-            return ClassModelList;
+            return VerifiedClassModelList;
         });
 
         tokenReplacement.Restore();

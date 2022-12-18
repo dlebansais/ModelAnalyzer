@@ -1,7 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,10 +24,21 @@ public class InvariantViolationAnalyzer : Analyzer
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.ClassDeclaration; }
     protected override bool IsAsyncRunRequested { get => true; }
 
+    public const string ForSynchronousTestOnly = "ClassName_62D72B24_5F04_451F_BC32_ABE6D787701B";
+
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
+        string ClassName = classDeclaration.Identifier.ValueText;
+        bool ForceSynchronous = ClassName.StartsWith(ForSynchronousTestOnly);
+
         if (!classModel.Unsupported.IsEmpty)
             return;
+
+        if (ForceSynchronous)
+        {
+            Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
+            classModel = Manager.GetVerifiedModel(classModel);
+        }
 
         if (!classModel.IsInvariantViolated)
             return;

@@ -34,7 +34,10 @@ class Program_CoreEnsure_0
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_0
   int X
   void Write(x)
-    ensure X == x
+  {
+    X = x;
+  }
+  # ensure X == x
 "));
     }
 
@@ -127,6 +130,9 @@ class Program_CoreEnsure_3
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_3
   int X
   void Write(x)
+  {
+    X = x;
+  }
 "));
     }
 
@@ -159,6 +165,9 @@ class Program_CoreEnsure_4
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_4
   int X
   void Write(x)
+  {
+    X = x;
+  }
 "));
     }
 
@@ -197,9 +206,15 @@ class Program_CoreEnsure_5
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_5
   int X
   void Write1(x)
-    ensure X == x
+  {
+    X = x;
+  }
+  # ensure X == x
   void Write2(x)
-    ensure X == x
+  {
+    X = x;
+  }
+  # ensure X == x
 "));
     }
 
@@ -237,7 +252,10 @@ class Program_CoreEnsure_6
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_6
   int X
   void Write(x)
-    ensure X == x
+  {
+    X = x;
+  }
+  # ensure X == x
 "));
     }
 }

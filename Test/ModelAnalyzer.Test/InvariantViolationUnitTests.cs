@@ -7,17 +7,19 @@ using VerifyCS = CSharpAnalyzerVerifier<InvariantViolationAnalyzer>;
 [TestFixture]
 public class InvariantViolationUnitTests
 {
+    string ForSynchronousTestOnly = InvariantViolationAnalyzer.ForSynchronousTestOnly;
+
     [Test]
     [Category("Analyzer")]
     public async Task ValidInitialState_NoDiagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class Program_InvariantViolation_0
-{
+class {ForSynchronousTestOnly}_0
+{{
     int X;
-}
+}}
 // Invariant: X == 0
 ");
     }
@@ -26,13 +28,13 @@ class Program_InvariantViolation_0
     [Category("Analyzer")]
     public async Task InitialStateViolateInvariant_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|Program_InvariantViolation_1|]
-{
+class [|{ForSynchronousTestOnly}_1|]
+{{
     int X;
-}
+}}
 // Invariant: X == 1
 ");
     }
@@ -41,18 +43,18 @@ class [|Program_InvariantViolation_1|]
     [Category("Analyzer")]
     public async Task ValidInvariantAfterAssignment_NoDiagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class Program_InvariantViolation_2
-{
+class {ForSynchronousTestOnly}_2
+{{
     int X;
 
     public void Write()
-    {
+    {{
         X = 1;
-    }
-}
+    }}
+}}
 // Invariant: X == 0 || X == 1
 ");
     }
@@ -61,18 +63,18 @@ class Program_InvariantViolation_2
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterAssignment_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|Program_InvariantViolation_3|]
-{
+class [|{ForSynchronousTestOnly}_3|]
+{{
     int X;
 
     public void Write()
-    {
+    {{
         X = 1;
-    }
-}
+    }}
+}}
 // Invariant: X == 0
 ");
     }
@@ -81,21 +83,21 @@ class [|Program_InvariantViolation_3|]
     [Category("Analyzer")]
     public async Task ValidInvariantAfterConditional_NoDiagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class Program_InvariantViolation_4
-{
+class {ForSynchronousTestOnly}_4
+{{
     int X;
 
     public void Write()
-    {
+    {{
         if (X == 0)
             X = 1;
         else
             X = 2;
-    }
-}
+    }}
+}}
 // Invariant: X == 0 || X == 1 || X == 2
 ");
     }
@@ -104,21 +106,21 @@ class Program_InvariantViolation_4
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional1_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|Program_InvariantViolation_5|]
-{
+class [|{ForSynchronousTestOnly}_5|]
+{{
     int X;
 
     public void Write()
-    {
+    {{
         if (X == 0)
             X = 2;
         else
             X = 1;
-    }
-}
+    }}
+}}
 // Invariant: X == 0 || X == 1
 ");
     }
@@ -127,21 +129,21 @@ class [|Program_InvariantViolation_5|]
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional2_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|Program_InvariantViolation_6|]
-{
+class [|{ForSynchronousTestOnly}_6|]
+{{
     int X;
 
     public void Write()
-    {
+    {{
         if (X == 1)
             X = 1;
         else
             X = 2;
-    }
-}
+    }}
+}}
 // Invariant: X == 0 || X == 1
 ");
     }
@@ -150,18 +152,18 @@ class [|Program_InvariantViolation_6|]
     [Category("Analyzer")]
     public async Task UnconstrainedInvariant_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|Program_InvariantViolation_7|]
-{
+class [|{ForSynchronousTestOnly}_7|]
+{{
     int X;
 
     void Write(int x)
-    {
+    {{
         X = x;
-    }
-}
+    }}
+}}
 // Invariant: X == 0
 ");
     }
@@ -170,19 +172,40 @@ class [|Program_InvariantViolation_7|]
     [Category("Analyzer")]
     public async Task ConstrainedInvariant_NoDiagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class Program_InvariantViolation_8
-{
+class {ForSynchronousTestOnly}_8
+{{
     int X;
 
     void Write(int x)
     // Require: x == 0
-    {
+    {{
         X = x;
+    }}
+}}
+// Invariant: X == 0
+");
     }
-}
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task AsyncTest_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@$"
+using System;
+
+// This class name is not set to ForSynchronousTestOnly_xx on purpose.
+class Program_InvariantViolation_9
+{{
+    int X;
+
+    void Write(int x)
+    {{
+        X = x;
+    }}
+}}
 // Invariant: X == 0
 ");
     }
