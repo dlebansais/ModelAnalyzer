@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
+	<RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
 	<LangVersion>11</LangVersion>
