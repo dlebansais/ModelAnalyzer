@@ -1,16 +1,18 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
+
 /// <summary>
-/// Represents information about an error encountered during verification.
+/// Represents information about the result of a class model verification.
 /// </summary>
-internal record VerificationError
+internal record VerificationResult
 {
     /// <summary>
     /// Gets the defaut value for no error.
     /// </summary>
-    public static VerificationError None { get; } = new()
+    public static VerificationResult Default { get; } = new()
     {
-        ErrorType = VerificationErrorType.Success,
+        ErrorType = VerificationErrorType.Unknown,
         ClassName = string.Empty,
         MethodName = string.Empty,
         ErrorIndex = -1,
@@ -39,10 +41,24 @@ internal record VerificationError
     /// <summary>
     /// Gets a value indicating whether the verification was successful.
     /// </summary>
-    public bool IsSuccess { get => ErrorType == VerificationErrorType.Success; }
+    public bool IsSuccess
+    {
+        get
+        {
+            Debug.Assert(ErrorType != VerificationErrorType.Unknown);
+            return ErrorType == VerificationErrorType.Success;
+        }
+    }
 
     /// <summary>
     /// Gets a value indicating whether the verification failed.
     /// </summary>
-    public bool IsError { get => ErrorType != VerificationErrorType.Success; }
+    public bool IsError
+    {
+        get
+        {
+            Debug.Assert(ErrorType != VerificationErrorType.Unknown);
+            return ErrorType > VerificationErrorType.Success;
+        }
+    }
 }

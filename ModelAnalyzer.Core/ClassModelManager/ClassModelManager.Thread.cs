@@ -116,20 +116,20 @@ public partial class ClassModelManager : IDisposable
 
             Log(JsonString);
 
-            VerificationError? VerificationError = JsonConvert.DeserializeObject<VerificationError>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-            if (VerificationError is not null)
-                UpdateVerificationEvent(VerificationError);
+            VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            if (VerificationResult is not null)
+                UpdateVerificationEvent(VerificationResult);
             else
                 Log("Failed to deserialize the verification result.");
         }
     }
 
-    private void UpdateVerificationEvent(VerificationError verificationError)
+    private void UpdateVerificationEvent(VerificationResult verificationResult)
     {
-        string ClassName = verificationError.ClassName;
-        bool IsInvariantViolated = verificationError.IsError;
+        string ClassName = verificationResult.ClassName;
+        bool IsInvariantViolated = verificationResult.IsError;
 
-        Log($"Verification result decoded: {verificationError}");
+        Log($"Verification result decoded: {verificationResult}");
 
         lock (Context.Lock)
         {

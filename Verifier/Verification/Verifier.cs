@@ -62,12 +62,12 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets a value indicating whether the invariant is violated.
     /// </summary>
-    public VerificationError VerificationError { get; private set; } = VerificationError.None;
+    public VerificationResult VerificationResult { get; private set; } = VerificationResult.Default;
 
     private void Verify(int depth)
     {
         // Stop analysing recursively if a violation has already been detected.
-        if (VerificationError.IsError)
+        if (VerificationResult != VerificationResult.Default && VerificationResult.IsError)
             return;
 
         List<Method> CallSequence = new();
@@ -124,7 +124,7 @@ internal partial class Verifier : IDisposable
         if (!AddClassInvariant(solver, aliasTable))
             return;
 
-        VerificationError = VerificationError.None with { ClassName = ClassName };
+        VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Success, ClassName = ClassName };
         Log($"Invariant preserved for class {ClassName}");
     }
 
@@ -162,7 +162,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() == Status.SATISFIABLE)
             {
                 Log($"Invariant violation for class {ClassName}");
-                VerificationError = VerificationError.None with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = i };
 
                 string ModelString = TextBuilder.Normalized(solver.Model.ToString());
                 Log(ModelString);
@@ -215,7 +215,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent require state for class {ClassName}");
-                VerificationError = VerificationError.None with { ClassName = ClassName, ErrorType = VerificationErrorType.RequireError, MethodName = method.Name, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.Name, ErrorIndex = i };
                 return false;
             }
         }
@@ -236,7 +236,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent ensure state for class {ClassName}");
-                VerificationError = VerificationError.None with { ClassName = ClassName, ErrorType = VerificationErrorType.EnsureError, MethodName = method.Name, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.Name, ErrorIndex = i };
                 return false;
             }
         }

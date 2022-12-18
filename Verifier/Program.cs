@@ -110,7 +110,7 @@ internal class Program
                     Log($"Class model decoded\n{ClassModel}");
 
                     string ClassName = ClassModel.Name;
-                    VerificationError VerificationError;
+                    VerificationResult VerificationResult;
 
                     try
                     {
@@ -126,15 +126,15 @@ internal class Program
 
                         Verifier.Verify();
 
-                        VerificationError = Verifier.VerificationError;
-                        Log($"Class model verified: {VerificationError}");
+                        VerificationResult = Verifier.VerificationResult;
+                        Log($"Class model verified: {VerificationResult}");
                     }
                     catch
                     {
-                        VerificationError = VerificationError.None with { ErrorType = VerificationErrorType.Abort, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
+                        VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
                     }
 
-                    JsonString = JsonConvert.SerializeObject(VerificationError, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                    JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
                     byte[] EncodedString = Converter.EncodeString(JsonString);
 
                     if (EncodedString.Length <= ToClientChannel.GetFreeLength())

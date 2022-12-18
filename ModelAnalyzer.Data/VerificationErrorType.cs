@@ -6,14 +6,19 @@
 internal enum VerificationErrorType
 {
     /// <summary>
+    /// Status unknown.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
     /// No error.
     /// </summary>
     Success,
 
     /// <summary>
-    /// Error during analysis.
+    /// Exception caught during analysis.
     /// </summary>
-    Abort,
+    Exception,
 
     /// <summary>
     /// Error in require clause.
