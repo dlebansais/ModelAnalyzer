@@ -1,14 +1,21 @@
 ﻿namespace Libz3Extractor;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
 public class Extractor
 {
+    public const string Libz3FileName = "libz3.dll";
+    public const string VerifierFileName = "Verifier.exe";
+
     // We must put libz3.dll in a directory not known to Visual Studio, otherwise the analyzer will not load.
     public static void Extract()
     {
+        if (ExtractedPathTable.Count > 0)
+            return;
+
         try
         {
             Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
@@ -42,8 +49,8 @@ public class Extractor
                     if (!PathEnvironmentVariable.Contains(NativeLocation))
                         Environment.SetEnvironmentVariable(PathEnvironmentVariableName, PathEnvironmentVariable + $";{NativeLocation}");
 
-                    ExtractFile(ExecutingAssembly, NativeLocation, "libz3.dll");
-                    ExtractFile(ExecutingAssembly, NativeLocation, "ProcessCommunication.dll");
+                    ExtractFile(ExecutingAssembly, NativeLocation, Libz3FileName);
+                    ExtractFile(ExecutingAssembly, DllDirectory, VerifierFileName);
                 }
             }
         }
@@ -52,18 +59,36 @@ public class Extractor
         }
     }
 
-    private static void ExtractFile(Assembly executingAssembly, string nativeLocation, string fileName)
+    private static void ExtractFile(Assembly executingAssembly, string directoryPath, string fileName)
     {
-        string DestinationPath = Path.Combine(nativeLocation, fileName);
+        string DestinationPath = Path.Combine(directoryPath, fileName);
 
-        // Get a stream to the dll loaded inside us.
-        using Stream ResourceStream = executingAssembly.GetManifestResourceStream($"Libz3Extractor.{fileName}");
+        try
+        {
+            if (!File.Exists(DestinationPath))
+            {
+                // Get a stream to the dll loaded inside us.
+                using Stream ResourceStream = executingAssembly.GetManifestResourceStream($"Libz3Extractor.{fileName}");
 
-        // Create a file stream in the new folder.
-        using FileStream DllStream = new(DestinationPath, FileMode.Create, FileAccess.Write);
+                // Create a file stream in the new folder.
+                using FileStream DllStream = new(DestinationPath, FileMode.Create, FileAccess.Write);
 
-        // Copy the stream to have a new dll ready to load.
-        ResourceStream.CopyTo(DllStream);
-        ResourceStream.Flush();
+                // Copy the stream to have a new dll ready to load.
+                ResourceStream.CopyTo(DllStream);
+                ResourceStream.Flush();
+            }
+        }
+        catch (IOException)
+        {
+        }
+
+        ExtractedPathTable.Add(fileName, DestinationPath);
     }
+
+    public static string GetExtractedPath(string fileName)
+    {
+        return ExtractedPathTable[fileName];
+    }
+
+    private static Dictionary<string, string> ExtractedPathTable = new();
 }

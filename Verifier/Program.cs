@@ -32,22 +32,6 @@ internal class Program
 
     public static void Main()
     {
-        /*
-        string JsonString = "{\"Name\":\"Other\",\"FieldTable\":{\"IsSealed\":true,\"List\":[{\"Key\":{\"Name\":\"XY\"},\"Value\":{\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"}}]},\"MethodTable\":{\"IsSealed\":true,\"List\":[{\"Key\":{\"Name\":\"Read\"},\"Value\":{\"MethodName\":{\"Name\":\"Read\"},\"IsSupported\":true,\"HasReturnValue\":true,\"ParameterTable\":{\"IsSealed\":true,\"List\":[]},\"RequireList\":[],\"StatementList\":[{\"$type\":\"ModelAnalyzer.AssignmentStatement, ModelAnalyzer.Data\",\"Destination\":{\"$type\":\"ModelAnalyzer.Field, ModelAnalyzer.Data\",\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"},\"Expression\":{\"$type\":\"ModelAnalyzer.LiteralIntValueExpression, ModelAnalyzer.Data\",\"Value\":0}},{\"$type\":\"ModelAnalyzer.ReturnStatement, ModelAnalyzer.Data\",\"Expression\":{\"$type\":\"ModelAnalyzer.VariableValueExpression, ModelAnalyzer.Data\",\"Variable\":{\"$type\":\"ModelAnalyzer.Field, ModelAnalyzer.Data\",\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"}}}],\"EnsureList\":[],\"Name\":\"Read\"}},{\"Key\":{\"Name\":\"Write\"},\"Value\":{\"MethodName\":{\"Name\":\"Write\"},\"IsSupported\":true,\"HasReturnValue\":false,\"ParameterTable\":{\"IsSealed\":true,\"List\":[{\"Key\":{\"Name\":\"x\"},\"Value\":{\"ParameterName\":{\"Name\":\"x\"},\"Name\":\"x\"}}]},\"RequireList\":[{\"BooleanExpression\":{\"$type\":\"ModelAnalyzer.ComparisonExpression, ModelAnalyzer.Data\",\"Left\":{\"$type\":\"ModelAnalyzer.VariableValueExpression, ModelAnalyzer.Data\",\"Variable\":{\"$type\":\"ModelAnalyzer.Parameter, ModelAnalyzer.Data\",\"ParameterName\":{\"Name\":\"x\"},\"Name\":\"x\"}},\"Operator\":0,\"Right\":{\"$type\":\"ModelAnalyzer.LiteralIntValueExpression, ModelAnalyzer.Data\",\"Value\":1}}}],\"StatementList\":[{\"$type\":\"ModelAnalyzer.AssignmentStatement, ModelAnalyzer.Data\",\"Destination\":{\"$type\":\"ModelAnalyzer.Field, ModelAnalyzer.Data\",\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"},\"Expression\":{\"$type\":\"ModelAnalyzer.BinaryArithmeticExpression, ModelAnalyzer.Data\",\"Left\":{\"$type\":\"ModelAnalyzer.VariableValueExpression, ModelAnalyzer.Data\",\"Variable\":{\"$type\":\"ModelAnalyzer.Parameter, ModelAnalyzer.Data\",\"ParameterName\":{\"Name\":\"x\"},\"Name\":\"x\"}},\"Operator\":1,\"Right\":{\"$type\":\"ModelAnalyzer.LiteralIntValueExpression, ModelAnalyzer.Data\",\"Value\":1}}}],\"EnsureList\":[{\"BooleanExpression\":{\"$type\":\"ModelAnalyzer.ComparisonExpression, ModelAnalyzer.Data\",\"Left\":{\"$type\":\"ModelAnalyzer.VariableValueExpression, ModelAnalyzer.Data\",\"Variable\":{\"$type\":\"ModelAnalyzer.Field, ModelAnalyzer.Data\",\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"}},\"Operator\":3,\"Right\":{\"$type\":\"ModelAnalyzer.LiteralIntValueExpression, ModelAnalyzer.Data\",\"Value\":0}}}],\"Name\":\"Write\"}}]},\"InvariantList\":[{\"BooleanExpression\":{\"$type\":\"ModelAnalyzer.ComparisonExpression, ModelAnalyzer.Data\",\"Left\":{\"$type\":\"ModelAnalyzer.VariableValueExpression, ModelAnalyzer.Data\",\"Variable\":{\"$type\":\"ModelAnalyzer.Field, ModelAnalyzer.Data\",\"FieldName\":{\"Name\":\"XY\"},\"Name\":\"XY\"}},\"Operator\":0,\"Right\":{\"$type\":\"ModelAnalyzer.LiteralIntValueExpression, ModelAnalyzer.Data\",\"Value\":0}}}],\"Unsupported\":{\"IsEmpty\":true,\"InvalidDeclaration\":false,\"HasUnsupporteMember\":false,\"InternalFields\":[],\"InternalMethods\":[],\"InternalParameters\":[],\"InternalRequires\":[],\"InternalEnsures\":[],\"InternalStatements\":[],\"InternalExpressions\":[],\"InternalInvariants\":[]}}";
-        ClassModel ClassModel = JsonConvert.DeserializeObject<ClassModel>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto })!;
-
-        using Verifier Verifier = new()
-        {
-            MaxDepth = MaxDepth,
-            ClassName = ClassModel.Name,
-            Logger = Logger,
-            FieldTable = ClassModel.FieldTable,
-            MethodTable = ClassModel.MethodTable,
-            InvariantList = ClassModel.InvariantList,
-        };
-
-        Verifier.Verify();
-        */
         Log("Entering main()");
 
         string Location = Assembly.GetExecutingAssembly().Location;

@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Libz3Extractor\Libz3Extractor.csproj" />
 	<ProjectReference Include="..\ModelAnalyzer.Core\ModelAnalyzer.Core.csproj" />
   </ItemGroup>
 

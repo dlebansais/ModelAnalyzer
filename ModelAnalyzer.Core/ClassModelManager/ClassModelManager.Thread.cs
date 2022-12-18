@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
+using Libz3Extractor;
 using Newtonsoft.Json;
 using ProcessCommunication;
 
@@ -150,14 +152,41 @@ public partial class ClassModelManager : IDisposable
 
     private void ScheduleAsynchronousVerification()
     {
-        Logger.Log("Starting the verification process.");
+        string VerifierFilePath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
 
-        Process.Start(@"C:\Projects\Temp\ModelAnalyzer\Verifier\bin\x64\Debug\net48\Verifier.exe");
+        Logger.Log($"Starting the verification process at {VerifierFilePath}.");
+
+        try
+        {
+            ProcessStartInfo ProcessStartInfo = new ProcessStartInfo();
+            ProcessStartInfo.FileName = VerifierFilePath;
+            ProcessStartInfo.UseShellExecute = false;
+            ProcessStartInfo.WorkingDirectory = Path.GetDirectoryName(VerifierFilePath);
+            Process CreatedProcess = Process.Start(ProcessStartInfo);
+
+            Log($"CreatedProcess: {CreatedProcess} {CreatedProcess.Id} {CreatedProcess.ProcessName}");
+        }
+        catch (Exception e)
+        {
+            Logger.LogException(e);
+        }
 
         Log("Creating the channel to send class models.");
 
         Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
-        ToServerChannel.Open();
+
+        TimeSpan Timeout = TimeSpan.FromSeconds(5);
+        Stopwatch Watch = new();
+        Watch.Start();
+
+        while (Watch.Elapsed < Timeout)
+        {
+            ToServerChannel.Open();
+            if (ToServerChannel.IsOpen)
+                break;
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+        }
 
         if (ToServerChannel.IsOpen)
         {

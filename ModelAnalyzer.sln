@@ -20,6 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Vsix", "Model
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core", "ModelAnalyzer.Core\ModelAnalyzer.Core.csproj", "{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21} = {FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisLogger", "AnalysisLogger\AnalysisLogger.csproj", "{B3C684B7-79D9-418D-8A72-034C6DC25921}"
 EndProject
@@ -29,15 +32,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core.Test", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libz3Extractor", "Libz3Extractor\Libz3Extractor.csproj", "{FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21}"
 	ProjectSection(ProjectDependencies) = postProject
-		{1AB3F9E1-3440-4809-8D3C-69B7BDF857A0} = {1AB3F9E1-3440-4809-8D3C-69B7BDF857A0}
 		{BC2BD800-4C7D-4848-97D2-C0B13C2299E5} = {BC2BD800-4C7D-4848-97D2-C0B13C2299E5}
+		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6} = {C0E89927-6AFF-475C-B6A7-ACFA47185DD6}
+		{F58E745E-014E-4CDC-AB67-CF6143F3425B} = {F58E745E-014E-4CDC-AB67-CF6143F3425B}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessCommunication", "ProcessCommunication\ProcessCommunication.csproj", "{BC2BD800-4C7D-4848-97D2-C0B13C2299E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Verifier", "Verifier\Verifier.csproj", "{F58E745E-014E-4CDC-AB67-CF6143F3425B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelAnalyzer.Data", "ModelAnalyzer.Data\ModelAnalyzer.Data.csproj", "{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Data", "ModelAnalyzer.Data\ModelAnalyzer.Data.csproj", "{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

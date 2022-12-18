@@ -11,7 +11,6 @@ public static class Initialization
 #else
         Logger = new NullLogger();
 #endif
-        Libz3Extractor.Extractor.Extract();
         Manager = new ClassModelManager() { Logger = Logger, StartMode = SynchronizedThreadStartMode.Auto };
     }
 

@@ -38,6 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AnalysisLogger\AnalysisLogger.csproj" />
     <ProjectReference Include="..\CSharp11Support\CSharp11Support.csproj" />
+    <ProjectReference Include="..\Libz3Extractor\Libz3Extractor.csproj" />
     <ProjectReference Include="..\ModelAnalyzer.Data\ModelAnalyzer.Data.csproj" />
     <ProjectReference Include="..\ProcessCommunication\ProcessCommunication.csproj" />
   </ItemGroup>

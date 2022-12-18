@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using AnalysisLogger;
+using Libz3Extractor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,6 +20,7 @@ public partial class ClassModelManager : IDisposable
     /// </summary>
     public ClassModelManager()
     {
+        Extractor.Extract();
         Context = new SynchronizedVerificationContext();
         FromServerChannel = InitChannel();
     }
