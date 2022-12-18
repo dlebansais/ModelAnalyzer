@@ -12,12 +12,12 @@
 
   <ItemGroup>
     <None Remove="..\ModelAnalyzer.Data\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
-    <None Remove="..\Verifier\bin\$(Platform)\$(Configuration)\net48\Verifier.exe" />
+    <None Remove="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\Verifier.exe" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\ModelAnalyzer.Data\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
-    <EmbeddedResource Include="..\Verifier\bin\$(Platform)\$(Configuration)\net48\Verifier.exe" />
+    <EmbeddedResource Include="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\Verifier.exe" />
   </ItemGroup>
 
 </Project>
