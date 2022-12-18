@@ -29,9 +29,6 @@ public class InvariantViolationAnalyzer : Analyzer
         if (!classModel.Unsupported.IsEmpty)
             return;
 
-        if (!classModel.IsVerified)
-            return;
-
         if (!classModel.IsInvariantViolated)
             return;
 

@@ -162,7 +162,6 @@ public partial class ClassModelManager : IDisposable
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
                         IsVerified = false,
-                        IsInvariantViolated = false,
                     };
 
                     Context.UpdateClassModel(NewClassModel);

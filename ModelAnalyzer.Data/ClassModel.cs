@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.CodeAnalysis.Operations;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 /// <summary>
 /// Represents the model of a class.
@@ -89,6 +91,8 @@ internal partial record ClassModel : IClassModel
             if (Item is Require Require && Require.BooleanExpression is Expression BooleanExpression)
                 AppendAssertion(builder, "require", BooleanExpression);
 
+        AppendStatements(builder, method.StatementList, 0, forceBraces: true);
+
         foreach (IEnsure Item in method.EnsureList)
             if (Item is Ensure Ensure && Ensure.BooleanExpression is Expression BooleanExpression)
                 AppendAssertion(builder, "ensure", BooleanExpression);
@@ -96,7 +100,84 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssertion(StringBuilder builder, string text, Expression booleanExpression)
     {
-        builder.AppendLine($"    {text} {booleanExpression.ToSimpleString()}");
+        builder.AppendLine($"  # {text} {booleanExpression.ToSimpleString()}");
+    }
+
+    private void AppendStatements(StringBuilder builder, List<Statement> statementList, int indentation, bool forceBraces = false)
+    {
+        if (forceBraces || statementList.Count > 1)
+        {
+            AppendIndentation(builder, indentation);
+            builder.AppendLine("{");
+        }
+
+        foreach (Statement Item in statementList)
+            AppendStatement(builder, Item, indentation + 1);
+
+        if (forceBraces || statementList.Count > 1)
+        {
+            AppendIndentation(builder, indentation);
+            builder.AppendLine("}");
+        }
+    }
+
+    private void AppendStatement(StringBuilder builder, Statement statement, int indentation)
+    {
+        switch (statement)
+        {
+            case AssignmentStatement Assignment:
+                AppendAssignmentStatement(builder, Assignment, indentation);
+                break;
+            case ConditionalStatement Conditional:
+                AppendConditionalStatement(builder, Conditional, indentation);
+                break;
+            case ReturnStatement Return:
+                AppendReturnStatement(builder, Return, indentation);
+                break;
+            default:
+                AppendStatementText(builder, "<unknown>", indentation);
+                break;
+        }
+    }
+
+    private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
+    {
+        AppendIndentation(builder, indentation);
+        builder.AppendLine($"{statement.Destination.Name} = {statement.Expression}");
+    }
+
+    private void AppendConditionalStatement(StringBuilder builder, ConditionalStatement statement, int indentation)
+    {
+        AppendIndentation(builder, indentation);
+        builder.AppendLine($"if ({statement.Condition})");
+        AppendStatements(builder, statement.WhenTrueStatementList, indentation + 1);
+
+        if (statement.WhenFalseStatementList.Count > 0)
+        {
+            AppendIndentation(builder, indentation);
+            builder.AppendLine("else");
+            AppendStatements(builder, statement.WhenFalseStatementList, indentation + 1);
+        }
+    }
+
+    private void AppendReturnStatement(StringBuilder builder, ReturnStatement statement, int indentation)
+    {
+        if (statement.Expression is null)
+            AppendStatementText(builder, $"return {statement.Expression}", indentation);
+        else
+            AppendStatementText(builder, "return", indentation);
+    }
+
+    private void AppendStatementText(StringBuilder builder, string text, int indentation)
+    {
+        AppendIndentation(builder, indentation);
+        builder.AppendLine($"{text};");
+    }
+
+    private void AppendIndentation(StringBuilder builder, int indentation)
+    {
+        for (int i = 0; i < indentation + 1; i++)
+            builder.Append("  ");
     }
 
     private void AppendInvariants(StringBuilder builder)

@@ -68,7 +68,7 @@ public partial class ClassModelManager : IDisposable
             if (IsVerified)
             {
                 Log($"Verification loop completed, class {ClassName} verified, invariant violation: {IsInvariantViolated}.");
-                return ((ClassModel)classModel) with { IsVerified = IsVerified, IsInvariantViolated = IsInvariantViolated };
+                return ((ClassModel)classModel) with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
             }
 
             UpdateVerificationEvents();
@@ -116,20 +116,20 @@ public partial class ClassModelManager : IDisposable
 
             Log(JsonString);
 
-            VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-            if (VerificationResult is not null)
-                UpdateVerificationEvent(VerificationResult);
+            VerificationError? VerificationError = JsonConvert.DeserializeObject<VerificationError>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            if (VerificationError is not null)
+                UpdateVerificationEvent(VerificationError);
             else
                 Log("Failed to deserialize the verification result.");
         }
     }
 
-    private void UpdateVerificationEvent(VerificationResult verificationResult)
+    private void UpdateVerificationEvent(VerificationError verificationError)
     {
-        string ClassName = verificationResult.ClassName;
-        bool IsInvariantViolated = verificationResult.IsInvariantViolated;
+        string ClassName = verificationError.ClassName;
+        bool IsInvariantViolated = verificationError.IsError;
 
-        Log($"Verification result decoded for class '{ClassName}': {IsInvariantViolated}");
+        Log($"Verification result decoded: {verificationError}");
 
         lock (Context.Lock)
         {

@@ -104,21 +104,20 @@ internal class Program
             int Offset = 0;
             while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
             {
-                Log(JsonString);
-
                 ClassModel? ClassModel = JsonConvert.DeserializeObject<ClassModel>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
                 if (ClassModel is not null)
                 {
-                    Log($"Class model decoded");
+                    Log($"Class model decoded\n{ClassModel}");
 
-                    bool IsInvariantViolated = false;
+                    string ClassName = ClassModel.Name;
+                    VerificationError VerificationError;
 
                     try
                     {
                         using Verifier Verifier = new()
                         {
                             MaxDepth = MaxDepth,
-                            ClassName = ClassModel.Name,
+                            ClassName = ClassName,
                             Logger = Logger,
                             FieldTable = ClassModel.FieldTable,
                             MethodTable = ClassModel.MethodTable,
@@ -127,16 +126,15 @@ internal class Program
 
                         Verifier.Verify();
 
-                        IsInvariantViolated = Verifier.IsInvariantViolated;
-                        Log($"Class model verified: {(IsInvariantViolated ? "invariant violated" : "no invariant violation")}");
+                        VerificationError = Verifier.VerificationError;
+                        Log($"Class model verified: {VerificationError}");
                     }
                     catch
                     {
+                        VerificationError = VerificationError.None with { ErrorType = VerificationErrorType.Abort, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
                     }
 
-                    VerificationResult Result = new() { ClassName = ClassModel.Name, IsInvariantViolated = IsInvariantViolated };
-
-                    JsonString = JsonConvert.SerializeObject(Result, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                    JsonString = JsonConvert.SerializeObject(VerificationError, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
                     byte[] EncodedString = Converter.EncodeString(JsonString);
 
                     if (EncodedString.Length <= ToClientChannel.GetFreeLength())

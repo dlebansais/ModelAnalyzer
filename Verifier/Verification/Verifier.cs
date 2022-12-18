@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using AnalysisLogger;
+using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
 
 /// <summary>
@@ -61,12 +62,12 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets a value indicating whether the invariant is violated.
     /// </summary>
-    public bool IsInvariantViolated { get; private set; }
+    public VerificationError VerificationError { get; private set; } = VerificationError.None;
 
     private void Verify(int depth)
     {
         // Stop analysing recursively if a violation has already been detected.
-        if (IsInvariantViolated)
+        if (VerificationError.IsError)
             return;
 
         List<Method> CallSequence = new();
@@ -82,7 +83,7 @@ internal partial class Verifier : IDisposable
         {
             foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
             {
-                Method Method = (Method)Entry.Value; // This line can only be executed if there are no unsupported methods.
+                Method Method = Entry.Value;
                 List<Method> NewCallSequence = new();
                 NewCallSequence.AddRange(callSequence);
                 NewCallSequence.Add(Method);
@@ -117,20 +118,14 @@ internal partial class Verifier : IDisposable
             Log($"Call sequence: {CallSequenceString}");
 
         foreach (Method Method in callSequence)
-            AddMethodCallState(solver, aliasTable, Method);
+            if (!AddMethodCallState(solver, aliasTable, Method))
+                return;
 
-        AddClassInvariant(solver, aliasTable);
+        if (!AddClassInvariant(solver, aliasTable))
+            return;
 
-        if (solver.Check() == Status.SATISFIABLE)
-        {
-            IsInvariantViolated = true;
-            Log($"Invariant violation for class {ClassName}");
-
-            string ModelString = TextBuilder.Normalized(solver.Model.ToString());
-            Log(ModelString);
-        }
-        else
-            Log($"Invariant preserved for class {ClassName}");
+        VerificationError = VerificationError.None with { ClassName = ClassName };
+        Log($"Invariant preserved for class {ClassName}");
     }
 
     private void AddInitialState(Solver solver, AliasTable aliasTable)
@@ -151,42 +146,54 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private void AddClassInvariant(Solver solver, AliasTable aliasTable)
+    private bool AddClassInvariant(Solver solver, AliasTable aliasTable)
     {
         Log($"Invariant for class {ClassName}");
 
-        List<BoolExpr> AssertionList = new();
-
-        foreach (IInvariant Item in InvariantList)
+        for (int i = 0; i < InvariantList.Count; i++)
         {
-            Invariant Invariant = (Invariant)Item; // This line can only be executed if there are no unsupported invariants.
+            Invariant Invariant = InvariantList[i];
             BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, Invariant.BooleanExpression);
-            AssertionList.Add(InvariantExpression);
+            BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
+
+            Log($"Adding invariant opposite {InvariantOpposite}");
+            solver.Assert(InvariantOpposite);
+
+            if (solver.Check() == Status.SATISFIABLE)
+            {
+                Log($"Invariant violation for class {ClassName}");
+                VerificationError = VerificationError.None with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = i };
+
+                string ModelString = TextBuilder.Normalized(solver.Model.ToString());
+                Log(ModelString);
+
+                return false;
+            }
         }
 
-        BoolExpr AllInvariants = Context.MkAnd(AssertionList);
-        BoolExpr AllInvariantsOpposite = Context.MkNot(AllInvariants);
-
-        Log($"Adding invariant opposite {AllInvariantsOpposite}");
-        solver.Assert(AllInvariantsOpposite);
+        return true;
     }
 
-    private void AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
+    private bool AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
     {
         AddMethodParameterStates(solver, aliasTable, method);
-        AddMethodRequires(solver, aliasTable, method);
+        if (!AddMethodRequires(solver, aliasTable, method))
+            return false;
 
         BoolExpr MainBranch = Context.MkBool(true);
 
         AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
-        AddMethodEnsures(solver, aliasTable, method);
+        if (!AddMethodEnsures(solver, aliasTable, method))
+            return false;
+
+        return true;
     }
 
     private void AddMethodParameterStates(Solver solver, AliasTable aliasTable, Method method)
     {
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
-            Parameter Parameter = (Parameter)Entry.Value; // This line can only be executed if there are no unsupported parameters.
+            Parameter Parameter = Entry.Value;
             string ParameterName = Parameter.Name;
             aliasTable.AddOrIncrementName(ParameterName);
             string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
@@ -195,24 +202,46 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private void AddMethodRequires(Solver solver, AliasTable aliasTable, Method method)
+    private bool AddMethodRequires(Solver solver, AliasTable aliasTable, Method method)
     {
-        foreach (IRequire Item in method.RequireList)
+        for (int i = 0; i < method.RequireList.Count; i++)
         {
-            Require Require = (Require)Item; // This line can only be executed if there are no unsupported require.
+            Require Require = method.RequireList[i];
             BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
+
+            Log($"Adding {RequireExpr}");
             solver.Assert(RequireExpr);
+
+            if (solver.Check() != Status.SATISFIABLE)
+            {
+                Log($"Inconsistent require state for class {ClassName}");
+                VerificationError = VerificationError.None with { ClassName = ClassName, ErrorType = VerificationErrorType.RequireError, MethodName = method.Name, ErrorIndex = i };
+                return false;
+            }
         }
+
+        return true;
     }
 
-    private void AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
+    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
     {
-        foreach (IEnsure Item in method.EnsureList)
+        for (int i = 0; i < method.EnsureList.Count; i++)
         {
-            Ensure Ensure = (Ensure)Item; // This line can only be executed if there are no unsupported ensure.
+            Ensure Ensure = method.EnsureList[i];
             BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, Ensure.BooleanExpression);
+
+            Log($"Adding {EnsureExpr}");
             solver.Assert(EnsureExpr);
+
+            if (solver.Check() != Status.SATISFIABLE)
+            {
+                Log($"Inconsistent ensure state for class {ClassName}");
+                VerificationError = VerificationError.None with { ClassName = ClassName, ErrorType = VerificationErrorType.EnsureError, MethodName = method.Name, ErrorIndex = i };
+                return false;
+            }
         }
+
+        return true;
     }
 
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)
@@ -224,6 +253,11 @@ internal partial class Verifier : IDisposable
     private void Log(string message)
     {
         Logger.Log(message);
+    }
+
+    private void LogError(string message)
+    {
+        Logger.Log(LogLevel.Error, message);
     }
 
     private Context Context;
