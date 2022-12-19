@@ -23,7 +23,7 @@ public partial class ClassModelManager : IDisposable
     }
 
     /// <summary>
-    /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="SynchronizedThreadStartMode.Auto"/>.
+    /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="VerificationProcessStartMode.Auto"/>.
     /// </summary>
     /// <param name="classModel">The class classModel.</param>
     private IClassModel WaitForVerification(IClassModel classModel)
@@ -42,7 +42,7 @@ public partial class ClassModelManager : IDisposable
             return classModel;
         }
 
-        if (StartMode == SynchronizedThreadStartMode.Manual)
+        if (StartMode == VerificationProcessStartMode.Manual)
             ScheduleAsynchronousVerification();
 
         Log("Starting the verification loop.");
@@ -149,9 +149,7 @@ public partial class ClassModelManager : IDisposable
         {
             Context.ClassModelTable[ClassName] = classModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
 
-            if (Interlocked.Decrement(ref VerificationRequestCount) == 0)
-                VerifierCallWatch.Stop();
-
+            VerificationSynchronization.NotifyAcknowledgeReceived();
             return true;
         }
 
@@ -225,11 +223,17 @@ public partial class ClassModelManager : IDisposable
 
                 if (!ClassModel.Unsupported.IsEmpty)
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
-                else if (ClassModel.IsVerified)
-                    Log($"Skipping complete verification for class '{ClassName}', it's already verified.");
+                else if (ClassModel.IsVerificationRequestSent)
+                    Log($"Skipping complete verification for class '{ClassName}', it's being done.");
                 else
+                {
+                    ClassModel = ClassModel with { IsVerificationRequestSent = true };
                     ToVerifyList.Add(ClassModel);
+                }
             }
+
+            foreach (ClassModel ClassModel in ToVerifyList)
+                Context.ClassModelTable[ClassModel.Name] = ClassModel;
         }
 
         foreach (ClassModel ClassModel in ToVerifyList)
@@ -245,15 +249,12 @@ public partial class ClassModelManager : IDisposable
 
                 Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
 
-                Interlocked.Increment(ref VerificationRequestCount);
-                VerifierCallWatch.Restart();
+                VerificationSynchronization.NotifyRequestSent();
             }
             else
                 Log($"Unable to send data for class '{ClassName}', buffer full.");
         }
     }
 
-    private static Stopwatch VerifierCallWatch = new();
-    private static int VerificationRequestCount;
     private Channel FromServerChannel;
 }

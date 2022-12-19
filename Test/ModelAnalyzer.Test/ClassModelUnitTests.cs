@@ -11,7 +11,7 @@ public class ClassModelUnitTests
     [Category("Analyzer")]
     public async Task ClassWithNoMembers_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -26,7 +26,7 @@ class Program_ClassModel_0
     [Category("Analyzer")]
     public async Task ClassCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -54,7 +54,7 @@ class Program_ClassModel_1
     [Category("Analyzer")]
     public async Task ClassNotModeled_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -73,7 +73,7 @@ class Program_ClassModel_2
     [Category("Analyzer")]
     public async Task ClassWithCommentBeforeNotModeled_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -93,7 +93,7 @@ class Program_ClassModel_3
     [Category("Analyzer")]
     public async Task ClassWithCommentAfterNotModeled_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -113,7 +113,7 @@ class Program_ClassModel_4
     [Category("Analyzer")]
     public async Task ClassWithCommentCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -143,7 +143,7 @@ class Program_ClassModel_5
     [Category("Analyzer")]
     public async Task ClassWithAttributeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -167,7 +167,7 @@ class Program_ClassModel_6
     [Category("Analyzer")]
     public async Task ClassWithPublicModifier_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -182,7 +182,7 @@ public class Program_ClassModel_7
     [Category("Analyzer")]
     public async Task ClassWithInternalModifier_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -197,7 +197,7 @@ internal class Program_ClassModel_8
     [Category("Analyzer")]
     public async Task ClassWithPartialModifier_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -212,7 +212,7 @@ partial class Program_ClassModel_9
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedModifierCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -234,7 +234,7 @@ static class Program_ClassModel_10
     [Category("Analyzer")]
     public async Task ClassWithBaseTypeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -262,7 +262,7 @@ class Program_ClassModel_11 : IDisposable
     [Category("Analyzer")]
     public async Task ClassWithTypeParameterCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -284,7 +284,7 @@ class Program_ClassModel_12<T>
     [Category("Analyzer")]
     public async Task ClassWithTypeConstraintCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -308,7 +308,7 @@ where T : class
     [Category("Analyzer")]
     public async Task ClassWithFieldMember_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -324,7 +324,7 @@ class Program_ClassModel_14
     [Category("Analyzer")]
     public async Task ClassWithTwoFieldMembers_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -341,7 +341,7 @@ class Program_ClassModel_15
     [Category("Analyzer")]
     public async Task ClassWithFieldAttributeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -367,7 +367,7 @@ class Program_ClassModel_16
     [Category("Analyzer")]
     public async Task ClassWithPrivateFieldModifier_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -383,7 +383,7 @@ class Program_ClassModel_17
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedFieldModifierCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -407,7 +407,7 @@ class Program_ClassModel_18
     [Category("Analyzer")]
     public async Task ClassWithPublicFielCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -431,7 +431,7 @@ class Program_ClassModel_19
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedFieldTypeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -455,7 +455,7 @@ class Program_ClassModel_20
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedFieldPredefinedTypeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -479,7 +479,7 @@ class Program_ClassModel_21
     [Category("Analyzer")]
     public async Task ClassWithMethodMemberNoParameters_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -498,7 +498,7 @@ class Program_ClassModel_22
     [Category("Analyzer")]
     public async Task ClassWithMethodMemberWithNoReturn_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -516,7 +516,7 @@ class Program_ClassModel_23
     [Category("Analyzer")]
     public async Task ClassWithMethodAttributeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -548,7 +548,7 @@ class Program_ClassModel_24
     [Category("Analyzer")]
     public async Task ClassWithPrivateMethodMember_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -567,7 +567,7 @@ class Program_ClassModel_25
     [Category("Analyzer")]
     public async Task ClassWithPublicMethodMember_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -586,7 +586,7 @@ class Program_ClassModel_26
     [Category("Analyzer")]
     public async Task ClassWithInternalMethodMember_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -605,7 +605,7 @@ class Program_ClassModel_26
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedMethodModifierCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -635,7 +635,7 @@ class Program_ClassModel_27
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedReturnTypeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -665,7 +665,7 @@ class Program_ClassModel_28
     [Category("Analyzer")]
     public async Task ClassWithUnsupportedReturnPredefinedTypeCouldHaveAModel_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
@@ -695,7 +695,7 @@ class Program_ClassModel_29
     [Category("Analyzer")]
     public async Task ClassWithMethodMemberWithOneParameter_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -714,7 +714,7 @@ class Program_ClassModel_30
     [Category("Analyzer")]
     public async Task ClassWithMethodMemberWithTwoParameters_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -733,7 +733,7 @@ class Program_ClassModel_31
     [Category("Analyzer")]
     public async Task ClassWithValidInstructions_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;

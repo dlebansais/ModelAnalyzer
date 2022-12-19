@@ -34,7 +34,7 @@ public partial class ClassModelManager : IDisposable
     /// <summary>
     /// Gets or sets the thread start mode.
     /// </summary>
-    public SynchronizedThreadStartMode StartMode { get; set; }
+    public VerificationProcessStartMode StartMode { get; set; }
 
     /// <summary>
     /// Checks whether a class is ignored for modeling.
@@ -134,14 +134,6 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    /// <summary>
-    /// Waits for the verifier to finish processing data.
-    /// </summary>
-    public static async Task SynchronizeWithVerifierAsync()
-    {
-        await Task.Run(SynchronizeWithVerifier);
-    }
-
     private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
@@ -172,6 +164,7 @@ public partial class ClassModelManager : IDisposable
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
+                        IsVerificationRequestSent = false,
                         IsVerified = false,
                     };
 
@@ -188,6 +181,7 @@ public partial class ClassModelManager : IDisposable
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
+                        IsVerificationRequestSent = false,
                         IsVerified = false,
                         IsInvariantViolated = false,
                     };
@@ -197,7 +191,7 @@ public partial class ClassModelManager : IDisposable
                     Log($"Class model for '{ClassName}' is new and has been added.");
                 }
 
-                if (StartMode == SynchronizedThreadStartMode.Auto)
+                if (StartMode == VerificationProcessStartMode.Auto)
                     ScheduleAsynchronousVerification();
             }
             else
@@ -207,15 +201,6 @@ public partial class ClassModelManager : IDisposable
         }
 
         return NewClassModel;
-    }
-
-    private static void SynchronizeWithVerifier()
-    {
-        while (VerificationRequestCount > 0 && VerifierCallWatch.Elapsed < TimeSpan.FromSeconds(5))
-            Thread.Sleep(100);
-
-        Interlocked.Exchange(ref VerificationRequestCount, 0);
-        VerifierCallWatch.Stop();
     }
 
     private void Log(string message)

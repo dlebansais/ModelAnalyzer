@@ -16,6 +16,11 @@ public interface IClassModel
     Unsupported Unsupported { get; }
 
     /// <summary>
+    /// Gets a value indicating whether a request to verify the model has been sent.
+    /// </summary>
+    bool IsVerificationRequestSent { get; }
+
+    /// <summary>
     /// Gets a value indicating whether the model is verified.
     /// </summary>
     bool IsVerified { get; }

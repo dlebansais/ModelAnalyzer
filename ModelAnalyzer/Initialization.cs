@@ -11,7 +11,7 @@ public static class Initialization
 #else
         Logger = new NullLogger();
 #endif
-        Manager = new ClassModelManager() { Logger = Logger, StartMode = SynchronizedThreadStartMode.Auto };
+        Manager = new ClassModelManager() { Logger = Logger, StartMode = VerificationProcessStartMode.Auto };
     }
 
     public static IAnalysisLogger Logger { get; }

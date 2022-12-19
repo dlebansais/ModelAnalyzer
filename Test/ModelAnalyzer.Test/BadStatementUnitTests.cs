@@ -11,7 +11,7 @@ public class BadStatementUnitTests
     [Category("Analyzer")]
     public async Task StatementIsUnsupported_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -31,7 +31,7 @@ class Program_BadStatement_0
     [Category("Analyzer")]
     public async Task InvalidAssignmentDestination_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -51,7 +51,7 @@ class Program_BadStatement_1
     [Category("Analyzer")]
     public async Task ValidReturn_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -72,7 +72,7 @@ class Program_BadStatement_2
     [Category("Analyzer")]
     public async Task InvalidReturn_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -94,7 +94,7 @@ class Program_BadStatement_3
     [Category("Analyzer")]
     public async Task InvalidNestedReturns_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;

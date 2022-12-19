@@ -11,7 +11,7 @@ public class BadParameterUnitTests
     [Category("Analyzer")]
     public async Task ParameterShouldNotHaveAttribute_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -29,7 +29,7 @@ class Program_BadParameter_0
     [Category("Analyzer")]
     public async Task ParameterShouldNotHaveModifier_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -47,7 +47,7 @@ class Program_BadParameter_1
     [Category("Analyzer")]
     public async Task ParameterPredefinedTypeIsNotSupported_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -65,7 +65,7 @@ class Program_BadParameter_2
     [Category("Analyzer")]
     public async Task ParameterTypeIsNotSupported_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;

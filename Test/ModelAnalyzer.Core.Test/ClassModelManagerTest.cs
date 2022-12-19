@@ -218,7 +218,7 @@ class Program_CoreClassModelManager_7
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = SynchronizedThreadStartMode.Manual };
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);

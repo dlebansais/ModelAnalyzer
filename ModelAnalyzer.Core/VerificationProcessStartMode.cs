@@ -1,9 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 /// <summary>
-/// Represents the start modes of a synchronized thread.
+/// Represents the start modes of the verification process.
 /// </summary>
-public enum SynchronizedThreadStartMode
+public enum VerificationProcessStartMode
 {
     /// <summary>
     /// Automatic start, as soon as there is a class to verify.

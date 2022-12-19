@@ -13,7 +13,7 @@ public class InvariantViolationUnitTests
     [Category("Analyzer")]
     public async Task ValidInitialState_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -30,7 +30,7 @@ class {ForSynchronousTestOnly}_0
     [Category("Analyzer")]
     public async Task InitialStateViolateInvariant_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -47,7 +47,7 @@ class [|{ForSynchronousTestOnly}_1|]
     [Category("Analyzer")]
     public async Task ValidInvariantAfterAssignment_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -69,7 +69,7 @@ class {ForSynchronousTestOnly}_2
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterAssignment_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -91,7 +91,7 @@ class [|{ForSynchronousTestOnly}_3|]
     [Category("Analyzer")]
     public async Task ValidInvariantAfterConditional_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -116,7 +116,7 @@ class {ForSynchronousTestOnly}_4
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional1_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -141,7 +141,7 @@ class [|{ForSynchronousTestOnly}_5|]
     [Category("Analyzer")]
     public async Task InvalidInvariantAfterConditional2_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -166,7 +166,7 @@ class [|{ForSynchronousTestOnly}_6|]
     [Category("Analyzer")]
     public async Task UnconstrainedInvariant_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -188,7 +188,7 @@ class [|{ForSynchronousTestOnly}_7|]
     [Category("Analyzer")]
     public async Task ConstrainedInvariant_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
@@ -211,7 +211,7 @@ class {ForSynchronousTestOnly}_8
     [Category("Analyzer")]
     public async Task AsyncTest_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;

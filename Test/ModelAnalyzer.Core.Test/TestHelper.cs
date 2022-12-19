@@ -72,7 +72,7 @@ internal class TestHelper
     {
         tokenReplacement.Replace();
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? VerificationProcessStartMode.Manual : VerificationProcessStartMode.Auto };
 
         List<IClassModel> ClassModelList = new();
 
@@ -109,7 +109,7 @@ internal class TestHelper
     {
         tokenReplacement.Replace();
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? SynchronizedThreadStartMode.Manual : SynchronizedThreadStartMode.Auto };
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? VerificationProcessStartMode.Manual : VerificationProcessStartMode.Auto };
 
         List<Task<IClassModel>> TaskList = new();
         CompilationContext CompilationContext = CompilationContext.Default;

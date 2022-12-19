@@ -10,7 +10,7 @@ public class Extractor
     public const string Libz3FileName = "libz3.dll";
     public const string VerifierFileName = "Verifier.exe";
 
-    // We must put libz3 inside Verifier.exe, otherwise the analyzer will not load.
+    // We must put libz3 along with Verifier.exe in a directory Windows doesn't know about, otherwise the analyzer will not load.
     public static void Extract()
     {
         if (ExtractedPathTable.Count > 0)
@@ -33,8 +33,13 @@ public class Extractor
                 // Look for the directory where FileExtractor.dll is.
                 if (File.Exists(ThisFileFilePath))
                 {
-                    ExtractFile(ExecutingAssembly, DllDirectory, Libz3FileName);
-                    ExtractFile(ExecutingAssembly, DllDirectory, VerifierFileName);
+                    // Create a #@$*! subdirectory where to put files. F*** Windows.
+                    string WinLocation = Path.Combine(DllDirectory, "win");
+                    if (!Directory.Exists(WinLocation))
+                        Directory.CreateDirectory(WinLocation);
+
+                    ExtractFile(ExecutingAssembly, WinLocation, Libz3FileName);
+                    ExtractFile(ExecutingAssembly, WinLocation, VerifierFileName);
                 }
             }
         }

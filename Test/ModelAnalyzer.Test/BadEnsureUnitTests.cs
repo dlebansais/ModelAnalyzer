@@ -11,7 +11,7 @@ public class BadEnsureUnitTests
     [Category("Analyzer")]
     public async Task ValidExpression_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -33,7 +33,7 @@ class Program_BadEnsure_0
     [Category("Analyzer")]
     public async Task ValidEnsureAfterExpressionBody_NoDiagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -52,7 +52,7 @@ class Program_BadEnsure_1
     [Category("Analyzer")]
     public async Task EnsureWithInvalidCode_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -74,7 +74,7 @@ class Program_BadEnsure_2
     [Category("Analyzer")]
     public async Task EnsureWithTwoStatements_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -96,7 +96,7 @@ class Program_BadEnsure_3
     [Category("Analyzer")]
     public async Task EnsureWithUnsupportedExpression_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -118,7 +118,7 @@ class Program_BadEnsure_4
     [Category("Analyzer")]
     public async Task EnsureWithUnknownField_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;
@@ -140,7 +140,7 @@ class Program_BadEnsure_5
     [Category("Analyzer")]
     public async Task MissplacedEnsures_Diagnostic()
     {
-        await ClassModelManager.SynchronizeWithVerifierAsync();
+        await VerificationSynchronization.SynchronizeWithVerifierAsync();
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 using System;

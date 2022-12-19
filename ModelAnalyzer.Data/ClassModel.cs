@@ -2,9 +2,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.CodeAnalysis.Operations;
-using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 /// <summary>
 /// Represents the model of a class.
@@ -35,6 +32,9 @@ internal partial record ClassModel : IClassModel
     /// Gets unsupported class elements.
     /// </summary>
     required public Unsupported Unsupported { get; init; }
+
+    /// <inheritdoc/>
+    required public bool IsVerificationRequestSent { get; init; }
 
     /// <inheritdoc/>
     required public bool IsVerified { get; init; }
