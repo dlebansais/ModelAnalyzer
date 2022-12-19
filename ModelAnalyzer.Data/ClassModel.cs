@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 /// <summary>
@@ -123,21 +124,25 @@ internal partial record ClassModel : IClassModel
 
     private void AppendStatement(StringBuilder builder, Statement statement, int indentation)
     {
+        bool IsHandled = false;
+
         switch (statement)
         {
             case AssignmentStatement Assignment:
                 AppendAssignmentStatement(builder, Assignment, indentation);
+                IsHandled = true;
                 break;
             case ConditionalStatement Conditional:
                 AppendConditionalStatement(builder, Conditional, indentation);
+                IsHandled = true;
                 break;
             case ReturnStatement Return:
                 AppendReturnStatement(builder, Return, indentation);
-                break;
-            default:
-                AppendStatementText(builder, "<unknown>", indentation);
+                IsHandled = true;
                 break;
         }
+
+        Debug.Assert(IsHandled);
     }
 
     private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
@@ -149,13 +154,13 @@ internal partial record ClassModel : IClassModel
     {
         AppendIndentation(builder, indentation);
         builder.AppendLine($"if ({statement.Condition})");
-        AppendStatements(builder, statement.WhenTrueStatementList, indentation + 1);
+        AppendStatements(builder, statement.WhenTrueStatementList, indentation);
 
         if (statement.WhenFalseStatementList.Count > 0)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("else");
-            AppendStatements(builder, statement.WhenFalseStatementList, indentation + 1);
+            AppendStatements(builder, statement.WhenFalseStatementList, indentation);
         }
     }
 

@@ -181,6 +181,7 @@ class Program_CoreExpression_6
     // Require: x >= 0
     // Require: (x + 1) >= (0)
     // Require: true
+    // Require: (x + 1) >= -1
     {
         X = x;
     }
@@ -202,6 +203,7 @@ class Program_CoreExpression_6
   # require x >= 0
   # require x + 1 >= 0
   # require True
+  # require x + 1 >= -1
   {
     X = x;
   }

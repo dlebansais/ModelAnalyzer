@@ -90,12 +90,14 @@ using System;
 class Program_CoreStatement_3
 {
     int X;
+    int Y;
 
-    void Write(int x)
+    void Write(int x, int y)
     {
         if (x == 0)
         {
             X = x;
+            Y = y;
         }
     }
 }
@@ -106,6 +108,20 @@ class Program_CoreStatement_3
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_3
+  int X
+  int Y
+  void Write(x, y)
+  {
+    if (x == 0)
+    {
+      X = x;
+      Y = y;
+    }
+  }
+"));
     }
 
     [Test]
@@ -118,8 +134,9 @@ using System;
 class Program_CoreStatement_4
 {
     int X;
+    int Y;
 
-    void Write(int x)
+    void Write(int x, int y)
     {
         if (x == 0)
         {
@@ -128,6 +145,7 @@ class Program_CoreStatement_4
         else
         {
             X = x;
+            Y = y;
         }
     }
 }
@@ -138,6 +156,22 @@ class Program_CoreStatement_4
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_4
+  int X
+  int Y
+  void Write(x, y)
+  {
+    if (x == 0)
+      X = 0;
+    else
+    {
+      X = x;
+      Y = y;
+    }
+  }
+"));
     }
 
     [Test]
@@ -163,6 +197,46 @@ class Program_CoreStatement_5
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_5
+  int X
+  int Read()
+  {
+    return X;
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ReturnStatementTest_WithoutValue()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_6
+{
+    void Write()
+    {
+        return;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_6
+  void Write()
+  {
+    return;
+  }
+"));
     }
 
     [Test]
@@ -172,7 +246,7 @@ class Program_CoreStatement_5
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_6
+class Program_CoreStatement_7
 {
     void Write(int x)
     {
@@ -198,7 +272,7 @@ class Program_CoreStatement_6
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_7
+class Program_CoreStatement_8
 {
     int X;
 
@@ -215,30 +289,5 @@ class Program_CoreStatement_7
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ReturnStatementTest_WithoutValue()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreStatement_8
-{
-    int X;
-
-    void Write(int x)
-    {
-        return;
-    }
-}
-");
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 }
