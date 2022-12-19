@@ -14,18 +14,20 @@ public class FileLogger : IAnalysisLogger
     /// <summary>
     /// Initializes a new instance of the <see cref="FileLogger"/> class.
     /// </summary>
-    public FileLogger()
+    /// <param name="filePath">The file path.</param>
+    public FileLogger(string filePath)
     {
-        FilePath = Environment.GetEnvironmentVariable("MODEL_ANALYZER_LOG_PATH") ?? Path.Combine(Path.GetTempPath(), "analyzer.txt");
+        FilePath = filePath;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileLogger"/> class.
     /// </summary>
-    /// <param name="filePath">The file path.</param>
-    public FileLogger(string filePath)
+    /// <param name="environmentVariable">The environment variable.</param>
+    /// <param name="fileName">The file name.</param>
+    public FileLogger(EnvironmentVariable environmentVariable, string fileName)
     {
-        FilePath = filePath;
+        FilePath = Environment.GetEnvironmentVariable(environmentVariable) ?? Path.Combine(Path.GetTempPath(), fileName);
     }
 
     /// <summary>

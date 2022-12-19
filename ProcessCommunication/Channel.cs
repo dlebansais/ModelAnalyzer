@@ -73,9 +73,9 @@ public class Channel : IDisposable
 
             Accessor = File.CreateViewAccessor();
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            LastError = e.Message;
+            LastError = exception.Message;
             Close();
         }
     }

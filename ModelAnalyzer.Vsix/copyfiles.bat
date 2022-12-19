@@ -21,7 +21,7 @@ if not exist %TARGET_FOLDER% goto end
 
 echo Copying files to: %TARGET_FOLDER%
 rem copy /Y %SOURCE_FOLDER%\libz3.dll %TARGET_FOLDER%
-copy /Y %SOURCE_FOLDER%\Microsoft.Z3.dll %TARGET_FOLDER%
+rem copy /Y %SOURCE_FOLDER%\Microsoft.Z3.dll %TARGET_FOLDER%
 copy /Y %4 %TARGET_FOLDER%\%5
 copy /Y %SOURCE_FOLDER_EXTENSION%\Microsoft.Extensions.Logging.Abstractions.dll %TARGET_FOLDER%
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Libz3Extractor;
+using FileExtractor;
 using Newtonsoft.Json;
 using ProcessCommunication;
 
@@ -173,9 +173,9 @@ public partial class ClassModelManager : IDisposable
 
             Log($"CreatedProcess: {CreatedProcess} {CreatedProcess.Id} {CreatedProcess.ProcessName}");
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Logger.LogException(e);
+            Logger.LogException(exception);
         }
 
         Log("Creating the channel to send class models.");

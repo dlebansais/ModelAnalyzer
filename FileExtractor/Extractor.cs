@@ -1,4 +1,4 @@
-﻿namespace Libz3Extractor;
+﻿namespace FileExtractor;
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ public class Extractor
     public const string Libz3FileName = "libz3.dll";
     public const string VerifierFileName = "Verifier.exe";
 
-    // We must put libz3.dll in a directory not known to Visual Studio, otherwise the analyzer will not load.
+    // We must put libz3 inside Verifier.exe, otherwise the analyzer will not load.
     public static void Extract()
     {
         if (ExtractedPathTable.Count > 0)
@@ -28,35 +28,19 @@ public class Extractor
             foreach (string Folder in Directory.GetDirectories(AnalyzerRoot))
             {
                 string DllDirectory = Path.Combine(AnalyzerRoot, Folder);
-                string MicrosoftZ3FilePath = Path.Combine(DllDirectory, "Libz3Extractor.dll");
+                string ThisFileFilePath = Path.Combine(DllDirectory, "FileExtractor.dll");
 
-                // Look for the directory where Microsoft.Z3.dll is.
-                if (File.Exists(MicrosoftZ3FilePath))
+                // Look for the directory where FileExtractor.dll is.
+                if (File.Exists(ThisFileFilePath))
                 {
-                    // Create a subdirectory where to put libz3.dll.
-                    string WinLocation = Path.Combine(DllDirectory, "win");
-                    if (!Directory.Exists(WinLocation))
-                        Directory.CreateDirectory(WinLocation);
-
-                    string NativeLocation = Path.Combine(WinLocation, "native");
-                    if (!Directory.Exists(NativeLocation))
-                        Directory.CreateDirectory(NativeLocation);
-
-                    // Make sure the new directory is in the path.
-                    string PathEnvironmentVariableName = "PATH";
-                    string PathEnvironmentVariable = Environment.GetEnvironmentVariable(PathEnvironmentVariableName);
-
-                    if (!PathEnvironmentVariable.Contains(NativeLocation))
-                        Environment.SetEnvironmentVariable(PathEnvironmentVariableName, PathEnvironmentVariable + $";{NativeLocation}");
-
-                    ExtractFile(ExecutingAssembly, NativeLocation, Libz3FileName);
+                    ExtractFile(ExecutingAssembly, DllDirectory, Libz3FileName);
                     ExtractFile(ExecutingAssembly, DllDirectory, VerifierFileName);
                 }
             }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            LastExceptionMessage = e.Message;
+            LastExceptionMessage = exception.Message;
         }
     }
 
@@ -68,13 +52,13 @@ public class Extractor
         {
             if (!File.Exists(DestinationPath))
             {
-                // Get a stream to the dll loaded inside us.
-                using Stream ResourceStream = executingAssembly.GetManifestResourceStream($"Libz3Extractor.{fileName}");
+                // Get a stream to the file loaded inside us.
+                using Stream ResourceStream = executingAssembly.GetManifestResourceStream($"FileExtractor.{fileName}");
 
                 // Create a file stream in the new folder.
                 using FileStream DllStream = new(DestinationPath, FileMode.Create, FileAccess.Write);
 
-                // Copy the stream to have a new dll ready to load.
+                // Copy the stream to have a new file ready to use.
                 ResourceStream.CopyTo(DllStream);
                 ResourceStream.Flush();
             }

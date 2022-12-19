@@ -7,7 +7,7 @@ public static class Initialization
     static Initialization()
     {
 #if DEBUG
-        Logger = new FileLogger();
+        Logger = new FileLogger((EnvironmentVariable)"MODEL_ANALYZER_LOG_PATH", "analyzer.txt");
 #else
         Logger = new NullLogger();
 #endif

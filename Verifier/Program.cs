@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using AnalysisLogger;
 using Microsoft.Extensions.Logging;
@@ -16,7 +15,11 @@ internal class Program
 {
     private const int MaxDepth = 2;
 
-    private static FileLogger Logger = new FileLogger("C:\\Projects\\Temp\\verifier.txt");
+#if DEBUG
+    private static IAnalysisLogger Logger = new FileLogger((EnvironmentVariable)"MODEL_VERIFIER_LOG_PATH", "verifier.txt");
+#else
+    private static IAnalysisLogger Logger = new NullLogger();
+#endif
 
     private static void Log(string message)
     {
@@ -113,10 +116,10 @@ internal class Program
             {
                 MaxDepth = MaxDepth,
                 ClassName = ClassName,
-                Logger = Logger,
                 FieldTable = classModel.FieldTable,
                 MethodTable = classModel.MethodTable,
                 InvariantList = classModel.InvariantList,
+                Logger = Logger,
             };
 
             Verifier.Verify();
@@ -124,8 +127,9 @@ internal class Program
             VerificationResult = Verifier.VerificationResult;
             Log($"Class model verified: {VerificationResult}");
         }
-        catch
+        catch (Exception exception)
         {
+            Logger.LogException(exception);
             VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
         }
 

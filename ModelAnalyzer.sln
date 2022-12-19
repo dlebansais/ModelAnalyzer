@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharp11Support", "CSharp11
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core.Test", "Test\ModelAnalyzer.Core.Test\ModelAnalyzer.Core.Test.csproj", "{2F2F7D02-914F-4387-8575-D7219CE437A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libz3Extractor", "Libz3Extractor\Libz3Extractor.csproj", "{FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileExtractor", "FileExtractor\FileExtractor.csproj", "{FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BC2BD800-4C7D-4848-97D2-C0B13C2299E5} = {BC2BD800-4C7D-4848-97D2-C0B13C2299E5}
 		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6} = {C0E89927-6AFF-475C-B6A7-ACFA47185DD6}

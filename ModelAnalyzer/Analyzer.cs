@@ -46,9 +46,9 @@ public abstract class Analyzer : DiagnosticAnalyzer
         {
             throw;
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Logger.LogException(e);
+            Logger.LogException(exception);
         }
     }
 
@@ -70,9 +70,9 @@ public abstract class Analyzer : DiagnosticAnalyzer
         {
             throw;
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Logger.LogException(e);
+            Logger.LogException(exception);
         }
     }
 

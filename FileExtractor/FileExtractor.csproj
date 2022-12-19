@@ -2,21 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	<LangVersion>11</LangVersion>
+    <LangVersion>11</LangVersion>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <IsPackable>false</IsPackable>
     <Version>0.0.3</Version>
-    <RootNamespace>Libz3Extractor</RootNamespace>
+    <RootNamespace>FileExtractor</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="..\ModelAnalyzer.Data\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
+    <None Remove="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\libz3.dll" />
     <None Remove="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\Verifier.exe" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\ModelAnalyzer.Data\bin\$(Platform)\$(Configuration)\$(TargetFramework)\libz3.dll" />
+    <EmbeddedResource Include="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\libz3.dll" />
     <EmbeddedResource Include="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\Verifier.exe" />
   </ItemGroup>
 
