@@ -35,12 +35,6 @@ internal partial record ClassModel : IClassModel
     required public Unsupported Unsupported { get; init; }
 
     /// <inheritdoc/>
-    required public bool IsVerificationRequestSent { get; init; }
-
-    /// <inheritdoc/>
-    required public bool IsVerified { get; init; }
-
-    /// <inheritdoc/>
     required public bool IsInvariantViolated { get; init; }
 
     /// <inheritdoc/>

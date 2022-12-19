@@ -20,7 +20,18 @@ public partial class ClassModelManager : IDisposable
     /// Initializes a new instance of the <see cref="ClassModelManager"/> class.
     /// </summary>
     public ClassModelManager()
+        : this(Guid.NewGuid())
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ClassModelManager"/> class.
+    /// </summary>
+    /// <param name="receiveChannelGuid">The guid of the channel receiving ack from the verifier.</param>
+    public ClassModelManager(Guid receiveChannelGuid)
+    {
+        ReceiveChannelGuid = receiveChannelGuid;
+
         Extractor.Extract();
         Context = new SynchronizedVerificationContext();
         FromServerChannel = InitChannel();
@@ -35,6 +46,11 @@ public partial class ClassModelManager : IDisposable
     /// Gets or sets the thread start mode.
     /// </summary>
     public VerificationProcessStartMode StartMode { get; set; }
+
+    /// <summary>
+    /// Gets the guid of the channel receiving ack from the verifier.
+    /// </summary>
+    public Guid ReceiveChannelGuid { get; }
 
     /// <summary>
     /// Checks whether a class is ignored for modeling.
@@ -116,10 +132,9 @@ public partial class ClassModelManager : IDisposable
         {
             List<string> ToRemoveClassList = new();
 
-            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
             {
                 string ClassName = Entry.Key;
-                IClassModel ClassModel = Entry.Value;
 
                 if (!existingClassList.Contains(ClassName))
                     ToRemoveClassList.Add(ClassName);
@@ -139,7 +154,7 @@ public partial class ClassModelManager : IDisposable
         string ClassName = classDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
 
-        ClassModel NewClassModel;
+        VerificationState NewVerificationState;
 
         lock (Context.Lock)
         {
@@ -156,37 +171,60 @@ public partial class ClassModelManager : IDisposable
 
                 if (ClassModelAlreadyExists)
                 {
-                    ClassModel OldClassModel = Context.ClassModelTable[ClassName];
+                    VerificationState OldVerificationState = Context.ClassModelTable[ClassName];
+                    ClassModelExchange OldClassModelExchange = OldVerificationState.ClassModelExchange;
+                    ClassModel OldClassModel = OldClassModelExchange.ClassModel;
 
-                    NewClassModel = OldClassModel with
+                    ClassModel NewClassModel = OldClassModel with
                     {
                         FieldTable = Parser.FieldTable,
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
+                    };
+
+                    ClassModelExchange NewClassModelExchange = OldClassModelExchange with
+                    {
+                        ClassModel = NewClassModel,
+                    };
+
+                    NewVerificationState = OldVerificationState with
+                    {
+                        ClassModelExchange = NewClassModelExchange,
                         IsVerificationRequestSent = false,
                         IsVerified = false,
                     };
 
-                    Context.UpdateClassModel(NewClassModel);
+                    Context.UpdateClassModel(NewVerificationState);
 
                     Log($"Updated model for class '{ClassName}'.");
                 }
                 else
                 {
-                    NewClassModel = new ClassModel()
+                    ClassModel NewClassModel = new ClassModel()
                     {
                         Name = ClassName,
                         FieldTable = Parser.FieldTable,
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
-                        IsVerificationRequestSent = false,
-                        IsVerified = false,
                         IsInvariantViolated = false,
                     };
 
-                    Context.AddClassModel(NewClassModel);
+                    ClassModelExchange NewClassModelExchange = new()
+                    {
+                        ClassModel = NewClassModel,
+                        ReceiveChannelGuid = ReceiveChannelGuid,
+                    };
+
+                    NewVerificationState = new VerificationState()
+                    {
+                        ClassModelExchange = NewClassModelExchange,
+                        IsVerificationRequestSent = false,
+                        IsVerified = false,
+                    };
+
+                    Context.AddClassModel(NewVerificationState);
 
                     Log($"Class model for '{ClassName}' is new and has been added.");
                 }
@@ -195,12 +233,12 @@ public partial class ClassModelManager : IDisposable
                     ScheduleAsynchronousVerification();
             }
             else
-                NewClassModel = Context.ClassModelTable[ClassName];
+                NewVerificationState = Context.ClassModelTable[ClassName];
 
             Context.LastCompilationContext = compilationContext;
         }
 
-        return NewClassModel;
+        return NewVerificationState.ClassModelExchange.ClassModel;
     }
 
     private void Log(string message)

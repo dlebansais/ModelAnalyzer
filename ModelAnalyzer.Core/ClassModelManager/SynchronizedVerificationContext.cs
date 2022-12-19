@@ -17,33 +17,33 @@ internal class SynchronizedVerificationContext
     /// <summary>
     /// Adds a class model.
     /// </summary>
-    /// <param name="classModel">The class model.</param>
-    public void AddClassModel(ClassModel classModel)
+    /// <param name="verificationState">The class model.</param>
+    public void AddClassModel(VerificationState verificationState)
     {
-        string ClassName = classModel.Name;
+        string ClassName = verificationState.ClassModelExchange.ClassModel.Name;
 
         Debug.Assert(!ClassModelTable.ContainsKey(ClassName));
 
-        ClassModelTable.Add(ClassName, classModel);
+        ClassModelTable.Add(ClassName, verificationState);
     }
 
     /// <summary>
     /// Updates an existing class model.
     /// </summary>
-    /// <param name="classModel">The class model.</param>
-    public void UpdateClassModel(ClassModel classModel)
+    /// <param name="verificationState">The class model.</param>
+    public void UpdateClassModel(VerificationState verificationState)
     {
-        string ClassName = classModel.Name;
+        string ClassName = verificationState.ClassModelExchange.ClassModel.Name;
 
         Debug.Assert(ClassModelTable.ContainsKey(ClassName));
 
-        ClassModelTable[ClassName] = classModel;
+        ClassModelTable[ClassName] = verificationState;
     }
 
     /// <summary>
     /// Gets the table of class models.
     /// </summary>
-    public Dictionary<string, ClassModel> ClassModelTable { get; } = new();
+    public Dictionary<string, VerificationState> ClassModelTable { get; } = new();
 
     /// <summary>
     /// Gets or sets the last compilation context.

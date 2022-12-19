@@ -14,11 +14,6 @@ public class Channel : IDisposable
     public static Guid ClientToServerGuid { get; } = new Guid("{03C9C797-C924-415E-A6F9-9112AE75E56F}");
 
     /// <summary>
-    /// Gets a shared guid from server to client.
-    /// </summary>
-    public static Guid ServerToClientGuid { get; } = new Guid("{30AC0040-5412-4DF0-AAB3-28D66599E7D2}");
-
-    /// <summary>
     /// Gets the max channel capacity.
     /// </summary>
     public const int Capacity = 0x100000;

@@ -16,7 +16,7 @@ public partial class ClassModelManager : IDisposable
 {
     private Channel InitChannel()
     {
-        Channel Channel = new Channel(Channel.ServerToClientGuid, Mode.ReceiveShared);
+        Channel Channel = new Channel(ReceiveChannelGuid, Mode.ReceiveShared);
         Channel.Open();
 
         return Channel;
@@ -70,7 +70,7 @@ public partial class ClassModelManager : IDisposable
             if (IsVerified)
             {
                 Log($"Verification loop completed, class {ClassName} verified, invariant violation: {IsInvariantViolated}.");
-                return ((ClassModel)classModel) with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
+                return ((ClassModel)classModel) with { IsInvariantViolated = IsInvariantViolated };
             }
 
             UpdateVerificationEvents();
@@ -86,9 +86,9 @@ public partial class ClassModelManager : IDisposable
             {
                 isFound = true;
 
-                ClassModel ClassModel = Context.ClassModelTable[className];
-                isVerified = ClassModel.IsVerified;
-                isInvariantViolated = ClassModel.IsInvariantViolated;
+                VerificationState VerificationState = Context.ClassModelTable[className];
+                isVerified = VerificationState.IsVerified;
+                isInvariantViolated = VerificationState.ClassModelExchange.ClassModel.IsInvariantViolated;
             }
             else
             {
@@ -132,7 +132,7 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
                 if (TryUpdateVerificationEventForClass(verificationResult, Entry.Value))
                     return;
         }
@@ -140,14 +140,20 @@ public partial class ClassModelManager : IDisposable
         Log($"Class no longer in the list of models, verification result lost.");
     }
 
-    private bool TryUpdateVerificationEventForClass(VerificationResult verificationResult, ClassModel classModel)
+    private bool TryUpdateVerificationEventForClass(VerificationResult verificationResult, VerificationState verificationState)
     {
         string ClassName = verificationResult.ClassName;
         bool IsInvariantViolated = verificationResult.IsError;
 
-        if (classModel.Name == ClassName)
+        if (verificationState.ClassModelExchange.ClassModel.Name == ClassName)
         {
-            Context.ClassModelTable[ClassName] = classModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
+            ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
+            ClassModel NewClassModel = OldClassModel with { IsInvariantViolated = IsInvariantViolated };
+
+            ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
+            ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
+
+            Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, IsVerified = true };
             return true;
         }
 
@@ -210,35 +216,38 @@ public partial class ClassModelManager : IDisposable
 
     private void SendClassModelDataForVerification(Channel channel)
     {
-        List<ClassModel> ToVerifyList = new();
+        List<VerificationState> ToVerifyList = new();
 
         lock (Context.Lock)
         {
-            foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
+            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
             {
-                ClassModel ClassModel = Entry.Value;
+                VerificationState VerificationState = Entry.Value;
+                ClassModel ClassModel = VerificationState.ClassModelExchange.ClassModel;
                 string ClassName = ClassModel.Name;
 
                 if (!ClassModel.Unsupported.IsEmpty)
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
-                else if (ClassModel.IsVerificationRequestSent)
+                else if (VerificationState.IsVerificationRequestSent)
                     Log($"Skipping complete verification for class '{ClassName}', it's being done.");
                 else
                 {
-                    ClassModel = ClassModel with { IsVerificationRequestSent = true };
-                    ToVerifyList.Add(ClassModel);
+                    VerificationState = VerificationState with { IsVerificationRequestSent = true };
+                    ToVerifyList.Add(VerificationState);
                 }
             }
 
-            foreach (ClassModel ClassModel in ToVerifyList)
-                Context.ClassModelTable[ClassModel.Name] = ClassModel;
+            foreach (VerificationState VerificationState in ToVerifyList)
+                Context.ClassModelTable[VerificationState.ClassModelExchange.ClassModel.Name] = VerificationState;
         }
 
-        foreach (ClassModel ClassModel in ToVerifyList)
+        foreach (VerificationState VerificationState in ToVerifyList)
         {
+            ClassModelExchange ClassModelExchange = VerificationState.ClassModelExchange;
+            ClassModel ClassModel = ClassModelExchange.ClassModel;
             string ClassName = ClassModel.Name;
 
-            string JSonString = JsonConvert.SerializeObject(ClassModel, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            string JSonString = JsonConvert.SerializeObject(ClassModelExchange, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             byte[] EncodedString = Converter.EncodeString(JSonString);
 
             if (EncodedString.Length <= channel.GetFreeLength())

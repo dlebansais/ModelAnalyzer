@@ -251,7 +251,7 @@ class Program_CoreClassModelManager_9
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_9
+class Program_CoreClassModelManager_10
 {
 }
 ");
@@ -309,13 +309,15 @@ class Program_CoreClassModelManager_9
 
     private void UpdateWithBlockedChannel(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        using Channel Channel = new Channel(Channel.ServerToClientGuid, Mode.Receive);
-        Channel.Open();
-
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+        Guid ServerToClientGuid = new Guid("{30AC0040-5412-4DF0-AAB3-28D66599E7D2}");
+
+        using Channel Channel = new Channel(ServerToClientGuid, Mode.Receive);
+        Channel.Open();
+
+        using ClassModelManager Manager = new(ServerToClientGuid) { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
 

@@ -81,33 +81,22 @@ internal class Program
 
     private static void ProcessData(byte[] data)
     {
-        Channel ToClientChannel = new(Channel.ServerToClientGuid, Mode.Send);
-        ToClientChannel.Open();
-
-        if (ToClientChannel.IsOpen)
+        int Offset = 0;
+        while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
         {
-            Log($"Client channel opened");
-
-            int Offset = 0;
-            while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
+            ClassModelExchange? ClassModelExchange = JsonConvert.DeserializeObject<ClassModelExchange>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
+            if (ClassModelExchange is not null)
             {
-                ClassModel? ClassModel = JsonConvert.DeserializeObject<ClassModel>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
-                if (ClassModel is not null)
-                {
-                    Log($"Class model decoded\n{ClassModel}");
-                    ProcessClassModel(ToClientChannel, ClassModel);
-                }
+                Log($"Class model decoded\n{ClassModelExchange.ClassModel}");
+                ProcessClassModel(ClassModelExchange);
             }
-
-            ToClientChannel.Close();
         }
-        else
-            Log($"Failed to open client channel, {ToClientChannel.LastError}");
     }
 
-    private static void ProcessClassModel(Channel toClientChannel, ClassModel classModel)
+    private static void ProcessClassModel(ClassModelExchange classModelExchange)
     {
-        string ClassName = classModel.Name;
+        ClassModel ClassModel = classModelExchange.ClassModel;
+        string ClassName = ClassModel.Name;
         VerificationResult VerificationResult;
 
         try
@@ -116,9 +105,9 @@ internal class Program
             {
                 MaxDepth = MaxDepth,
                 ClassName = ClassName,
-                FieldTable = classModel.FieldTable,
-                MethodTable = classModel.MethodTable,
-                InvariantList = classModel.InvariantList,
+                FieldTable = ClassModel.FieldTable,
+                MethodTable = ClassModel.MethodTable,
+                InvariantList = ClassModel.InvariantList,
                 Logger = Logger,
             };
 
@@ -133,15 +122,27 @@ internal class Program
             VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
         }
 
-        string JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-        byte[] EncodedString = Converter.EncodeString(JsonString);
+        Channel ToClientChannel = new(classModelExchange.ReceiveChannelGuid, Mode.Send);
+        ToClientChannel.Open();
 
-        if (EncodedString.Length <= toClientChannel.GetFreeLength())
+        if (ToClientChannel.IsOpen)
         {
-            toClientChannel.Write(EncodedString);
-            Log("Ack sent");
+            Log($"Client channel opened");
+
+            string JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            byte[] EncodedString = Converter.EncodeString(JsonString);
+
+            if (EncodedString.Length <= ToClientChannel.GetFreeLength())
+            {
+                ToClientChannel.Write(EncodedString);
+                Log("Ack sent");
+            }
+            else
+                Log("No room for ack");
+
+            ToClientChannel.Close();
         }
         else
-            Log("No room for ack");
+            Log($"Failed to open client channel, {ToClientChannel.LastError}");
     }
 }
