@@ -241,12 +241,42 @@ class Program_CoreStatement_6
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_Checked()
+    public void StatementTest_ExpressionBody()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreStatement_7
+{
+    int X;
+    int Read() => X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_7
+  int X
+  int Read()
+  {
+    return X;
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedStatementTest_Checked()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_8
 {
     void Write(int x)
     {
@@ -267,18 +297,93 @@ class Program_CoreStatement_7
 
     [Test]
     [Category("Core")]
+    public void UnsupportedStatementTest_SingleInstruction()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_9
+{
+    void Write(int x)
+    {
+        if (x == 0)
+            break;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
     public void UnsupportedStatementTest_InvalidDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_8
+class Program_CoreStatement_10
 {
     int X;
 
     void Write(int x, int y)
     {
         x = y;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedStatementTest_ExpressionDestination()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_11
+{
+    void Write(int x, int y)
+    {
+        x[0] = y;
+    }
+
+    int[] X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedStatementTest_InvalidReturnExpression()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_12
+{
+    int Write(int x)
+    {
+        return x % 10;
     }
 }
 ");

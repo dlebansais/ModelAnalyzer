@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
+using ProcessCommunication;
 
 public class ClassModelManagerTest
 {
@@ -208,6 +209,58 @@ class Program_CoreClassModelManager_7
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, DuplicateVerificationWithUpdate);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_VerificationWithErrorAndUpdate()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_8
+{
+    string X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithErrorAndUpdate);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithAutoStart()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_9
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithAutoStart);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithBlockedChannel()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_9
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedChannel);
+    }
+
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
@@ -222,6 +275,51 @@ class Program_CoreClassModelManager_7
 
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void VerificationWithErrorAndUpdate(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void UpdateWithAutoStart(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void UpdateWithBlockedChannel(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        using Channel Channel = new Channel(Channel.ServerToClientGuid, Mode.Receive);
+        Channel.Open();
+
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         Manager.GetVerifiedModel(ClassModel);
     }
