@@ -156,6 +156,9 @@ public partial class ClassModelManager : IDisposable
 
     private void ScheduleAsynchronousVerification()
     {
+        Extractor.Extract();
+        Log($"Extracted count: {Extractor.ExtractedPathTable.Count}");
+        Log($"Extracted error: {Extractor.LastExceptionMessage}");
         string VerifierFilePath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
 
         Logger.Log($"Starting the verification process at {VerifierFilePath}.");

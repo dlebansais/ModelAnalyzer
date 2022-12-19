@@ -28,7 +28,7 @@ public class Extractor
             foreach (string Folder in Directory.GetDirectories(AnalyzerRoot))
             {
                 string DllDirectory = Path.Combine(AnalyzerRoot, Folder);
-                string MicrosoftZ3FilePath = Path.Combine(DllDirectory, "Microsoft.Z3.dll");
+                string MicrosoftZ3FilePath = Path.Combine(DllDirectory, "Libz3Extractor.dll");
 
                 // Look for the directory where Microsoft.Z3.dll is.
                 if (File.Exists(MicrosoftZ3FilePath))
@@ -54,8 +54,9 @@ public class Extractor
                 }
             }
         }
-        catch
+        catch (Exception e)
         {
+            LastExceptionMessage = e.Message;
         }
     }
 
@@ -90,5 +91,6 @@ public class Extractor
         return ExtractedPathTable[fileName];
     }
 
-    private static Dictionary<string, string> ExtractedPathTable = new();
+    public static Dictionary<string, string> ExtractedPathTable { get; } = new();
+    public static string LastExceptionMessage { get; private set; } = string.Empty;
 }
