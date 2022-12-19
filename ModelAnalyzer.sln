@@ -26,8 +26,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core", "Model
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisLogger", "AnalysisLogger\AnalysisLogger.csproj", "{B3C684B7-79D9-418D-8A72-034C6DC25921}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharp11Support", "CSharp11Support\CSharp11Support.csproj", "{527D837A-FCB5-4504-8634-69F582406FCB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Core.Test", "Test\ModelAnalyzer.Core.Test\ModelAnalyzer.Core.Test.csproj", "{2F2F7D02-914F-4387-8575-D7219CE437A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileExtractor", "FileExtractor\FileExtractor.csproj", "{FBE624D7-BAA2-4E90-B5B3-AE1C365E6F21}"
@@ -77,10 +75,6 @@ Global
 		{B3C684B7-79D9-418D-8A72-034C6DC25921}.Debug|x64.Build.0 = Debug|x64
 		{B3C684B7-79D9-418D-8A72-034C6DC25921}.Release|x64.ActiveCfg = Release|x64
 		{B3C684B7-79D9-418D-8A72-034C6DC25921}.Release|x64.Build.0 = Release|x64
-		{527D837A-FCB5-4504-8634-69F582406FCB}.Debug|x64.ActiveCfg = Debug|x64
-		{527D837A-FCB5-4504-8634-69F582406FCB}.Debug|x64.Build.0 = Debug|x64
-		{527D837A-FCB5-4504-8634-69F582406FCB}.Release|x64.ActiveCfg = Release|x64
-		{527D837A-FCB5-4504-8634-69F582406FCB}.Release|x64.Build.0 = Release|x64
 		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Debug|x64.ActiveCfg = Debug|x64
 		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Debug|x64.Build.0 = Debug|x64
 		{2F2F7D02-914F-4387-8575-D7219CE437A0}.Release|x64.ActiveCfg = Release|x64
