@@ -148,8 +148,6 @@ public partial class ClassModelManager : IDisposable
         if (classModel.Name == ClassName)
         {
             Context.ClassModelTable[ClassName] = classModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
-
-            VerificationSynchronization.NotifyAcknowledgeReceived();
             return true;
         }
 
@@ -248,8 +246,6 @@ public partial class ClassModelManager : IDisposable
                 channel.Write(EncodedString);
 
                 Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
-
-                VerificationSynchronization.NotifyRequestSent();
             }
             else
                 Log($"Unable to send data for class '{ClassName}', buffer full.");
