@@ -14,8 +14,8 @@ public class TestInitialization
     }
 
 #if DEBUG
-    public static FileLogger Logger { get; } = new FileLogger((EnvironmentVariable)"MODEL_ANALYZER_LOG_PATH", "analyzer.txt");
+    public static IAnalysisLogger Logger { get; } = new FileLogger((EnvironmentVariable)"MODEL_ANALYZER_LOG_PATH", "analyzer.txt");
 #else
-    public static FileLogger Logger { get; } = new NullLogger();
+    public static IAnalysisLogger Logger { get; } = new NullLogger();
 #endif
 }

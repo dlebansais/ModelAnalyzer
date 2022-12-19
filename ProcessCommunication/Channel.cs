@@ -54,7 +54,7 @@ public class Channel : IDisposable
 
         try
         {
-            int CapacityWithHeadTail = Capacity + sizeof(int) * 2;
+            int CapacityWithHeadTail = Capacity + (sizeof(int) * 2);
             string ChannelName = Guid.ToString("B");
 
             switch (Mode)

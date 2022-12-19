@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <PackageId>Test.CSharp.ModelAnalyzer</PackageId>
-    <PackageVersion>0.0.22</PackageVersion>
+    <PackageVersion>0.0.23</PackageVersion>
     <Authors>David Le Bansais</Authors>
     <PackageProjectUrl>https://github.com/dlebansais/ModelAnalyzer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dlebansais/ModelAnalyzer</RepositoryUrl>
@@ -44,7 +44,6 @@
       <TfmSpecificPackageFile Include="main.png" PackagePath="" />
       <TfmSpecificPackageFile Include="README-short.md" PackagePath="" />
       <TfmSpecificPackageFile Include="$(OutputPath)\AnalysisLogger.dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="$(OutputPath)\CSharp11Support.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\ModelAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />

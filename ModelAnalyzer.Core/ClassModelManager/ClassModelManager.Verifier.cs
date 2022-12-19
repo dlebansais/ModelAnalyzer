@@ -128,30 +128,34 @@ public partial class ClassModelManager : IDisposable
 
     private void UpdateVerificationEvent(VerificationResult verificationResult)
     {
-        string ClassName = verificationResult.ClassName;
-        bool IsInvariantViolated = verificationResult.IsError;
-
         Log($"Verification result decoded: {verificationResult}");
 
         lock (Context.Lock)
         {
             foreach (KeyValuePair<string, ClassModel> Entry in Context.ClassModelTable)
-            {
-                ClassModel ClassModel = Entry.Value;
-
-                if (ClassModel.Name == ClassName)
-                {
-                    Context.ClassModelTable[ClassName] = ClassModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
-
-                    if (Interlocked.Decrement(ref VerificationRequestCount) == 0)
-                        VerifierCallWatch.Stop();
-
+                if (TryUpdateVerificationEventForClass(verificationResult, Entry.Value))
                     return;
-                }
-            }
         }
 
-        Log($"Class '{ClassName}' no longer in the list of models, verification result lost.");
+        Log($"Class no longer in the list of models, verification result lost.");
+    }
+
+    private bool TryUpdateVerificationEventForClass(VerificationResult verificationResult, ClassModel classModel)
+    {
+        string ClassName = verificationResult.ClassName;
+        bool IsInvariantViolated = verificationResult.IsError;
+
+        if (classModel.Name == ClassName)
+        {
+            Context.ClassModelTable[ClassName] = classModel with { IsVerified = true, IsInvariantViolated = IsInvariantViolated };
+
+            if (Interlocked.Decrement(ref VerificationRequestCount) == 0)
+                VerifierCallWatch.Stop();
+
+            return true;
+        }
+
+        return false;
     }
 
     private void ScheduleAsynchronousVerification()

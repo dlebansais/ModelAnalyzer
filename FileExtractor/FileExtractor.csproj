@@ -20,4 +20,11 @@
     <EmbeddedResource Include="..\Verifier\bin\$(Platform)\$(Configuration)\net48\win7-x64\Verifier.exe" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="PolySharp" Version="1.8.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
