@@ -460,20 +460,26 @@ class Program_CoreClassModelManager_16
     private void BlockServerProcess(out string extractPath)
     {
         // Wait to be sure the verifier process exited.
-        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(5));
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + Timeouts.VerificationIdleTimeout);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
         extractPath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
+
+        bool IsProcessReplaced = false;
 
         try
         {
             using FileStream Stream = new(extractPath, FileMode.Create, FileAccess.Write);
             using StreamWriter Writer = new(Stream);
-            Writer.WriteLine("Erased exe");
+            Writer.WriteLine("Replaced exe");
+
+            IsProcessReplaced = true;
         }
         catch
         {
         }
+
+        Assert.That(IsProcessReplaced, Is.True);
     }
 
     private void RestoreServerProcess(string extractPath)

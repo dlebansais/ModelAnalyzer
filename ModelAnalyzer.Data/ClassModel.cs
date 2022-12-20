@@ -82,14 +82,14 @@ internal partial record ClassModel : IClassModel
         string ReturnString = method.HasReturnValue ? "int" : "void";
         builder.AppendLine($"  {ReturnString} {method.MethodName.Name}({Parameters})");
 
-        foreach (IRequire Item in method.RequireList)
-            if (Item is Require Require && Require.BooleanExpression is Expression BooleanExpression)
+        foreach (Require Require in method.RequireList)
+            if (Require.BooleanExpression is Expression BooleanExpression)
                 AppendAssertion(builder, "require", BooleanExpression);
 
         AppendStatements(builder, method.StatementList, 0, forceBraces: true);
 
-        foreach (IEnsure Item in method.EnsureList)
-            if (Item is Ensure Ensure && Ensure.BooleanExpression is Expression BooleanExpression)
+        foreach (Ensure Ensure in method.EnsureList)
+            if (Ensure.BooleanExpression is Expression BooleanExpression)
                 AppendAssertion(builder, "ensure", BooleanExpression);
     }
 
