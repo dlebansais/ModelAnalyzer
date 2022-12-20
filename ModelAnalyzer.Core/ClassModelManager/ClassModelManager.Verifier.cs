@@ -114,8 +114,6 @@ public partial class ClassModelManager : IDisposable
         int Offset = 0;
         while (Converter.TryDecodeString(Data, ref Offset, out string JsonString))
         {
-            Log($"New offset: {Offset}.");
-
             Log(JsonString);
 
             VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });

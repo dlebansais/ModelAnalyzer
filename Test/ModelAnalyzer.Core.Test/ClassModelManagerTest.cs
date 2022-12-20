@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using FileExtractor;
 using Microsoft.CodeAnalysis.CSharp;
@@ -296,6 +297,48 @@ class Program_CoreClassModelManager_12
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerProcess);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithCorruptedResult()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_16
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithCorruptedResult);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithClassDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_17
+{
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_18
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithClassDisappeared);
+    }
+
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
@@ -412,6 +455,50 @@ class Program_CoreClassModelManager_12
         catch
         {
         }
+    }
+
+    private void UpdateWithCorruptedResult(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        using Channel Channel = new Channel(Manager.ReceiveChannelGuid, Mode.Send);
+        Channel.Open();
+
+        Assert.That(Channel.IsOpen, Is.True);
+
+        int EmptyPacketSize = sizeof(int);
+        byte[] EmptyPacketBytes = BitConverter.GetBytes(EmptyPacketSize);
+        Channel.Write(EmptyPacketBytes);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void UpdateWithClassDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
+        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        IClassModel ClassModel0;
+        IClassModel ClassModel1;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
+
+        CompilationContext CompilationContext = CompilationContext.GetAnother();
+        ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0);
+        ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1);
+        Manager.RemoveMissingClasses(new List<string>() { ClassModel1.Name });
+
+        // Give some time to the verifier to process the two classes.
+        Thread.Sleep(TimeSpan.FromSeconds(10));
+
+        Manager.GetVerifiedModel(ClassModel0);
+        Manager.GetVerifiedModel(ClassModel1);
     }
 
     [Test]
