@@ -52,8 +52,8 @@ internal partial class ClassDeclarationParser
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
             else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
                 NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
-            else if (IsSupportedBinaryConditionalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
-                NewExpression = new BinaryConditionalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
+            else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
+                NewExpression = new BinaryLogicalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
             else
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
@@ -77,7 +77,7 @@ internal partial class ClassDeclarationParser
             if (IsSupportedUnaryArithmeticOperator(OperatorToken, out UnaryArithmeticOperator UnaryArithmeticOperator))
                 NewExpression = new UnaryArithmeticExpression { Operator = UnaryArithmeticOperator, Operand = Operand };
             else if (IsSupportedUnaryLogicalOperator(OperatorToken, out UnaryLogicalOperator UnaryLogicalOperator))
-                NewExpression = new UnaryConditionalExpression { Operator = UnaryLogicalOperator, Operand = Operand };
+                NewExpression = new UnaryLogicalExpression { Operator = UnaryLogicalOperator, Operand = Operand };
             else
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
@@ -147,7 +147,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsSupportedBinaryConditionalOperator(SyntaxToken token, out BinaryLogicalOperator logicalOperator)
+    private bool IsSupportedBinaryLogicalOperator(SyntaxToken token, out BinaryLogicalOperator logicalOperator)
     {
         SyntaxKind OperatorKind = token.Kind();
 

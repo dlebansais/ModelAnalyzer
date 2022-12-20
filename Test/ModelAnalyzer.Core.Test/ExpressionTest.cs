@@ -88,7 +88,7 @@ class Program_CoreExpression_2
 
     [Test]
     [Category("Core")]
-    public void BinaryConditionalTest()
+    public void BinaryLogicalTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -115,7 +115,7 @@ class Program_CoreExpression_3
 
     [Test]
     [Category("Core")]
-    public void BinaryConditionalTest_InvalidOperator()
+    public void BinaryLogicalTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +133,7 @@ class Program_CoreExpression_4
 }
 ");
 
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration, LocateBinaryConditionalOperator, SyntaxKind.DoKeyword);
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration, LocateBinaryLogicalOperator, SyntaxKind.DoKeyword);
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
@@ -143,7 +143,7 @@ class Program_CoreExpression_4
 
     [Test]
     [Category("Core")]
-    public void UnaryConditionalTest()
+    public void UnaryLogicalTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -169,7 +169,7 @@ class Program_CoreExpression_5
 
     [Test]
     [Category("Core")]
-    public void UnaryConditionalTest_InvalidOperator()
+    public void UnaryLogicalTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -187,7 +187,7 @@ class Program_CoreExpression_6
 }
 ");
 
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration, LocateUnaryConditionalOperator, SyntaxKind.PercentToken);
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration, LocateUnaryLogicalOperator, SyntaxKind.PercentToken);
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
@@ -507,7 +507,7 @@ class Program_CoreExpression_16
         return Operator;
     }
 
-    private SyntaxToken LocateBinaryConditionalOperator(ClassDeclarationSyntax classDeclaration)
+    private SyntaxToken LocateBinaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
     {
         MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
         BlockSyntax Block = Method.Body!;
@@ -518,7 +518,7 @@ class Program_CoreExpression_16
         return Operator;
     }
 
-    private SyntaxToken LocateUnaryConditionalOperator(ClassDeclarationSyntax classDeclaration)
+    private SyntaxToken LocateUnaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
     {
         MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
         BlockSyntax Block = Method.Body!;

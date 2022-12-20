@@ -25,12 +25,12 @@ internal partial class Verifier : IDisposable
                 Result = BuildUnaryArithmeticExpression(aliasTable, UnaryArithmetic);
                 IsAssigned = true;
                 break;
-            case BinaryConditionalExpression BinaryConditional:
-                Result = BuildBinaryConditionalExpression(aliasTable, BinaryConditional);
+            case BinaryLogicalExpression BinaryLogical:
+                Result = BuildBinaryLogicalExpression(aliasTable, BinaryLogical);
                 IsAssigned = true;
                 break;
-            case UnaryConditionalExpression UnaryConditional:
-                Result = BuildUnaryConditionalExpression(aliasTable, UnaryConditional);
+            case UnaryLogicalExpression UnaryLogical:
+                Result = BuildUnaryLogicalExpression(aliasTable, UnaryLogical);
                 IsAssigned = true;
                 break;
             case ComparisonExpression Comparison:
@@ -73,17 +73,17 @@ internal partial class Verifier : IDisposable
         return OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
     }
 
-    private BoolExpr BuildBinaryConditionalExpression(AliasTable aliasTable, BinaryConditionalExpression binaryLogicalExpression)
+    private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, BinaryLogicalExpression binaryLogicalExpression)
     {
         BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Left);
         BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, binaryLogicalExpression.Right);
         return OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildUnaryConditionalExpression(AliasTable aliasTable, UnaryConditionalExpression unaryConditionalExpression)
+    private BoolExpr BuildUnaryLogicalExpression(AliasTable aliasTable, UnaryLogicalExpression unaryLogicalExpression)
     {
-        BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, unaryConditionalExpression.Operand);
-        return OperatorBuilder.UnaryLogical[unaryConditionalExpression.Operator](Context, Operand);
+        BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, unaryLogicalExpression.Operand);
+        return OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)
