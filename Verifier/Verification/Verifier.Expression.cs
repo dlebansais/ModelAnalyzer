@@ -45,10 +45,6 @@ internal partial class Verifier : IDisposable
                 Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
                 IsAssigned = true;
                 break;
-            case ParenthesizedExpression Parenthesized:
-                Result = BuildParenthesizedExpression(aliasTable, Parenthesized);
-                IsAssigned = true;
-                break;
             case VariableValueExpression VariableValue:
                 Result = BuildVariableValueExpression(aliasTable, VariableValue);
                 IsAssigned = true;
@@ -101,11 +97,6 @@ internal partial class Verifier : IDisposable
     private BoolExpr BuildLiteralBoolValueExpression(LiteralBoolValueExpression literalBoolValueExpression)
     {
         return Context.MkBool(literalBoolValueExpression.Value);
-    }
-
-    private Expr BuildParenthesizedExpression(AliasTable aliasTable, ParenthesizedExpression parenthesizedExpression)
-    {
-        return BuildExpression<Expr>(aliasTable, parenthesizedExpression.Inside);
     }
 
     private ArithExpr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)
