@@ -80,7 +80,7 @@ class Program_CoreParameter_3
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreParameter_3
-  void Write(x)
+  void Write(int x)
   {
   }
 "));

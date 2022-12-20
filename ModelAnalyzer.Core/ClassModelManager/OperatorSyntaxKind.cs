@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 internal static class OperatorSyntaxKind
 {
     /// <summary>
-    /// Gets supported binary arithmetic operators.
+    /// Gets the arithmetic operators associated to a token.
     /// </summary>
     public static Dictionary<SyntaxKind, BinaryArithmeticOperator> BinaryArithmetic { get; } = new()
     {
@@ -20,7 +20,7 @@ internal static class OperatorSyntaxKind
     };
 
     /// <summary>
-    /// Gets supported unary arithmetic operators.
+    /// Gets the unary arithmetic operators associated to a token.
     /// </summary>
     public static Dictionary<SyntaxKind, UnaryArithmeticOperator> UnaryArithmetic { get; } = new()
     {
@@ -28,7 +28,7 @@ internal static class OperatorSyntaxKind
     };
 
     /// <summary>
-    /// Gets supported binary logical operators.
+    /// Gets the binary logical operators associated to a token.
     /// </summary>
     public static Dictionary<SyntaxKind, BinaryLogicalOperator> BinaryLogical { get; } = new()
     {
@@ -37,7 +37,7 @@ internal static class OperatorSyntaxKind
     };
 
     /// <summary>
-    /// Gets supported unary logical operators.
+    /// Gets the unary logical operators associated to a token.
     /// </summary>
     public static Dictionary<SyntaxKind, UnaryLogicalOperator> UnaryLogical { get; } = new()
     {
@@ -45,12 +45,19 @@ internal static class OperatorSyntaxKind
     };
 
     /// <summary>
-    /// Gets supported comparison operators.
+    /// Gets the equality operators associated to a token.
+    /// </summary>
+    public static Dictionary<SyntaxKind, EqualityOperator> Equality { get; } = new()
+    {
+        { SyntaxKind.EqualsEqualsToken, EqualityOperator.Equal },
+        { SyntaxKind.ExclamationEqualsToken, EqualityOperator.NotEqual },
+    };
+
+    /// <summary>
+    /// Gets the comparison operators associated to a token.
     /// </summary>
     public static Dictionary<SyntaxKind, ComparisonOperator> Comparison { get; } = new()
     {
-        { SyntaxKind.EqualsEqualsToken, ComparisonOperator.Equal },
-        { SyntaxKind.ExclamationEqualsToken, ComparisonOperator.NotEqual },
         { SyntaxKind.GreaterThanToken, ComparisonOperator.GreaterThan },
         { SyntaxKind.GreaterThanEqualsToken, ComparisonOperator.GreaterThanOrEqual },
         { SyntaxKind.LessThanToken, ComparisonOperator.LessThan },

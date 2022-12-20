@@ -50,10 +50,12 @@ internal partial class ClassDeclarationParser
 
             if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
-            else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
-                NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
             else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
                 NewExpression = new BinaryLogicalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
+            else if (IsSupportedEqualityOperator(OperatorToken, out EqualityOperator EqualityOperator))
+                NewExpression = new EqualityExpression { Left = Left, Operator = EqualityOperator, Right = Right };
+            else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
+                NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
             else
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
@@ -130,6 +132,20 @@ internal partial class ClassDeclarationParser
         }
 
         logicalOperator = default;
+        return false;
+    }
+
+    private bool IsSupportedEqualityOperator(SyntaxToken token, out EqualityOperator equalityOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (OperatorSyntaxKind.Equality.ContainsKey(OperatorKind))
+        {
+            equalityOperator = OperatorSyntaxKind.Equality[OperatorKind];
+            return true;
+        }
+
+        equalityOperator = default;
         return false;
     }
 

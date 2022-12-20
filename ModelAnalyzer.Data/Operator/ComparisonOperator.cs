@@ -6,16 +6,6 @@
 internal enum ComparisonOperator
 {
     /// <summary>
-    /// The == operator.
-    /// </summary>
-    Equal,
-
-    /// <summary>
-    /// The != operator.
-    /// </summary>
-    NotEqual,
-
-    /// <summary>
     /// The &gt; operator.
     /// </summary>
     GreaterThan,

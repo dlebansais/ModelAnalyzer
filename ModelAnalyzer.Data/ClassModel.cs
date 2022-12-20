@@ -58,7 +58,12 @@ internal partial record ClassModel : IClassModel
     private void AppendFields(StringBuilder builder)
     {
         foreach (KeyValuePair<FieldName, Field> FieldEntry in FieldTable)
-            builder.AppendLine($"  int {FieldEntry.Value.Name}");
+        {
+            Field Field = FieldEntry.Value;
+            string TypeString = ExpressionTypeToString(Field.VariableType);
+
+            builder.AppendLine($"  {TypeString} {Field.Name}");
+        }
     }
 
     private void AppendMethods(StringBuilder builder)
@@ -76,11 +81,13 @@ internal partial record ClassModel : IClassModel
             if (Parameters.Length > 0)
                 Parameters += ", ";
 
-            Parameters += ParameterEntry.Key.Name;
+            Parameter Parameter = ParameterEntry.Value;
+            string ParameterTypeString = ExpressionTypeToString(Parameter.VariableType);
+            Parameters += $"{ParameterTypeString} {Parameter.Name}";
         }
 
-        string ReturnString = method.HasReturnValue ? "int" : "void";
-        builder.AppendLine($"  {ReturnString} {method.Name}({Parameters})");
+        string ReturnTypeString = ExpressionTypeToString(method.ReturnType);
+        builder.AppendLine($"  {ReturnTypeString} {method.Name}({Parameters})");
 
         foreach (Require Require in method.RequireList)
             AppendAssertion(builder, "require", Require.BooleanExpression);
@@ -180,5 +187,31 @@ internal partial record ClassModel : IClassModel
     {
         foreach (Invariant Invariant in InvariantList)
             builder.AppendLine($"  * {Invariant.BooleanExpression}");
+    }
+
+    private string ExpressionTypeToString(ExpressionType expressionType)
+    {
+        string Result = string.Empty;
+        bool IsHandled = false;
+
+        switch (expressionType)
+        {
+            case ExpressionType.Void:
+                Result = "void";
+                IsHandled = true;
+                break;
+            case ExpressionType.Boolean:
+                Result = "bool";
+                IsHandled = true;
+                break;
+            case ExpressionType.Integer:
+                Result = "int";
+                IsHandled = true;
+                break;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return Result;
     }
 }

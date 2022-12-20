@@ -33,7 +33,7 @@ class Program_CoreRequire_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_0
   int X
-  void Write(x)
+  void Write(int x)
   # require x >= 0
   {
     X = x;
@@ -69,7 +69,7 @@ class Program_CoreRequire_1
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_1
   int X
-  void Write(x)
+  void Write(int x)
   # require ((x >= 0) || (x >= (0 + 1))) || ((x + 1) <= 0)
   {
     X = x;
@@ -109,7 +109,7 @@ class Program_CoreRequire_2
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_2
   int X
-  void Write(x)
+  void Write(int x)
   {
     X = x;
   }
@@ -174,7 +174,7 @@ class Program_CoreRequire_4
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_4
   int X
-  void Write(x)
+  void Write(int x)
   {
     X = x;
   }
@@ -215,12 +215,12 @@ class Program_CoreRequire_5
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_5
   int X
-  void Write1(x)
+  void Write1(int x)
   # require x >= 0
   {
     X = x;
   }
-  void Write2(x)
+  void Write2(int x)
   # require x >= 0
   {
     X = x;
@@ -261,7 +261,7 @@ class Program_CoreRequire_6
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_6
   int X
-  void Write(x)
+  void Write(int x)
   # require x >= 0
   {
     X = x;

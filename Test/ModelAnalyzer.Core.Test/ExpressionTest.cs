@@ -255,7 +255,7 @@ class Program_CoreExpression_8
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_8
   int X
-  void Write(x)
+  void Write(int x)
   # require x >= 0
   # require (x + 1) >= 0
   # require True

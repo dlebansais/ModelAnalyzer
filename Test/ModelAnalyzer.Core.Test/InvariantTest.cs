@@ -33,7 +33,7 @@ class Program_CoreInvariant_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreInvariant_0
   int X
-  void Write(x)
+  void Write(int x)
   {
     X = x;
   }

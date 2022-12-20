@@ -33,6 +33,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildUnaryLogicalExpression(aliasTable, UnaryLogical);
                 IsAssigned = true;
                 break;
+            case EqualityExpression Equality:
+                Result = BuildEqualityExpression(aliasTable, Equality);
+                IsAssigned = true;
+                break;
             case ComparisonExpression Comparison:
                 Result = BuildComparisonExpression(aliasTable, Comparison);
                 IsAssigned = true;
@@ -80,6 +84,13 @@ internal partial class Verifier : IDisposable
     {
         BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, unaryLogicalExpression.Operand);
         return OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
+    }
+
+    private BoolExpr BuildEqualityExpression(AliasTable aliasTable, EqualityExpression equalityExpression)
+    {
+        Expr Left = BuildExpression<Expr>(aliasTable, equalityExpression.Left);
+        Expr Right = BuildExpression<Expr>(aliasTable, equalityExpression.Right);
+        return OperatorBuilder.Equality[equalityExpression.Operator](Context, Left, Right);
     }
 
     private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ComparisonExpression comparisonExpression)

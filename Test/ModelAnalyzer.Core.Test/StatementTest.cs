@@ -113,7 +113,7 @@ class Program_CoreStatement_3
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_3
   int X
   int Y
-  void Write(x, y)
+  void Write(int x, int y)
   {
     if (x == 0)
     {
@@ -161,7 +161,7 @@ class Program_CoreStatement_4
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_4
   int X
   int Y
-  void Write(x, y)
+  void Write(int x, int y)
   {
     if (x == 0)
       X = 0;

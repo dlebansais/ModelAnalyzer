@@ -22,7 +22,7 @@ internal class Method : IMethod
     /// <summary>
     /// Gets a value indicating whether the method returns a value.
     /// </summary>
-    required public bool HasReturnValue { get; init; }
+    required public ExpressionType ReturnType { get; init; }
 
     /// <summary>
     /// Gets the method parameters.

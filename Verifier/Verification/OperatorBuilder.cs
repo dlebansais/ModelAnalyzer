@@ -10,7 +10,7 @@ using Microsoft.Z3;
 internal static class OperatorBuilder
 {
     /// <summary>
-    /// Gets the table associating binary arithmetic operators to an expression builder.
+    /// Gets the expression builder associated to a binary arithmetic operator.
     /// </summary>
     public static Dictionary<BinaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr, ArithExpr>> BinaryArithmetic { get; } = new()
     {
@@ -21,7 +21,7 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets the table associating unary arithmetic operators to an expression builder.
+    /// Gets the expression builder associated to a unary arithmetic operator.
     /// </summary>
     public static Dictionary<UnaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr>> UnaryArithmetic { get; } = new()
     {
@@ -29,7 +29,7 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets the table associating binary logical operators to an expression builder.
+    /// Gets the expression builder associated to a binary logical operator.
     /// </summary>
     public static Dictionary<BinaryLogicalOperator, Func<Context, BoolExpr, BoolExpr, BoolExpr>> BinaryLogical { get; } = new()
     {
@@ -38,7 +38,7 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets the table associating unary logical operators to an expression builder.
+    /// Gets the expression builder associated to a unary logical operator.
     /// </summary>
     public static Dictionary<UnaryLogicalOperator, Func<Context, BoolExpr, BoolExpr>> UnaryLogical { get; } = new()
     {
@@ -46,12 +46,19 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets the table associating comparison operators to an expression builder.
+    /// Gets the expression builder associated to an equality operator.
+    /// </summary>
+    public static Dictionary<EqualityOperator, Func<Context, Expr, Expr, BoolExpr>> Equality { get; } = new()
+    {
+        { EqualityOperator.Equal, (Context ctx, Expr left, Expr right) => ctx.MkEq(left, right) },
+        { EqualityOperator.NotEqual, (Context ctx, Expr left, Expr right) => ctx.MkNot(ctx.MkEq(left, right)) },
+    };
+
+    /// <summary>
+    /// Gets the expression builder associated to a comparison operator.
     /// </summary>
     public static Dictionary<ComparisonOperator, Func<Context, ArithExpr, ArithExpr, BoolExpr>> Comparison { get; } = new()
     {
-        { ComparisonOperator.Equal, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkEq(left, right) },
-        { ComparisonOperator.NotEqual, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkNot(ctx.MkEq(left, right)) },
         { ComparisonOperator.GreaterThan, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGt(left, right) },
         { ComparisonOperator.GreaterThanOrEqual, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGe(left, right) },
         { ComparisonOperator.LessThan, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLt(left, right) },

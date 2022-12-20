@@ -28,6 +28,7 @@ class Program_CoreField_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_0
   int X
+  bool Y
 "));
     }
 

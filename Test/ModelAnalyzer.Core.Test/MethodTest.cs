@@ -31,7 +31,7 @@ class Program_CoreMethod_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_0
   int X
-  void Write(x, y)
+  void Write(int x, int y)
   {
   }
 "));
@@ -247,7 +247,7 @@ class Program_CoreMethod_7
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_7
   int X
-  void Write(x, y)
+  void Write(int x, int y)
   {
   }
 "));

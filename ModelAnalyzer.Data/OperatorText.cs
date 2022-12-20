@@ -8,7 +8,7 @@ using System.Collections.Generic;
 internal static class OperatorText
 {
     /// <summary>
-    /// Gets supported binary arithmetic operators.
+    /// Gets the text associated to a binary arithmetic operator.
     /// </summary>
     public static Dictionary<BinaryArithmeticOperator, string> BinaryArithmetic { get; } = new()
     {
@@ -19,7 +19,7 @@ internal static class OperatorText
     };
 
     /// <summary>
-    /// Gets supported unary arithmetic operators.
+    /// Gets the text associated to a unary arithmetic operator.
     /// </summary>
     public static Dictionary<UnaryArithmeticOperator, string> UnaryArithmetic { get; } = new()
     {
@@ -27,7 +27,7 @@ internal static class OperatorText
     };
 
     /// <summary>
-    /// Gets supported binary logical operators.
+    /// Gets the text associated to a binary logical operator.
     /// </summary>
     public static Dictionary<BinaryLogicalOperator, string> BinaryLogical { get; } = new()
     {
@@ -36,7 +36,7 @@ internal static class OperatorText
     };
 
     /// <summary>
-    /// Gets supported unary logical operators.
+    /// Gets the text associated to a unary logical operator.
     /// </summary>
     public static Dictionary<UnaryLogicalOperator, string> UnaryLogical { get; } = new()
     {
@@ -44,12 +44,19 @@ internal static class OperatorText
     };
 
     /// <summary>
-    /// Gets supported comparison operators.
+    /// Gets the text associated to an equality operator.
+    /// </summary>
+    public static Dictionary<EqualityOperator, string> Equality { get; } = new()
+    {
+        { EqualityOperator.Equal, "==" },
+        { EqualityOperator.NotEqual, "!=" },
+    };
+
+    /// <summary>
+    /// Gets the text associated to a comparison operator.
     /// </summary>
     public static Dictionary<ComparisonOperator, string> Comparison { get; } = new()
     {
-        { ComparisonOperator.Equal, "==" },
-        { ComparisonOperator.NotEqual, "!=" },
         { ComparisonOperator.GreaterThan, ">" },
         { ComparisonOperator.GreaterThanOrEqual, ">=" },
         { ComparisonOperator.LessThan, "<" },

@@ -41,7 +41,7 @@ internal partial class ClassDeclarationParser
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
         {
-            if (IsMethodDeclarationValid(methodDeclaration, out bool HasReturnValue))
+            if (IsMethodDeclarationValid(methodDeclaration, out ExpressionType ReturnType))
             {
                 bool IsSupported = true;
                 ParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
@@ -53,7 +53,7 @@ internal partial class ClassDeclarationParser
                 {
                     MethodName = MethodName,
                     IsSupported = IsSupported,
-                    HasReturnValue = HasReturnValue,
+                    ReturnType = ReturnType,
                     ParameterTable = ParameterTable,
                     RequireList = RequireList,
                     StatementList = StatementList,
@@ -73,7 +73,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out bool hasReturnValue)
+    private bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out ExpressionType returnType)
     {
         bool IsMethodSupported = true;
 
@@ -84,18 +84,11 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
 
-        if (!IsTypeSupported(methodDeclaration.ReturnType, out ExpressionType ReturnType))
+        if (!IsTypeSupported(methodDeclaration.ReturnType, out returnType))
         {
             LogWarning($"Unsupported method return type.");
 
-            hasReturnValue = false;
             IsMethodSupported = false;
-        }
-        else
-        {
-            Debug.Assert(ReturnType != ExpressionType.Other);
-
-            hasReturnValue = ReturnType != ExpressionType.Void;
         }
 
         foreach (SyntaxToken Modifier in methodDeclaration.Modifiers)
