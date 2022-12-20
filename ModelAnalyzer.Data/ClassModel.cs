@@ -93,7 +93,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssertion(StringBuilder builder, string text, Expression booleanExpression)
     {
-        builder.AppendLine($"  # {text} {booleanExpression.ToSimpleString()}");
+        builder.AppendLine($"  # {text} {booleanExpression}");
     }
 
     private void AppendStatements(StringBuilder builder, List<Statement> statementList, int indentation, bool forceBraces = false)

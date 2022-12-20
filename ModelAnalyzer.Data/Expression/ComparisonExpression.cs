@@ -37,6 +37,6 @@ internal class ComparisonExpression : Expression
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Left} {OperatorText.Comparison[Operator]} {Right}";
+        return ToString();
     }
 }

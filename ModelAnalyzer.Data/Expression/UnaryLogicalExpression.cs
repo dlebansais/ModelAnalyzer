@@ -25,12 +25,12 @@ internal class UnaryLogicalExpression : Expression
     public override string ToString()
     {
         string OperandString = Operand.IsSimple ? $"{Operand}" : $"({Operand.ToSimpleString()})";
-        return $"{OperatorText.UnaryLogical[Operator]} {OperandString}";
+        return $"{OperatorText.UnaryLogical[Operator]}{OperandString}";
     }
 
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{OperatorText.UnaryLogical[Operator]} {Operand}";
+        return ToString();
     }
 }

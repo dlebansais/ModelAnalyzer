@@ -31,6 +31,6 @@ internal class UnaryArithmeticExpression : Expression
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{OperatorText.UnaryArithmetic[Operator]}{Operand}";
+        return ToString();
     }
 }

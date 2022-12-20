@@ -241,6 +241,8 @@ class Program_CoreExpression_8
     }
     // Ensure: (X) >= 0
     // Ensure: X >= 0 && (X >= 1)
+    // Ensure: !(X < 0)
+    // Ensure: X >= 0 && !(X >= 1)
 }
 ");
 
@@ -255,14 +257,16 @@ class Program_CoreExpression_8
   int X
   void Write(x)
   # require x >= 0
-  # require x + 1 >= 0
+  # require (x + 1) >= (0)
   # require True
-  # require x + 1 >= -1
+  # require (x + 1) >= (-1)
   {
     X = x;
   }
-  # ensure X >= 0
-  # ensure X >= 0 && X >= 1
+  # ensure (X) >= 0
+  # ensure (X >= 0) && (X >= 1)
+  # ensure !(X < 0)
+  # ensure (X >= 0) && (!(X >= 1))
 "));
     }
 

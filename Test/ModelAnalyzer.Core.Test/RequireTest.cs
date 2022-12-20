@@ -70,7 +70,7 @@ class Program_CoreRequire_1
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_1
   int X
   void Write(x)
-  # require (x >= 0) || (x >= 0 + 1) || (x + 1) <= 0
+  # require ((x >= 0) || (x >= (0 + 1))) || ((x + 1) <= 0)
   {
     X = x;
   }

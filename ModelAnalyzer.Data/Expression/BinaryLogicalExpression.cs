@@ -37,6 +37,6 @@ internal class BinaryLogicalExpression : Expression
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Left} {OperatorText.BinaryLogical[Operator]} {Right}";
+        return ToString();
     }
 }
