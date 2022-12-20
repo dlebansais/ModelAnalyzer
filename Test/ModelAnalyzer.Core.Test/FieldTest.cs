@@ -15,6 +15,7 @@ using System;
 class Program_CoreField_0
 {
     int X;
+    bool Y;
 }
 ");
 

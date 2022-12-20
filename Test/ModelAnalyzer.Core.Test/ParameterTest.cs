@@ -15,8 +15,9 @@ using System;
 class Program_CoreParameter_0
 {
     int X;
+    bool Y;
 
-    void Write(int x)
+    void Write(int x, bool y)
     {
     }
 }
@@ -38,8 +39,6 @@ using System;
 
 class Program_CoreParameter_2
 {
-    int X;
-
     void Write(string x)
     {
     }

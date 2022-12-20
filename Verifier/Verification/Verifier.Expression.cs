@@ -99,11 +99,30 @@ internal partial class Verifier : IDisposable
         return Context.MkBool(literalBoolValueExpression.Value);
     }
 
-    private ArithExpr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)
+    private Expr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)
     {
-        string VariableName = variableValueExpression.Variable.Name;
+        IVariable Variable = variableValueExpression.Variable;
+        string VariableName = Variable.Name;
         string VariableAliasName = aliasTable.GetAlias(VariableName);
 
-        return Context.MkIntConst(VariableAliasName);
+        Expr Result = Zero;
+        bool IsHandled = false;
+
+        switch (Variable.VariableType)
+        {
+            case ExpressionType.Boolean:
+                Result = Context.MkBoolConst(VariableAliasName);
+                IsHandled = true;
+                break;
+
+            case ExpressionType.Integer:
+                Result = Context.MkIntConst(VariableAliasName);
+                IsHandled = true;
+                break;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return Result;
     }
 }

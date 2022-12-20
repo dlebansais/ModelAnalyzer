@@ -185,6 +185,10 @@ internal partial class ClassDeclarationParser
                 variableType = ExpressionType.Void;
                 break;
 
+            case SyntaxKind.BoolKeyword:
+                variableType = ExpressionType.Boolean;
+                break;
+
             case SyntaxKind.IntKeyword:
                 variableType = ExpressionType.Integer;
                 break;
