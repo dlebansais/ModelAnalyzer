@@ -14,9 +14,9 @@ public class Channel : IDisposable
     public static Guid ClientToServerGuid { get; } = new Guid("{03C9C797-C924-415E-A6F9-9112AE75E56F}");
 
     /// <summary>
-    /// Gets the max channel capacity.
+    /// Gets or sets the channel capacity.
     /// </summary>
-    public const int Capacity = 0x100000;
+    public static int Capacity { get; set; } = 0x100000;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Channel"/> class.

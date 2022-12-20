@@ -304,7 +304,7 @@ class Program_CoreClassModelManager_12
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_16
+class Program_CoreClassModelManager_13
 {
 }
 ");
@@ -321,7 +321,7 @@ class Program_CoreClassModelManager_16
         ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_17
+class Program_CoreClassModelManager_14
 {
 }
 ");
@@ -329,7 +329,7 @@ class Program_CoreClassModelManager_17
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_18
+class Program_CoreClassModelManager_15
 {
 }
 ");
@@ -337,6 +337,23 @@ class Program_CoreClassModelManager_18
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithClassDisappeared);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithLittleCapacity()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_16
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithLittleCapacity);
     }
 
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
@@ -426,31 +443,45 @@ class Program_CoreClassModelManager_18
     private void UpdateWithBlockedServerProcess(List<ClassDeclarationSyntax> classDeclarationList)
     {
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
-        IClassModel ClassModel;
+
+        BlockServerProcess(out string ExtractPath);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
-        string ExtractPath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
+
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+
+        RestoreServerProcess(ExtractPath);
+    }
+
+    private void BlockServerProcess(out string extractPath)
+    {
+        // Wait to be sure the verifier process exited.
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(5));
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+        extractPath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
 
         try
         {
-            using FileStream Stream = new(ExtractPath, FileMode.Create, FileAccess.Write);
+            using FileStream Stream = new(extractPath, FileMode.Create, FileAccess.Write);
             using StreamWriter Writer = new(Stream);
             Writer.WriteLine("Erased exe");
         }
         catch
         {
         }
+    }
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
-
-        Manager.GetVerifiedModel(ClassModel);
-
+    private void RestoreServerProcess(string extractPath)
+    {
         try
         {
             // Delete the modified file so that next test will restore it.
-            File.Delete(ExtractPath);
+            File.Delete(extractPath);
         }
         catch
         {
@@ -495,10 +526,32 @@ class Program_CoreClassModelManager_18
         Manager.RemoveMissingClasses(new List<string>() { ClassModel1.Name });
 
         // Give some time to the verifier to process the two classes.
-        Thread.Sleep(TimeSpan.FromSeconds(10));
+        Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout + Timeouts.VerificationAcknowledgeTimeout);
 
         Manager.GetVerifiedModel(ClassModel0);
         Manager.GetVerifiedModel(ClassModel1);
+    }
+
+    private void UpdateWithLittleCapacity(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        // Wait to be sure the verifier process exited. Otherwise, the different capacity will break the channel.
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(5));
+
+        int OldCapacity = Channel.Capacity;
+        Channel.Capacity = sizeof(int);
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+
+        Channel.Capacity = OldCapacity;
     }
 
     [Test]

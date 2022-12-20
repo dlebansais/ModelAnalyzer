@@ -47,7 +47,7 @@ public partial class ClassModelManager : IDisposable
 
         Log("Starting the verification loop.");
 
-        TimeSpan Timeout = TimeSpan.FromSeconds(5);
+        TimeSpan Timeout = Timeouts.VerificationAcknowledgeTimeout;
         Stopwatch Watch = new();
         Watch.Start();
 
@@ -184,9 +184,9 @@ public partial class ClassModelManager : IDisposable
 
         Log("Creating the channel to send class models.");
 
-        Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
+        using Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
 
-        TimeSpan Timeout = TimeSpan.FromSeconds(5);
+        TimeSpan Timeout = Timeouts.VerifierProcessLaunchTimeout;
         Stopwatch Watch = new();
         Watch.Start();
 

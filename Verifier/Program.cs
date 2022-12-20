@@ -49,7 +49,7 @@ internal class Program
             return;
         }
 
-        TimeSpan Timeout = TimeSpan.FromSeconds(60);
+        TimeSpan Timeout = Timeouts.VerificationIdleTimeout;
         Stopwatch Watch = new();
         Watch.Start();
 
