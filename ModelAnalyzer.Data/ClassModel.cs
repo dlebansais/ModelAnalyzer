@@ -80,7 +80,7 @@ internal partial record ClassModel : IClassModel
         }
 
         string ReturnString = method.HasReturnValue ? "int" : "void";
-        builder.AppendLine($"  {ReturnString} {method.MethodName.Name}({Parameters})");
+        builder.AppendLine($"  {ReturnString} {method.Name}({Parameters})");
 
         foreach (Require Require in method.RequireList)
             if (Require.BooleanExpression is Expression BooleanExpression)

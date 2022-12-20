@@ -529,10 +529,11 @@ class Program_CoreClassModelManager_16
         CompilationContext CompilationContext = CompilationContext.GetAnother();
         ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0);
         ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1);
-        Manager.RemoveMissingClasses(new List<string>() { ClassModel1.Name });
 
         // Give some time to the verifier to process the two classes.
         Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout + Timeouts.VerificationAcknowledgeTimeout);
+
+        Manager.RemoveMissingClasses(new List<string>() { ClassModel1.Name });
 
         Manager.GetVerifiedModel(ClassModel0);
         Manager.GetVerifiedModel(ClassModel1);
