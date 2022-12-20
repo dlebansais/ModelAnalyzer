@@ -14,4 +14,7 @@ public class UnsupportedParameter : IUnsupportedParameter
 
     /// <inheritdoc/>
     required public Location Location { get; init; }
+
+    /// <inheritdoc/>
+    public ExpressionType VariableType => ExpressionType.Other;
 }

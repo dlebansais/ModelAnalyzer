@@ -11,6 +11,10 @@ internal class VariableValueExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => true;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => Variable.VariableType;
+
     /// <summary>
     /// Gets the variable.
     /// </summary>

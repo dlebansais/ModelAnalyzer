@@ -11,6 +11,10 @@ internal class ComparisonExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Bool;
+
     /// <summary>
     /// Gets the left expression.
     /// </summary>

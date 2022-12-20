@@ -11,6 +11,10 @@ internal class BinaryArithmeticExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Int;
+
     /// <summary>
     /// Gets the left expression.
     /// </summary>

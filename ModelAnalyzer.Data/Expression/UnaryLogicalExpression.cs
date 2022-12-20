@@ -11,6 +11,10 @@ internal class UnaryLogicalExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Bool;
+
     /// <summary>
     /// Gets the logical operator.
     /// </summary>

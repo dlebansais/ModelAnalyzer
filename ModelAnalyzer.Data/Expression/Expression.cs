@@ -9,4 +9,9 @@ internal abstract class Expression : IExpression
     /// Gets a value indicating whether the expression is simple.
     /// </summary>
     public abstract bool IsSimple { get; }
+
+    /// <summary>
+    /// Gets the expression type.
+    /// </summary>
+    public abstract ExpressionType ExpressionType { get; }
 }

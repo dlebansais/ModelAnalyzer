@@ -233,7 +233,7 @@ internal partial class ClassDeclarationParser
         Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
         if (Expression is not null)
         {
-            if (IsBooleanExpression(Expression))
+            if (Expression.ExpressionType == ExpressionType.Bool)
             {
                 booleanExpression = Expression;
                 return true;
@@ -243,11 +243,6 @@ internal partial class ClassDeclarationParser
         }
 
         return false;
-    }
-
-    private bool IsBooleanExpression(Expression expression)
-    {
-        return expression is BinaryLogicalExpression || expression is UnaryLogicalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }
 
     private bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)

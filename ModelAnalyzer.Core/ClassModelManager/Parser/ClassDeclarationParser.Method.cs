@@ -115,9 +115,9 @@ internal partial class ClassDeclarationParser
             // Ignore duplicate names, the compiler will catch them.
             if (!ParameterTable.ContainsItem(ParameterName))
             {
-                if (IsParameterSupported(Parameter, fieldTable))
+                if (IsParameterSupported(Parameter, fieldTable, out ExpressionType ParameterType))
                 {
-                    Parameter NewParameter = new Parameter() { ParameterName = ParameterName };
+                    Parameter NewParameter = new Parameter() { ParameterName = ParameterName, VariableType = ParameterType };
                     ParameterTable.AddItem(ParameterName, NewParameter);
                 }
                 else
@@ -133,7 +133,7 @@ internal partial class ClassDeclarationParser
         return ParameterTable;
     }
 
-    private bool IsParameterSupported(ParameterSyntax parameter, FieldTable fieldTable)
+    private bool IsParameterSupported(ParameterSyntax parameter, FieldTable fieldTable, out ExpressionType parameterType)
     {
         bool IsParameterSupported = true;
 
@@ -158,6 +158,7 @@ internal partial class ClassDeclarationParser
             IsParameterSupported = false;
         }
 
+        parameterType = ExpressionType.Int;
         string ParameterName = parameter.Identifier.ValueText;
 
         if (TryFindFieldByName(fieldTable, ParameterName, out _))

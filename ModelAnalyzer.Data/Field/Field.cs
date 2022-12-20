@@ -15,4 +15,7 @@ internal class Field : IField
 
     /// <inheritdoc/>
     public string Name { get { return FieldName.Name; } }
+
+    /// <inheritdoc/>
+    required public ExpressionType VariableType { get; init; }
 }

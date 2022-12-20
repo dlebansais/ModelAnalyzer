@@ -9,4 +9,9 @@ public interface IVariable
     /// Gets the variable name.
     /// </summary>
     string Name { get; }
+
+    /// <summary>
+    /// Gets the variable type.
+    /// </summary>
+    ExpressionType VariableType { get; }
 }

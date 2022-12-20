@@ -50,11 +50,12 @@ internal partial class ClassDeclarationParser
             IsFieldSupported = false;
         }
 
+        ExpressionType FieldType = ExpressionType.Int;
         foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-            AddField(Variable, fieldTable, unsupported, IsFieldSupported);
+            AddField(Variable, fieldTable, unsupported, IsFieldSupported, FieldType);
     }
 
-    private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported)
+    private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported, ExpressionType fieldType)
     {
         FieldName FieldName = new() { Name = variable.Identifier.ValueText };
 
@@ -72,7 +73,7 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { FieldName = FieldName };
+                Field NewField = new Field { FieldName = FieldName, VariableType = fieldType };
                 fieldTable.AddItem(FieldName, NewField);
             }
             else

@@ -11,6 +11,10 @@ internal class LiteralIntValueExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => true;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Int;
+
     /// <summary>
     /// Gets or sets the literal value.
     /// </summary>

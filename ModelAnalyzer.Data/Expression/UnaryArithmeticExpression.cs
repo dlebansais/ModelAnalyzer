@@ -11,6 +11,10 @@ internal class UnaryArithmeticExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => Operand is LiteralIntValueExpression;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Int;
+
     /// <summary>
     /// Gets the unary arithmetic operator.
     /// </summary>

@@ -11,6 +11,10 @@ internal class LiteralBoolValueExpression : Expression
     [JsonIgnore]
     public override bool IsSimple => true;
 
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override ExpressionType ExpressionType => ExpressionType.Bool;
+
     /// <summary>
     /// Gets or sets a value indicating whether the literal value is true.
     /// </summary>
