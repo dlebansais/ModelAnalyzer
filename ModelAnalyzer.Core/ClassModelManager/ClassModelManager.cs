@@ -192,7 +192,7 @@ public partial class ClassModelManager : IDisposable
                     {
                         ClassModelExchange = NewClassModelExchange,
                         IsVerificationRequestSent = false,
-                        IsVerified = false,
+                        VerificationResult = VerificationResult.Default,
                     };
 
                     Context.UpdateClassModel(NewVerificationState);
@@ -221,7 +221,7 @@ public partial class ClassModelManager : IDisposable
                     {
                         ClassModelExchange = NewClassModelExchange,
                         IsVerificationRequestSent = false,
-                        IsVerified = false,
+                        VerificationResult = VerificationResult.Default,
                     };
 
                     Context.AddClassModel(NewVerificationState);

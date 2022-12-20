@@ -87,7 +87,7 @@ public partial class ClassModelManager : IDisposable
                 isFound = true;
 
                 VerificationState VerificationState = Context.ClassModelTable[className];
-                isVerified = VerificationState.IsVerified;
+                isVerified = VerificationState.VerificationResult != VerificationResult.Default;
                 isInvariantViolated = VerificationState.ClassModelExchange.ClassModel.IsInvariantViolated;
             }
             else
@@ -151,7 +151,7 @@ public partial class ClassModelManager : IDisposable
             ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
             ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
 
-            Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, IsVerified = true };
+            Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, VerificationResult = verificationResult };
             return true;
         }
 

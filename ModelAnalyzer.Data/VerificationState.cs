@@ -16,7 +16,7 @@ internal partial record VerificationState
     required public bool IsVerificationRequestSent { get; init; }
 
     /// <summary>
-    /// Gets a value indicating whether the model is verified.
+    /// Gets the verification result.
     /// </summary>
-    required public bool IsVerified { get; init; }
+    required public VerificationResult VerificationResult { get; init; }
 }
