@@ -80,6 +80,12 @@ public class Extractor
         return ExtractedPathTable[fileName];
     }
 
+    public static void Reset()
+    {
+        ExtractedPathTable.Clear();
+        LastExceptionMessage = string.Empty;
+    }
+
     public static Dictionary<string, string> ExtractedPathTable { get; } = new();
     public static string LastExceptionMessage { get; private set; } = string.Empty;
 }

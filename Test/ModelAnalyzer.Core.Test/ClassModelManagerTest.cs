@@ -323,7 +323,9 @@ using System;
 
 class Program_CoreClassModelManager_14
 {
+    int X;
 }
+// Invariant: X > 0
 ");
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
@@ -331,7 +333,9 @@ using System;
 
 class Program_CoreClassModelManager_15
 {
+    int X;
 }
+// Invariant: X > 0
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
@@ -492,6 +496,9 @@ class Program_CoreClassModelManager_16
         catch
         {
         }
+
+        // Make the extractor will not assume it's already extracted.
+        Extractor.Reset();
     }
 
     private void UpdateWithCorruptedResult(List<ClassDeclarationSyntax> classDeclarationList)
@@ -528,15 +535,16 @@ class Program_CoreClassModelManager_16
 
         CompilationContext CompilationContext = CompilationContext.GetAnother();
         ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0);
+        Manager.RemoveMissingClasses(new List<string>());
         ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1);
 
-        // Give some time to the verifier to process the two classes.
-        Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout + Timeouts.VerificationAcknowledgeTimeout);
+        Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout);
 
-        Manager.RemoveMissingClasses(new List<string>() { ClassModel1.Name });
+        ClassModel0 = Manager.GetVerifiedModel(ClassModel0);
+        ClassModel1 = Manager.GetVerifiedModel(ClassModel1);
 
-        Manager.GetVerifiedModel(ClassModel0);
-        Manager.GetVerifiedModel(ClassModel1);
+        Assert.That(ClassModel0.IsInvariantViolated, Is.False);
+        Assert.That(ClassModel1.IsInvariantViolated, Is.True);
     }
 
     private void UpdateWithLittleCapacity(List<ClassDeclarationSyntax> classDeclarationList)
