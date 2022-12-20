@@ -193,12 +193,6 @@ internal partial class ClassDeclarationParser
 
     private Expression? TryParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ParenthesizedExpressionSyntax parenthesizedExpression)
     {
-        Expression? NewExpression = null;
-        Expression? InsideExpression = ParseExpression(fieldTable, parameterTable, unsupported, parenthesizedExpression.Expression, isNested: true);
-
-        if (InsideExpression is Expression Inside)
-            NewExpression = new ParenthesizedExpression { Inside = Inside };
-
-        return NewExpression;
+        return ParseExpression(fieldTable, parameterTable, unsupported, parenthesizedExpression.Expression, isNested: true);
     }
 }
