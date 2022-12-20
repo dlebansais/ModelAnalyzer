@@ -19,7 +19,7 @@ internal class BinaryConditionalExpression : Expression
     /// <summary>
     /// Gets the logical operator.
     /// </summary>
-    required public LogicalOperator Operator { get; init; }
+    required public BinaryLogicalOperator Operator { get; init; }
 
     /// <summary>
     /// Gets the right expression.
@@ -31,12 +31,12 @@ internal class BinaryConditionalExpression : Expression
     {
         string LeftString = Left.IsSimple ? $"{Left}" : $"({Left.ToSimpleString()})";
         string RightString = Right.IsSimple ? $"{Right}" : $"({Right.ToSimpleString()})";
-        return $"{LeftString} {OperatorText.Logical[Operator]} {RightString}";
+        return $"{LeftString} {OperatorText.BinaryLogical[Operator]} {RightString}";
     }
 
     /// <inheritdoc/>
     public override string ToSimpleString()
     {
-        return $"{Left} {OperatorText.Logical[Operator]} {Right}";
+        return $"{Left} {OperatorText.BinaryLogical[Operator]} {Right}";
     }
 }

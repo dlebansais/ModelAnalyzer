@@ -34,7 +34,7 @@ class Program_CoreExpression_0
 
     [Test]
     [Category("Core")]
-    public void BinaryExpressionTest()
+    public void BinaryArithmeticExpressionTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -62,7 +62,7 @@ class Program_CoreExpression_1
 
     [Test]
     [Category("Core")]
-    public void BinaryExpressionTest_InvalidOperator()
+    public void BinaryArithmeticExpressionTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -143,12 +143,66 @@ class Program_CoreExpression_4
 
     [Test]
     [Category("Core")]
-    public void ParenthesizedExpressionTest()
+    public void UnaryConditionalTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreExpression_5
+{
+    void Write(int x)
+    {
+        if (!(x == 0))
+            if (!true)
+            {
+            }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnaryConditionalTest_InvalidOperator()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_6
+{
+    int X;
+
+    void Write(int x)
+    {
+        if (!(x == 0)) // Token '!' is replaced with '%'.
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration, LocateUnaryConditionalOperator, SyntaxKind.PercentToken);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ParenthesizedExpressionTest()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_7
 {
     int X;
 
@@ -173,7 +227,7 @@ class Program_CoreExpression_5
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_6
+class Program_CoreExpression_8
 {
     int X;
 
@@ -197,7 +251,7 @@ class Program_CoreExpression_6
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_6
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_8
   int X
   void Write(x)
   # require x >= 0
@@ -219,7 +273,7 @@ class Program_CoreExpression_6
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_7
+class Program_CoreExpression_9
 {
     int X;
 
@@ -247,7 +301,7 @@ class Program_CoreExpression_7
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_8
+class Program_CoreExpression_10
 {
     int X;
 
@@ -275,7 +329,7 @@ class Program_CoreExpression_8
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_9
+class Program_CoreExpression_11
 {
     int X;
 
@@ -303,7 +357,7 @@ class Program_CoreExpression_9
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_10
+class Program_CoreExpression_12
 {
     int X;
 
@@ -331,7 +385,7 @@ class Program_CoreExpression_10
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_11
+class Program_CoreExpression_13
 {
     int X;
 
@@ -354,12 +408,12 @@ class Program_CoreExpression_11
 
     [Test]
     [Category("Core")]
-    public void UnaryExpressionTest()
+    public void UnaryArithmeticExpressionTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_12
+class Program_CoreExpression_14
 {
     int X;
 
@@ -379,12 +433,12 @@ class Program_CoreExpression_12
 
     [Test]
     [Category("Core")]
-    public void UnaryExpressionTest_InvalidOperator()
+    public void UnaryArithmeticExpressionTest_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_13
+class Program_CoreExpression_15
 {
     int X;
 
@@ -405,12 +459,12 @@ class Program_CoreExpression_13
 
     [Test]
     [Category("Core")]
-    public void UnaryExpressionTest_InvalidOperand()
+    public void UnaryArithmeticExpressionTest_InvalidOperand()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_14
+class Program_CoreExpression_16
 {
     int X;
 
@@ -460,6 +514,17 @@ class Program_CoreExpression_14
         IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
         BinaryExpressionSyntax BinaryExpression = (BinaryExpressionSyntax)IfStatement.Condition;
         SyntaxToken Operator = BinaryExpression.OperatorToken;
+
+        return Operator;
+    }
+
+    private SyntaxToken LocateUnaryConditionalOperator(ClassDeclarationSyntax classDeclaration)
+    {
+        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
+        BlockSyntax Block = Method.Body!;
+        IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
+        PrefixUnaryExpressionSyntax UnaryExpression = (PrefixUnaryExpressionSyntax)IfStatement.Condition;
+        SyntaxToken Operator = UnaryExpression.OperatorToken;
 
         return Operator;
     }

@@ -27,12 +27,20 @@ internal static class OperatorText
     };
 
     /// <summary>
-    /// Gets supported logical operators.
+    /// Gets supported binary logical operators.
     /// </summary>
-    public static Dictionary<LogicalOperator, string> Logical { get; } = new()
+    public static Dictionary<BinaryLogicalOperator, string> BinaryLogical { get; } = new()
     {
-        { LogicalOperator.Or, "||" },
-        { LogicalOperator.And, "&&" },
+        { BinaryLogicalOperator.Or, "||" },
+        { BinaryLogicalOperator.And, "&&" },
+    };
+
+    /// <summary>
+    /// Gets supported unary logical operators.
+    /// </summary>
+    public static Dictionary<UnaryLogicalOperator, string> UnaryLogical { get; } = new()
+    {
+        { UnaryLogicalOperator.Not, "!" },
     };
 
     /// <summary>

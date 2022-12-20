@@ -10,7 +10,7 @@ using Microsoft.Z3;
 internal static class OperatorBuilder
 {
     /// <summary>
-    /// Gets supported binary arithmetic operators.
+    /// Gets the table associating binary arithmetic operators to an expression builder.
     /// </summary>
     public static Dictionary<BinaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr, ArithExpr>> BinaryArithmetic { get; } = new()
     {
@@ -21,7 +21,7 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets supported unary arithmetic operators.
+    /// Gets the table associating unary arithmetic operators to an expression builder.
     /// </summary>
     public static Dictionary<UnaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr>> UnaryArithmetic { get; } = new()
     {
@@ -29,16 +29,24 @@ internal static class OperatorBuilder
     };
 
     /// <summary>
-    /// Gets supported logical operators.
+    /// Gets the table associating binary logical operators to an expression builder.
     /// </summary>
-    public static Dictionary<LogicalOperator, Func<Context, BoolExpr, BoolExpr, BoolExpr>> Logical { get; } = new()
+    public static Dictionary<BinaryLogicalOperator, Func<Context, BoolExpr, BoolExpr, BoolExpr>> BinaryLogical { get; } = new()
     {
-        { LogicalOperator.Or, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkOr(left, right) },
-        { LogicalOperator.And, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkAnd(left, right) },
+        { BinaryLogicalOperator.Or, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkOr(left, right) },
+        { BinaryLogicalOperator.And, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkAnd(left, right) },
     };
 
     /// <summary>
-    /// Gets supported comparison operators.
+    /// Gets the table associating unary logical operators to an expression builder.
+    /// </summary>
+    public static Dictionary<UnaryLogicalOperator, Func<Context, BoolExpr, BoolExpr>> UnaryLogical { get; } = new()
+    {
+        { UnaryLogicalOperator.Not, (Context ctx, BoolExpr operand) => ctx.MkNot(operand) },
+    };
+
+    /// <summary>
+    /// Gets the table associating comparison operators to an expression builder.
     /// </summary>
     public static Dictionary<ComparisonOperator, Func<Context, ArithExpr, ArithExpr, BoolExpr>> Comparison { get; } = new()
     {

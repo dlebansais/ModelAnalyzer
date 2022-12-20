@@ -1,9 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 /// <summary>
-/// Represents a logical operator.
+/// Represents a binary logical operator.
 /// </summary>
-internal enum LogicalOperator
+internal enum BinaryLogicalOperator
 {
     /// <summary>
     /// The || operator.

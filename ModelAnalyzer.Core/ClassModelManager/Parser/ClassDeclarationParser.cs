@@ -247,7 +247,7 @@ internal partial class ClassDeclarationParser
 
     private bool IsBooleanExpression(Expression expression)
     {
-        return expression is BinaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
+        return expression is BinaryConditionalExpression || expression is UnaryConditionalExpression || expression is ComparisonExpression || expression is LiteralBoolValueExpression;
     }
 
     private bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)

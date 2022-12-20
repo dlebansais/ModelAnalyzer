@@ -56,7 +56,7 @@ The analyzer supports:
   * The `+`, `-`, `*` and `/` binary operators.
   * The `-` unary operator.
   * Parenthesis.
-  * The `&&` and `||` logical operators.
+  * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer constants (ex: `0`), `true` and `false`.
   * Variables, either fields or parameters.

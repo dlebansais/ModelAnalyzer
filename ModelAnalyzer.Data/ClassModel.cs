@@ -83,14 +83,12 @@ internal partial record ClassModel : IClassModel
         builder.AppendLine($"  {ReturnString} {method.Name}({Parameters})");
 
         foreach (Require Require in method.RequireList)
-            if (Require.BooleanExpression is Expression BooleanExpression)
-                AppendAssertion(builder, "require", BooleanExpression);
+            AppendAssertion(builder, "require", Require.BooleanExpression);
 
         AppendStatements(builder, method.StatementList, 0, forceBraces: true);
 
         foreach (Ensure Ensure in method.EnsureList)
-            if (Ensure.BooleanExpression is Expression BooleanExpression)
-                AppendAssertion(builder, "ensure", BooleanExpression);
+            AppendAssertion(builder, "ensure", Ensure.BooleanExpression);
     }
 
     private void AppendAssertion(StringBuilder builder, string text, Expression booleanExpression)

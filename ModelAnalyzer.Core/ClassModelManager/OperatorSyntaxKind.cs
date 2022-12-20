@@ -28,12 +28,20 @@ internal static class OperatorSyntaxKind
     };
 
     /// <summary>
-    /// Gets supported logical operators.
+    /// Gets supported binary logical operators.
     /// </summary>
-    public static Dictionary<SyntaxKind, LogicalOperator> Logical { get; } = new()
+    public static Dictionary<SyntaxKind, BinaryLogicalOperator> BinaryLogical { get; } = new()
     {
-        { SyntaxKind.BarBarToken, LogicalOperator.Or },
-        { SyntaxKind.AmpersandAmpersandToken, LogicalOperator.And },
+        { SyntaxKind.BarBarToken, BinaryLogicalOperator.Or },
+        { SyntaxKind.AmpersandAmpersandToken, BinaryLogicalOperator.And },
+    };
+
+    /// <summary>
+    /// Gets supported unary logical operators.
+    /// </summary>
+    public static Dictionary<SyntaxKind, UnaryLogicalOperator> UnaryLogical { get; } = new()
+    {
+        { SyntaxKind.ExclamationToken, UnaryLogicalOperator.Not },
     };
 
     /// <summary>
