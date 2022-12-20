@@ -29,14 +29,8 @@ internal class BinaryLogicalExpression : Expression
     /// <inheritdoc/>
     public override string ToString()
     {
-        string LeftString = Left.IsSimple ? $"{Left}" : $"({Left.ToSimpleString()})";
-        string RightString = Right.IsSimple ? $"{Right}" : $"({Right.ToSimpleString()})";
+        string LeftString = Left.IsSimple ? $"{Left}" : $"({Left})";
+        string RightString = Right.IsSimple ? $"{Right}" : $"({Right})";
         return $"{LeftString} {OperatorText.BinaryLogical[Operator]} {RightString}";
-    }
-
-    /// <inheritdoc/>
-    public override string ToSimpleString()
-    {
-        return ToString();
     }
 }

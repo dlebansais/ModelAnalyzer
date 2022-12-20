@@ -21,10 +21,4 @@ internal class LiteralBoolValueExpression : Expression
     {
         return $"{Value}";
     }
-
-    /// <inheritdoc/>
-    public override string ToSimpleString()
-    {
-        return ToString();
-    }
 }

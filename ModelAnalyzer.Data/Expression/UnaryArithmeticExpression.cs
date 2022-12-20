@@ -24,13 +24,7 @@ internal class UnaryArithmeticExpression : Expression
     /// <inheritdoc/>
     public override string ToString()
     {
-        string OperandString = Operand.IsSimple ? $"{Operand}" : $"({Operand.ToSimpleString()})";
+        string OperandString = Operand.IsSimple ? $"{Operand}" : $"({Operand})";
         return $"{OperatorText.UnaryArithmetic[Operator]}{OperandString}";
-    }
-
-    /// <inheritdoc/>
-    public override string ToSimpleString()
-    {
-        return ToString();
     }
 }
