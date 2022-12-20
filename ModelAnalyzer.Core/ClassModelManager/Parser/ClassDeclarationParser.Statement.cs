@@ -91,13 +91,18 @@ internal partial class ClassDeclarationParser
     {
         Statement? NewStatement = null;
 
-        if (expressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression && AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
+        if (expressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression)
         {
-            if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
+            if (AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
             {
-                Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
-                if (Expression is not null)
-                    NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
+                {
+                    Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
+                    if (Expression is not null)
+                        NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                }
+                else
+                    Log($"Unknown assignment statement destination.");
             }
             else
                 Log($"Unsupported assignment statement destination.");

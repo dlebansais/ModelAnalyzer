@@ -96,7 +96,7 @@ public abstract class Analyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(Id, classDeclaration, isAsyncRunRequested: IsAsyncRunRequested);
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: IsAsyncRunRequested);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
 
         ReportDiagnostic(context, classDeclaration, ClassModel);

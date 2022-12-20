@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 public static class CompilationContextHelper
 {
-    public static CompilationContext ToCompilationContext(string diagnosticId, ClassDeclarationSyntax classDeclaration, bool isAsyncRunRequested)
+    public static CompilationContext ToCompilationContext(ClassDeclarationSyntax classDeclaration, bool isAsyncRunRequested)
     {
-        return new CompilationContext(diagnosticId, classDeclaration, isAsyncRunRequested);
+        return new CompilationContext(classDeclaration, isAsyncRunRequested);
     }
 }

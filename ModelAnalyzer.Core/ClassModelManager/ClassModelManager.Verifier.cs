@@ -16,7 +16,7 @@ public partial class ClassModelManager : IDisposable
 {
     private Channel InitChannel()
     {
-        Channel Channel = new Channel(ReceiveChannelGuid, Mode.ReceiveShared);
+        Channel Channel = new Channel(ReceiveChannelGuid, Mode.Receive);
         Channel.Open();
 
         return Channel;

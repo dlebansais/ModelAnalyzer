@@ -61,9 +61,6 @@ public class Channel : IDisposable
                 case Mode.Receive:
                     File = MemoryMappedFile.CreateNew(ChannelName, CapacityWithHeadTail, MemoryMappedFileAccess.ReadWrite);
                     break;
-                case Mode.ReceiveShared:
-                    File = MemoryMappedFile.CreateOrOpen(ChannelName, CapacityWithHeadTail, MemoryMappedFileAccess.ReadWrite);
-                    break;
             }
 
             Accessor = File.CreateViewAccessor();

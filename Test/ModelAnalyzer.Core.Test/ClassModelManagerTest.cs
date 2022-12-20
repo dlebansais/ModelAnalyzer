@@ -2,8 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
 using System.Threading.Tasks;
+using FileExtractor;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
@@ -246,7 +247,7 @@ class Program_CoreClassModelManager_9
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithBlockedChannel()
+    public void ClassModelManagerTest_UpdateWithBlockedClientChannel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -258,7 +259,41 @@ class Program_CoreClassModelManager_10
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedChannel);
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedClientChannel);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithBlockedServerChannel()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_11
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerChannel);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManagerTest_UpdateWithBlockedServerProcess()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_12
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerProcess);
     }
 
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
@@ -307,7 +342,7 @@ class Program_CoreClassModelManager_10
         Manager.GetVerifiedModel(ClassModel);
     }
 
-    private void UpdateWithBlockedChannel(List<ClassDeclarationSyntax> classDeclarationList)
+    private void UpdateWithBlockedClientChannel(List<ClassDeclarationSyntax> classDeclarationList)
     {
         ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
@@ -324,6 +359,59 @@ class Program_CoreClassModelManager_10
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void UpdateWithBlockedServerChannel(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        Guid ClientToServerGuid = ProcessCommunication.Channel.ClientToServerGuid;
+
+        using Channel Channel = new Channel(ClientToServerGuid, Mode.Send);
+        Channel.Open();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
+    private void UpdateWithBlockedServerProcess(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+        string ExtractPath = Extractor.GetExtractedPath(Extractor.VerifierFileName);
+
+        try
+        {
+            using FileStream Stream = new(ExtractPath, FileMode.Create, FileAccess.Write);
+            using StreamWriter Writer = new(Stream);
+            Writer.WriteLine("Erased exe");
+        }
+        catch
+        {
+        }
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+
+        try
+        {
+            // Delete the modified file so that next test will restore it.
+            File.Delete(ExtractPath);
+        }
+        catch
+        {
+        }
     }
 
     [Test]

@@ -14,9 +14,4 @@ public enum Mode
     /// The receive mode.
     /// </summary>
     Receive,
-
-    /// <summary>
-    /// The receive mode, can be shared.
-    /// </summary>
-    ReceiveShared,
 }
