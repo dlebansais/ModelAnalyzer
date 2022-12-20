@@ -13,7 +13,7 @@ internal class LiteralBoolValueExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Bool;
+    public override ExpressionType ExpressionType => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets or sets a value indicating whether the literal value is true.

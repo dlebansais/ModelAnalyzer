@@ -167,18 +167,29 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsTypeSupported(TypeSyntax? type, out bool isVoid)
+    private bool IsTypeSupported(TypeSyntax? type, out ExpressionType variableType)
     {
-        isVoid = false;
+        variableType = ExpressionType.Other;
 
         if (type is not PredefinedTypeSyntax PredefinedType)
             return false;
 
         SyntaxKind TypeKind = PredefinedType.Keyword.Kind();
-        if (TypeKind != SyntaxKind.IntKeyword && TypeKind != SyntaxKind.VoidKeyword)
-            return false;
 
-        isVoid = TypeKind == SyntaxKind.VoidKeyword;
+        switch (TypeKind)
+        {
+            default:
+                return false;
+
+            case SyntaxKind.VoidKeyword:
+                variableType = ExpressionType.Void;
+                break;
+
+            case SyntaxKind.IntKeyword:
+                variableType = ExpressionType.Integer;
+                break;
+        }
+
         return true;
     }
 
@@ -233,7 +244,7 @@ internal partial class ClassDeclarationParser
         Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
         if (Expression is not null)
         {
-            if (Expression.ExpressionType == ExpressionType.Bool)
+            if (Expression.ExpressionType == ExpressionType.Boolean)
             {
                 booleanExpression = Expression;
                 return true;

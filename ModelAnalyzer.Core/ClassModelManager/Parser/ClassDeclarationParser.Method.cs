@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -67,7 +68,7 @@ internal partial class ClassDeclarationParser
                     ReportUnsupportedEnsures(unsupported, TriviaList);
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
-                unsupported.AddUnsupportedMethod(Location, out UnsupportedMethod UnsupportedMethod);
+                unsupported.AddUnsupportedMethod(Location);
             }
         }
     }
@@ -83,7 +84,7 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
 
-        if (!IsTypeSupported(methodDeclaration.ReturnType, out bool IsVoidReturn))
+        if (!IsTypeSupported(methodDeclaration.ReturnType, out ExpressionType ReturnType))
         {
             LogWarning($"Unsupported method return type.");
 
@@ -91,7 +92,11 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
         else
-            hasReturnValue = !IsVoidReturn;
+        {
+            Debug.Assert(ReturnType != ExpressionType.Other);
+
+            hasReturnValue = ReturnType != ExpressionType.Void;
+        }
 
         foreach (SyntaxToken Modifier in methodDeclaration.Modifiers)
             if (!Modifier.IsKind(SyntaxKind.PrivateKeyword) && !Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword))
@@ -123,7 +128,7 @@ internal partial class ClassDeclarationParser
                 else
                 {
                     Location Location = Parameter.GetLocation();
-                    unsupported.AddUnsupportedParameter(Location, out UnsupportedParameter UnsupportedParameter);
+                    unsupported.AddUnsupportedParameter(Location);
                 }
             }
         }
@@ -151,14 +156,13 @@ internal partial class ClassDeclarationParser
             IsParameterSupported = false;
         }
 
-        if (!IsTypeSupported(parameter.Type, out _))
+        if (!IsTypeSupported(parameter.Type, out parameterType))
         {
             LogWarning($"Unsupported parameter type.");
 
             IsParameterSupported = false;
         }
 
-        parameterType = ExpressionType.Int;
         string ParameterName = parameter.Identifier.ValueText;
 
         if (TryFindFieldByName(fieldTable, ParameterName, out _))

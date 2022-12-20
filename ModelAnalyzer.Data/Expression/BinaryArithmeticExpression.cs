@@ -13,7 +13,7 @@ internal class BinaryArithmeticExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Int;
+    public override ExpressionType ExpressionType => ExpressionType.Integer;
 
     /// <summary>
     /// Gets the left expression.

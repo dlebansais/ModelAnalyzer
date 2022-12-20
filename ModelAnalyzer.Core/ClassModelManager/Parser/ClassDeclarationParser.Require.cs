@@ -56,7 +56,7 @@ internal partial class ClassDeclarationParser
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedRequire(Text, Location, out UnsupportedRequire UnsupportedRequire);
+            unsupported.AddUnsupportedRequire(Text, Location);
         }
     }
 
@@ -80,6 +80,6 @@ internal partial class ClassDeclarationParser
         Log($"Require '{Text}' not supported at this location.");
 
         Location Location = GetLocationInComment(trivia, pattern);
-        unsupported.AddUnsupportedRequire(Text, Location, out _);
+        unsupported.AddUnsupportedRequire(Text, Location);
     }
 }

@@ -59,7 +59,7 @@ internal partial class ClassDeclarationParser
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedEnsure(Text, Location, out UnsupportedEnsure UnsupportedEnsure);
+            unsupported.AddUnsupportedEnsure(Text, Location);
         }
     }
 
@@ -83,6 +83,6 @@ internal partial class ClassDeclarationParser
         Log($"Ensure '{Text}' not supported at this location.");
 
         Location Location = GetLocationInComment(trivia, pattern);
-        unsupported.AddUnsupportedEnsure(Text, Location, out _);
+        unsupported.AddUnsupportedEnsure(Text, Location);
     }
 }

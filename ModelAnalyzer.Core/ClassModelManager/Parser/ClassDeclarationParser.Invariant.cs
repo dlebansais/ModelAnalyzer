@@ -69,7 +69,7 @@ internal partial class ClassDeclarationParser
         else
         {
             Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedInvariant(Text, Location, out UnsupportedInvariant UnsupportedInvariant);
+            unsupported.AddUnsupportedInvariant(Text, Location);
         }
     }
 }

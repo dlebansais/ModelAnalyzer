@@ -30,7 +30,7 @@ internal partial class ClassDeclarationParser
 
         if (NewExpression is null)
         {
-            unsupported.AddUnsupportedExpression(Location, out UnsupportedExpression UnsupportedExpression);
+            unsupported.AddUnsupportedExpression(Location);
         }
         else if (!isNested) // Only log the top-level expression.
             Log($"Expression analyzed: '{NewExpression}'.");

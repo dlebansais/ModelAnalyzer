@@ -35,11 +35,10 @@ public record Unsupported : IUnsupported
     /// Adds an unsupported field.
     /// </summary>
     /// <param name="location">The field location.</param>
-    /// <param name="newItem">The added field upon return.</param>
-    public void AddUnsupportedField(Location location, out UnsupportedField newItem)
+    public void AddUnsupportedField(Location location)
     {
-        newItem = new UnsupportedField { Location = location };
-        InternalFields.Add(newItem);
+        UnsupportedField NewItem = new UnsupportedField { Location = location };
+        InternalFields.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -50,11 +49,10 @@ public record Unsupported : IUnsupported
     /// Adds an unsupported field.
     /// </summary>
     /// <param name="location">The method location.</param>
-    /// <param name="newItem">The added method upon return.</param>
-    public void AddUnsupportedMethod(Location location, out UnsupportedMethod newItem)
+    public void AddUnsupportedMethod(Location location)
     {
-        newItem = new UnsupportedMethod { Location = location };
-        InternalMethods.Add(newItem);
+        UnsupportedMethod NewItem = new UnsupportedMethod { Location = location };
+        InternalMethods.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -65,11 +63,10 @@ public record Unsupported : IUnsupported
     /// Adds an unsupported parameter.
     /// </summary>
     /// <param name="location">The parameter location.</param>
-    /// <param name="newItem">The added parameter upon return.</param>
-    public void AddUnsupportedParameter(Location location, out UnsupportedParameter newItem)
+    public void AddUnsupportedParameter(Location location)
     {
-        newItem = new UnsupportedParameter { Location = location };
-        InternalParameters.Add(newItem);
+        UnsupportedParameter NewItem = new UnsupportedParameter { Location = location };
+        InternalParameters.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -81,11 +78,10 @@ public record Unsupported : IUnsupported
     /// </summary>
     /// <param name="text">The requirement text.</param>
     /// <param name="location">The requirement location.</param>
-    /// <param name="newItem">The added requirement upon return.</param>
-    public void AddUnsupportedRequire(string text, Location location, out UnsupportedRequire newItem)
+    public void AddUnsupportedRequire(string text, Location location)
     {
-        newItem = new UnsupportedRequire { Text = text, Location = location };
-        InternalRequires.Add(newItem);
+        UnsupportedRequire NewItem = new UnsupportedRequire { Text = text, Location = location };
+        InternalRequires.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -97,11 +93,10 @@ public record Unsupported : IUnsupported
     /// </summary>
     /// <param name="text">The guarantee text.</param>
     /// <param name="location">The guarantee location.</param>
-    /// <param name="newItem">The added guarantee upon return.</param>
-    public void AddUnsupportedEnsure(string text, Location location, out UnsupportedEnsure newItem)
+    public void AddUnsupportedEnsure(string text, Location location)
     {
-        newItem = new UnsupportedEnsure { Text = text, Location = location };
-        InternalEnsures.Add(newItem);
+        UnsupportedEnsure NewItem = new UnsupportedEnsure { Text = text, Location = location };
+        InternalEnsures.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -112,11 +107,10 @@ public record Unsupported : IUnsupported
     /// Adds an unsupported statement.
     /// </summary>
     /// <param name="location">The statement location.</param>
-    /// <param name="newItem">The added statement upon return.</param>
-    public void AddUnsupportedStatement(Location location, out UnsupportedStatement newItem)
+    public void AddUnsupportedStatement(Location location)
     {
-        newItem = new UnsupportedStatement { Location = location };
-        InternalStatements.Add(newItem);
+        UnsupportedStatement NewItem = new UnsupportedStatement { Location = location };
+        InternalStatements.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -127,11 +121,10 @@ public record Unsupported : IUnsupported
     /// Adds an unsupported expression.
     /// </summary>
     /// <param name="location">The expression location.</param>
-    /// <param name="newItem">The added expression upon return.</param>
-    public void AddUnsupportedExpression(Location location, out UnsupportedExpression newItem)
+    public void AddUnsupportedExpression(Location location)
     {
-        newItem = new UnsupportedExpression { Location = location };
-        InternalExpressions.Add(newItem);
+        UnsupportedExpression NewItem = new UnsupportedExpression { Location = location };
+        InternalExpressions.Add(NewItem);
     }
 
     /// <inheritdoc/>
@@ -143,11 +136,10 @@ public record Unsupported : IUnsupported
     /// </summary>
     /// <param name="text">The invariant text.</param>
     /// <param name="location">The invariant location.</param>
-    /// <param name="newItem">The added invariant upon return.</param>
-    public void AddUnsupportedInvariant(string text, Location location, out UnsupportedInvariant newItem)
+    public void AddUnsupportedInvariant(string text, Location location)
     {
-        newItem = new UnsupportedInvariant { Text = text, Location = location };
-        InternalInvariants.Add(newItem);
+        UnsupportedInvariant NewItem = new UnsupportedInvariant { Text = text, Location = location };
+        InternalInvariants.Add(NewItem);
     }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

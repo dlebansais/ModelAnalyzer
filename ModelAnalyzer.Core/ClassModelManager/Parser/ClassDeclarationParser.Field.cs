@@ -43,14 +43,13 @@ internal partial class ClassDeclarationParser
                 IsFieldSupported = false;
             }
 
-        if (!IsTypeSupported(Declaration.Type, out _))
+        if (!IsTypeSupported(Declaration.Type, out ExpressionType FieldType))
         {
             LogWarning($"Unsupported field type.");
 
             IsFieldSupported = false;
         }
 
-        ExpressionType FieldType = ExpressionType.Int;
         foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
             AddField(Variable, fieldTable, unsupported, IsFieldSupported, FieldType);
     }
@@ -79,7 +78,7 @@ internal partial class ClassDeclarationParser
             else
             {
                 Location Location = variable.Identifier.GetLocation();
-                unsupported.AddUnsupportedField(Location, out UnsupportedField UnsupportedField);
+                unsupported.AddUnsupportedField(Location);
             }
         }
     }

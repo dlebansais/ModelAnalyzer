@@ -13,7 +13,7 @@ internal class LiteralIntValueExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Int;
+    public override ExpressionType ExpressionType => ExpressionType.Integer;
 
     /// <summary>
     /// Gets or sets the literal value.

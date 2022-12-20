@@ -11,12 +11,17 @@ public enum ExpressionType
     Other,
 
     /// <summary>
+    /// No type.
+    /// </summary>
+    Void,
+
+    /// <summary>
     /// bool type.
     /// </summary>
-    Bool,
+    Boolean,
 
     /// <summary>
     /// int type.
     /// </summary>
-    Int,
+    Integer,
 }

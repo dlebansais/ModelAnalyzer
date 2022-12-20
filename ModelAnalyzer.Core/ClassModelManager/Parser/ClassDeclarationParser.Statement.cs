@@ -79,7 +79,7 @@ internal partial class ClassDeclarationParser
         if (NewStatement is null)
         {
             Location Location = statementNode.GetLocation();
-            unsupported.AddUnsupportedStatement(Location, out UnsupportedStatement UnsupportedStatement);
+            unsupported.AddUnsupportedStatement(Location);
         }
         else
             Log($"Statement analyzed: '{NewStatement}'.");

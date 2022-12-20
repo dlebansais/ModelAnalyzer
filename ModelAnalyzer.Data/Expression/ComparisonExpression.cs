@@ -13,7 +13,7 @@ internal class ComparisonExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Bool;
+    public override ExpressionType ExpressionType => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the left expression.
