@@ -28,8 +28,11 @@ namespace ModelAnalyzer.Test
         /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
         public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
         {
+            source = CSharpVerifierHelper.ExtractDiagnosticId(source, out string DiagnosticId);
+
             var test = new Test
             {
+                ExpectedDiagnosticId = DiagnosticId,
                 TestCode = source,
             };
 

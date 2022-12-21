@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 
@@ -28,6 +29,70 @@ namespace ModelAnalyzer.Test
                 .SetItem("CS8669", ReportDiagnostic.Error);
 
             return nullableWarnings;
+        }
+
+        internal static string ExtractDiagnosticId(string source, out string diagnosticId)
+        {
+            string FirstDiagnosticId = string.Empty;
+            string ExtractedSource = source;
+            string ExtractedDiagnosticId;
+
+            do
+            {
+                ExtractedSource = ExtractDiagnosticIdOnce(ExtractedSource, out ExtractedDiagnosticId);
+
+                if (ExtractedDiagnosticId != string.Empty)
+                {
+                    if (FirstDiagnosticId == string.Empty)
+                        FirstDiagnosticId = ExtractedDiagnosticId;
+                    else if (FirstDiagnosticId != ExtractedDiagnosticId)
+                    {
+                        diagnosticId = string.Empty;
+                        return source;
+                    }
+                }
+            }
+            while (ExtractedDiagnosticId != string.Empty);
+
+            diagnosticId = FirstDiagnosticId;
+            return ExtractedSource;
+        }
+
+        private static string ExtractDiagnosticIdOnce(string source, out string diagnosticId)
+        {
+            string EndTagPattern = "|]";
+            string StartRulePattern = "MA";
+            string Pattern = EndTagPattern + StartRulePattern;
+            const int RuleIdLength = 4;
+
+            int PatternIndex = source.IndexOf(Pattern);
+
+            if (PatternIndex >= 0 && PatternIndex + Pattern.Length + RuleIdLength <= source.Length)
+            {
+                diagnosticId = source.Substring(PatternIndex + EndTagPattern.Length, StartRulePattern.Length + RuleIdLength);
+                source = source.Substring(0, PatternIndex + EndTagPattern.Length) + source.Substring(PatternIndex + Pattern.Length + RuleIdLength);
+            }
+            else
+                diagnosticId = string.Empty;
+
+            return source;
+        }
+
+        internal static bool TrySelectDiagnosticDescriptor(DiagnosticAnalyzer[] analyzers, string diagnosticId, out DiagnosticDescriptor diagnosticDescriptor)
+        {
+            if (diagnosticId != string.Empty)
+            {
+                foreach (var analyzer in analyzers)
+                    foreach (var descriptor in analyzer.SupportedDiagnostics)
+                        if (descriptor.Id == diagnosticId)
+                        {
+                            diagnosticDescriptor = descriptor;
+                            return true;
+                        }
+            }
+
+            diagnosticDescriptor = null;
+            return false;
         }
     }
 }

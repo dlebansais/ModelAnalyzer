@@ -2,7 +2,8 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-using VerifyCS = CSharpAnalyzerVerifier<BadExpressionAnalyzer>;
+// using VerifyCS = CSharpAnalyzerVerifier<BadExpressionAnalyzer>;
+using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]
 public class BadExpressionUnitTests
@@ -20,7 +21,7 @@ class Program_BadExpression_0
 
     void Write(int x)
     {
-        X = [|nameof(X).Length|];
+        X = [|nameof(X).Length|]MA0002;
     }
 }
 ");
@@ -39,7 +40,7 @@ class Program_BadExpression_1
 
     void Write(int x)
     {
-        X = x [|%|] x;
+        X = x [|%|]MA0002 x;
     }
 }
 ");

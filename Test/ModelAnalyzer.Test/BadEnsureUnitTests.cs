@@ -2,7 +2,8 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-using VerifyCS = CSharpAnalyzerVerifier<BadEnsureAnalyzer>;
+// using VerifyCS = CSharpAnalyzerVerifier<BadEnsureAnalyzer>;
+using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]
 public class BadEnsureUnitTests
@@ -59,7 +60,7 @@ class Program_BadEnsure_2
     {
         X = x;
     }
-    // Ensure: [|x $ 0|]
+    // Ensure: [|x $ 0|]MA0001
 }
 ");
     }
@@ -79,7 +80,7 @@ class Program_BadEnsure_3
     {
         X = x;
     }
-    // Ensure: [|x > 0; break;|]
+    // Ensure: [|x > 0; break;|]MA0001
 }
 ");
     }
@@ -99,7 +100,7 @@ class Program_BadEnsure_4
     {
         X = x;
     }
-    // Ensure: [|typeof(x)|]
+    // Ensure: [|typeof(x)|]MA0001
 }
 ");
     }
@@ -119,7 +120,7 @@ class Program_BadEnsure_5
     {
         X = x;
     }
-    // Ensure: [|Y == 0|]
+    // Ensure: [|Y == 0|]MA0001
 }
 ");
     }
@@ -134,13 +135,13 @@ using System;
 class Program_BadEnsure_6
 {
     int X;
-    // Ensure: [|X == 0|]
+    // Ensure: [|X == 0|]MA0001
 
     string Read() => string.Empty;
-    // Ensure: [|X == 0|]
+    // Ensure: [|X == 0|]MA0001
 
     int Y;
-    // Ensure: [|X == 0|]
+    // Ensure: [|X == 0|]MA0001
 }
 ");
     }

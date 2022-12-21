@@ -1,4 +1,4 @@
-﻿namespace ModelAnalyzer;
+﻿/*namespace ModelAnalyzer;
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -31,3 +31,4 @@ public class BadExpressionAnalyzer : Analyzer
         }
     }
 }
+*/
