@@ -17,6 +17,11 @@ public abstract class Analyzer : DiagnosticAnalyzer
     protected abstract SyntaxKind DiagnosticKind { get; }
     protected abstract bool IsAsyncRunRequested { get; }
 
+    protected static DiagnosticDescriptor CreateRule(string id, LocalizableString title, LocalizableString messageFormat, string category, DiagnosticSeverity diagnosticSeverity, LocalizableString description)
+    {
+        return new DiagnosticDescriptor(id, title, messageFormat, category, diagnosticSeverity, isEnabledByDefault: true, description, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{id}.md");
+    }
+
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
