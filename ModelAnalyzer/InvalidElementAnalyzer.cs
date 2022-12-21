@@ -12,23 +12,29 @@ using Microsoft.Extensions.Logging;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class InvalidElementAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId0 = "MA0001";
-    public const string DiagnosticId1 = "MA0002";
+    public const string Category = "Design";
+    public const string DiagnosticIdInvalidEnsure = "MA0001";
+    public const string DiagnosticIdInvalidExpression = "MA0002";
 
-    private static readonly LocalizableString Title0 = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString MessageFormat0 = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString Description0 = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor Rule0 = new DiagnosticDescriptor(DiagnosticId0, Title0, MessageFormat0, "Design", DiagnosticSeverity.Warning, isEnabledByDefault: true, Description0, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{DiagnosticId0}.md");
+    private static readonly LocalizableString TitleInvalidEnsure = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormatInvalidEnsure = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString DescriptionInvalidEnsure = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor RuleInvalidEnsure = CreateRule(DiagnosticIdInvalidEnsure, TitleInvalidEnsure, MessageFormatInvalidEnsure, DescriptionInvalidEnsure);
 
-    private static readonly LocalizableString Title1 = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString MessageFormat1 = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-    private static readonly LocalizableString Description1 = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-    private static readonly DiagnosticDescriptor Rule1 = new DiagnosticDescriptor(DiagnosticId1, Title1, MessageFormat1, "Design", DiagnosticSeverity.Warning, isEnabledByDefault: true, Description1, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{DiagnosticId1}.md");
+    private static readonly LocalizableString TitleInvalidExpression = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormatInvalidExpression = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString DescriptionInvalidExpression = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor RuleInvalidExpression = CreateRule(DiagnosticIdInvalidExpression, TitleInvalidExpression, MessageFormatInvalidExpression, DescriptionInvalidExpression);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get => ImmutableArray.Create(Rule0, Rule1); }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get => ImmutableArray.Create(RuleInvalidEnsure, RuleInvalidExpression); }
 
     private IAnalysisLogger Logger { get; } = Initialization.Logger;
     private ClassModelManager Manager { get; } = Initialization.Manager;
+
+    private static DiagnosticDescriptor CreateRule(string diagnosticId, LocalizableString title, LocalizableString messageFormat, LocalizableString description)
+    {
+        return new DiagnosticDescriptor(diagnosticId, title, messageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{diagnosticId}.md");
+    }
 
     public override void Initialize(AnalysisContext context)
     {
@@ -65,14 +71,14 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
 
         foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting bad ensure.");
-            context.ReportDiagnostic(Diagnostic.Create(Rule0, Item.Location));
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid ensure.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location));
         }
 
         foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting bad expression.");
-            context.ReportDiagnostic(Diagnostic.Create(Rule1, Item.Location));
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid expression.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
         }
     }
 }
