@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -90,6 +91,9 @@ class Program_CoreRequire_2
 
     void Write(int x)
     // Require: 0
+    // Require: X
+    // Require: X + X
+    // Require: -X
     {
         X = x;
     }
@@ -101,10 +105,14 @@ class Program_CoreRequire_2
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
 
         IUnsupportedRequire UnsupportedRequire = ClassModel.Unsupported.Requires[0];
         Assert.That(UnsupportedRequire.Text, Is.EqualTo("0"));
+
+        TestUnsupportedRequireExpression(ClassModel, 0, "0");
+        TestUnsupportedRequireExpression(ClassModel, 1, "X");
+        TestUnsupportedRequireExpression(ClassModel, 2, "X + X");
+        TestUnsupportedRequireExpression(ClassModel, 3, "-X");
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_2
@@ -114,6 +122,14 @@ class Program_CoreRequire_2
     X = x;
   }
 "));
+    }
+
+    private void TestUnsupportedRequireExpression(IClassModel classModel, int index, string unsupportedExpressionText)
+    {
+        Assert.That(classModel.Unsupported.Requires.Count, Is.GreaterThan(index));
+
+        IUnsupportedRequire UnsupportedRequire = classModel.Unsupported.Requires[index];
+        Assert.That(UnsupportedRequire.Text, Is.EqualTo(unsupportedExpressionText));
     }
 
     [Test]

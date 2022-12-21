@@ -55,6 +55,7 @@ class Program_CoreParameter_2
 
         IUnsupportedParameter UnsupportedParameter = ClassModel.Unsupported.Parameters[0];
         Assert.That(UnsupportedParameter.Name, Is.EqualTo("*"));
+        Assert.That(UnsupportedParameter.VariableType, Is.EqualTo(ExpressionType.Other));
     }
 
     [Test]
