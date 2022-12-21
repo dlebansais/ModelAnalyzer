@@ -53,11 +53,6 @@ internal partial class ClassDeclarationParser
 
             requireList.Add(NewRequire);
         }
-        else
-        {
-            Location Location = GetLocationInComment(trivia, pattern);
-            unsupported.AddUnsupportedRequire(Text, Location);
-        }
     }
 
     private void ReportUnsupportedRequires(Unsupported unsupported, SyntaxTriviaList triviaList)

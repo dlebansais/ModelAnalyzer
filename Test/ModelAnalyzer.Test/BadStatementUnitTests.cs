@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-using VerifyCS = CSharpAnalyzerVerifier<BadStatementAnalyzer>;
+using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]
 public class BadStatementUnitTests
@@ -19,7 +19,7 @@ class Program_BadStatement_0
     int X;
     int Read()
     {
-        [|throw new NotImplementedException();|]
+        [|throw new NotImplementedException();|]MA0006
     }
 }
 ");
@@ -37,7 +37,7 @@ class Program_BadStatement_1
     int X;
     void Write(int x)
     {
-        [|x = 0;|]
+        [|x = 0;|]MA0006
     }
 }
 ");
@@ -75,7 +75,7 @@ class Program_BadStatement_3
 
     int Read()
     {
-        [|return X;|]
+        [|return X;|]MA0006
         X = 0;
     }
 }
@@ -96,9 +96,9 @@ class Program_BadStatement_4
     int Read()
     {
         if (X == 0)
-            [|return X;|]
+            [|return X;|]MA0006
         else
-            [|return X + 1;|]
+            [|return X + 1;|]MA0006
     }
 }
 ");

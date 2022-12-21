@@ -66,20 +66,24 @@ internal partial class ClassDeclarationParser
     private Statement? ParseStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
     {
         Statement? NewStatement = null;
+        bool IsErrorReported = false;
 
         if (statementNode is ExpressionStatementSyntax ExpressionStatement)
-            NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement);
+            NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement, ref IsErrorReported);
         else if (statementNode is IfStatementSyntax IfStatement)
-            NewStatement = TryParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement);
+            NewStatement = TryParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement, ref IsErrorReported);
         else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
-            NewStatement = TryParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement);
+            NewStatement = TryParseReturnStatement(fieldTable, parameterTable, unsupported, ReturnStatement, ref IsErrorReported);
         else
             Log($"Unsupported statement type '{statementNode.GetType().Name}'.");
 
         if (NewStatement is null)
         {
-            Location Location = statementNode.GetLocation();
-            unsupported.AddUnsupportedStatement(Location);
+            if (!IsErrorReported)
+            {
+                Location Location = statementNode.GetLocation();
+                unsupported.AddUnsupportedStatement(Location);
+            }
         }
         else
             Log($"Statement analyzed: '{NewStatement}'.");
@@ -87,7 +91,7 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement)
+    private Statement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -100,6 +104,8 @@ internal partial class ClassDeclarationParser
                     Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
                     if (Expression is not null)
                         NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                    else
+                        isErrorReported = true;
                 }
                 else
                     Log($"Unknown assignment statement destination.");
@@ -113,7 +119,7 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement)
+    private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -130,11 +136,13 @@ internal partial class ClassDeclarationParser
 
             NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
         }
+        else
+            isErrorReported = true;
 
         return NewStatement;
     }
 
-    private Statement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement)
+    private Statement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -144,6 +152,8 @@ internal partial class ClassDeclarationParser
 
             if (ReturnExpression is not null)
                 NewStatement = new ReturnStatement { Expression = ReturnExpression };
+            else
+                isErrorReported = true;
         }
         else
             NewStatement = new ReturnStatement() { Expression = null };

@@ -2,7 +2,6 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-// using VerifyCS = CSharpAnalyzerVerifier<BadEnsureAnalyzer>;
 using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]

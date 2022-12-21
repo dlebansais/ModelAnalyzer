@@ -218,7 +218,7 @@ internal partial class ClassDeclarationParser
 
     private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out Expression booleanExpression)
     {
-        bool IsInvariantSupported = true;
+        bool IsAssertionSupported = true;
 
         CompilationUnitSyntax Root = syntaxTree.GetCompilationUnitRoot();
         Debug.Assert(Root.AttributeLists.Count == 0, "The root begins with an assignment and no attributes.");
@@ -227,7 +227,7 @@ internal partial class ClassDeclarationParser
         if (Root.Members.Count != 1)
         {
             Log($"There can be only one expression in an assertion.");
-            IsInvariantSupported = false;
+            IsAssertionSupported = false;
         }
 
         GlobalStatementSyntax GlobalStatement = (GlobalStatementSyntax)Root.Members[0];
@@ -236,9 +236,9 @@ internal partial class ClassDeclarationParser
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
         if (!IsValidAssertionExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression))
-            IsInvariantSupported = false;
+            IsAssertionSupported = false;
 
-        return IsInvariantSupported;
+        return IsAssertionSupported;
     }
 
     private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out Expression booleanExpression)

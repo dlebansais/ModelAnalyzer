@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-using VerifyCS = CSharpAnalyzerVerifier<BadParameterAnalyzer>;
+using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]
 public class BadParameterUnitTests
@@ -16,7 +16,7 @@ using System;
 
 class Program_BadParameter_0
 {
-    void Write([|[System.Runtime.InteropServices.In] int x|])
+    void Write([|[System.Runtime.InteropServices.In] int x|]MA0004)
     {
     }
 }
@@ -32,7 +32,7 @@ using System;
 
 class Program_BadParameter_1
 {
-    void Write([|ref int x|])
+    void Write([|ref int x|]MA0004)
     {
     }
 }
@@ -48,7 +48,7 @@ using System;
 
 class Program_BadParameter_2
 {
-    void Write([|string p|])
+    void Write([|string p|]MA0004)
     {
     }
 }
@@ -64,7 +64,7 @@ using System;
 
 class Program_BadParameter_3
 {
-    void Write([|Program_BadParameter_3 p|])
+    void Write([|Program_BadParameter_3 p|]MA0004)
     {
     }
 }
