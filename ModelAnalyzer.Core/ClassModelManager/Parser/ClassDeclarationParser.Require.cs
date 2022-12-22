@@ -30,10 +30,13 @@ internal partial class ClassDeclarationParser
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
-                string Header = $"// {Modeling.Require}";
+                string RequireHeader = $"// {Modeling.Require}";
+                string EnsureHeader = $"// {Modeling.Ensure}";
 
-                if (Comment.StartsWith(Header))
-                    ParseRequire(fieldTable, parameterTable, unsupported, RequireList, Trivia, Comment, Header);
+                if (Comment.StartsWith(RequireHeader))
+                    ParseRequire(fieldTable, parameterTable, unsupported, RequireList, Trivia, Comment, RequireHeader);
+                else if (Comment.StartsWith(EnsureHeader))
+                    ReportUnsupportedEnsure(unsupported, Trivia, Comment, EnsureHeader);
             }
 
         return RequireList;

@@ -324,4 +324,40 @@ class Program_CoreEnsure_8
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void EnsureTest_Missplaced()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_9
+{
+    int X;
+
+    void Write(int x)
+    // Ensure: X == x
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Ensures.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_9
+  int X
+  void Write(int x)
+  {
+    X = x;
+  }
+"));
+    }
 }

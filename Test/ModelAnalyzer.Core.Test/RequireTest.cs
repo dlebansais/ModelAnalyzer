@@ -351,4 +351,40 @@ class Program_CoreRequire_8
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void RequireTest_Missplaced()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_9
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Require: X == x
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_9
+  int X
+  void Write(int x)
+  {
+    X = x;
+  }
+"));
+    }
 }
