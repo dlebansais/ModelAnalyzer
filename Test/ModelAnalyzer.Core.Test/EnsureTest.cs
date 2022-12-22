@@ -288,4 +288,40 @@ class Program_CoreEnsure_7
   # ensure X == x
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void EnsureTest_UnknownField()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_8
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: Y == x
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_8
+  int X
+  void Write(int x)
+  {
+    X = x;
+  }
+"));
+    }
 }

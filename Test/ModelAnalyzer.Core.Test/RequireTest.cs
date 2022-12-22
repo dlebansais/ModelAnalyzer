@@ -315,4 +315,40 @@ class Program_CoreRequire_7
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void RequireTest_UnknownField()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_8
+{
+    int X;
+
+    void Write(int x)
+    // Require: Y == x
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_8
+  int X
+  void Write(int x)
+  {
+    X = x;
+  }
+"));
+    }
 }
