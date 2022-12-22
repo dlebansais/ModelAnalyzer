@@ -46,6 +46,6 @@ class Program_CoreAssertion_1
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Invariants.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 }

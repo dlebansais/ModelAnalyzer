@@ -63,4 +63,108 @@ class Program_BadExpression_2
 }
 ");
     }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithBadConstantInInvariant_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_3
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+
+    void Write(int x)
+    {
+        if (x >= 0)
+            X = x;
+    }
+}
+// Invariant: X [|%|]MA0002 X
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithBadExpressionInInvariant_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_4
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+
+    void Write(int x)
+    {
+        if (x >= 0)
+            X = x;
+    }
+}
+// Invariant: [|typeof(X)|]MA0002
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithBadOperatorInInvariant_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_5
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+
+    void Write(int x)
+    {
+        if (x >= 0)
+            X = x;
+    }
+}
+// Invariant: X [|%|]MA0002 0
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithUnknownFieldInInvariant_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_6
+{
+    int X;
+
+    int Read()
+    {
+        return X;
+    }
+
+    void Write(int x)
+    {
+        if (x >= 0)
+            X = x;
+    }
+}
+// Invariant: [|Y|]MA0002 >= 0
+");
+    }
 }

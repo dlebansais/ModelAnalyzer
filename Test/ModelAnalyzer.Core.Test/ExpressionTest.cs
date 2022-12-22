@@ -295,7 +295,7 @@ class Program_CoreExpression_9
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -323,7 +323,7 @@ class Program_CoreExpression_10
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(5));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
     }
 
     [Test]
@@ -351,7 +351,7 @@ class Program_CoreExpression_11
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -379,7 +379,7 @@ class Program_CoreExpression_12
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(3));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -407,7 +407,7 @@ class Program_CoreExpression_13
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -484,7 +484,7 @@ class Program_CoreExpression_16
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)

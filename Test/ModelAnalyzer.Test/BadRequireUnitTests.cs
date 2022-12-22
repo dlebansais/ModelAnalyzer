@@ -39,7 +39,7 @@ class Program_BadRequire_1
     int X;
 
     void Write(int x)
-    // Require: [|x $ 0|]MA0005
+    [|// Require: x $ 0|]MA0005
     {
         X = x;
     }
@@ -59,7 +59,7 @@ class Program_BadRequire_2
     int X;
 
     void Write(int x)
-    // Require: [|x > 0; break;|]MA0005
+    [|// Require: x > 0; break;|]MA0005
     {
         X = x;
     }
@@ -79,7 +79,7 @@ class Program_BadRequire_3
     int X;
 
     void Write(int x)
-    // Require: [|typeof(x)|]MA0005
+    // Require: [|typeof(x)|]MA0002
     {
         X = x;
     }
@@ -99,7 +99,7 @@ class Program_BadRequire_4
     int X;
 
     void Write(int x)
-    // Require: [|Y == 0|]MA0002
+    // Require: [|Y|]MA0002 == 0
     {
         X = x;
     }
@@ -117,13 +117,13 @@ using System;
 class Program_BadRequire_5
 {
     int X;
-    // Require: [|X == 0|]MA0005
+    [|// Require: X == 0|]MA0005
 
     int Read() => X;
-    // Require: [|X == 0|]MA0005
+    [|// Require: X == 0|]MA0005
 
     int Y;
-    // Require: [|X == 0|]MA0005
+    [|// Require: X == 0|]MA0005
 }
 ");
     }

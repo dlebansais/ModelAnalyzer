@@ -80,7 +80,7 @@ class Program_BadInvariant_2
             X = x;
     }
 }
-// Invariant: [|X $ 0|]
+[|// Invariant: X $ 0|]
 ");
     }
 
@@ -106,33 +106,7 @@ class Program_BadInvariant_3
             X = x;
     }
 }
-// Invariant: [|X >= 0; break;|]
-");
-    }
-
-    [Test]
-    [Category("Analyzer")]
-    public async Task ClassWithBadExpressionInInvariant_Diagnostic()
-    {
-        await VerifyCS.VerifyAnalyzerAsync(@"
-using System;
-
-class Program_BadInvariant_4
-{
-    int X;
-
-    int Read()
-    {
-        return X;
-    }
-
-    void Write(int x)
-    {
-        if (x >= 0)
-            X = x;
-    }
-}
-// Invariant: [|typeof(X)|]
+[|// Invariant: X >= 0; break;|]
 ");
     }
 
@@ -159,84 +133,6 @@ class Program_BadInvariant_5
     }
 }
 // Invariant: 0 <= X
-");
-    }
-
-    [Test]
-    [Category("Analyzer")]
-    public async Task ClassWithBadOperatorInInvariant_Diagnostic()
-    {
-        await VerifyCS.VerifyAnalyzerAsync(@"
-using System;
-
-class Program_BadInvariant_6
-{
-    int X;
-
-    int Read()
-    {
-        return X;
-    }
-
-    void Write(int x)
-    {
-        if (x >= 0)
-            X = x;
-    }
-}
-// Invariant: [|X % 0|]
-");
-    }
-
-    [Test]
-    [Category("Analyzer")]
-    public async Task ClassWithBadConstantInInvariant_Diagnostic()
-    {
-        await VerifyCS.VerifyAnalyzerAsync(@"
-using System;
-
-class Program_BadInvariant_7
-{
-    int X;
-
-    int Read()
-    {
-        return X;
-    }
-
-    void Write(int x)
-    {
-        if (x >= 0)
-            X = x;
-    }
-}
-// Invariant: [|X % X|]
-");
-    }
-
-    [Test]
-    [Category("Analyzer")]
-    public async Task ClassWithUnknownFieldInInvariant_Diagnostic()
-    {
-        await VerifyCS.VerifyAnalyzerAsync(@"
-using System;
-
-class Program_BadInvariant_8
-{
-    int X;
-
-    int Read()
-    {
-        return X;
-    }
-
-    void Write(int x)
-    {
-        if (x >= 0)
-            X = x;
-    }
-}
-// Invariant: [|Y >= 0|]
 ");
     }
 }

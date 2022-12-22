@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
+    private const string AssignmentAssertionText = "_ = ";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassDeclarationParser"/> class.
     /// </summary>
@@ -197,12 +199,12 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, out Expression booleanExpression)
+    private bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, LocationContext locationContext, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
 
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
+        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"{AssignmentAssertionText}{text};", Options);
         var Diagnostics = SyntaxTree.GetDiagnostics();
         List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
         Log($"Parsed: '{text}' ErrorCount={ErrorList.Count}");
@@ -210,13 +212,15 @@ internal partial class ClassDeclarationParser
         if (ErrorList.Count > 0)
         {
             Log($"Expression '{text}' contains an error.");
+
+            isErrorReported = false;
             return false;
         }
         else
-            return IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, SyntaxTree, out booleanExpression);
+            return IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, locationContext, SyntaxTree, out booleanExpression, out isErrorReported);
     }
 
-    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, SyntaxTree syntaxTree, out Expression booleanExpression)
+    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -235,17 +239,20 @@ internal partial class ClassDeclarationParser
         AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
-        if (!IsValidAssertionExpression(fieldTable, parameterTable, unsupported, Expression, out booleanExpression))
+        if (!IsValidAssertionExpression(fieldTable, parameterTable, unsupported, locationContext, Expression, out booleanExpression, out isErrorReported))
             IsAssertionSupported = false;
+        else
+            isErrorReported = false;
 
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionNode, out Expression booleanExpression)
+    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
+        isErrorReported = false;
 
-        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
             if (Expression.ExpressionType == ExpressionType.Boolean)
@@ -256,6 +263,8 @@ internal partial class ClassDeclarationParser
             else
                 Log($"Boolean expression expected.");
         }
+        else
+            isErrorReported = true;
 
         return false;
     }
@@ -276,16 +285,6 @@ internal partial class ClassDeclarationParser
 
         variable = null!;
         return false;
-    }
-
-    private Location GetLocationInComment(SyntaxTrivia trivia, string pattern)
-    {
-        Location FullLocation = trivia.GetLocation();
-        TextSpan FullSpan = FullLocation.SourceSpan;
-        TextSpan InvariantSpan = new TextSpan(FullSpan.Start + pattern.Length, FullSpan.Length - pattern.Length);
-        Location Location = Location.Create(FullLocation.SourceTree!, InvariantSpan);
-
-        return Location;
     }
 
     private void Log(string message)

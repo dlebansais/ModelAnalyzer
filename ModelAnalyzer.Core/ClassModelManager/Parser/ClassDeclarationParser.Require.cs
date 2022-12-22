@@ -30,28 +30,35 @@ internal partial class ClassDeclarationParser
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
-                string Pattern = $"// {Modeling.Require}";
+                string Header = $"// {Modeling.Require}";
 
-                if (Comment.StartsWith(Pattern))
-                    ParseRequire(fieldTable, parameterTable, unsupported, RequireList, Trivia, Comment, Pattern);
+                if (Comment.StartsWith(Header))
+                    ParseRequire(fieldTable, parameterTable, unsupported, RequireList, Trivia, Comment, Header);
             }
 
         return RequireList;
     }
 
-    private void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string pattern)
+    private void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string header)
     {
-        string Text = comment.Substring(pattern.Length);
+        string Text = comment.Substring(header.Length);
 
         Log($"Analyzing require '{Text}'.");
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out Expression BooleanExpression))
+        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
         {
             Require NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
 
             Log($"Require analyzed: '{NewRequire}'.");
 
             requireList.Add(NewRequire);
+        }
+        else if (!IsErrorReported)
+        {
+            Location Location = trivia.GetLocation();
+            unsupported.AddUnsupportedRequire(Text, Location);
         }
     }
 
@@ -61,20 +68,20 @@ internal partial class ClassDeclarationParser
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
-                string Pattern = $"// {Modeling.Require}";
+                string Header = $"// {Modeling.Require}";
 
-                if (Comment.StartsWith(Pattern))
-                    ReportUnsupportedRequire(unsupported, Trivia, Comment, Pattern);
+                if (Comment.StartsWith(Header))
+                    ReportUnsupportedRequire(unsupported, Trivia, Comment, Header);
             }
     }
 
-    private void ReportUnsupportedRequire(Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    private void ReportUnsupportedRequire(Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
     {
-        string Text = comment.Substring(pattern.Length);
+        string Text = comment.Substring(header.Length);
 
         Log($"Require '{Text}' not supported at this location.");
 
-        Location Location = GetLocationInComment(trivia, pattern);
+        Location Location = trivia.GetLocation();
         unsupported.AddUnsupportedRequire(Text, Location);
     }
 }

@@ -33,22 +33,24 @@ internal partial class ClassDeclarationParser
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
-                string Pattern = $"// {Modeling.Ensure}";
+                string Header = $"// {Modeling.Ensure}";
 
-                if (Comment.StartsWith(Pattern))
-                    ParseEnsure(fieldTable, parameterTable, unsupported, EnsureList, Trivia, Comment, Pattern);
+                if (Comment.StartsWith(Header))
+                    ParseEnsure(fieldTable, parameterTable, unsupported, EnsureList, Trivia, Comment, Header);
             }
 
         return EnsureList;
     }
 
-    private void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string pattern)
+    private void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
     {
-        string Text = comment.Substring(pattern.Length);
+        string Text = comment.Substring(header.Length);
 
         Log($"Analyzing ensure '{Text}'.");
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, out Expression BooleanExpression))
+        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+
+        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
         {
             Ensure NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
 
@@ -56,9 +58,9 @@ internal partial class ClassDeclarationParser
 
             ensureList.Add(NewEnsure);
         }
-        else
+        else if (!IsErrorReported)
         {
-            Location Location = GetLocationInComment(trivia, pattern);
+            Location Location = trivia.GetLocation();
             unsupported.AddUnsupportedEnsure(Text, Location);
         }
     }
@@ -82,7 +84,7 @@ internal partial class ClassDeclarationParser
 
         Log($"Ensure '{Text}' not supported at this location.");
 
-        Location Location = GetLocationInComment(trivia, pattern);
+        Location Location = trivia.GetLocation();
         unsupported.AddUnsupportedEnsure(Text, Location);
     }
 }

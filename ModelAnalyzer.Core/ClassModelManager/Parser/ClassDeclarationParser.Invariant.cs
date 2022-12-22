@@ -47,18 +47,20 @@ internal partial class ClassDeclarationParser
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
                 string Comment = Trivia.ToFullString();
-                string Pattern = $"// {Modeling.Invariant}";
+                string Header = $"// {Modeling.Invariant}";
 
-                if (Comment.StartsWith(Pattern))
-                    AddInvariantsInTrivia(invariantList, fieldTable, unsupported, Trivia, Comment, Pattern);
+                if (Comment.StartsWith(Header))
+                    AddInvariantsInTrivia(invariantList, fieldTable, unsupported, Trivia, Comment, Header);
             }
     }
 
-    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string pattern)
+    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
     {
-        string Text = comment.Substring(pattern.Length);
+        string Text = comment.Substring(header.Length);
 
-        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, out Expression BooleanExpression))
+        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+
+        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
         {
             Invariant NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
 
@@ -66,9 +68,9 @@ internal partial class ClassDeclarationParser
 
             invariantList.Add(NewInvariant);
         }
-        else
+        else if (!IsErrorReported)
         {
-            Location Location = GetLocationInComment(trivia, pattern);
+            Location Location = trivia.GetLocation();
             unsupported.AddUnsupportedInvariant(Text, Location);
         }
     }

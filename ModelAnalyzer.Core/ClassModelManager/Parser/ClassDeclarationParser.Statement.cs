@@ -25,8 +25,9 @@ internal partial class ClassDeclarationParser
     private List<Statement> ParseExpressionBody(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
         List<Statement> Result = new();
+        LocationContext LocationContext = new(expressionBody);
 
-        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, expressionBody, isNested: false);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
@@ -101,7 +102,10 @@ internal partial class ClassDeclarationParser
             {
                 if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
                 {
-                    Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, AssignmentExpression.Right, isNested: false);
+                    ExpressionSyntax SourceExpression = AssignmentExpression.Right;
+                    LocationContext LocationContext = new(SourceExpression);
+
+                    Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, SourceExpression, isNested: false);
                     if (Expression is not null)
                         NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
                     else
@@ -122,8 +126,10 @@ internal partial class ClassDeclarationParser
     private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
+        ExpressionSyntax ConditionExpression = ifStatement.Condition;
+        LocationContext LocationContext = new(ConditionExpression);
 
-        Expression? Condition = ParseExpression(fieldTable, parameterTable, unsupported, ifStatement.Condition, isNested: false);
+        Expression? Condition = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, ConditionExpression, isNested: false);
         if (Condition is not null)
         {
             List<Statement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ifStatement.Statement);
@@ -146,9 +152,10 @@ internal partial class ClassDeclarationParser
     {
         Statement? NewStatement = null;
 
-        if (returnStatement.Expression is not null)
+        if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
-            Expression? ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, returnStatement.Expression, isNested: false);
+            LocationContext LocationContext = new(ResultExpression);
+            Expression? ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, ResultExpression, isNested: false);
 
             if (ReturnExpression is not null)
                 NewStatement = new ReturnStatement { Expression = ReturnExpression };
