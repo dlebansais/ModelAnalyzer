@@ -63,6 +63,9 @@ internal partial class ClassDeclarationParser
             Location Location = trivia.GetLocation();
             unsupported.AddUnsupportedEnsure(Text, Location);
         }
+        else
+        {
+        }
     }
 
     private void ReportUnsupportedEnsures(Unsupported unsupported, SyntaxTriviaList triviaList)
