@@ -1,6 +1,8 @@
 ﻿namespace ModelAnalyzer;
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -108,35 +110,18 @@ internal partial class ClassDeclarationParser
         {
             Expression? ParsedExpression = TryParseLiteralValueExpression(literalExpression);
 
-            if (fieldType == ExpressionType.Boolean)
+            Dictionary<ExpressionType, Func<Expression?, Expression?>> InitializerTable = new()
             {
-                if (ParsedExpression is LiteralBooleanValueExpression BooleanExpression)
-                {
-                    initializerExpression = BooleanExpression;
-                    return true;
-                }
-            }
-            else if (fieldType == ExpressionType.Integer)
-            {
-                if (ParsedExpression is LiteralIntegerValueExpression IntegerExpression)
-                {
-                    initializerExpression = IntegerExpression;
-                    return true;
-                }
-            }
-            else if (fieldType == ExpressionType.FloatingPoint)
-            {
-                if (ParsedExpression is LiteralIntegerValueExpression IntegerExpression)
-                {
-                    initializerExpression = IntegerExpression;
-                    return true;
-                }
-                else if (ParsedExpression is LiteralFloatingPointValueExpression FloatingPointExpression)
-                {
-                    initializerExpression = FloatingPointExpression;
-                    return true;
-                }
-            }
+                { ExpressionType.Boolean, BooleanInitializer },
+                { ExpressionType.Integer, IntegerInitializer },
+                { ExpressionType.FloatingPoint, FloatingPointInitializer },
+            };
+
+            Debug.Assert(InitializerTable.ContainsKey(fieldType));
+
+            initializerExpression = InitializerTable[fieldType](ParsedExpression);
+            if (initializerExpression is not null)
+                return true;
         }
 
         LogWarning("Unsupported field initializer.");
@@ -145,5 +130,31 @@ internal partial class ClassDeclarationParser
         unsupported.AddUnsupportedExpression(Location);
         initializerExpression = null;
         return false;
+    }
+
+    private Expression? BooleanInitializer(Expression? expression)
+    {
+        if (expression is LiteralBooleanValueExpression BooleanExpression)
+            return BooleanExpression;
+        else
+            return null;
+    }
+
+    private Expression? IntegerInitializer(Expression? expression)
+    {
+        if (expression is LiteralIntegerValueExpression IntegerExpression)
+            return IntegerExpression;
+        else
+            return null;
+    }
+
+    private Expression? FloatingPointInitializer(Expression? expression)
+    {
+        if (expression is LiteralIntegerValueExpression IntegerExpression)
+            return IntegerExpression;
+        else if (expression is LiteralFloatingPointValueExpression FloatingPointExpression)
+            return FloatingPointExpression;
+        else
+            return null;
     }
 }

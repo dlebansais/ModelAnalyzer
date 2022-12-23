@@ -528,6 +528,7 @@ class Program_CoreExpression_18
     void Write()
     {
         X = 1.1 + 2.2;
+        X = 1;
     }
 }
 ");
