@@ -41,12 +41,16 @@ internal partial class Verifier : IDisposable
                 Result = BuildComparisonExpression(aliasTable, Comparison);
                 IsAssigned = true;
                 break;
+            case LiteralBoolValueExpression LiteralBoolValue:
+                Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
+                IsAssigned = true;
+                break;
             case LiteralIntValueExpression LiteralIntValue:
                 Result = BuildLiteralIntValueExpression(LiteralIntValue);
                 IsAssigned = true;
                 break;
-            case LiteralBoolValueExpression LiteralBoolValue:
-                Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
+            case LiteralFloatingPointValueExpression LiteralFloatingPointValue:
+                Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue);
                 IsAssigned = true;
                 break;
             case VariableValueExpression VariableValue:
@@ -100,14 +104,19 @@ internal partial class Verifier : IDisposable
         return OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
     }
 
-    private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)
-    {
-        return Context.MkInt(literalIntValueExpression.Value);
-    }
-
     private BoolExpr BuildLiteralBoolValueExpression(LiteralBoolValueExpression literalBoolValueExpression)
     {
-        return Context.MkBool(literalBoolValueExpression.Value);
+        return CreateBooleanExpr(literalBoolValueExpression.Value);
+    }
+
+    private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)
+    {
+        return CreateIntegerExpr(literalIntValueExpression.Value);
+    }
+
+    private ArithExpr BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression)
+    {
+        return CreateFloatingPointExpr(literalFloatingPointValueExpression.Value);
     }
 
     private Expr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)

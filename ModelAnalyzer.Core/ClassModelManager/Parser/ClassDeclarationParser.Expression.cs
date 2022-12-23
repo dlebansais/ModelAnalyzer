@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -202,8 +203,10 @@ internal partial class ClassDeclarationParser
             NewExpression = new LiteralBoolValueExpression { Value = true };
         else if (LiteralValue == "false")
             NewExpression = new LiteralBoolValueExpression { Value = false };
-        else if (int.TryParse(LiteralValue, out int Value))
-            NewExpression = new LiteralIntValueExpression { Value = Value };
+        else if (int.TryParse(LiteralValue, out int IntValue))
+            NewExpression = new LiteralIntValueExpression { Value = IntValue };
+        else if (double.TryParse(LiteralValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double DoubleValue))
+            NewExpression = new LiteralFloatingPointValueExpression { Value = DoubleValue };
         else
             Log($"Failed to parse literal value '{LiteralValue}'.");
 

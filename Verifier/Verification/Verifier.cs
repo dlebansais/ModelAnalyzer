@@ -171,7 +171,7 @@ internal partial class Verifier : IDisposable
 
             case ExpressionType.Integer:
                 if (field.Initializer is LiteralIntValueExpression LiteralInteger)
-                    Initializer = LiteralInteger.Value == 0 ? Zero : Context.MkInt(LiteralInteger.Value);
+                    Initializer = LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
                 else
                     Initializer = Zero;
                 IsHandled = true;
@@ -179,7 +179,7 @@ internal partial class Verifier : IDisposable
 
             case ExpressionType.FloatingPoint:
                 if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
-                    Initializer = LiteralFloatingPoint.Value == 0 ? Zero : Context.MkNumeral(LiteralFloatingPoint.Value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
+                    Initializer = LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
                 else
                     Initializer = Zero;
                 IsHandled = true;
@@ -293,6 +293,21 @@ internal partial class Verifier : IDisposable
     {
         solver.Assert(Context.MkImplies(branch, boolExpr));
         Log($"Adding {branch} => {boolExpr}");
+    }
+
+    private BoolExpr CreateBooleanExpr(bool value)
+    {
+        return Context.MkBool(value);
+    }
+
+    private IntExpr CreateIntegerExpr(int value)
+    {
+        return Context.MkInt(value);
+    }
+
+    private ArithExpr CreateFloatingPointExpr(double value)
+    {
+        return (ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
     }
 
     private void Log(string message)

@@ -9,7 +9,7 @@ internal class UnaryArithmeticExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]
-    public override bool IsSimple => Operand is LiteralIntValueExpression;
+    public override bool IsSimple => Operand is LiteralIntValueExpression || Operand is LiteralFloatingPointValueExpression;
 
     /// <inheritdoc/>
     [JsonIgnore]

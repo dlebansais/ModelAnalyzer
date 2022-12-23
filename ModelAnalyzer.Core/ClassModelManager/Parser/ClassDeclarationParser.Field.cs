@@ -120,10 +120,18 @@ internal partial class ClassDeclarationParser
                 initializerExpression = IntegerExpression;
                 return true;
             }
-            else if (fieldType == ExpressionType.FloatingPoint && ParsedExpression is LiteralFloatingPointValueExpression FloatingPointExpression)
+            else if (fieldType == ExpressionType.FloatingPoint)
             {
-                initializerExpression = FloatingPointExpression;
-                return true;
+                if (ParsedExpression is LiteralIntValueExpression IntegerExpression)
+                {
+                    initializerExpression = IntegerExpression;
+                    return true;
+                }
+                else if (ParsedExpression is LiteralFloatingPointValueExpression FloatingPointExpression)
+                {
+                    initializerExpression = FloatingPointExpression;
+                    return true;
+                }
             }
         }
 
