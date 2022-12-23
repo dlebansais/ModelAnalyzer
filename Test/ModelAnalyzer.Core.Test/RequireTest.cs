@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
-using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -134,12 +133,41 @@ class Program_CoreRequire_2
 
     [Test]
     [Category("Core")]
-    public void UnsupportedRequireTest_TooManyInstructions()
+    public void UnsupportedRequireTest_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreRequire_3
+{
+    int X;
+
+    void Write(int x)
+    // Require: *
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+
+        IUnsupportedRequire UnsupportedRequire = ClassModel.Unsupported.Requires[0];
+        Assert.That(UnsupportedRequire.Text, Is.EqualTo("*"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedRequireTest_TooManyInstructions()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_4
 {
     int X;
 
@@ -169,7 +197,7 @@ class Program_CoreRequire_3
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_4
+class Program_CoreRequire_5
 {
     int X;
 
@@ -188,7 +216,7 @@ class Program_CoreRequire_4
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_4
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_5
   int X
   void Write(int x)
   {
@@ -204,7 +232,7 @@ class Program_CoreRequire_4
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_5
+class Program_CoreRequire_6
 {
     int X;
 
@@ -229,7 +257,7 @@ class Program_CoreRequire_5
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_5
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_6
   int X
   void Write1(int x)
   # require x >= 0
@@ -251,7 +279,7 @@ class Program_CoreRequire_5
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_6
+class Program_CoreRequire_7
 {
     int X;
 
@@ -275,7 +303,7 @@ class Program_CoreRequire_6
         Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_6
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_7
   int X
   void Write(int x)
   # require x >= 0
@@ -292,7 +320,7 @@ class Program_CoreRequire_6
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_7
+class Program_CoreRequire_8
 {
     int X;
 
@@ -307,7 +335,7 @@ class Program_CoreRequire_7
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_7
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_8
   int X
   int Read()
   {
@@ -323,7 +351,7 @@ class Program_CoreRequire_7
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_8
+class Program_CoreRequire_9
 {
     int X;
 
@@ -343,7 +371,7 @@ class Program_CoreRequire_8
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_8
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_9
   int X
   void Write(int x)
   {
@@ -359,7 +387,7 @@ class Program_CoreRequire_8
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreRequire_9
+class Program_CoreRequire_10
 {
     int X;
 
@@ -379,7 +407,7 @@ class Program_CoreRequire_9
         Assert.That(ClassModel.Unsupported.Requires.Count, Is.EqualTo(1));
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_9
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_10
   int X
   void Write(int x)
   {

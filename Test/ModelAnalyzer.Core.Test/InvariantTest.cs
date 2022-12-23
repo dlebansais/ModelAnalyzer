@@ -73,12 +73,42 @@ class Program_CoreInvariant_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedInvariantTest_TooManyInstructions()
+    public void UnsupportedInvariantTest_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreInvariant_2
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+// Invariant: *
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Invariants.Count, Is.EqualTo(1));
+
+        IUnsupportedInvariant UnsupportedInvariant = ClassModel.Unsupported.Invariants[0];
+        Assert.That(UnsupportedInvariant.Text, Is.EqualTo("*"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedInvariantTest_TooManyInstructions()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreInvariant_3
 {
     int X;
 
@@ -108,7 +138,7 @@ class Program_CoreInvariant_2
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreInvariant_3
+class Program_CoreInvariant_4
 {
     int X;
 
@@ -134,7 +164,7 @@ namespace Invariant
 {
     using System;
 
-    class Program_CoreInvariant_4
+    class Program_CoreInvariant_5
     {
         int X;
 
@@ -160,7 +190,7 @@ namespace Invariant
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreInvariant_5
+class Program_CoreInvariant_6
 {
     int X;
 
