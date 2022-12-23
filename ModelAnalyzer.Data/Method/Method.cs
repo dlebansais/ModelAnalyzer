@@ -15,11 +15,6 @@ internal class Method : IMethod
     required public MethodName MethodName { get; init; }
 
     /// <summary>
-    /// Gets a value indicating whether all method members are supported.
-    /// </summary>
-    required public bool IsSupported { get; init; }
-
-    /// <summary>
     /// Gets a value indicating whether the method returns a value.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }

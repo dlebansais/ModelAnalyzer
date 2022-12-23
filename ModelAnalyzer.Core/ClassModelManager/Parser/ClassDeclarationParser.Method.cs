@@ -43,7 +43,6 @@ internal partial class ClassDeclarationParser
         {
             if (IsMethodDeclarationValid(methodDeclaration, out ExpressionType ReturnType))
             {
-                bool IsSupported = true;
                 ParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
@@ -52,7 +51,6 @@ internal partial class ClassDeclarationParser
                 Method NewMethod = new Method
                 {
                     MethodName = MethodName,
-                    IsSupported = IsSupported,
                     ReturnType = ReturnType,
                     ParameterTable = ParameterTable,
                     RequireList = RequireList,
