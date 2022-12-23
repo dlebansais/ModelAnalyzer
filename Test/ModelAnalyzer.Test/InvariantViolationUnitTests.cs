@@ -170,16 +170,58 @@ class [|{ForSynchronousTestOnly}_7|]
 
     [Test]
     [Category("Analyzer")]
-    public async Task ConstrainedInvariant_NoDiagnostic()
+    public async Task ConstrainedInvariant_BoolNoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
 class {ForSynchronousTestOnly}_8
 {{
+    bool X;
+
+    void Write(bool x)
+    // Require: x == false
+    {{
+        X = x;
+    }}
+}}
+// Invariant: X == false
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ConstrainedInvariant_IntNoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@$"
+using System;
+
+class {ForSynchronousTestOnly}_9
+{{
     int X;
 
     void Write(int x)
+    // Require: x == 0
+    {{
+        X = x;
+    }}
+}}
+// Invariant: X == 0
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ConstrainedInvariant_DoubleNoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@$"
+using System;
+
+class {ForSynchronousTestOnly}_10
+{{
+    double X;
+
+    void Write(double x)
     // Require: x == 0
     {{
         X = x;
@@ -197,7 +239,7 @@ class {ForSynchronousTestOnly}_8
 using System;
 
 // This class name is not set to ForSynchronousTestOnly_xx on purpose.
-class Program_InvariantViolation_9
+class Program_InvariantViolation_11
 {{
     int X;
 

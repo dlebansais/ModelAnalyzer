@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using AnalysisLogger;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
 
@@ -143,52 +142,82 @@ internal partial class Verifier : IDisposable
             Field Field = Entry.Value;
 
             aliasTable.AddName(FieldName);
-            string FieldNameAlias = aliasTable.GetAlias(FieldName);
 
-            IntExpr FieldExpr = Context.MkIntConst(FieldNameAlias);
-            Expr Initializer = GetFieldInitializer(Field);
-            BoolExpr InitExpr = Context.MkEq(FieldExpr, Initializer);
+            string FieldNameAlias = aliasTable.GetAlias(Field.Name);
+            ExpressionType FieldType = Field.VariableType;
+
+            Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
+            Expr InitializerExpr = GetFieldInitializer(Field);
+            BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
             Log($"Adding {InitExpr}");
             solver.Assert(InitExpr);
         }
     }
 
-    private Expr GetFieldInitializer(Field field)
+    private Expr CreateVariableExpr(string variableName, ExpressionType variableType)
     {
-        Expr Initializer = null!;
         bool IsHandled = false;
+        Expr Result = null!;
 
-        switch (field.VariableType)
+        switch (variableType)
         {
             case ExpressionType.Boolean:
-                if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
-                    Initializer = LiteralBoolean.Value == true ? True : False;
-                else
-                    Initializer = False;
+                Result = Context.MkBoolConst(variableName);
                 IsHandled = true;
                 break;
 
             case ExpressionType.Integer:
-                if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
-                    Initializer = LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
-                else
-                    Initializer = Zero;
+                Result = Context.MkIntConst(variableName);
                 IsHandled = true;
                 break;
 
             case ExpressionType.FloatingPoint:
-                if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
-                    Initializer = LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
-                else
-                    Initializer = Zero;
+                Result = Context.MkRealConst(variableName);
                 IsHandled = true;
                 break;
         }
 
         Debug.Assert(IsHandled);
 
-        return Initializer;
+        return Result;
+    }
+
+    private Expr GetFieldInitializer(Field field)
+    {
+        Expr InitializerExpr = null!;
+        bool IsHandled = false;
+
+        switch (field.VariableType)
+        {
+            case ExpressionType.Boolean:
+                if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
+                    InitializerExpr = LiteralBoolean.Value == true ? True : False;
+                else
+                    InitializerExpr = False;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.Integer:
+                if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
+                    InitializerExpr = LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
+                else
+                    InitializerExpr = Zero;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.FloatingPoint:
+                if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
+                    InitializerExpr = LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
+                else
+                    InitializerExpr = Zero;
+                IsHandled = true;
+                break;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return InitializerExpr;
     }
 
     private bool AddClassInvariant(Solver solver, AliasTable aliasTable)

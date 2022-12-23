@@ -46,7 +46,23 @@ internal partial class Verifier : IDisposable
         string DestinationName = assignmentStatement.Destination.Name;
         aliasTable.IncrementNameAlias(DestinationName);
         string DestinationNameAlias = aliasTable.GetAlias(DestinationName);
-        IntExpr DestinationExpr = Context.MkIntConst(DestinationNameAlias);
+
+        Expr DestinationExpr = null!;
+
+        switch (SourceExpr)
+        {
+            case BoolExpr:
+                DestinationExpr = Context.MkBoolConst(DestinationNameAlias);
+                break;
+            case IntExpr:
+                DestinationExpr = Context.MkIntConst(DestinationNameAlias);
+                break;
+            case RealExpr:
+                DestinationExpr = Context.MkRealConst(DestinationNameAlias);
+                break;
+        }
+
+        Debug.Assert(DestinationExpr is not null);
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
