@@ -192,6 +192,10 @@ internal partial class ClassDeclarationParser
             case SyntaxKind.IntKeyword:
                 variableType = ExpressionType.Integer;
                 break;
+
+            case SyntaxKind.DoubleKeyword:
+                variableType = ExpressionType.FloatingPoint;
+                break;
         }
 
         return true;

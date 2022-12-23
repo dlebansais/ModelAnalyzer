@@ -24,4 +24,9 @@ public enum ExpressionType
     /// int type.
     /// </summary>
     Integer,
+
+    /// <summary>
+    /// double type.
+    /// </summary>
+    FloatingPoint,
 }

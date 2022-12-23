@@ -1,11 +1,12 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Globalization;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Represents a literal value expression.
+/// Represents a literal floating point value expression.
 /// </summary>
-internal class LiteralIntValueExpression : Expression
+internal class LiteralFloatingPointValueExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -13,16 +14,16 @@ internal class LiteralIntValueExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Integer;
+    public override ExpressionType ExpressionType => ExpressionType.FloatingPoint;
 
     /// <summary>
     /// Gets or sets the literal value.
     /// </summary>
-    public int Value { get; set; }
+    public double Value { get; set; }
 
     /// <inheritdoc/>
     public override string ToString()
     {
-        return Value.ToString();
+        return Value.ToString(CultureInfo.InvariantCulture);
     }
 }

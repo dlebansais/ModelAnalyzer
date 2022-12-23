@@ -120,6 +120,11 @@ internal partial class ClassDeclarationParser
                 initializerExpression = IntegerExpression;
                 return true;
             }
+            else if (fieldType == ExpressionType.FloatingPoint && ParsedExpression is LiteralFloatingPointValueExpression FloatingPointExpression)
+            {
+                initializerExpression = FloatingPointExpression;
+                return true;
+            }
         }
 
         LogWarning("Unsupported field initializer.");

@@ -13,7 +13,7 @@ internal class UnaryArithmeticExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Integer;
+    public override ExpressionType ExpressionType => Operand.ExpressionType;
 
     /// <summary>
     /// Gets the unary arithmetic operator.

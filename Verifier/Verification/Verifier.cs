@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.Extensions.Logging;
@@ -171,6 +172,14 @@ internal partial class Verifier : IDisposable
             case ExpressionType.Integer:
                 if (field.Initializer is LiteralIntValueExpression LiteralInteger)
                     Initializer = LiteralInteger.Value == 0 ? Zero : Context.MkInt(LiteralInteger.Value);
+                else
+                    Initializer = Zero;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.FloatingPoint:
+                if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
+                    Initializer = LiteralFloatingPoint.Value == 0 ? Zero : Context.MkNumeral(LiteralFloatingPoint.Value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
                 else
                     Initializer = Zero;
                 IsHandled = true;

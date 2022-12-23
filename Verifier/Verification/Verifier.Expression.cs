@@ -130,6 +130,11 @@ internal partial class Verifier : IDisposable
                 Result = Context.MkIntConst(VariableAliasName);
                 IsHandled = true;
                 break;
+
+            case ExpressionType.FloatingPoint:
+                Result = Context.MkRealConst(VariableAliasName);
+                IsHandled = true;
+                break;
         }
 
         Debug.Assert(IsHandled);

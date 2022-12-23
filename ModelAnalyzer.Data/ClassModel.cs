@@ -204,6 +204,7 @@ internal partial record ClassModel : IClassModel
             { ExpressionType.Void, "void" },
             { ExpressionType.Boolean, "bool" },
             { ExpressionType.Integer, "int" },
+            { ExpressionType.FloatingPoint, "double" },
         };
 
         Debug.Assert(ExpressionTypeToStringTable.ContainsKey(expressionType));

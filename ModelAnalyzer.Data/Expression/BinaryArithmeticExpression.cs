@@ -13,7 +13,16 @@ internal class BinaryArithmeticExpression : Expression
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Integer;
+    public override ExpressionType ExpressionType
+    {
+        get
+        {
+            if (Left.ExpressionType == ExpressionType.FloatingPoint || Right.ExpressionType == ExpressionType.FloatingPoint)
+                return ExpressionType.FloatingPoint;
+            else
+                return ExpressionType.Integer;
+        }
+    }
 
     /// <summary>
     /// Gets the left expression.
