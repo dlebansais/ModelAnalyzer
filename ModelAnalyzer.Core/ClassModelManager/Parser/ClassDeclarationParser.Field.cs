@@ -1,11 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 
 /// <summary>
 /// Represents a class declaration parser.
@@ -89,7 +87,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out IField field)
+    private bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out Field field)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
             if (Entry.Value.FieldName.Name == fieldName)

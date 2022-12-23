@@ -273,7 +273,7 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)
     {
-        if (TryFindFieldByName(fieldTable, variableName, out IField Field))
+        if (TryFindFieldByName(fieldTable, variableName, out Field Field))
         {
             variable = Field;
             return true;

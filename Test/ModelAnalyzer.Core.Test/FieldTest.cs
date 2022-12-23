@@ -164,6 +164,7 @@ class Program_CoreField_6
     bool X = true;
     int Y = 0;
     double Z = 1.1;
+    double K = 1;
 }
 ");
 
@@ -178,6 +179,7 @@ class Program_CoreField_6
   bool X = true
   int Y = 0
   double Z = 1.1
+  double K = 1
 "));
     }
 

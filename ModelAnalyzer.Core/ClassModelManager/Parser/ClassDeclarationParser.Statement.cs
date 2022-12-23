@@ -100,27 +100,42 @@ internal partial class ClassDeclarationParser
         {
             if (AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
             {
-                if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out IField Destination))
+                if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out Field Destination))
                 {
                     ExpressionSyntax SourceExpression = AssignmentExpression.Right;
                     LocationContext LocationContext = new(SourceExpression);
 
                     Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, SourceExpression, isNested: false);
                     if (Expression is not null)
-                        NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                    {
+                        if (IsSourceAndDestinationTypeCompatible(Destination, Expression))
+                            NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                        else
+                            Log("Source cannot be assigned to destination.");
+                    }
                     else
                         isErrorReported = true;
                 }
                 else
-                    Log($"Unknown assignment statement destination.");
+                    Log("Unknown assignment statement destination.");
             }
             else
-                Log($"Unsupported assignment statement destination.");
+                Log("Unsupported assignment statement destination.");
         }
         else
-            Log($"Unsupported assignment statement source.");
+            Log("Unsupported assignment statement source.");
 
         return NewStatement;
+    }
+
+    private bool IsSourceAndDestinationTypeCompatible(Field destination, Expression source)
+    {
+        if (destination.VariableType == source.ExpressionType)
+            return true;
+        else if (destination.VariableType == ExpressionType.FloatingPoint && source.ExpressionType == ExpressionType.Integer)
+            return true;
+        else
+            return false;
     }
 
     private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
