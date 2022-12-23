@@ -258,7 +258,7 @@ class Program_CoreExpression_8
   void Write(int x)
   # require x >= 0
   # require (x + 1) >= 0
-  # require True
+  # require true
   # require (x + 1) >= -1
   {
     X = x;
