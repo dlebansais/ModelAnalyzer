@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static System.Net.Mime.MediaTypeNames;
 
 /// <summary>
 /// Represents a class declaration parser.
@@ -48,12 +49,21 @@ internal partial class ClassDeclarationParser
 
         Log($"Analyzing require '{Text}'.");
 
-        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+        Require? NewRequire = null;
+        bool IsErrorReported = false;
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
+        if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
-            Require NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
+            LocationContext LocationContext = new(trivia, header, Offset);
 
+            if (IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            {
+                NewRequire = new Require { Text = Text, BooleanExpression = BooleanExpression };
+            }
+        }
+
+        if (NewRequire is not null)
+        {
             Log($"Require analyzed: '{NewRequire}'.");
 
             requireList.Add(NewRequire);

@@ -15,8 +15,6 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private const string AssignmentAssertionText = "_ = ";
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassDeclarationParser"/> class.
     /// </summary>
@@ -199,25 +197,25 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool TryParseAssertionInTrivia(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, string text, LocationContext locationContext, out Expression booleanExpression, out bool isErrorReported)
+    private bool TryParseAssertionTextInTrivia(string text, out SyntaxTree syntaxTree, out int offset)
     {
-        booleanExpression = null!;
+        const string AssignmentAssertionText = "_ = ";
+        offset = AssignmentAssertionText.Length;
 
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"{AssignmentAssertionText}{text};", Options);
-        var Diagnostics = SyntaxTree.GetDiagnostics();
+        syntaxTree = CSharpSyntaxTree.ParseText($"{AssignmentAssertionText}{text};", Options);
+        var Diagnostics = syntaxTree.GetDiagnostics();
         List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
         Log($"Parsed: '{text}' ErrorCount={ErrorList.Count}");
 
         if (ErrorList.Count > 0)
         {
-            Log($"Expression '{text}' contains an error.");
+            Log($"Expression '{text}' contains errors.");
 
-            isErrorReported = false;
             return false;
         }
-        else
-            return IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, locationContext, SyntaxTree, out booleanExpression, out isErrorReported);
+
+        return true;
     }
 
     private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)

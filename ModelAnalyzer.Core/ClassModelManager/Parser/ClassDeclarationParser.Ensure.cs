@@ -48,12 +48,21 @@ internal partial class ClassDeclarationParser
 
         Log($"Analyzing ensure '{Text}'.");
 
-        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+        Ensure? NewEnsure = null;
+        bool IsErrorReported = false;
 
-        if (TryParseAssertionInTrivia(fieldTable, parameterTable, unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
+        if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
-            Ensure NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+            LocationContext LocationContext = new(trivia, header, Offset);
 
+            if (IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            {
+                NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+            }
+        }
+
+        if (NewEnsure is not null)
+        {
             Log($"Ensure analyzed: '{NewEnsure}'.");
 
             ensureList.Add(NewEnsure);

@@ -58,12 +58,23 @@ internal partial class ClassDeclarationParser
     {
         string Text = comment.Substring(header.Length);
 
-        LocationContext LocationContext = new(trivia, header, AssignmentAssertionText.Length);
+        Log($"Analyzing ensure '{Text}'.");
 
-        if (TryParseAssertionInTrivia(fieldTable, new ParameterTable(), unsupported, Text, LocationContext, out Expression BooleanExpression, out bool IsErrorReported))
+        Invariant? NewInvariant = null;
+        bool IsErrorReported = false;
+
+        if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
-            Invariant NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
+            LocationContext LocationContext = new(trivia, header, Offset);
 
+            if (IsValidAssertionSyntaxTree(fieldTable, ParameterTable.Empty, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            {
+                NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
+            }
+        }
+
+        if (NewInvariant is not null)
+        {
             Log($"Invariant analyzed: '{NewInvariant}'.");
 
             invariantList.Add(NewInvariant);
