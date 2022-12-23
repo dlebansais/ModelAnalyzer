@@ -1,9 +1,11 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 
 /// <summary>
 /// Represents a class declaration parser.
@@ -57,25 +59,29 @@ internal partial class ClassDeclarationParser
     private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported, ExpressionType fieldType)
     {
         FieldName FieldName = new() { Name = variable.Identifier.ValueText };
+        bool IsErrorReported = false;
 
         // Ignore duplicate names, the compiler will catch them.
         if (!fieldTable.ContainsItem(FieldName))
         {
             bool IsFieldSupported = isFieldSupported; // Initialize with the result of previous checks (type etc.)
+            Expression? Initializer = null;
 
-            if (variable.Initializer is not null)
+            if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
-                LogWarning($"Unsupported field initializer.");
-
-                IsFieldSupported = false;
+                if (!TryParseFieldInitializer(unsupported, EqualsValueClause, fieldType, out Initializer))
+                {
+                    IsFieldSupported = false;
+                    IsErrorReported = true;
+                }
             }
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { FieldName = FieldName, VariableType = fieldType };
+                Field NewField = new Field { FieldName = FieldName, VariableType = fieldType, Initializer = Initializer };
                 fieldTable.AddItem(FieldName, NewField);
             }
-            else
+            else if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
                 unsupported.AddUnsupportedField(Location);
@@ -93,6 +99,34 @@ internal partial class ClassDeclarationParser
             }
 
         field = null!;
+        return false;
+    }
+
+    private bool TryParseFieldInitializer(Unsupported unsupported, EqualsValueClauseSyntax equalsValueClause, ExpressionType fieldType, out Expression? initializerExpression)
+    {
+        ExpressionSyntax InitializerValue = equalsValueClause.Value;
+
+        if (InitializerValue is LiteralExpressionSyntax literalExpression)
+        {
+            Expression? ParsedExpression = TryParseLiteralValueExpression(literalExpression);
+
+            if (fieldType == ExpressionType.Boolean && ParsedExpression is LiteralBoolValueExpression BooleanExpression)
+            {
+                initializerExpression = BooleanExpression;
+                return true;
+            }
+            else if (fieldType == ExpressionType.Integer && ParsedExpression is LiteralIntValueExpression IntegerExpression)
+            {
+                initializerExpression = IntegerExpression;
+                return true;
+            }
+        }
+
+        LogWarning("Unsupported field initializer.");
+
+        Location Location = InitializerValue.GetLocation();
+        unsupported.AddUnsupportedExpression(Location);
+        initializerExpression = null;
         return false;
     }
 }

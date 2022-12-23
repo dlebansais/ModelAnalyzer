@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using AnalysisLogger;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
 
@@ -19,6 +21,8 @@ internal partial class Verifier : IDisposable
         // Need model generation turned on.
         Context = new Context(new Dictionary<string, string>() { { "model", "true" } });
         Zero = Context.MkInt(0);
+        False = Context.MkBool(false);
+        True = Context.MkBool(true);
     }
 
     /// <summary>
@@ -135,15 +139,47 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
         {
             string FieldName = Entry.Key.Name;
+            Field Field = Entry.Value;
+
             aliasTable.AddName(FieldName);
             string FieldNameAlias = aliasTable.GetAlias(FieldName);
 
             IntExpr FieldExpr = Context.MkIntConst(FieldNameAlias);
-            BoolExpr InitExpr = Context.MkEq(FieldExpr, Zero);
+            Expr Initializer = GetFieldInitializer(Field);
+            BoolExpr InitExpr = Context.MkEq(FieldExpr, Initializer);
 
             Log($"Adding {InitExpr}");
             solver.Assert(InitExpr);
         }
+    }
+
+    private Expr GetFieldInitializer(Field field)
+    {
+        Expr Initializer = null!;
+        bool IsHandled = false;
+
+        switch (field.VariableType)
+        {
+            case ExpressionType.Boolean:
+                if (field.Initializer is LiteralBoolValueExpression LiteralBoolean)
+                    Initializer = LiteralBoolean.Value == true ? True : False;
+                else
+                    Initializer = False;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.Integer:
+                if (field.Initializer is LiteralIntValueExpression LiteralInteger)
+                    Initializer = LiteralInteger.Value == 0 ? Zero : Context.MkInt(LiteralInteger.Value);
+                else
+                    Initializer = Zero;
+                IsHandled = true;
+                break;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return Initializer;
     }
 
     private bool AddClassInvariant(Solver solver, AliasTable aliasTable)
@@ -262,4 +298,6 @@ internal partial class Verifier : IDisposable
 
     private Context Context;
     private IntExpr Zero;
+    private BoolExpr False;
+    private BoolExpr True;
 }

@@ -62,7 +62,15 @@ internal partial record ClassModel : IClassModel
             Field Field = FieldEntry.Value;
             string TypeString = ExpressionTypeToString(Field.VariableType);
 
-            builder.AppendLine($"  {TypeString} {Field.Name}");
+            string InitializerString;
+            IExpression? Initializer = Field.Initializer;
+
+            if (Initializer is not null)
+                InitializerString = $" = {Initializer}";
+            else
+                InitializerString = string.Empty;
+
+            builder.AppendLine($"  {TypeString} {Field.Name}{InitializerString}");
         }
     }
 

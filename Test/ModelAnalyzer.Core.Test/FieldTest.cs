@@ -152,7 +152,7 @@ class Program_CoreField_5
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest_Initializer()
+    public void FieldTest_ValidInitializer()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -160,6 +160,35 @@ using System;
 class Program_CoreField_6
 {
     int X = 0;
+    bool Y = true;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_6
+  int X = 0
+  bool Y = true
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void UnsupportedFieldTest_Initializer()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_7
+{
+    int X = 1 + 1;
+    int Y = false;
+    bool Z = 0;
 }
 ");
 
@@ -168,7 +197,7 @@ class Program_CoreField_6
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(3));
     }
 
     [Test]
@@ -178,7 +207,7 @@ class Program_CoreField_6
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreField_7
+class Program_CoreField_8
 {
     string X;
     int Y;

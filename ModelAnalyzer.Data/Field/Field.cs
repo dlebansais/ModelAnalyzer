@@ -18,4 +18,9 @@ internal class Field : IField
 
     /// <inheritdoc/>
     required public ExpressionType VariableType { get; init; }
+
+    /// <summary>
+    /// Gets the field initializer.
+    /// </summary>
+    required public IExpression? Initializer { get; init; }
 }

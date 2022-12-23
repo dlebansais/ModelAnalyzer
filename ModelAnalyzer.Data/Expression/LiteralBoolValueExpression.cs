@@ -23,6 +23,6 @@ internal class LiteralBoolValueExpression : Expression
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{Value}";
+        return Value ? "true" : "false";
     }
 }
