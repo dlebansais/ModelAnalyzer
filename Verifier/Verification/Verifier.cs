@@ -162,7 +162,7 @@ internal partial class Verifier : IDisposable
         switch (field.VariableType)
         {
             case ExpressionType.Boolean:
-                if (field.Initializer is LiteralBoolValueExpression LiteralBoolean)
+                if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
                     Initializer = LiteralBoolean.Value == true ? True : False;
                 else
                     Initializer = False;
@@ -170,7 +170,7 @@ internal partial class Verifier : IDisposable
                 break;
 
             case ExpressionType.Integer:
-                if (field.Initializer is LiteralIntValueExpression LiteralInteger)
+                if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
                     Initializer = LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
                 else
                     Initializer = Zero;

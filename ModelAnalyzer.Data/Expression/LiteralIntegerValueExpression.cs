@@ -3,9 +3,9 @@
 using Newtonsoft.Json;
 
 /// <summary>
-/// Represents a literal value expression.
+/// Represents a literal integer value expression.
 /// </summary>
-internal class LiteralIntValueExpression : Expression
+internal class LiteralIntegerValueExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]

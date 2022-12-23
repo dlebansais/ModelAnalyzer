@@ -14,8 +14,9 @@ using System;
 
 class Program_CoreField_0
 {
-    int X;
-    bool Y;
+    bool X;
+    int Y;
+    double Z;
 }
 ");
 
@@ -27,8 +28,9 @@ class Program_CoreField_0
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_0
-  int X
-  bool Y
+  bool X
+  int Y
+  double Z
 "));
     }
 
@@ -159,8 +161,9 @@ using System;
 
 class Program_CoreField_6
 {
-    int X = 0;
-    bool Y = true;
+    bool X = true;
+    int Y = 0;
+    double Z = 1.1;
 }
 ");
 
@@ -172,8 +175,9 @@ class Program_CoreField_6
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_6
-  int X = 0
-  bool Y = true
+  bool X = true
+  int Y = 0
+  double Z = 1.1
 "));
     }
 
@@ -189,6 +193,7 @@ class Program_CoreField_7
     int X = 1 + 1;
     int Y = false;
     bool Z = 0;
+    double K = false;
 }
 ");
 
@@ -197,7 +202,7 @@ class Program_CoreField_7
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(3));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(4));
     }
 
     [Test]

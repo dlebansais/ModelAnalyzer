@@ -110,19 +110,25 @@ internal partial class ClassDeclarationParser
         {
             Expression? ParsedExpression = TryParseLiteralValueExpression(literalExpression);
 
-            if (fieldType == ExpressionType.Boolean && ParsedExpression is LiteralBoolValueExpression BooleanExpression)
+            if (fieldType == ExpressionType.Boolean)
             {
-                initializerExpression = BooleanExpression;
-                return true;
+                if (ParsedExpression is LiteralBooleanValueExpression BooleanExpression)
+                {
+                    initializerExpression = BooleanExpression;
+                    return true;
+                }
             }
-            else if (fieldType == ExpressionType.Integer && ParsedExpression is LiteralIntValueExpression IntegerExpression)
+            else if (fieldType == ExpressionType.Integer)
             {
-                initializerExpression = IntegerExpression;
-                return true;
+                if (ParsedExpression is LiteralIntegerValueExpression IntegerExpression)
+                {
+                    initializerExpression = IntegerExpression;
+                    return true;
+                }
             }
             else if (fieldType == ExpressionType.FloatingPoint)
             {
-                if (ParsedExpression is LiteralIntValueExpression IntegerExpression)
+                if (ParsedExpression is LiteralIntegerValueExpression IntegerExpression)
                 {
                     initializerExpression = IntegerExpression;
                     return true;

@@ -41,12 +41,12 @@ internal partial class Verifier : IDisposable
                 Result = BuildComparisonExpression(aliasTable, Comparison);
                 IsAssigned = true;
                 break;
-            case LiteralBoolValueExpression LiteralBoolValue:
-                Result = BuildLiteralBoolValueExpression(LiteralBoolValue);
+            case LiteralBooleanValueExpression LiteralBooleanValue:
+                Result = BuildLiteralBooleanValueExpression(LiteralBooleanValue);
                 IsAssigned = true;
                 break;
-            case LiteralIntValueExpression LiteralIntValue:
-                Result = BuildLiteralIntValueExpression(LiteralIntValue);
+            case LiteralIntegerValueExpression LiteralIntegerValue:
+                Result = BuildLiteralIntegerValueExpression(LiteralIntegerValue);
                 IsAssigned = true;
                 break;
             case LiteralFloatingPointValueExpression LiteralFloatingPointValue:
@@ -104,14 +104,14 @@ internal partial class Verifier : IDisposable
         return OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildLiteralBoolValueExpression(LiteralBoolValueExpression literalBoolValueExpression)
+    private BoolExpr BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression)
     {
-        return CreateBooleanExpr(literalBoolValueExpression.Value);
+        return CreateBooleanExpr(literalBooleanValueExpression.Value);
     }
 
-    private ArithExpr BuildLiteralIntValueExpression(LiteralIntValueExpression literalIntValueExpression)
+    private ArithExpr BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression)
     {
-        return CreateIntegerExpr(literalIntValueExpression.Value);
+        return CreateIntegerExpr(literalIntegerValueExpression.Value);
     }
 
     private ArithExpr BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression)

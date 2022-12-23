@@ -311,7 +311,7 @@ class Program_CoreExpression_10
 
     void Write(int x)
     {
-        if (x is string || x is double)
+        if (x is string || x is float)
         {
         }
     }

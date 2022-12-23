@@ -200,13 +200,13 @@ internal partial class ClassDeclarationParser
         string LiteralValue = literalExpression.Token.ValueText;
 
         if (LiteralValue == "true")
-            NewExpression = new LiteralBoolValueExpression { Value = true };
+            NewExpression = new LiteralBooleanValueExpression { Value = true };
         else if (LiteralValue == "false")
-            NewExpression = new LiteralBoolValueExpression { Value = false };
-        else if (int.TryParse(LiteralValue, out int IntValue))
-            NewExpression = new LiteralIntValueExpression { Value = IntValue };
-        else if (double.TryParse(LiteralValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double DoubleValue))
-            NewExpression = new LiteralFloatingPointValueExpression { Value = DoubleValue };
+            NewExpression = new LiteralBooleanValueExpression { Value = false };
+        else if (int.TryParse(LiteralValue, out int IntegerValue))
+            NewExpression = new LiteralIntegerValueExpression { Value = IntegerValue };
+        else if (double.TryParse(LiteralValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double FloatingPointValue))
+            NewExpression = new LiteralFloatingPointValueExpression { Value = FloatingPointValue };
         else
             Log($"Failed to parse literal value '{LiteralValue}'.");
 

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a literal boolean value expression.
 /// </summary>
-internal class LiteralBoolValueExpression : Expression
+internal class LiteralBooleanValueExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]
