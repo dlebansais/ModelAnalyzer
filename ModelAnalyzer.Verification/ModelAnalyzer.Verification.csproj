@@ -1,16 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net48</TargetFramework>
-	<RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>11</LangVersion>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
-	<LangVersion>11</LangVersion>
     <IsPackable>false</IsPackable>
-    <RootNamespace>Verifier</RootNamespace>
+    <RootNamespace>ModelAnalyzer</RootNamespace>
     <Product />
-    <Description>A process to verify code consistency</Description>
+    <Description>A class model analyzer</Description>
     <Copyright>Copyright © 2022 David Le Bansais</Copyright>
     <Version>0.0.3</Version>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -20,21 +18,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="5.7.0">
+    <PackageReference Include="PolySharp" Version="1.8.1">
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Fody" Version="6.6.4">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="Microsoft.Z3" Version="4.11.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AnalysisLogger\AnalysisLogger.csproj" />
     <ProjectReference Include="..\ModelAnalyzer.Data\ModelAnalyzer.Data.csproj" />
-    <ProjectReference Include="..\ModelAnalyzer.Verification\ModelAnalyzer.Verification.csproj" />
-    <ProjectReference Include="..\ProcessCommunication\ProcessCommunication.csproj" />
   </ItemGroup>
 
 </Project>

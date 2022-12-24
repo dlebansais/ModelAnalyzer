@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Verifier", "Verifier\Verifi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelAnalyzer.Data", "ModelAnalyzer.Data\ModelAnalyzer.Data.csproj", "{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelAnalyzer.Verification", "ModelAnalyzer.Verification\ModelAnalyzer.Verification.csproj", "{88D18C2C-B9D0-4F8B-A171-B7E58A5C5BD0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -95,6 +97,10 @@ Global
 		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Debug|x64.Build.0 = Debug|x64
 		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Release|x64.ActiveCfg = Release|x64
 		{C0E89927-6AFF-475C-B6A7-ACFA47185DD6}.Release|x64.Build.0 = Release|x64
+		{88D18C2C-B9D0-4F8B-A171-B7E58A5C5BD0}.Debug|x64.ActiveCfg = Debug|x64
+		{88D18C2C-B9D0-4F8B-A171-B7E58A5C5BD0}.Debug|x64.Build.0 = Debug|x64
+		{88D18C2C-B9D0-4F8B-A171-B7E58A5C5BD0}.Release|x64.ActiveCfg = Release|x64
+		{88D18C2C-B9D0-4F8B-A171-B7E58A5C5BD0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
