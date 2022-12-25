@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a literal integer value expression.
 /// </summary>
-internal class LiteralIntegerValueExpression : Expression
+internal class LiteralIntegerValueExpression : Expression, ILiteralExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a literal floating point value expression.
 /// </summary>
-internal class LiteralFloatingPointValueExpression : Expression
+internal class LiteralFloatingPointValueExpression : Expression, ILiteralExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

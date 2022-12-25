@@ -65,7 +65,7 @@ internal partial class ClassDeclarationParser
         if (!fieldTable.ContainsItem(FieldName))
         {
             bool IsFieldSupported = isFieldSupported; // Initialize with the result of previous checks (type etc.)
-            Expression? Initializer = null;
+            ILiteralExpression? Initializer = null;
 
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
@@ -102,15 +102,15 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryParseFieldInitializer(Unsupported unsupported, EqualsValueClauseSyntax equalsValueClause, ExpressionType fieldType, out Expression? initializerExpression)
+    private bool TryParseFieldInitializer(Unsupported unsupported, EqualsValueClauseSyntax equalsValueClause, ExpressionType fieldType, out ILiteralExpression? initializerExpression)
     {
         ExpressionSyntax InitializerValue = equalsValueClause.Value;
 
-        if (InitializerValue is LiteralExpressionSyntax literalExpression)
+        if (InitializerValue is LiteralExpressionSyntax LiteralExpression)
         {
-            Expression? ParsedExpression = TryParseLiteralValueExpression(literalExpression);
+            Expression? ParsedExpression = TryParseLiteralValueExpression(LiteralExpression);
 
-            Dictionary<ExpressionType, Func<Expression?, Expression?>> InitializerTable = new()
+            Dictionary<ExpressionType, Func<Expression?, ILiteralExpression?>> InitializerTable = new()
             {
                 { ExpressionType.Boolean, BooleanInitializer },
                 { ExpressionType.Integer, IntegerInitializer },
@@ -132,7 +132,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Expression? BooleanInitializer(Expression? expression)
+    private ILiteralExpression? BooleanInitializer(Expression? expression)
     {
         if (expression is LiteralBooleanValueExpression BooleanExpression)
             return BooleanExpression;
@@ -140,7 +140,7 @@ internal partial class ClassDeclarationParser
             return null;
     }
 
-    private Expression? IntegerInitializer(Expression? expression)
+    private ILiteralExpression? IntegerInitializer(Expression? expression)
     {
         if (expression is LiteralIntegerValueExpression IntegerExpression)
             return IntegerExpression;
@@ -148,7 +148,7 @@ internal partial class ClassDeclarationParser
             return null;
     }
 
-    private Expression? FloatingPointInitializer(Expression? expression)
+    private ILiteralExpression? FloatingPointInitializer(Expression? expression)
     {
         if (expression is LiteralIntegerValueExpression IntegerExpression)
             return IntegerExpression;

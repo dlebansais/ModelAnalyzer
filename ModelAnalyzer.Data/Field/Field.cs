@@ -22,5 +22,5 @@ internal class Field : IField
     /// <summary>
     /// Gets the field initializer.
     /// </summary>
-    required public IExpression? Initializer { get; init; }
+    required public ILiteralExpression? Initializer { get; init; }
 }

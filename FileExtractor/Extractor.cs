@@ -5,17 +5,30 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-public class Extractor
+/// <summary>
+/// Provides tool to extract files from resources.
+/// </summary>
+public static class Extractor
 {
+    /// <summary>
+    /// The libz3 library name.
+    /// </summary>
     public const string Libz3FileName = "libz3.dll";
+
+    /// <summary>
+    /// The verifier exe name.
+    /// </summary>
     public const string VerifierFileName = "Verifier.exe";
 
-    // We must put libz3 along with Verifier.exe in a directory Windows doesn't know about, otherwise the analyzer will not load.
+    /// <summary>
+    /// Extracts files in resources into a subfolder of this module.
+    /// </summary>
     public static void Extract()
     {
         if (ExtractedPathTable.Count > 0)
             return;
 
+        // We must put libz3 along with Verifier.exe in a directory Windows doesn't know about, otherwise the analyzer will not load.
         try
         {
             Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
@@ -75,17 +88,31 @@ public class Extractor
         ExtractedPathTable.Add(fileName, DestinationPath);
     }
 
+    /// <summary>
+    /// Gets the path where a file was extracted.
+    /// </summary>
+    /// <param name="fileName">The file name.</param>
     public static string GetExtractedPath(string fileName)
     {
         return ExtractedPathTable[fileName];
     }
 
+    /// <summary>
+    /// Resets extraction so that a call to <see cref="Extract"/> will extract files again.
+    /// </summary>
     public static void Reset()
     {
         ExtractedPathTable.Clear();
         LastExceptionMessage = string.Empty;
     }
 
-    public static Dictionary<string, string> ExtractedPathTable { get; } = new();
+    /// <summary>
+    /// Gets the last exception message.
+    /// </summary>
     public static string LastExceptionMessage { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the table of extracted files.
+    /// </summary>
+    public static Dictionary<string, string> ExtractedPathTable { get; } = new();
 }

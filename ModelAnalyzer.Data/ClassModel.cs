@@ -63,7 +63,7 @@ internal partial record ClassModel : IClassModel
             string TypeString = ExpressionTypeToString(Field.VariableType);
 
             string InitializerString;
-            IExpression? Initializer = Field.Initializer;
+            ILiteralExpression? Initializer = Field.Initializer;
 
             if (Initializer is not null)
                 InitializerString = $" = {Initializer}";
