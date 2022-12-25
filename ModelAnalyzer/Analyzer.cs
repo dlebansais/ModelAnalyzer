@@ -1,18 +1,18 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
+using System.Collections.Generic;
+using AnalysisLogger;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using AnalysisLogger;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 public abstract class Analyzer : DiagnosticAnalyzer
 {
     protected IAnalysisLogger Logger { get; } = Initialization.Logger;
     protected ClassModelManager Manager { get; } = Initialization.Manager;
-    
+
     protected abstract string Id { get; }
     protected abstract SyntaxKind DiagnosticKind { get; }
     protected abstract bool IsAsyncRunRequested { get; }

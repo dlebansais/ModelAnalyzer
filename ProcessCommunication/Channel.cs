@@ -107,6 +107,7 @@ public class Channel : IDisposable
     /// <summary>
     /// Reads data from the channel.
     /// </summary>
+    /// <exception cref="InvalidOperationException">The channel is not open.</exception>
     public byte[]? Read()
     {
         if (Accessor is null)
@@ -165,6 +166,8 @@ public class Channel : IDisposable
     /// <summary>
     /// Writes data to the channel.
     /// </summary>
+    /// <param name="data">The data to write.</param>
+    /// <exception cref="InvalidOperationException">The channel is not open.</exception>
     public void Write(byte[] data)
     {
         if (Accessor is null)

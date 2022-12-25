@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 public class CallSequenceTest

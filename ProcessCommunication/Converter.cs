@@ -1,7 +1,7 @@
 ﻿namespace ProcessCommunication;
 
-using System.Text;
 using System;
+using System.Text;
 
 /// <summary>
 /// Provides tools to encode and decode strings transmitted over channels.
