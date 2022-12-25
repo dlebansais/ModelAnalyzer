@@ -13,6 +13,13 @@ internal class ReadOnlyFieldTable : ReadOnlyNameAndItemTable<FieldName, Field>
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyFieldTable"/> class.
     /// </summary>
+    public ReadOnlyFieldTable()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadOnlyFieldTable"/> class.
+    /// </summary>
     /// <param name="table">The source table.</param>
     public ReadOnlyFieldTable(FieldTable table)
         : base(table)

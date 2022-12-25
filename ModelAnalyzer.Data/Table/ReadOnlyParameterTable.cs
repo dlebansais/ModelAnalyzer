@@ -13,6 +13,13 @@ internal class ReadOnlyParameterTable : ReadOnlyNameAndItemTable<ParameterName, 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyParameterTable"/> class.
     /// </summary>
+    public ReadOnlyParameterTable()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadOnlyParameterTable"/> class.
+    /// </summary>
     /// <param name="table">The source table.</param>
     public ReadOnlyParameterTable(ParameterTable table)
         : base(table)

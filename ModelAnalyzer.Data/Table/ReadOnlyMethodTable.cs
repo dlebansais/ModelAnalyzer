@@ -13,6 +13,13 @@ internal class ReadOnlyMethodTable : ReadOnlyNameAndItemTable<MethodName, Method
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyMethodTable"/> class.
     /// </summary>
+    public ReadOnlyMethodTable()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadOnlyMethodTable"/> class.
+    /// </summary>
     /// <param name="table">The source table.</param>
     public ReadOnlyMethodTable(MethodTable table)
         : base(table)

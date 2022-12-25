@@ -15,7 +15,6 @@ public class NameAndItemTableTest
     {
         NameAndItemTable<string, int> TestTable = new();
 
-        Assert.IsFalse(TestTable.IsSealed);
         Assert.That(TestTable.ContainsItem("*"), Is.False);
     }
 
@@ -27,7 +26,6 @@ public class NameAndItemTableTest
 
         TestTable.AddItem("*", 0);
 
-        Assert.IsFalse(TestTable.IsSealed);
         Assert.That(TestTable.ContainsItem("*"), Is.True);
 
         bool IsFound = false;
@@ -40,19 +38,84 @@ public class NameAndItemTableTest
 
     [Test]
     [Category("Core")]
-    public void NameAndItemTable_Sealing()
+    public void NameAndItemTable_ReadOnlyFieldTable()
     {
-        NameAndItemTable<string, int> TestTable = new();
+        FieldTable TestTable = new();
+        FieldName TestFieldName = new FieldName() { Name = "*" };
+        Field TestField = new Field() { FieldName = TestFieldName, VariableType = ExpressionType.Other, Initializer = null };
 
-        TestTable.AddItem("*", 0);
+        TestTable.AddItem(TestFieldName, TestField);
 
-        Assert.IsFalse(TestTable.IsSealed);
-        Assert.That(TestTable.ContainsItem("*"), Is.True);
+        Assert.That(TestTable.ContainsItem(TestFieldName), Is.True);
 
-        TestTable.Seal();
+        ReadOnlyFieldTable ReadOnlyTestTable = TestTable.ToReadOnly();
 
-        Assert.IsTrue(TestTable.IsSealed);
+        Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyFieldTable.Empty));
+        Assert.That(ReadOnlyTestTable.ContainsItem(TestFieldName), Is.True);
 
-        Assert.Throws<InvalidOperationException>(() => TestTable.AddItem("+", 0));
+        bool IsFound = false;
+        foreach (KeyValuePair<FieldName, Field> Entry in ReadOnlyTestTable)
+            if (Entry.Key == TestFieldName && Entry.Value == TestField)
+                IsFound = true;
+
+        Assert.IsTrue(IsFound);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void NameAndItemTable_ReadOnlyMethodTable()
+    {
+        MethodTable TestTable = new();
+        MethodName TestMethodName = new MethodName() { Name = "*" };
+        Method TestMethod = new Method()
+        {
+            MethodName = TestMethodName,
+            ParameterTable = ReadOnlyParameterTable.Empty,
+            EnsureList = new(),
+            RequireList = new(),
+            StatementList = new(),
+            ReturnType = ExpressionType.Void,
+        };
+
+        TestTable.AddItem(TestMethodName, TestMethod);
+
+        Assert.That(TestTable.ContainsItem(TestMethodName), Is.True);
+
+        ReadOnlyMethodTable ReadOnlyTestTable = TestTable.ToReadOnly();
+
+        Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyMethodTable.Empty));
+        Assert.That(ReadOnlyTestTable.ContainsItem(TestMethodName), Is.True);
+
+        bool IsFound = false;
+        foreach (KeyValuePair<MethodName, Method> Entry in ReadOnlyTestTable)
+            if (Entry.Key == TestMethodName && Entry.Value == TestMethod)
+                IsFound = true;
+
+        Assert.IsTrue(IsFound);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void NameAndItemTable_ReadOnlyParameterTable()
+    {
+        ParameterTable TestTable = new();
+        ParameterName TestParameterName = new ParameterName() { Name = "*" };
+        Parameter TestParameter = new Parameter() { ParameterName = TestParameterName, VariableType = ExpressionType.Other };
+
+        TestTable.AddItem(TestParameterName, TestParameter);
+
+        Assert.That(TestTable.ContainsItem(TestParameterName), Is.True);
+
+        ReadOnlyParameterTable ReadOnlyTestTable = TestTable.ToReadOnly();
+
+        Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyParameterTable.Empty));
+        Assert.That(ReadOnlyTestTable.ContainsItem(TestParameterName), Is.True);
+
+        bool IsFound = false;
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in ReadOnlyTestTable)
+            if (Entry.Key == TestParameterName && Entry.Value == TestParameter)
+                IsFound = true;
+
+        Assert.IsTrue(IsFound);
     }
 }

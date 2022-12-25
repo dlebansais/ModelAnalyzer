@@ -12,29 +12,13 @@ internal class NameAndItemTable<TName, TItem>
     where TName : IEquatable<TName>
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the table is sealed.
-    /// </summary>
-    public bool IsSealed { get; set; }
-
-    /// <summary>
     /// Adds an item to the collection. The item name must be unique, and the table not sealed.
     /// </summary>
     /// <param name="itemName">The item name used as a key.</param>
     /// <param name="item">The item.</param>
     public void AddItem(TName itemName, TItem item)
     {
-        if (IsSealed)
-            throw new InvalidOperationException("Cannot add items to a sealed table.");
-
         List.Add(new KeyValuePair<TName, TItem>(itemName, item));
-    }
-
-    /// <summary>
-    /// Seals the table, forbiding subsequent calls to <see cref="AddItem(TName, TItem)"/>.
-    /// </summary>
-    public void Seal()
-    {
-        IsSealed = true;
     }
 
     /// <summary>

@@ -14,6 +14,13 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyNameAndItemTable{TName, TItem}"/> class.
     /// </summary>
+    public ReadOnlyNameAndItemTable()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadOnlyNameAndItemTable{TName, TItem}"/> class.
+    /// </summary>
     /// <param name="table">The source table.</param>
     public ReadOnlyNameAndItemTable(NameAndItemTable<TName, TItem> table)
     {
@@ -36,5 +43,5 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     /// </summary>
     public IEnumerator<KeyValuePair<TName, TItem>> GetEnumerator() => List.GetEnumerator();
 
-    private List<KeyValuePair<TName, TItem>> List { get; set; } = new();
+    public List<KeyValuePair<TName, TItem>> List { get; set; } = new();
 }
