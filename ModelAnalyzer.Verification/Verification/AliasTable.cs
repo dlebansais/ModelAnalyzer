@@ -32,12 +32,21 @@ internal class AliasTable
     }
 
     /// <summary>
+    /// Checks whether a variable name is in the table.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    public bool ContainsName(string name)
+    {
+        return Table.ContainsKey(name);
+    }
+
+    /// <summary>
     /// Adds a variable name to the table and creates its first alias.
     /// </summary>
     /// <param name="name">The name.</param>
     public void AddName(string name)
     {
-        Debug.Assert(!Table.ContainsKey(name));
+        Debug.Assert(!ContainsName(name));
 
         Table.Add(name, new AliasName { VariableName = name });
         AllAliases.Add(Table[name].Alias);
@@ -69,7 +78,7 @@ internal class AliasTable
     /// <param name="name">The name.</param>
     public string GetAlias(string name)
     {
-        Debug.Assert(Table.ContainsKey(name));
+        Debug.Assert(ContainsName(name));
 
         return Table[name].Alias;
     }
@@ -80,7 +89,7 @@ internal class AliasTable
     /// <param name="name">The name.</param>
     public void IncrementNameAlias(string name)
     {
-        Debug.Assert(Table.ContainsKey(name));
+        Debug.Assert(ContainsName(name));
 
         Table[name].Increment();
         AllAliases.Add(Table[name].Alias);
