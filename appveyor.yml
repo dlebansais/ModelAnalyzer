@@ -62,7 +62,7 @@ before_test:
   - timeout 10
 
 test_script:
-  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests.bat -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%*.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
+  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests.bat -filter:"+[%APPVEYOR_PROJECT_NAME%*]* -[%APPVEYOR_PROJECT_NAME%.Core.Test]* -[%APPVEYOR_PROJECT_NAME%.Data.Test]* -[%APPVEYOR_PROJECT_NAME%.Verification.Test]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
 
 after_test:
   - ps: Get-Content Coverage-*.xml -Head 3

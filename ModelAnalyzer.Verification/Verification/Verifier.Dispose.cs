@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents a code verifier.
