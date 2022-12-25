@@ -5,7 +5,7 @@ using NUnit.Framework;
 public class AliasNameTest
 {
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void BasicTest()
     {
         string TestObjectName = "Test";
@@ -16,7 +16,7 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasNameTest_Increment()
     {
         string TestObjectName = "Test";
@@ -29,7 +29,7 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasNameTest_MergeNoIncrement()
     {
         string TestObjectName = "Test";
@@ -44,7 +44,7 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasNameTest_MergeSymetric()
     {
         string TestObjectName = "Test";
@@ -59,7 +59,7 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasNameTest_MergeOneIncrement()
     {
         string TestObjectName = "Test";

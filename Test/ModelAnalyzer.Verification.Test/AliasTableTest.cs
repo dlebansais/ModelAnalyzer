@@ -1,13 +1,12 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 public class AliasTableTest
 {
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void BasicTest()
     {
         string TestName = "Test";
@@ -19,7 +18,7 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasTableTest_AddOrIncrement()
     {
         string TestName = "Test";
@@ -43,7 +42,7 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasTableTest_Increment()
     {
         string TestName = "Test";
@@ -60,7 +59,7 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasTableTest_Clone()
     {
         string TestName = "Test";
@@ -82,7 +81,7 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasTableTest_AliasDifference()
     {
         string TestName1 = "Test1";
@@ -123,7 +122,7 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verifier")]
     public void AliasTableTest_Merge()
     {
         string TestName1 = "Test1";

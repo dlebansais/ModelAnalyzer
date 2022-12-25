@@ -74,23 +74,21 @@ internal partial class Verifier : IDisposable
         if (VerificationResult != VerificationResult.Default && VerificationResult.IsError)
             return;
 
-        List<Method> CallSequence = new();
+        CallSequence CallSequence = new();
         CallMethods(depth, CallSequence);
 
         if (depth < MaxDepth)
             Verify(depth + 1);
     }
 
-    private void CallMethods(int depth, List<Method> callSequence)
+    private void CallMethods(int depth, CallSequence callSequence)
     {
         if (depth > 0)
         {
             foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
             {
                 Method Method = Entry.Value;
-                List<Method> NewCallSequence = new();
-                NewCallSequence.AddRange(callSequence);
-                NewCallSequence.Add(Method);
+                CallSequence NewCallSequence = callSequence.WithAddedCall(Method);
 
                 CallMethods(depth - 1, NewCallSequence);
             }
@@ -99,7 +97,7 @@ internal partial class Verifier : IDisposable
             AddMethodCalls(callSequence);
     }
 
-    private void AddMethodCalls(List<Method> callSequence)
+    private void AddMethodCalls(CallSequence callSequence)
     {
         using Solver solver = Context.MkSolver();
 
@@ -107,19 +105,10 @@ internal partial class Verifier : IDisposable
 
         AddInitialState(solver, aliasTable);
 
-        string CallSequenceString = string.Empty;
-        foreach (Method Method in callSequence)
-        {
-            if (CallSequenceString.Length > 0)
-                CallSequenceString += ", ";
-
-            CallSequenceString += Method.Name;
-        }
-
-        if (CallSequenceString == string.Empty)
+        if (callSequence.IsEmpty)
             Log($"Call sequence empty");
         else
-            Log($"Call sequence: {CallSequenceString}");
+            Log($"Call sequence: {callSequence}");
 
         foreach (Method Method in callSequence)
             if (!AddMethodCallState(solver, aliasTable, Method))
