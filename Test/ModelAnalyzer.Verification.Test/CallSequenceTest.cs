@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
+using System.Collections.Generic;
 using NUnit.Framework;
 
 /// <summary>
@@ -41,5 +42,27 @@ public class CallSequenceTest
 
         Assert.That(TestObject0.IsEmpty);
         Assert.That(TestObject0.ToString(), Is.EqualTo(string.Empty));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void CallSequence_Enumerate()
+    {
+        CallSequence TestObject = new();
+        string MethodName = "Test";
+
+        Method Method = new() { MethodName = new MethodName() { Name = MethodName }, ParameterTable = new(), EnsureList = new(), RequireList = new(), StatementList = new(), ReturnType = ExpressionType.Void };
+
+        TestObject = TestObject.WithAddedCall(Method);
+
+        Assert.That(!TestObject.IsEmpty);
+        Assert.That(TestObject.ToString(), Is.EqualTo(MethodName));
+
+        List<Method> MethodList = new();
+        foreach (var Item in TestObject)
+            MethodList.Add(Item);
+
+        Assert.That(MethodList.Count, Is.EqualTo(1));
+        Assert.That(MethodList[0], Is.EqualTo(Method));
     }
 }
