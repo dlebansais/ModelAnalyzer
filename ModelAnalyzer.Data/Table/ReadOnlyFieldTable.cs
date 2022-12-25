@@ -8,7 +8,7 @@ internal class ReadOnlyFieldTable : ReadOnlyNameAndItemTable<FieldName, Field>
     /// <summary>
     /// Gets the empty field table.
     /// </summary>
-    public static ReadOnlyFieldTable Empty { get; } = new(new FieldTable());
+    public static ReadOnlyFieldTable Empty { get; } = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyFieldTable"/> class.

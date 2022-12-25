@@ -8,7 +8,7 @@ internal class ReadOnlyMethodTable : ReadOnlyNameAndItemTable<MethodName, Method
     /// <summary>
     /// Gets the empty method table.
     /// </summary>
-    public static ReadOnlyMethodTable Empty { get; } = new(new MethodTable());
+    public static ReadOnlyMethodTable Empty { get; } = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyMethodTable"/> class.

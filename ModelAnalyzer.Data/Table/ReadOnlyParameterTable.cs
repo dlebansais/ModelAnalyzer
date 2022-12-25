@@ -8,7 +8,7 @@ internal class ReadOnlyParameterTable : ReadOnlyNameAndItemTable<ParameterName, 
     /// <summary>
     /// Gets the empty parameter table.
     /// </summary>
-    public static ReadOnlyParameterTable Empty { get; } = new(new ParameterTable());
+    public static ReadOnlyParameterTable Empty { get; } = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyParameterTable"/> class.
