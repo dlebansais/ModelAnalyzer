@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a literal boolean value expression.
 /// </summary>
-internal class LiteralBooleanValueExpression : Expression, ILiteralExpression
+internal class LiteralBooleanValueExpression : Expression, ILiteralExpression<bool>, ILiteralExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -15,9 +15,7 @@ internal class LiteralBooleanValueExpression : Expression, ILiteralExpression
     [JsonIgnore]
     public override ExpressionType ExpressionType => ExpressionType.Boolean;
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the literal value is true.
-    /// </summary>
+    /// <inheritdoc/>
     public bool Value { get; set; }
 
     /// <inheritdoc/>

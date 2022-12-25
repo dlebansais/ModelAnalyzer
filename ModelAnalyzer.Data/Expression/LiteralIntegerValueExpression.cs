@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a literal integer value expression.
 /// </summary>
-internal class LiteralIntegerValueExpression : Expression, ILiteralExpression
+internal class LiteralIntegerValueExpression : Expression, ILiteralExpression<int>, ILiteralExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -15,9 +15,7 @@ internal class LiteralIntegerValueExpression : Expression, ILiteralExpression
     [JsonIgnore]
     public override ExpressionType ExpressionType => ExpressionType.Integer;
 
-    /// <summary>
-    /// Gets or sets the literal value.
-    /// </summary>
+    /// <inheritdoc/>
     public int Value { get; set; }
 
     /// <inheritdoc/>

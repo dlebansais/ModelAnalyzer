@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 /// <summary>
@@ -54,9 +55,9 @@ public class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFieldSuccess()
+    public void Verifier_OneBooleanFieldSuccess()
     {
-        Verifier TestObject = CreateOneFieldVerifier(invariantTestValue: 0);
+        Verifier TestObject = CreateOneFieldVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false);
 
         TestObject.Verify();
 
@@ -66,9 +67,9 @@ public class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFieldError()
+    public void Verifier_OneBooleanFieldError()
     {
-        Verifier TestObject = CreateOneFieldVerifier(invariantTestValue: 1);
+        Verifier TestObject = CreateOneFieldVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: true);
 
         TestObject.Verify();
 
@@ -77,14 +78,67 @@ public class VerifierTest
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
-    private Verifier CreateOneFieldVerifier(int invariantTestValue)
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneIntegerFieldSuccess()
     {
+        Verifier TestObject = CreateOneFieldVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneIntegerFieldError()
+    {
+        Verifier TestObject = CreateOneFieldVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneFloatingPointFieldSuccess()
+    {
+        Verifier TestObject = CreateOneFieldVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneFloatingPointFieldError()
+    {
+        Verifier TestObject = CreateOneFieldVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 1.0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+    }
+
+    private Verifier CreateOneFieldVerifier<TValue, TExpression>(TValue invariantTestValue)
+        where TExpression : Expression, ILiteralExpression<TValue>, ILiteralExpression, new()
+    {
+        TExpression Zero = new() { Value = invariantTestValue };
+
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             FieldName = new FieldName { Name = FieldName },
-            VariableType = ExpressionType.Integer,
+            VariableType = Zero.ExpressionType,
             Initializer = null,
         };
 
@@ -92,7 +146,6 @@ public class VerifierTest
         TestFieldTable.AddItem(TestField.FieldName, TestField);
 
         VariableValueExpression Variable = new() { Variable = TestField };
-        LiteralIntegerValueExpression Zero = new() { Value = invariantTestValue };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
@@ -117,9 +170,9 @@ public class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFieldWithInitializerSuccess()
+    public void Verifier_OneBooleanFieldWithInitializerSuccess()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier(initialValue: 0, invariantTestValue: 0);
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<bool, LiteralBooleanValueExpression>(initialValue: false, invariantTestValue: false);
 
         TestObject.Verify();
 
@@ -129,9 +182,9 @@ public class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFieldWithInitializerError()
+    public void Verifier_OneBooleanFieldWithInitializerError()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier(initialValue: 1, invariantTestValue: 0);
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<bool, LiteralBooleanValueExpression>(initialValue: true, invariantTestValue: false);
 
         TestObject.Verify();
 
@@ -140,16 +193,68 @@ public class VerifierTest
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
-    private Verifier CreateOneFieldWithInitializerVerifier(int initialValue, int invariantTestValue)
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneIntegerFieldWithInitializerSuccess()
     {
-        LiteralIntegerValueExpression Initializer = new() { Value = initialValue };
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<int, LiteralIntegerValueExpression>(initialValue: 0, invariantTestValue: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneIntegerFieldWithInitializerError()
+    {
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<int, LiteralIntegerValueExpression>(initialValue: 1, invariantTestValue: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneFloatingPointFieldWithInitializerSuccess()
+    {
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 0.0, invariantTestValue: 0.0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_OneFloatingPointFieldWithInitializerError()
+    {
+        Verifier TestObject = CreateOneFieldWithInitializerVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 1.0, invariantTestValue: 0.0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+    }
+
+    private Verifier CreateOneFieldWithInitializerVerifier<TValue, TExpression>(TValue initialValue, TValue invariantTestValue)
+        where TExpression : Expression, ILiteralExpression<TValue>, ILiteralExpression, new()
+    {
+        TExpression Initializer = new() { Value = initialValue };
+        TExpression Zero = new() { Value = invariantTestValue };
 
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             FieldName = new FieldName { Name = FieldName },
-            VariableType = ExpressionType.Integer,
+            VariableType = Zero.ExpressionType,
             Initializer = Initializer,
         };
 
@@ -157,7 +262,6 @@ public class VerifierTest
         TestFieldTable.AddItem(TestField.FieldName, TestField);
 
         VariableValueExpression Variable = new() { Variable = TestField };
-        LiteralIntegerValueExpression Zero = new() { Value = invariantTestValue };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
