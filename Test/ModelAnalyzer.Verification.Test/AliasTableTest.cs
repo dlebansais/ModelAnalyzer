@@ -3,11 +3,14 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="AliasTable"/> class.
+/// </summary>
 public class AliasTableTest
 {
     [Test]
-    [Category("Verifier")]
-    public void BasicTest()
+    [Category("Verification")]
+    public void AliasTable_BasicTest()
     {
         string TestName = "Test";
         AliasTable TestObject = new();
@@ -18,8 +21,8 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasTableTest_AddOrIncrement()
+    [Category("Verification")]
+    public void AliasTable_AddOrIncrement()
     {
         string TestName = "Test";
         AliasTable TestObject = new();
@@ -42,8 +45,8 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasTableTest_Increment()
+    [Category("Verification")]
+    public void AliasTable_Increment()
     {
         string TestName = "Test";
         AliasTable TestObject = new();
@@ -59,8 +62,8 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasTableTest_Clone()
+    [Category("Verification")]
+    public void AliasTable_Clone()
     {
         string TestName = "Test";
         AliasTable TestObject = new();
@@ -81,8 +84,8 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasTableTest_AliasDifference()
+    [Category("Verification")]
+    public void AliasTable_AliasDifference()
     {
         string TestName1 = "Test1";
         string TestName2 = "Test2";
@@ -122,8 +125,8 @@ public class AliasTableTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasTableTest_Merge()
+    [Category("Verification")]
+    public void AliasTable_Merge()
     {
         string TestName1 = "Test1";
         string TestName2 = "Test2";

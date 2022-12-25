@@ -2,11 +2,14 @@
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="CallSequence"/> class.
+/// </summary>
 public class CallSequenceTest
 {
     [Test]
-    [Category("Verifier")]
-    public void BasicTest()
+    [Category("Verification")]
+    public void CallSequence_BasicTest()
     {
         CallSequence TestObject = new();
 
@@ -15,8 +18,8 @@ public class CallSequenceTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void CallSequenceTest_AddedCall()
+    [Category("Verification")]
+    public void CallSequence_AddedCall()
     {
         CallSequence TestObject0 = new();
         string MethodName1 = "Test1";

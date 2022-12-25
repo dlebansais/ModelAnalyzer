@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class ClassTest
+/// <summary>
+/// Tests for the <see cref="ClassModel"/> class.
+/// </summary>
+public class ClassModelTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void ClassModel_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -30,7 +33,7 @@ class Program_CoreClass_0
 
     [Test]
     [Category("Core")]
-    public void InvalidClassTest_Attribute()
+    public void ClassModel_InvalidClass_Attribute()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -50,7 +53,7 @@ class Program_CoreClass_1
 
     [Test]
     [Category("Core")]
-    public void ClassTest_PublicModifier()
+    public void ClassModel_PublicModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -73,7 +76,7 @@ public class Program_CoreClass_2
 
     [Test]
     [Category("Core")]
-    public void ClassTest_PrivateModifier()
+    public void ClassModel_PrivateModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -96,7 +99,7 @@ private class Program_CoreClass_3
 
     [Test]
     [Category("Core")]
-    public void ClassTest_InternalModifier()
+    public void ClassModel_InternalModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -119,7 +122,7 @@ internal class Program_CoreClass_4
 
     [Test]
     [Category("Core")]
-    public void ClassTest_PartialModifier()
+    public void ClassModel_PartialModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -142,7 +145,7 @@ partial class Program_CoreClass_5
 
     [Test]
     [Category("Core")]
-    public void InvalidClassTest_Modifier()
+    public void ClassModel_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -161,7 +164,7 @@ static class Program_CoreClass_6
 
     [Test]
     [Category("Core")]
-    public void InvalidClassTest_Base()
+    public void ClassModel_Base()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -183,7 +186,7 @@ class Program_CoreClass_7 : IDisposable
 
     [Test]
     [Category("Core")]
-    public void InvalidClassTest_TypeParameter()
+    public void ClassModel_TypeParameter()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -203,7 +206,7 @@ class Program_CoreClass_8<T>
 
     [Test]
     [Category("Core")]
-    public void InvalidClassTest_Constraint()
+    public void ClassModel_Constraint()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

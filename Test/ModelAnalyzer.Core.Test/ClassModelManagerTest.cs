@@ -11,11 +11,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 using ProcessCommunication;
 
+/// <summary>
+/// Tests for the <see cref="ClassModelManager"/> class.
+/// </summary>
 public class ClassModelManagerTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void ClassModelManager_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -42,7 +45,7 @@ class Program_CoreClassModelManager_0
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_NoModelTrivia()
+    public void ClassModelManager_NoModelTrivia()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -60,7 +63,7 @@ class Program_CoreClassModelManager_1
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_IgnoredTrivia()
+    public void ClassModelManager_IgnoredTrivia()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -78,7 +81,7 @@ class Program_CoreClassModelManager_2
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_RemoveNoClass()
+    public void ClassModelManager_RemoveNoClass()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -101,7 +104,7 @@ class Program_CoreClassModelManager_3
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_RemoveAllClasses()
+    public void ClassModelManager_RemoveAllClasses()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -124,7 +127,7 @@ class Program_CoreClassModelManager_4
 
     [Test]
     [Category("Core")]
-    public async Task ClassModelManagerTest_DuplicateVerification()
+    public async Task ClassModelManager_DuplicateVerification()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -147,7 +150,7 @@ class Program_CoreClassModelManager_5
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_EmptyClassName()
+    public void ClassModelManager_EmptyClassName()
     {
         ClassDeclarationSyntax ClassDeclaration = SyntaxFactory.ClassDeclaration(string.Empty);
 
@@ -158,7 +161,7 @@ class Program_CoreClassModelManager_5
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_EmptyClassNameAsync()
+    public void ClassModelManager_EmptyClassNameAsync()
     {
         ClassDeclarationSyntax ClassDeclaration = SyntaxFactory.ClassDeclaration(string.Empty);
 
@@ -173,7 +176,7 @@ class Program_CoreClassModelManager_5
 
     [Test]
     [Category("Core")]
-    public async Task ClassModelManagerTest_DuplicateClassRemoved()
+    public async Task ClassModelManager_DuplicateClassRemoved()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -196,7 +199,7 @@ class Program_CoreClassModelManager_6
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_DuplicateVerificationWithUpdate()
+    public void ClassModelManager_DuplicateVerificationWithUpdate()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -213,7 +216,7 @@ class Program_CoreClassModelManager_7
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_VerificationWithErrorAndUpdate()
+    public void ClassModelManager_VerificationWithErrorAndUpdate()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -231,7 +234,7 @@ class Program_CoreClassModelManager_8
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithAutoStart()
+    public void ClassModelManager_UpdateWithAutoStart()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -248,7 +251,7 @@ class Program_CoreClassModelManager_9
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithBlockedClientChannel()
+    public void ClassModelManager_UpdateWithBlockedClientChannel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -265,7 +268,7 @@ class Program_CoreClassModelManager_10
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithBlockedServerChannel()
+    public void ClassModelManager_UpdateWithBlockedServerChannel()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -282,7 +285,7 @@ class Program_CoreClassModelManager_11
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithBlockedServerProcess()
+    public void ClassModelManager_UpdateWithBlockedServerProcess()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -299,7 +302,7 @@ class Program_CoreClassModelManager_12
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithCorruptedResult()
+    public void ClassModelManager_UpdateWithCorruptedResult()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -316,7 +319,7 @@ class Program_CoreClassModelManager_13
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithClassDisappeared()
+    public void ClassModelManager_UpdateWithClassDisappeared()
     {
         ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
 using System;
@@ -345,7 +348,7 @@ class Program_CoreClassModelManager_15
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_UpdateWithLittleCapacity()
+    public void ClassModelManager_UpdateWithLittleCapacity()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -571,7 +574,7 @@ class Program_CoreClassModelManager_16
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_Dispose()
+    public void ClassModelManager_Dispose()
     {
         using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
         {
@@ -580,7 +583,7 @@ class Program_CoreClassModelManager_16
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_DoubleDispose()
+    public void ClassModelManager_DoubleDispose()
     {
         using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
         {
@@ -590,7 +593,7 @@ class Program_CoreClassModelManager_16
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_FakeFinalize()
+    public void ClassModelManager_FakeFinalize()
     {
         using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
         {
@@ -600,7 +603,7 @@ class Program_CoreClassModelManager_16
 
     [Test]
     [Category("Core")]
-    public void ClassModelManagerTest_Destructor()
+    public void ClassModelManager_Destructor()
     {
         using ClassModelManagerContainer Container = new();
     }

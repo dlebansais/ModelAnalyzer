@@ -2,11 +2,14 @@
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="AliasName"/> class.
+/// </summary>
 public class AliasNameTest
 {
     [Test]
-    [Category("Verifier")]
-    public void BasicTest()
+    [Category("Verification")]
+    public void AliasName_BasicTest()
     {
         string TestObjectName = "Test";
         AliasName TestObject = new() { VariableName = TestObjectName };
@@ -16,8 +19,8 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasNameTest_Increment()
+    [Category("Verification")]
+    public void AliasName_Increment()
     {
         string TestObjectName = "Test";
         AliasName TestObject = new() { VariableName = TestObjectName };
@@ -29,8 +32,8 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasNameTest_MergeNoIncrement()
+    [Category("Verification")]
+    public void AliasName_MergeNoIncrement()
     {
         string TestObjectName = "Test";
         AliasName TestObject1 = new() { VariableName = TestObjectName };
@@ -44,8 +47,8 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasNameTest_MergeSymetric()
+    [Category("Verification")]
+    public void AliasName_MergeSymetric()
     {
         string TestObjectName = "Test";
         AliasName TestObject1 = new() { VariableName = TestObjectName };
@@ -59,8 +62,8 @@ public class AliasNameTest
     }
 
     [Test]
-    [Category("Verifier")]
-    public void AliasNameTest_MergeOneIncrement()
+    [Category("Verification")]
+    public void AliasName_MergeOneIncrement()
     {
         string TestObjectName = "Test";
         AliasName TestObject1 = new() { VariableName = TestObjectName };

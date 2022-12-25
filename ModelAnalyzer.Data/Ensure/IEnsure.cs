@@ -3,10 +3,6 @@
 /// <summary>
 /// Provides information about a guarantee assertion.
 /// </summary>
-public interface IEnsure
+public interface IEnsure : IAssertion
 {
-    /// <summary>
-    /// Gets the assertion text.
-    /// </summary>
-    string Text { get; }
 }

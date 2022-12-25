@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Invariant"/> class.
+/// </summary>
 public class InvariantTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Invariant_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -43,7 +46,7 @@ class Program_CoreInvariant_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedInvariantTest_ExpressionNotBoolean()
+    public void Invariant_ExpressionNotBoolean()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -73,7 +76,7 @@ class Program_CoreInvariant_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedInvariantTest_InvalidExpression()
+    public void Invariant_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -103,7 +106,7 @@ class Program_CoreInvariant_2
 
     [Test]
     [Category("Core")]
-    public void UnsupportedInvariantTest_TooManyInstructions()
+    public void Invariant_TooManyInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +136,7 @@ class Program_CoreInvariant_3
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_NoNewLineAtEndofFile()
+    public void Invariant_NoNewLineAtEndofFile()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -157,7 +160,7 @@ class Program_CoreInvariant_4
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_InNamespace()
+    public void Invariant_InNamespace()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 namespace Invariant
@@ -185,7 +188,7 @@ namespace Invariant
 
     [Test]
     [Category("Core")]
-    public void InvariantTest_NoKeyword()
+    public void Invariant_NoKeyword()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

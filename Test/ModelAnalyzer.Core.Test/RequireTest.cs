@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Require"/> class.
+/// </summary>
 public class RequireTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Require_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -43,7 +46,7 @@ class Program_CoreRequire_0
 
     [Test]
     [Category("Core")]
-    public void RequireTest_ComplexRequire()
+    public void Require_ComplexRequire()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -79,7 +82,7 @@ class Program_CoreRequire_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedRequireTest_ExpressionNotBoolean()
+    public void Require_ExpressionNotBoolean()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +136,7 @@ class Program_CoreRequire_2
 
     [Test]
     [Category("Core")]
-    public void UnsupportedRequireTest_InvalidExpression()
+    public void Require_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -162,7 +165,7 @@ class Program_CoreRequire_3
 
     [Test]
     [Category("Core")]
-    public void UnsupportedRequireTest_TooManyInstructions()
+    public void Require_TooManyInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -192,7 +195,7 @@ class Program_CoreRequire_4
 
     [Test]
     [Category("Core")]
-    public void UnparsedRequireTest_NoKeyword()
+    public void Require_NoKeyword()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -227,7 +230,7 @@ class Program_CoreRequire_5
 
     [Test]
     [Category("Core")]
-    public void RequireTest_MultipleMethods()
+    public void Require_MultipleMethods()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -274,7 +277,7 @@ class Program_CoreRequire_6
 
     [Test]
     [Category("Core")]
-    public void RequireTest_UnsupportedMember()
+    public void Require_UnsupportedMember()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -315,7 +318,7 @@ class Program_CoreRequire_7
 
     [Test]
     [Category("Core")]
-    public void RequireTest_ExpressionBody()
+    public void Require_ExpressionBody()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -346,7 +349,7 @@ class Program_CoreRequire_8
 
     [Test]
     [Category("Core")]
-    public void RequireTest_UnknownField()
+    public void Require_UnknownField()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -382,7 +385,7 @@ class Program_CoreRequire_9
 
     [Test]
     [Category("Core")]
-    public void RequireTest_Missplaced()
+    public void Require_Missplaced()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

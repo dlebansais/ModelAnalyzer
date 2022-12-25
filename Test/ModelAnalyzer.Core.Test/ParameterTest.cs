@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Parameter"/> class.
+/// </summary>
 public class ParameterTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Parameter_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -32,7 +35,7 @@ class Program_CoreParameter_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_InvalidParameterType()
+    public void Parameter_InvalidParameterType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -60,7 +63,7 @@ class Program_CoreParameter_2
 
     [Test]
     [Category("Core")]
-    public void ParameterTest_DuplicateParameterName()
+    public void Parameter_DuplicateParameterName()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -89,7 +92,7 @@ class Program_CoreParameter_3
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_Attribute()
+    public void Parameter_Attribute()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -113,7 +116,7 @@ class Program_CoreParameter_4
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_Modifier()
+    public void Parameter_UnsupportedModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -137,7 +140,7 @@ class Program_CoreParameter_5
 
     [Test]
     [Category("Core")]
-    public void UnsupportedParameterTest_NameCollisionWithField()
+    public void Parameter_NameCollisionWithField()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -163,7 +166,7 @@ class Program_CoreParameter_6
 
     [Test]
     [Category("Core")]
-    public void ParameterTest_InvalidParameterTestedAsSource()
+    public void Parameter_InvalidParameterTestedAsSource()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

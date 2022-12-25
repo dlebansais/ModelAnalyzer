@@ -2,11 +2,14 @@
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="CompilationContext"/> class.
+/// </summary>
 public class CompilationContextTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void CompilationContext_BasicTest()
     {
         CompilationContext Context1 = CompilationContext.Default;
         CompilationContext Context2 = CompilationContext.GetAnother();
@@ -26,7 +29,7 @@ public class CompilationContextTest
 
     [Test]
     [Category("Core")]
-    public void CompilationContextTestTest_HashCodeComparison()
+    public void CompilationContext_HashCodeComparison()
     {
         CompilationContext Context1 = new CompilationContext(10, false);
         CompilationContext Context2 = new CompilationContext(10, false);
@@ -46,7 +49,7 @@ public class CompilationContextTest
 
     [Test]
     [Category("Core")]
-    public void CompilationContextTestTest_IsAsyncRunRequestedComparison()
+    public void CompilationContext_IsAsyncRunRequestedComparison()
     {
         CompilationContext Context1 = new CompilationContext(10, false);
         CompilationContext Context2 = new CompilationContext(10, true);

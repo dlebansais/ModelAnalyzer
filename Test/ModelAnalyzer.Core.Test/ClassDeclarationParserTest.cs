@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
-public class ParserTest
+/// <summary>
+/// Tests for the <see cref="ClassDeclarationParser"/> class.
+/// </summary>
+public class ClassDeclarationParserTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void ClassDeclarationParser_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

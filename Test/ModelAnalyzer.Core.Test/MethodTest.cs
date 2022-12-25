@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Method"/> class.
+/// </summary>
 public class MethodTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Method_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -39,7 +42,7 @@ class Program_CoreMethod_0
 
     [Test]
     [Category("Core")]
-    public void MethodTest_WithReturnValue()
+    public void Method_WithReturnValue()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -73,7 +76,7 @@ class Program_CoreMethod_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedMethodTest_InvalidReturnType()
+    public void Method_InvalidReturnType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -108,7 +111,7 @@ class Program_CoreMethod_2
 
     [Test]
     [Category("Core")]
-    public void MethodTest_NoNewLine()
+    public void Method_NoNewLine()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -136,7 +139,7 @@ class Program_CoreMethod_3
 
     [Test]
     [Category("Core")]
-    public void MethodTest_DuplicateName()
+    public void Method_DuplicateName()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -169,7 +172,7 @@ class Program_CoreMethod_4
 
     [Test]
     [Category("Core")]
-    public void UnsupportedMethodTest_WithEnsure()
+    public void Method_WithEnsure()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -196,7 +199,7 @@ class Program_CoreMethod_5
 
     [Test]
     [Category("Core")]
-    public void UnsupportedMethodTest_Attribute()
+    public void Method_Attribute()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -223,7 +226,7 @@ class Program_CoreMethod_6
 
     [Test]
     [Category("Core")]
-    public void MethodTest_Modifier()
+    public void Method_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -255,7 +258,7 @@ class Program_CoreMethod_7
 
     [Test]
     [Category("Core")]
-    public void UnsupportedMethodTest_InvalidModifier()
+    public void Method_InvalidModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -278,7 +281,7 @@ class Program_CoreMethod_8
 
     [Test]
     [Category("Core")]
-    public void UnsupportedMethodTest_InvalidPredefinedReturnType()
+    public void Method_InvalidPredefinedReturnType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Ensure"/> class.
+/// </summary>
 public class EnsureTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Ensure_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -43,7 +46,7 @@ class Program_CoreEnsure_0
 
     [Test]
     [Category("Core")]
-    public void EnsureTest_ComplexEnsure()
+    public void Ensure_ComplexEnsure()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -69,7 +72,7 @@ class Program_CoreEnsure_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_ExpressionNotBoolean()
+    public void Ensure_ExpressionNotBoolean()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -99,7 +102,7 @@ class Program_CoreEnsure_2
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_TooManyInstructions()
+    public void Ensure_TooManyInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -138,7 +141,7 @@ class Program_CoreEnsure_3
 
     [Test]
     [Category("Core")]
-    public void UnparsedEnsureTest_NoKeyword()
+    public void Ensure_NoKeyword()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -173,7 +176,7 @@ class Program_CoreEnsure_4
 
     [Test]
     [Category("Core")]
-    public void UnsupportedEnsureTest_InvalidExpression()
+    public void Ensure_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -203,7 +206,7 @@ class Program_CoreEnsure_5
 
     [Test]
     [Category("Core")]
-    public void EnsureTest_MultipleMethods()
+    public void Ensure_MultipleMethods()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -250,7 +253,7 @@ class Program_CoreEnsure_6
 
     [Test]
     [Category("Core")]
-    public void EnsureTest_UnsupportedMember()
+    public void Ensure_UnsupportedMember()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -291,7 +294,7 @@ class Program_CoreEnsure_7
 
     [Test]
     [Category("Core")]
-    public void EnsureTest_UnknownField()
+    public void Ensure_UnknownField()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -327,7 +330,7 @@ class Program_CoreEnsure_8
 
     [Test]
     [Category("Core")]
-    public void EnsureTest_Missplaced()
+    public void Ensure_Missplaced()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

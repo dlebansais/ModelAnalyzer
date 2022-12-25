@@ -5,11 +5,14 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Ensure"/> class.
+/// </summary>
 public class ExpressionTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Expression_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -34,7 +37,7 @@ class Program_CoreExpression_0
 
     [Test]
     [Category("Core")]
-    public void BinaryArithmeticExpressionTest()
+    public void Expression_BinaryArithmetic()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -62,7 +65,7 @@ class Program_CoreExpression_1
 
     [Test]
     [Category("Core")]
-    public void BinaryArithmeticExpressionTest_InvalidOperator()
+    public void Expression_BinaryArithmetic_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -88,7 +91,7 @@ class Program_CoreExpression_2
 
     [Test]
     [Category("Core")]
-    public void BinaryLogicalTest()
+    public void Expression_BinaryLogical()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -115,7 +118,7 @@ class Program_CoreExpression_3
 
     [Test]
     [Category("Core")]
-    public void BinaryLogicalTest_InvalidOperator()
+    public void Expression_BinaryLogical_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -143,7 +146,7 @@ class Program_CoreExpression_4
 
     [Test]
     [Category("Core")]
-    public void UnaryLogicalTest()
+    public void Expression_UnaryLogical()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -169,7 +172,7 @@ class Program_CoreExpression_5
 
     [Test]
     [Category("Core")]
-    public void UnaryLogicalTest_InvalidOperator()
+    public void Expression_UnaryLogical_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -197,7 +200,7 @@ class Program_CoreExpression_6
 
     [Test]
     [Category("Core")]
-    public void ParenthesizedExpressionTest()
+    public void Expression_Parenthesized()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -222,7 +225,7 @@ class Program_CoreExpression_7
 
     [Test]
     [Category("Core")]
-    public void ExpressionInAssertionTest()
+    public void Expression_InAssertion()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -272,7 +275,7 @@ class Program_CoreExpression_8
 
     [Test]
     [Category("Core")]
-    public void UnsupportedExpressionTest()
+    public void Expression_Unsupported()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -300,7 +303,7 @@ class Program_CoreExpression_9
 
     [Test]
     [Category("Core")]
-    public void UnsupportedExpressionTest_Nested()
+    public void Expression_Unsupported_Nested()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -328,7 +331,7 @@ class Program_CoreExpression_10
 
     [Test]
     [Category("Core")]
-    public void UnsupportedExpressionTest_InvalidFieldName()
+    public void Expression_InvalidFieldName()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -356,7 +359,7 @@ class Program_CoreExpression_11
 
     [Test]
     [Category("Core")]
-    public void UnsupportedExpressionTest_Parenthesized()
+    public void Expression_Unsupported_Parenthesized()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -384,7 +387,7 @@ class Program_CoreExpression_12
 
     [Test]
     [Category("Core")]
-    public void UnsupportedExpressionTest_Literal()
+    public void Expression_Unsupported_Literal()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -412,7 +415,7 @@ class Program_CoreExpression_13
 
     [Test]
     [Category("Core")]
-    public void UnaryArithmeticExpressionTest()
+    public void Expression_UnaryArithmetic()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -437,7 +440,7 @@ class Program_CoreExpression_14
 
     [Test]
     [Category("Core")]
-    public void UnaryArithmeticExpressionTest_InvalidOperator()
+    public void Expression_UnaryArithmetic_InvalidOperator()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -463,7 +466,7 @@ class Program_CoreExpression_15
 
     [Test]
     [Category("Core")]
-    public void UnaryArithmeticExpressionTest_InvalidOperand()
+    public void Expression_UnaryArithmetic_InvalidOperand()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -489,7 +492,7 @@ class Program_CoreExpression_16
 
     [Test]
     [Category("Core")]
-    public void ExpressionTest_SourceAndDestinationNotCompatible()
+    public void Expression_SourceAndDestinationNotCompatible()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -516,7 +519,7 @@ class Program_CoreExpression_17
 
     [Test]
     [Category("Core")]
-    public void ExpressionTest_Double()
+    public void Expression_Double()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

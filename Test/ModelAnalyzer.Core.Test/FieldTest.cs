@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Field"/> class.
+/// </summary>
 public class FieldTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Field_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -36,7 +39,7 @@ class Program_CoreField_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest_BadType()
+    public void Field_BadType()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -65,7 +68,7 @@ class Program_CoreField_1
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest_Attribute()
+    public void Field_Attribute()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -87,7 +90,7 @@ class Program_CoreField_2
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest_Modifier()
+    public void Field_UnsupportedModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -108,7 +111,7 @@ class Program_CoreField_3
 
     [Test]
     [Category("Core")]
-    public void FieldTest_Modifier()
+    public void Field_Modifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -133,7 +136,7 @@ class Program_CoreField_4
 
     [Test]
     [Category("Core")]
-    public void DuplicateFieldNameTest()
+    public void Field_DuplicateFieldName()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -154,7 +157,7 @@ class Program_CoreField_5
 
     [Test]
     [Category("Core")]
-    public void FieldTest_ValidInitializer()
+    public void Field_ValidInitializer()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -185,7 +188,7 @@ class Program_CoreField_6
 
     [Test]
     [Category("Core")]
-    public void UnsupportedFieldTest_Initializer()
+    public void Field_UnsupportedInitializer()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -209,7 +212,7 @@ class Program_CoreField_7
 
     [Test]
     [Category("Core")]
-    public void FieldTest_InvalidFieldTestedAsDestination()
+    public void Field_InvalidFieldTestedAsDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

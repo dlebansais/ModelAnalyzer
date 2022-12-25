@@ -1,12 +1,8 @@
 ﻿namespace ModelAnalyzer;
 
 /// <summary>
-/// Provides information about a class invariant.
+/// Provides information about a class invariant assertion.
 /// </summary>
-public interface IInvariant
+public interface IInvariant : IAssertion
 {
-    /// <summary>
-    /// Gets the invariant text.
-    /// </summary>
-    string Text { get; }
 }

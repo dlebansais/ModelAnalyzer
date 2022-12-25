@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="IAssertion"/> interface.
+/// </summary>
 public class AssertionTest
 {
     [Test]
     [Category("Core")]
-    public void UnsupportedAssertionTest_MultipleInstructions()
+    public void Assertion_MultipleInstructions()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -29,7 +32,7 @@ class Program_CoreAssertion_0
 
     [Test]
     [Category("Core")]
-    public void UnsupportedAssertionTest_InvalidExpression()
+    public void Assertion_InvalidExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

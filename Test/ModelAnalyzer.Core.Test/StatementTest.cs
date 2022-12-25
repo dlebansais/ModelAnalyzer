@@ -3,11 +3,14 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="Statement"/> class.
+/// </summary>
 public class StatementTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void Statement_BasicTest()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -32,7 +35,7 @@ class Program_CoreStatement_0
 
     [Test]
     [Category("Core")]
-    public void AssignmentStatementTest()
+    public void Statement_Assignment()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -58,7 +61,7 @@ class Program_CoreStatement_1
 
     [Test]
     [Category("Core")]
-    public void AssignmentStatementTest_InvalidDestination()
+    public void Statement_AssignmentInvalidDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -82,7 +85,7 @@ class Program_CoreStatement_2
 
     [Test]
     [Category("Core")]
-    public void IfStatementTest()
+    public void Statement_If()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -126,7 +129,7 @@ class Program_CoreStatement_3
 
     [Test]
     [Category("Core")]
-    public void IfStatementTest_WithElse()
+    public void Statement_IfWithElse()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -176,7 +179,7 @@ class Program_CoreStatement_4
 
     [Test]
     [Category("Core")]
-    public void ReturnStatementTest()
+    public void Statement_Return()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -210,7 +213,7 @@ class Program_CoreStatement_5
 
     [Test]
     [Category("Core")]
-    public void ReturnStatementTest_WithoutValue()
+    public void Statement_ReturnWithoutValue()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -241,7 +244,7 @@ class Program_CoreStatement_6
 
     [Test]
     [Category("Core")]
-    public void StatementTest_ExpressionBody()
+    public void Statement_ExpressionBody()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -271,7 +274,7 @@ class Program_CoreStatement_7
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_Checked()
+    public void Statement_UnsupporteChecked()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -297,7 +300,7 @@ class Program_CoreStatement_8
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_SingleInstruction()
+    public void Statement_UnsupportedSingleInstruction()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -322,7 +325,7 @@ class Program_CoreStatement_9
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_InvalidDestination()
+    public void Statement_UnsupportedInvalidDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -348,7 +351,7 @@ class Program_CoreStatement_10
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_ExpressionDestination()
+    public void Statement_UnsupportedExpressionDestination()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -374,7 +377,7 @@ class Program_CoreStatement_11
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_InvalidReturnExpression()
+    public void Statement_InvalidReturnExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -398,7 +401,7 @@ class Program_CoreStatement_12
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_InvalidExpressionBody()
+    public void Statement_InvalidExpressionBody()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -420,7 +423,7 @@ class Program_CoreStatement_13
 
     [Test]
     [Category("Core")]
-    public void UnsupportedStatementTest_InvalidSimpleExpression()
+    public void Statement_InvalidSimpleExpression()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

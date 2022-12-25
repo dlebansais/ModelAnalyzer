@@ -3,10 +3,6 @@
 /// <summary>
 /// Provides information about a requirement assertion.
 /// </summary>
-public interface IRequire
+public interface IRequire : IAssertion
 {
-    /// <summary>
-    /// Gets the assertion text.
-    /// </summary>
-    string Text { get; }
 }

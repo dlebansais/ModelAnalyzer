@@ -1,15 +1,17 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-public class TableTest
+/// <summary>
+/// Tests for the <see cref="NameAndItemTable{TName, TItem}"/> class.
+/// </summary>
+public class NameAndItemTableTest
 {
     [Test]
     [Category("Core")]
-    public void BasicTest()
+    public void NameAndItemTable_BasicTest()
     {
         NameAndItemTable<string, int> TestTable = new();
 
@@ -19,7 +21,7 @@ public class TableTest
 
     [Test]
     [Category("Core")]
-    public void TableTest_AddItem()
+    public void NameAndItemTable_AddItem()
     {
         NameAndItemTable<string, int> TestTable = new();
 
@@ -38,7 +40,7 @@ public class TableTest
 
     [Test]
     [Category("Core")]
-    public void TableTest_Sealing()
+    public void NameAndItemTable_Sealing()
     {
         NameAndItemTable<string, int> TestTable = new();
 
