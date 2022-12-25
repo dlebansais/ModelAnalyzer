@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private Expression? ParseExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, bool isNested)
+    private Expression? ParseExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, bool isNested)
     {
         Expression? NewExpression = null;
         Location Location = locationContext.GetLocation(expressionNode);
@@ -40,7 +40,7 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseBinaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParseBinaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
         Expression? LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, binaryExpression.Left, isNested: true);
@@ -71,7 +71,7 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParsePrefixUnaryExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParsePrefixUnaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
         Expression? OperandExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, prefixUnaryExpression.Operand, isNested: true);
@@ -181,7 +181,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Expression? TryParseVariableValueExpression(FieldTable fieldTable, ParameterTable parameterTable, IdentifierNameSyntax identifierName)
+    private Expression? TryParseVariableValueExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, IdentifierNameSyntax identifierName)
     {
         Expression? NewExpression = null;
         string VariableName = identifierName.Identifier.ValueText;
@@ -213,7 +213,7 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseParenthesizedExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
+    private Expression? TryParseParenthesizedExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
     {
         Expression? NewExpression = null;
         Expression? NestedExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, parenthesizedExpression.Expression, isNested: true);

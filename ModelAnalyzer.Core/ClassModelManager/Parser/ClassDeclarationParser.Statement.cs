@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Statement> ParseStatements(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Statement> ParseStatements(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
     {
         List<Statement> StatementList = new();
 
@@ -22,7 +22,7 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private List<Statement> ParseExpressionBody(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
+    private List<Statement> ParseExpressionBody(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
@@ -34,7 +34,7 @@ internal partial class ClassDeclarationParser
         return Result;
     }
 
-    private List<Statement> ParseBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
+    private List<Statement> ParseBlock(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
     {
         List<Statement> StatementList = new();
 
@@ -48,7 +48,7 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private List<Statement> ParseStatementOrBlock(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax node)
+    private List<Statement> ParseStatementOrBlock(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, StatementSyntax node)
     {
         List<Statement> StatementList = new();
 
@@ -64,7 +64,7 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private Statement? ParseStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
+    private Statement? ParseStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
     {
         Statement? NewStatement = null;
         bool IsErrorReported = false;
@@ -92,7 +92,7 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseAssignmentStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
+    private Statement? TryParseAssignmentStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -138,7 +138,7 @@ internal partial class ClassDeclarationParser
             return false;
     }
 
-    private Statement? TryParseIfStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
+    private Statement? TryParseIfStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
@@ -163,7 +163,7 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseReturnStatement(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
+    private Statement? TryParseReturnStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 

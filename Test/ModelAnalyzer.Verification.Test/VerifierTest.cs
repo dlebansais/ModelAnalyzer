@@ -16,8 +16,8 @@ public class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = new(),
-            MethodTable = new(),
+            FieldTable = ReadOnlyFieldTable.Empty,
+            MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new(),
             MaxDepth = 0,
         };
@@ -38,8 +38,8 @@ public class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = new(),
-            MethodTable = new(),
+            FieldTable = ReadOnlyFieldTable.Empty,
+            MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new(),
             MaxDepth = 1,
         };
@@ -90,7 +90,6 @@ public class VerifierTest
 
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField.FieldName, TestField);
-        TestFieldTable.Seal();
 
         VariableValueExpression Variable = new() { Variable = TestField };
         LiteralIntegerValueExpression Zero = new() { Value = invariantTestValue };
@@ -107,8 +106,8 @@ public class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable,
-            MethodTable = new(),
+            FieldTable = TestFieldTable.ToReadOnly(),
+            MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
             MaxDepth = 0,
         };
@@ -156,7 +155,6 @@ public class VerifierTest
 
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField.FieldName, TestField);
-        TestFieldTable.Seal();
 
         VariableValueExpression Variable = new() { Variable = TestField };
         LiteralIntegerValueExpression Zero = new() { Value = invariantTestValue };
@@ -173,8 +171,8 @@ public class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable,
-            MethodTable = new(),
+            FieldTable = TestFieldTable.ToReadOnly(),
+            MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
             MaxDepth = 0,
         };

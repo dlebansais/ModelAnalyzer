@@ -22,7 +22,7 @@ internal class Method : IMethod
     /// <summary>
     /// Gets the method parameters.
     /// </summary>
-    required public ParameterTable ParameterTable { get; init; }
+    required public ReadOnlyParameterTable ParameterTable { get; init; }
 
     /// <summary>
     /// Gets the method requirements.

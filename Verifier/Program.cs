@@ -101,7 +101,7 @@ internal class Program
 
         try
         {
-            using ModelAnalyzer.Verifier Verifier = new()
+            using Verifier Verifier = new()
             {
                 MaxDepth = MaxDepth,
                 ClassName = ClassName,

@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private FieldTable ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
+    private ReadOnlyFieldTable ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
     {
         FieldTable FieldTable = new();
 
@@ -20,9 +20,7 @@ internal partial class ClassDeclarationParser
             if (Member is FieldDeclarationSyntax FieldDeclaration)
                 AddField(FieldDeclaration, FieldTable, unsupported);
 
-        FieldTable.Seal();
-
-        return FieldTable;
+        return FieldTable.ToReadOnly();
     }
 
     private void AddField(FieldDeclarationSyntax fieldDeclaration, FieldTable fieldTable, Unsupported unsupported)
@@ -89,7 +87,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool TryFindFieldByName(FieldTable fieldTable, string fieldName, out Field field)
+    private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out Field field)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
             if (Entry.Value.FieldName.Name == fieldName)

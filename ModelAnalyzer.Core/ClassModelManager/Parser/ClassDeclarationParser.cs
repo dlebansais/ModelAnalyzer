@@ -7,7 +7,6 @@ using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -46,8 +45,8 @@ internal partial class ClassDeclarationParser
         else
         {
             Unsupported.InvalidDeclaration = true;
-            FieldTable = new FieldTable();
-            MethodTable = new MethodTable();
+            FieldTable = ReadOnlyFieldTable.Empty;
+            MethodTable = ReadOnlyMethodTable.Empty;
             InvariantList = new List<Invariant>();
         }
     }
@@ -65,12 +64,12 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Gets the field table.
     /// </summary>
-    public FieldTable FieldTable { get; private set; } = new();
+    public ReadOnlyFieldTable FieldTable { get; private set; } = ReadOnlyFieldTable.Empty;
 
     /// <summary>
     /// Gets the method table.
     /// </summary>
-    public MethodTable MethodTable { get; private set; } = new();
+    public ReadOnlyMethodTable MethodTable { get; private set; } = ReadOnlyMethodTable.Empty;
 
     /// <summary>
     /// Gets the list of invariants.
@@ -222,7 +221,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidAssertionSyntaxTree(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionSyntaxTree(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -249,7 +248,7 @@ internal partial class ClassDeclarationParser
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
         isErrorReported = false;
@@ -271,7 +270,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryFindVariableByName(FieldTable fieldTable, ParameterTable parameterTable, string variableName, out IVariable variable)
+    private bool TryFindVariableByName(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, string variableName, out IVariable variable)
     {
         if (TryFindFieldByName(fieldTable, variableName, out Field Field))
         {

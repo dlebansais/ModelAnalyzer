@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Invariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    private List<Invariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
     {
         List<Invariant> InvariantList = new();
 
@@ -41,7 +41,7 @@ internal partial class ClassDeclarationParser
         return InvariantList;
     }
 
-    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
+    private void AddInvariantsInTrivia(List<Invariant> invariantList, ReadOnlyFieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -54,7 +54,7 @@ internal partial class ClassDeclarationParser
             }
     }
 
-    private void AddInvariantsInTrivia(List<Invariant> invariantList, FieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
+    private void AddInvariantsInTrivia(List<Invariant> invariantList, ReadOnlyFieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
@@ -67,7 +67,7 @@ internal partial class ClassDeclarationParser
         {
             LocationContext LocationContext = new(trivia, header, Offset);
 
-            if (IsValidAssertionSyntaxTree(fieldTable, ParameterTable.Empty, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(fieldTable, ReadOnlyParameterTable.Empty, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
             }

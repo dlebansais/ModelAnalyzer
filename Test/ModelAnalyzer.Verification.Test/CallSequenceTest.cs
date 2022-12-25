@@ -26,14 +26,30 @@ public class CallSequenceTest
         string MethodName1 = "Test1";
         string MethodName2 = "Test2";
 
-        Method Method1 = new() { MethodName = new MethodName() { Name = MethodName1 }, ParameterTable = new(), EnsureList = new(), RequireList = new(), StatementList = new(), ReturnType = ExpressionType.Void };
+        Method Method1 = new()
+        {
+            MethodName = new MethodName() { Name = MethodName1 },
+            ParameterTable = ReadOnlyParameterTable.Empty,
+            EnsureList = new(),
+            RequireList = new(),
+            StatementList = new(),
+            ReturnType = ExpressionType.Void,
+        };
 
         CallSequence TestObject1 = TestObject0.WithAddedCall(Method1);
 
         Assert.That(!TestObject1.IsEmpty);
         Assert.That(TestObject1.ToString(), Is.EqualTo(MethodName1));
 
-        Method Method2 = new() { MethodName = new MethodName() { Name = MethodName2 }, ParameterTable = new(), EnsureList = new(), RequireList = new(), StatementList = new(), ReturnType = ExpressionType.Void };
+        Method Method2 = new()
+        {
+            MethodName = new MethodName() { Name = MethodName2 },
+            ParameterTable = ReadOnlyParameterTable.Empty,
+            EnsureList = new(),
+            RequireList = new(),
+            StatementList = new(),
+            ReturnType = ExpressionType.Void,
+        };
 
         CallSequence TestObject2 = TestObject1.WithAddedCall(Method2);
 
@@ -51,7 +67,15 @@ public class CallSequenceTest
         CallSequence TestObject = new();
         string MethodName = "Test";
 
-        Method Method = new() { MethodName = new MethodName() { Name = MethodName }, ParameterTable = new(), EnsureList = new(), RequireList = new(), StatementList = new(), ReturnType = ExpressionType.Void };
+        Method Method = new()
+        {
+            MethodName = new MethodName() { Name = MethodName },
+            ParameterTable = ReadOnlyParameterTable.Empty,
+            EnsureList = new(),
+            RequireList = new(),
+            StatementList = new(),
+            ReturnType = ExpressionType.Void,
+        };
 
         TestObject = TestObject.WithAddedCall(Method);
 

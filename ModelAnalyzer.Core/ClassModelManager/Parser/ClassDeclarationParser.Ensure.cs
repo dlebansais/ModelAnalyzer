@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Ensure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
     {
         List<Ensure> EnsureList;
 
@@ -25,7 +25,7 @@ internal partial class ClassDeclarationParser
         return EnsureList;
     }
 
-    private List<Ensure> ParseEnsures(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(SyntaxTriviaList triviaList, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
     {
         List<Ensure> EnsureList = new();
 
@@ -42,7 +42,7 @@ internal partial class ClassDeclarationParser
         return EnsureList;
     }
 
-    private void ParseEnsure(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
+    private void ParseEnsure(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 

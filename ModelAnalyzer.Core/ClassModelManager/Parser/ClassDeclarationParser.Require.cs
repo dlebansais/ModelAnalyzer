@@ -11,7 +11,7 @@ using static System.Net.Mime.MediaTypeNames;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Require> ParseRequires(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Require> ParseRequires(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
     {
         List<Require> RequireList;
 
@@ -23,7 +23,7 @@ internal partial class ClassDeclarationParser
         return RequireList;
     }
 
-    private List<Require> ParseRequires(SyntaxTriviaList triviaList, FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported)
+    private List<Require> ParseRequires(SyntaxTriviaList triviaList, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
     {
         List<Require> RequireList = new();
 
@@ -43,7 +43,7 @@ internal partial class ClassDeclarationParser
         return RequireList;
     }
 
-    private void ParseRequire(FieldTable fieldTable, ParameterTable parameterTable, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string header)
+    private void ParseRequire(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 

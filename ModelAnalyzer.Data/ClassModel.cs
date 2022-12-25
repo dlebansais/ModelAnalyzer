@@ -17,12 +17,12 @@ internal partial record ClassModel : IClassModel
     /// <summary>
     /// Gets the field table.
     /// </summary>
-    required public FieldTable FieldTable { get; init; }
+    required public ReadOnlyFieldTable FieldTable { get; init; }
 
     /// <summary>
     /// Gets the method table.
     /// </summary>
-    required public MethodTable MethodTable { get; init; }
+    required public ReadOnlyMethodTable MethodTable { get; init; }
 
     /// <summary>
     /// Gets the list of invariants.

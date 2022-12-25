@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private MethodTable ParseMethods(ClassDeclarationSyntax classDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    private ReadOnlyMethodTable ParseMethods(ClassDeclarationSyntax classDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
     {
         MethodTable MethodTable = new();
 
@@ -28,12 +27,10 @@ internal partial class ClassDeclarationParser
                 ReportUnsupportedEnsures(unsupported, TriviaList);
         }
 
-        MethodTable.Seal();
-
-        return MethodTable;
+        return MethodTable.ToReadOnly();
     }
 
-    private void AddMethod(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
+    private void AddMethod(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
     {
         string Name = methodDeclaration.Identifier.ValueText;
         MethodName MethodName = new() { Name = Name };
@@ -43,7 +40,7 @@ internal partial class ClassDeclarationParser
         {
             if (IsMethodDeclarationValid(methodDeclaration, out ExpressionType ReturnType))
             {
-                ParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
+                ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
                 List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
@@ -100,7 +97,7 @@ internal partial class ClassDeclarationParser
         return IsMethodSupported;
     }
 
-    private ParameterTable ParseParameters(MethodDeclarationSyntax methodDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    private ReadOnlyParameterTable ParseParameters(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
     {
         ParameterTable ParameterTable = new();
 
@@ -124,12 +121,10 @@ internal partial class ClassDeclarationParser
             }
         }
 
-        ParameterTable.Seal();
-
-        return ParameterTable;
+        return ParameterTable.ToReadOnly();
     }
 
-    private bool IsParameterSupported(ParameterSyntax parameter, FieldTable fieldTable, out ExpressionType parameterType)
+    private bool IsParameterSupported(ParameterSyntax parameter, ReadOnlyFieldTable fieldTable, out ExpressionType parameterType)
     {
         bool IsParameterSupported = true;
 
@@ -166,7 +161,7 @@ internal partial class ClassDeclarationParser
         return IsParameterSupported;
     }
 
-    private bool TryFindParameterByName(ParameterTable parameterTable, string parameterName, out IParameter parameter)
+    private bool TryFindParameterByName(ReadOnlyParameterTable parameterTable, string parameterName, out IParameter parameter)
     {
         foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
             if (Entry.Value.ParameterName.Name == parameterName)
