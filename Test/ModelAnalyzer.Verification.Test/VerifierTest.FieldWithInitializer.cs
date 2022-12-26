@@ -94,14 +94,14 @@ public partial class VerifierTest
         Field TestField = new()
         {
             FieldName = new FieldName { Name = FieldName },
-            VariableType = Zero.ExpressionType,
+            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };
 
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField.FieldName, TestField);
 
-        VariableValueExpression Variable = new() { Variable = TestField };
+        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
@@ -213,14 +213,14 @@ public partial class VerifierTest
         Field TestField1 = new()
         {
             FieldName = new FieldName { Name = FieldName1 },
-            VariableType = Zero1.ExpressionType,
+            VariableType = Zero1.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };
 
         Field TestField2 = new()
         {
             FieldName = new FieldName { Name = FieldName2 },
-            VariableType = Zero2.ExpressionType,
+            VariableType = Zero2.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };
 
@@ -228,10 +228,10 @@ public partial class VerifierTest
         TestFieldTable.AddItem(TestField1.FieldName, TestField1);
         TestFieldTable.AddItem(TestField2.FieldName, TestField2);
 
-        VariableValueExpression Variable1 = new() { Variable = TestField1 };
+        VariableValueExpression Variable1 = new() { VariableName = TestField1.FieldName };
         EqualityExpression VariableEqualZero1 = new EqualityExpression() { Left = Variable1, Right = Zero1, Operator = EqualityOperator.Equal };
 
-        VariableValueExpression Variable2 = new() { Variable = TestField2 };
+        VariableValueExpression Variable2 = new() { VariableName = TestField2.FieldName };
         EqualityExpression VariableEqualZero2 = new EqualityExpression() { Left = Variable2, Right = Zero2, Operator = EqualityOperator.Equal };
 
         BinaryLogicalExpression AndExpression = new() { Left = VariableEqualZero1, Operator = BinaryLogicalOperator.And, Right = VariableEqualZero2 };

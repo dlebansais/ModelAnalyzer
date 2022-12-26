@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a parameter name.
 /// </summary>
 [DebuggerDisplay("{Name}")]
-internal record ParameterName
+internal record ParameterName : IVariableName
 {
     /// <summary>
     /// Gets the parameter name.

@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a field name.
 /// </summary>
 [DebuggerDisplay("{Name}")]
-internal record FieldName : IClassMemberName
+internal record FieldName : IClassMemberName, IVariableName
 {
     /// <summary>
     /// Gets the field name.

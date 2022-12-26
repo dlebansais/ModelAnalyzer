@@ -140,7 +140,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
         {
             Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, Item.Name));
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, Item.VariableName.Name));
         }
 
         foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)

@@ -9,12 +9,12 @@ using System.Diagnostics;
 internal class AssignmentStatement : Statement
 {
     /// <summary>
-    /// Gets the destination variable.
+    /// Gets the destination variable name.
     /// </summary>
-    required public IVariable Destination { get; init; }
+    required public IVariableName DestinationName { get; init; }
 
     /// <summary>
     /// Gets the source expression.
     /// </summary>
-    required public IExpression Expression { get; init; }
+    required public Expression Expression { get; init; }
 }

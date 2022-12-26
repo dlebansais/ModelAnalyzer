@@ -14,7 +14,7 @@ internal class Field : IField
     required public FieldName FieldName { get; init; }
 
     /// <inheritdoc/>
-    public string Name { get { return FieldName.Name; } }
+    public IVariableName VariableName { get => FieldName; }
 
     /// <inheritdoc/>
     required public ExpressionType VariableType { get; init; }

@@ -108,8 +108,8 @@ internal partial class ClassDeclarationParser
                     Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, SourceExpression, isNested: false);
                     if (Expression is not null)
                     {
-                        if (IsSourceAndDestinationTypeCompatible(Destination, Expression))
-                            NewStatement = new AssignmentStatement { Destination = Destination, Expression = Expression };
+                        if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, Destination, Expression))
+                            NewStatement = new AssignmentStatement { DestinationName = Destination.FieldName, Expression = Expression };
                         else
                             Log("Source cannot be assigned to destination.");
                     }
@@ -128,11 +128,11 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(Field destination, Expression source)
+    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field destination, Expression source)
     {
-        if (destination.VariableType == source.ExpressionType)
+        if (destination.VariableType == source.GetExpressionType(fieldTable, parameterTable))
             return true;
-        else if (destination.VariableType == ExpressionType.FloatingPoint && source.ExpressionType == ExpressionType.Integer)
+        else if (destination.VariableType == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable) == ExpressionType.Integer)
             return true;
         else
             return false;

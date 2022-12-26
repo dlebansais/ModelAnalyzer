@@ -169,14 +169,14 @@ public partial class VerifierTest
         Field TestField = new()
         {
             FieldName = new FieldName { Name = FieldName },
-            VariableType = Zero.ExpressionType,
+            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField.FieldName, TestField);
 
-        VariableValueExpression Variable = new() { Variable = TestField };
+        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
@@ -187,7 +187,7 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { Destination = TestField, Expression = AssignmentSource };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = AssignmentSource };
         ConditionalStatement Conditional = new()
         {
             Condition = VariableEqualZero,

@@ -187,7 +187,7 @@ internal partial class ClassDeclarationParser
         string VariableName = identifierName.Identifier.ValueText;
 
         if (TryFindVariableByName(fieldTable, parameterTable, VariableName, out IVariable Variable))
-            NewExpression = new VariableValueExpression { Variable = Variable };
+            NewExpression = new VariableValueExpression { VariableName = Variable.VariableName };
         else
             Log($"Unknown variable '{VariableName}'.");
 

@@ -50,6 +50,35 @@ internal partial record ClassModel : IClassModel
         return TextBuilder.Normalized(Builder.ToString());
     }
 
+    /// <summary>
+    /// Gets a variable from its name.
+    /// </summary>
+    /// <param name="fieldTable">The table of fields.</param>
+    /// <param name="parameterTable">The table of parameters.</param>
+    /// <param name="variableName">The variable name.</param>
+    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, IVariableName variableName)
+    {
+        IVariable Result = null!;
+
+        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
+            if (Entry.Key.Name == variableName.Name)
+            {
+                Result = Entry.Value;
+                break;
+            }
+
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
+            if (Entry.Key.Name == variableName.Name)
+            {
+                Result = Entry.Value;
+                break;
+            }
+
+        Debug.Assert(Result is not null);
+
+        return Result!;
+    }
+
     private void AppendClassName(StringBuilder builder)
     {
         builder.AppendLine(Name);
@@ -70,7 +99,7 @@ internal partial record ClassModel : IClassModel
             else
                 InitializerString = string.Empty;
 
-            builder.AppendLine($"  {TypeString} {Field.Name}{InitializerString}");
+            builder.AppendLine($"  {TypeString} {Field.VariableName.Name}{InitializerString}");
         }
     }
 
@@ -91,7 +120,7 @@ internal partial record ClassModel : IClassModel
 
             Parameter Parameter = ParameterEntry.Value;
             string ParameterTypeString = ExpressionTypeToString(Parameter.VariableType);
-            Parameters += $"{ParameterTypeString} {Parameter.Name}";
+            Parameters += $"{ParameterTypeString} {Parameter.ParameterName.Name}";
         }
 
         string ReturnTypeString = ExpressionTypeToString(method.ReturnType);
@@ -154,7 +183,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
     {
-        AppendStatementText(builder, $"{statement.Destination.Name} = {statement.Expression}", indentation);
+        AppendStatementText(builder, $"{statement.DestinationName.Name} = {statement.Expression}", indentation);
     }
 
     private void AppendConditionalStatement(StringBuilder builder, ConditionalStatement statement, int indentation)

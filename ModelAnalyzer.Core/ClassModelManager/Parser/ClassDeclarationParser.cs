@@ -256,7 +256,7 @@ internal partial class ClassDeclarationParser
         Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
-            if (Expression.ExpressionType == ExpressionType.Boolean)
+            if (Expression.GetExpressionType(fieldTable, parameterTable) == ExpressionType.Boolean)
             {
                 booleanExpression = Expression;
                 return true;

@@ -12,8 +12,7 @@ internal class UnaryArithmeticExpression : Expression
     public override bool IsSimple => Operand is LiteralIntegerValueExpression || Operand is LiteralFloatingPointValueExpression;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType => Operand.ExpressionType;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => Operand.GetExpressionType(fieldTable, parameterTable);
 
     /// <summary>
     /// Gets the unary arithmetic operator.

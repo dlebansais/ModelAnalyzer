@@ -131,7 +131,7 @@ internal partial class Verifier : IDisposable
 
             aliasTable.AddVariable(Field);
 
-            AliasName FieldNameAlias = aliasTable.GetAlias(Field);
+            VariableAlias FieldNameAlias = aliasTable.GetAlias(Field);
             ExpressionType FieldType = Field.VariableType;
 
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
@@ -143,7 +143,7 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private Expr CreateVariableExpr(AliasName aliasName, ExpressionType variableType)
+    private Expr CreateVariableExpr(VariableAlias aliasName, ExpressionType variableType)
     {
         bool IsHandled = false;
         Expr Result = null!;
@@ -244,7 +244,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < InvariantList.Count; i++)
         {
             Invariant Invariant = InvariantList[i];
-            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, Invariant.BooleanExpression);
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, ReadOnlyParameterTable.Empty, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
 
             Log($"Adding invariant opposite {InvariantOpposite}");
@@ -273,7 +273,7 @@ internal partial class Verifier : IDisposable
 
         BoolExpr MainBranch = Context.MkBool(true);
 
-        AddStatementListExecution(solver, aliasTable, MainBranch, method.StatementList);
+        AddStatementListExecution(solver, aliasTable, method.ParameterTable, MainBranch, method.StatementList);
         if (!AddMethodEnsures(solver, aliasTable, method))
             return false;
 
@@ -286,7 +286,7 @@ internal partial class Verifier : IDisposable
         {
             Parameter Parameter = Entry.Value;
             aliasTable.AddOrIncrement(Parameter);
-            AliasName ParameterNameAlias = aliasTable.GetAlias(Parameter);
+            VariableAlias ParameterNameAlias = aliasTable.GetAlias(Parameter);
 
             CreateVariableExpr(ParameterNameAlias, Parameter.VariableType);
         }
@@ -297,7 +297,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.RequireList.Count; i++)
         {
             Require Require = method.RequireList[i];
-            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, Require.BooleanExpression);
+            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, Require.BooleanExpression);
 
             Log($"Adding {RequireExpr}");
             solver.Assert(RequireExpr);
@@ -318,7 +318,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.EnsureList.Count; i++)
         {
             Ensure Ensure = method.EnsureList[i];
-            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, Ensure.BooleanExpression);
+            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, Ensure.BooleanExpression);
 
             Log($"Adding {EnsureExpr}");
             solver.Assert(EnsureExpr);

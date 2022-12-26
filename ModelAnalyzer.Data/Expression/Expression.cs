@@ -13,5 +13,7 @@ internal abstract class Expression : IExpression
     /// <summary>
     /// Gets the expression type.
     /// </summary>
-    public abstract ExpressionType ExpressionType { get; }
+    /// <param name="fieldTable">The table of fields.</param>
+    /// <param name="parameterTable">The table of parameters.</param>
+    public abstract ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable);
 }

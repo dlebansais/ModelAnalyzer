@@ -12,8 +12,7 @@ internal class LiteralIntegerValueExpression : Expression, ILiteralExpression<in
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Integer;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => ExpressionType.Integer;
 
     /// <inheritdoc/>
     public int Value { get; set; }

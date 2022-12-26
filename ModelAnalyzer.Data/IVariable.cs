@@ -8,7 +8,7 @@ public interface IVariable
     /// <summary>
     /// Gets the variable name.
     /// </summary>
-    string Name { get; }
+    IVariableName VariableName { get; }
 
     /// <summary>
     /// Gets the variable type.

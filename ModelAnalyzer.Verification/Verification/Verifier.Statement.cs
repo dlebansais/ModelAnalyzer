@@ -10,24 +10,24 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, List<Statement> statementList)
+    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, List<Statement> statementList)
     {
         foreach (Statement Statement in statementList)
-            AddStatementExecution(solver, aliasTable, branch, Statement);
+            AddStatementExecution(solver, aliasTable, parameterTable, branch, Statement);
     }
 
-    private void AddStatementExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, Statement statement)
+    private void AddStatementExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, Statement statement)
     {
         bool IsAdded = false;
 
         switch (statement)
         {
             case AssignmentStatement Assignment:
-                AddAssignmentExecution(solver, aliasTable, branch, Assignment);
+                AddAssignmentExecution(solver, aliasTable, parameterTable, branch, Assignment);
                 IsAdded = true;
                 break;
             case ConditionalStatement Conditional:
-                AddConditionalExecution(solver, aliasTable, branch, Conditional);
+                AddConditionalExecution(solver, aliasTable, parameterTable, branch, Conditional);
                 IsAdded = true;
                 break;
             case ReturnStatement Return:
@@ -39,34 +39,34 @@ internal partial class Verifier : IDisposable
         Debug.Assert(IsAdded);
     }
 
-    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, AssignmentStatement assignmentStatement)
+    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
-        Expr SourceExpr = BuildExpression<Expr>(aliasTable, assignmentStatement.Expression);
+        Expr SourceExpr = BuildExpression<Expr>(aliasTable, parameterTable, assignmentStatement.Expression);
+        IVariable Destination = ClassModel.GetVariable(FieldTable, parameterTable, assignmentStatement.DestinationName);
 
-        IVariable Destination = assignmentStatement.Destination;
-        aliasTable.IncrementNameAlias(Destination);
-        AliasName DestinationNameAlias = aliasTable.GetAlias(Destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, assignmentStatement.Expression.ExpressionType);
+        aliasTable.IncrementAlias(Destination);
+        VariableAlias DestinationNameAlias = aliasTable.GetAlias(Destination);
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, assignmentStatement.Expression.GetExpressionType(FieldTable, parameterTable));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
 
-    private void AddConditionalExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, ConditionalStatement conditionalStatement)
+    private void AddConditionalExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, ConditionalStatement conditionalStatement)
     {
-        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, conditionalStatement.Condition);
+        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, parameterTable, conditionalStatement.Condition);
         BoolExpr TrueBranchExpr = Context.MkAnd(branch, ConditionExpr);
         BoolExpr FalseBranchExpr = Context.MkAnd(branch, Context.MkNot(ConditionExpr));
 
         AliasTable BeforeWhenTrue = aliasTable.Clone();
-        AddStatementListExecution(solver, aliasTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
-        List<AliasName> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
+        AddStatementListExecution(solver, aliasTable, parameterTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
+        List<VariableAlias> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
         AliasTable WhenTrueAliasTable = aliasTable.Clone();
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
-        AddStatementListExecution(solver, aliasTable, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
-        List<AliasName> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
+        AddStatementListExecution(solver, aliasTable, parameterTable, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
+        List<VariableAlias> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
 
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
@@ -80,14 +80,14 @@ internal partial class Verifier : IDisposable
         {
             ExpressionType VariableType = Variable.VariableType;
 
-            AliasName NameAlias = aliasTable.GetAlias(Variable);
+            VariableAlias NameAlias = aliasTable.GetAlias(Variable);
             Expr DestinationExpr = CreateVariableExpr(NameAlias, VariableType);
 
-            AliasName WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
+            VariableAlias WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
             Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, VariableType);
             BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
-            AliasName WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
+            VariableAlias WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
             Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, VariableType);
             BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
@@ -96,9 +96,9 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private void AddConditionalAliases(Solver solver, BoolExpr branchExpr, List<AliasName> aliasList)
+    private void AddConditionalAliases(Solver solver, BoolExpr branchExpr, List<VariableAlias> aliasList)
     {
-        foreach (AliasName Alias in aliasList)
+        foreach (VariableAlias Alias in aliasList)
         {
             IVariable Variable = Alias.Variable;
             ExpressionType FieldType = Variable.VariableType;

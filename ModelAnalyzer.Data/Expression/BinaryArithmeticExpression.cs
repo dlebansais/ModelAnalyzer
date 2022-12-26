@@ -12,16 +12,12 @@ internal class BinaryArithmeticExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable)
     {
-        get
-        {
-            if (Left.ExpressionType == ExpressionType.FloatingPoint || Right.ExpressionType == ExpressionType.FloatingPoint)
-                return ExpressionType.FloatingPoint;
-            else
-                return ExpressionType.Integer;
-        }
+        if (Left.GetExpressionType(fieldTable, parameterTable) == ExpressionType.FloatingPoint || Right.GetExpressionType(fieldTable, parameterTable) == ExpressionType.FloatingPoint)
+            return ExpressionType.FloatingPoint;
+        else
+            return ExpressionType.Integer;
     }
 
     /// <summary>

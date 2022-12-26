@@ -12,8 +12,7 @@ internal class LiteralBooleanValueExpression : Expression, ILiteralExpression<bo
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => ExpressionType.Boolean;
 
     /// <inheritdoc/>
     public bool Value { get; set; }

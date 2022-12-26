@@ -13,8 +13,7 @@ internal class LiteralFloatingPointValueExpression : Expression, ILiteralExpress
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.FloatingPoint;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => ExpressionType.FloatingPoint;
 
     /// <inheritdoc/>
     public double Value { get; set; }

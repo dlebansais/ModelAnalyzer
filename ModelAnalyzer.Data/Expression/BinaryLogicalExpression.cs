@@ -12,8 +12,7 @@ internal class BinaryLogicalExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override ExpressionType ExpressionType => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the left expression.

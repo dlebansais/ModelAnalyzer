@@ -5,24 +5,24 @@ using System.Diagnostics;
 /// <summary>
 /// Represents an alias for a variable.
 /// </summary>
-internal record AliasName
+internal record VariableAlias
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AliasName"/> class.
+    /// Initializes a new instance of the <see cref="VariableAlias"/> class.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public AliasName(IVariable variable)
+    public VariableAlias(IVariable variable)
     {
         Variable = variable;
         Index = 0;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AliasName"/> class.
+    /// Initializes a new instance of the <see cref="VariableAlias"/> class.
     /// </summary>
     /// <param name="variable">The variable.</param>
     /// <param name="index">The index.</param>
-    public AliasName(IVariable variable, int index)
+    public VariableAlias(IVariable variable, int index)
     {
         Variable = variable;
         Index = index;
@@ -41,9 +41,9 @@ internal record AliasName
     /// <summary>
     /// Return the alias with <see cref="Index"/> incremented.
     /// </summary>
-    public AliasName Incremented()
+    public VariableAlias Incremented()
     {
-        return new AliasName(Variable, Index + 1);
+        return new VariableAlias(Variable, Index + 1);
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ internal record AliasName
     /// </summary>
     /// <param name="other">The other alias.</param>
     /// <param name="isUpdated"><see langword="true"/> upon return if this alias was incremented; otherwise, <see langword="false"/>.</param>
-    public AliasName Merged(AliasName other, out bool isUpdated)
+    public VariableAlias Merged(VariableAlias other, out bool isUpdated)
     {
         Debug.Assert(Variable == other.Variable);
 
@@ -70,6 +70,6 @@ internal record AliasName
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{Variable.Name}_{Index}";
+        return $"{Variable.VariableName}_{Index}";
     }
 }

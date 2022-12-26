@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 public class UnsupportedParameter : IUnsupportedParameter
 {
     /// <inheritdoc/>
-    public string Name => "*";
+    public IVariableName VariableName => new ParameterName() { Name = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }

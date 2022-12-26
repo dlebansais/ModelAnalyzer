@@ -3,7 +3,7 @@
 using NUnit.Framework;
 
 /// <summary>
-/// Tests for the <see cref="AliasName"/> class.
+/// Tests for the <see cref="VariableAlias"/> class.
 /// </summary>
 public class AliasNameTest
 {
@@ -13,10 +13,10 @@ public class AliasNameTest
     {
         FieldName TestObjectName = new() { Name = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
-        AliasName TestObject = new(TestField);
+        VariableAlias TestObject = new(TestField);
 
         Assert.That(TestObject.Variable, Is.EqualTo(TestField));
-        Assert.That(TestObject, Is.EqualTo(new AliasName(TestField, 0)));
+        Assert.That(TestObject, Is.EqualTo(new VariableAlias(TestField, 0)));
     }
 
     [Test]
@@ -25,12 +25,12 @@ public class AliasNameTest
     {
         FieldName TestObjectName = new() { Name = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
-        AliasName TestObject = new(TestField);
+        VariableAlias TestObject = new(TestField);
 
         TestObject = TestObject.Incremented();
 
         Assert.That(TestObject.Variable, Is.EqualTo(TestField));
-        Assert.That(TestObject, Is.EqualTo(new AliasName(TestField, 1)));
+        Assert.That(TestObject, Is.EqualTo(new VariableAlias(TestField, 1)));
     }
 
     [Test]
@@ -39,14 +39,14 @@ public class AliasNameTest
     {
         FieldName TestObjectName = new() { Name = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
-        AliasName TestObject1 = new(TestField);
-        AliasName TestObject2 = new(TestField);
+        VariableAlias TestObject1 = new(TestField);
+        VariableAlias TestObject2 = new(TestField);
 
         TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 0)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 0)));
+        Assert.That(TestObject1, Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject2, Is.EqualTo(new VariableAlias(TestField, 0)));
     }
 
     [Test]
@@ -55,14 +55,14 @@ public class AliasNameTest
     {
         FieldName TestObjectName = new() { Name = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
-        AliasName TestObject1 = new(TestField);
-        AliasName TestObject2 = new(TestField);
+        VariableAlias TestObject1 = new(TestField);
+        VariableAlias TestObject2 = new(TestField);
 
         TestObject1 = TestObject1.Merged(TestObject2, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 0)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 0)));
+        Assert.That(TestObject1, Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject2, Is.EqualTo(new VariableAlias(TestField, 0)));
     }
 
     [Test]
@@ -71,14 +71,14 @@ public class AliasNameTest
     {
         FieldName TestObjectName = new() { Name = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
-        AliasName TestObject1 = new(TestField);
-        AliasName TestObject2 = new(TestField);
+        VariableAlias TestObject1 = new(TestField);
+        VariableAlias TestObject2 = new(TestField);
 
         TestObject1 = TestObject1.Incremented();
         TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.True);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 1)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 1)));
+        Assert.That(TestObject1, Is.EqualTo(new VariableAlias(TestField, 1)));
+        Assert.That(TestObject2, Is.EqualTo(new VariableAlias(TestField, 1)));
     }
 }

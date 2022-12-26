@@ -14,7 +14,7 @@ internal class Parameter : IParameter, IVariable
     required public ParameterName ParameterName { get; init; }
 
     /// <inheritdoc/>
-    public string Name { get { return ParameterName.Name; } }
+    public IVariableName VariableName { get => ParameterName; }
 
     /// <inheritdoc/>
     required public ExpressionType VariableType { get; init; }
