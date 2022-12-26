@@ -43,9 +43,9 @@ internal partial class Verifier : IDisposable
     {
         Expr SourceExpr = BuildExpression<Expr>(aliasTable, assignmentStatement.Expression);
 
-        string DestinationName = assignmentStatement.Destination.Name;
-        aliasTable.IncrementNameAlias(DestinationName);
-        AliasName DestinationNameAlias = aliasTable.GetAlias(DestinationName);
+        IVariable Destination = assignmentStatement.Destination;
+        aliasTable.IncrementNameAlias(Destination);
+        AliasName DestinationNameAlias = aliasTable.GetAlias(Destination);
         Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, assignmentStatement.Expression.ExpressionType);
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
@@ -71,55 +71,43 @@ internal partial class Verifier : IDisposable
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
         // Merge aliases from the if branche (the table currently contains the end of the end branch).
-        aliasTable.Merge(WhenTrueAliasTable, out List<string> UpdatedNameList);
+        aliasTable.Merge(WhenTrueAliasTable, out List<IVariable> UpdatedNameList);
 
         AddConditionalAliases(solver, TrueBranchExpr, AliasesOnlyWhenFalse);
         AddConditionalAliases(solver, FalseBranchExpr, AliasesOnlyWhenTrue);
 
-        foreach (string Name in UpdatedNameList)
+        foreach (IVariable Variable in UpdatedNameList)
         {
-            FieldName FieldName = new() { Name = Name };
-            foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
-                if (Entry.Key == FieldName)
-                {
-                    Field Field = Entry.Value;
-                    ExpressionType FieldType = Field.VariableType;
+            ExpressionType VariableType = Variable.VariableType;
 
-                    AliasName NameAlias = aliasTable.GetAlias(Name);
-                    Expr DestinationExpr = CreateVariableExpr(NameAlias, FieldType);
+            AliasName NameAlias = aliasTable.GetAlias(Variable);
+            Expr DestinationExpr = CreateVariableExpr(NameAlias, VariableType);
 
-                    AliasName WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Name);
-                    Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, FieldType);
-                    BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
+            AliasName WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
+            Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, VariableType);
+            BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
-                    AliasName WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Name);
-                    Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, FieldType);
-                    BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
+            AliasName WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
+            Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, VariableType);
+            BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
-                    AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
-                    AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);
-                    break;
-                }
+            AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
+            AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);
         }
     }
 
     private void AddConditionalAliases(Solver solver, BoolExpr branchExpr, List<AliasName> aliasList)
     {
-        foreach (AliasName FieldNameAlias in aliasList)
+        foreach (AliasName Alias in aliasList)
         {
-            FieldName FieldName = new() { Name = FieldNameAlias.VariableName };
-            foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
-                if (Entry.Key == FieldName)
-                {
-                    Field Field = Entry.Value;
-                    ExpressionType FieldType = Field.VariableType;
+            IVariable Variable = Alias.Variable;
+            ExpressionType FieldType = Variable.VariableType;
 
-                    Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
-                    Expr InitializerExpr = GetFieldInitializer(Field);
-                    BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
+            Expr FieldExpr = CreateVariableExpr(Alias, FieldType);
+            Expr InitializerExpr = CreateVariableInitializer(Variable);
+            BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
-                    AddToSolver(solver, branchExpr, InitExpr);
-                }
+            AddToSolver(solver, branchExpr, InitExpr);
         }
     }
 

@@ -3,35 +3,35 @@
 using System.Diagnostics;
 
 /// <summary>
-/// Represents an alias for a variable name.
+/// Represents an alias for a variable.
 /// </summary>
 internal record AliasName
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasName"/> class.
     /// </summary>
-    /// <param name="variableName">The variable name.</param>
-    public AliasName(string variableName)
+    /// <param name="variable">The variable.</param>
+    public AliasName(IVariable variable)
     {
-        VariableName = variableName;
+        Variable = variable;
         Index = 0;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AliasName"/> class.
     /// </summary>
-    /// <param name="variableName">The variable name.</param>
+    /// <param name="variable">The variable.</param>
     /// <param name="index">The index.</param>
-    public AliasName(string variableName, int index)
+    public AliasName(IVariable variable, int index)
     {
-        VariableName = variableName;
+        Variable = variable;
         Index = index;
     }
 
     /// <summary>
-    /// Gets the variable name.
+    /// Gets the variable.
     /// </summary>
-    public string VariableName { get; }
+    public IVariable Variable { get; }
 
     /// <summary>
     /// Gets the alias index.
@@ -43,7 +43,7 @@ internal record AliasName
     /// </summary>
     public AliasName Incremented()
     {
-        return new AliasName(VariableName, Index + 1);
+        return new AliasName(Variable, Index + 1);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ internal record AliasName
     /// <param name="isUpdated"><see langword="true"/> upon return if this alias was incremented; otherwise, <see langword="false"/>.</param>
     public AliasName Merged(AliasName other, out bool isUpdated)
     {
-        Debug.Assert(VariableName == other.VariableName);
+        Debug.Assert(Variable == other.Variable);
 
         if (other.Index != Index)
         {
@@ -70,6 +70,6 @@ internal record AliasName
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{VariableName}_{Index}";
+        return $"{Variable.Name}_{Index}";
     }
 }

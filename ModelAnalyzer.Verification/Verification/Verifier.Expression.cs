@@ -122,8 +122,7 @@ internal partial class Verifier : IDisposable
     private Expr BuildVariableValueExpression(AliasTable aliasTable, VariableValueExpression variableValueExpression)
     {
         IVariable Variable = variableValueExpression.Variable;
-        string VariableName = Variable.Name;
-        AliasName VariableAliasName = aliasTable.GetAlias(VariableName);
+        AliasName VariableAliasName = aliasTable.GetAlias(Variable);
 
         return CreateVariableExpr(VariableAliasName, Variable.VariableType);
     }

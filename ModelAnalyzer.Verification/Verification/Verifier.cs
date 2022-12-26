@@ -127,16 +127,15 @@ internal partial class Verifier : IDisposable
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
         {
-            string FieldName = Entry.Key.Name;
             Field Field = Entry.Value;
 
-            aliasTable.AddName(FieldName);
+            aliasTable.AddVariable(Field);
 
-            AliasName FieldNameAlias = aliasTable.GetAlias(Field.Name);
+            AliasName FieldNameAlias = aliasTable.GetAlias(Field);
             ExpressionType FieldType = Field.VariableType;
 
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
-            Expr InitializerExpr = GetFieldInitializer(Field);
+            Expr InitializerExpr = CreateFieldInitializer(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
             Log($"Adding {InitExpr}");
@@ -173,7 +172,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private Expr GetFieldInitializer(Field field)
+    private Expr CreateFieldInitializer(Field field)
     {
         Expr InitializerExpr = null!;
         bool IsHandled = false;
@@ -201,6 +200,34 @@ internal partial class Verifier : IDisposable
                     InitializerExpr = LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
                 else
                     InitializerExpr = Zero;
+                IsHandled = true;
+                break;
+        }
+
+        Debug.Assert(IsHandled);
+
+        return InitializerExpr;
+    }
+
+    private Expr CreateVariableInitializer(IVariable variable)
+    {
+        Expr InitializerExpr = null!;
+        bool IsHandled = false;
+
+        switch (variable.VariableType)
+        {
+            case ExpressionType.Boolean:
+                InitializerExpr = False;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.Integer:
+                InitializerExpr = Zero;
+                IsHandled = true;
+                break;
+
+            case ExpressionType.FloatingPoint:
+                InitializerExpr = Zero;
                 IsHandled = true;
                 break;
         }
@@ -258,9 +285,8 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            string ParameterName = Parameter.Name;
-            aliasTable.AddOrIncrementName(ParameterName);
-            AliasName ParameterNameAlias = aliasTable.GetAlias(ParameterName);
+            aliasTable.AddOrIncrement(Parameter);
+            AliasName ParameterNameAlias = aliasTable.GetAlias(Parameter);
 
             CreateVariableExpr(ParameterNameAlias, Parameter.VariableType);
         }

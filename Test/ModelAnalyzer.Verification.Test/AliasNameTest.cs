@@ -11,69 +11,74 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_BasicTest()
     {
-        string TestObjectName = "Test";
-        AliasName TestObject = new(TestObjectName);
+        FieldName TestObjectName = new() { Name = "Test" };
+        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        AliasName TestObject = new(TestField);
 
-        Assert.That(TestObject.VariableName, Is.EqualTo(TestObjectName));
-        Assert.That(TestObject, Is.EqualTo(new AliasName(TestObjectName, 0)));
+        Assert.That(TestObject.Variable, Is.EqualTo(TestField));
+        Assert.That(TestObject, Is.EqualTo(new AliasName(TestField, 0)));
     }
 
     [Test]
     [Category("Verification")]
     public void AliasName_Increment()
     {
-        string TestObjectName = "Test";
-        AliasName TestObject = new(TestObjectName);
+        FieldName TestObjectName = new() { Name = "Test" };
+        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        AliasName TestObject = new(TestField);
 
         TestObject = TestObject.Incremented();
 
-        Assert.That(TestObject.VariableName, Is.EqualTo(TestObjectName));
-        Assert.That(TestObject, Is.EqualTo(new AliasName(TestObjectName, 1)));
+        Assert.That(TestObject.Variable, Is.EqualTo(TestField));
+        Assert.That(TestObject, Is.EqualTo(new AliasName(TestField, 1)));
     }
 
     [Test]
     [Category("Verification")]
     public void AliasName_MergeNoIncrement()
     {
-        string TestObjectName = "Test";
-        AliasName TestObject1 = new(TestObjectName);
-        AliasName TestObject2 = new(TestObjectName);
+        FieldName TestObjectName = new() { Name = "Test" };
+        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        AliasName TestObject1 = new(TestField);
+        AliasName TestObject2 = new(TestField);
 
         TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestObjectName, 0)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestObjectName, 0)));
+        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 0)));
+        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 0)));
     }
 
     [Test]
     [Category("Verification")]
     public void AliasName_MergeSymetric()
     {
-        string TestObjectName = "Test";
-        AliasName TestObject1 = new(TestObjectName);
-        AliasName TestObject2 = new(TestObjectName);
+        FieldName TestObjectName = new() { Name = "Test" };
+        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        AliasName TestObject1 = new(TestField);
+        AliasName TestObject2 = new(TestField);
 
         TestObject1 = TestObject1.Merged(TestObject2, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestObjectName, 0)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestObjectName, 0)));
+        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 0)));
+        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 0)));
     }
 
     [Test]
     [Category("Verification")]
     public void AliasName_MergeOneIncrement()
     {
-        string TestObjectName = "Test";
-        AliasName TestObject1 = new(TestObjectName);
-        AliasName TestObject2 = new(TestObjectName);
+        FieldName TestObjectName = new() { Name = "Test" };
+        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        AliasName TestObject1 = new(TestField);
+        AliasName TestObject2 = new(TestField);
 
         TestObject1 = TestObject1.Incremented();
         TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.True);
-        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestObjectName, 1)));
-        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestObjectName, 1)));
+        Assert.That(TestObject1, Is.EqualTo(new AliasName(TestField, 1)));
+        Assert.That(TestObject2, Is.EqualTo(new AliasName(TestField, 1)));
     }
 }
