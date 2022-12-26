@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a method parameter.
 /// </summary>
-[DebuggerDisplay("{ParameterName.Name}")]
+[DebuggerDisplay("{ParameterName.Text}")]
 internal class Parameter : IParameter, IVariable
 {
     /// <summary>
@@ -14,7 +14,7 @@ internal class Parameter : IParameter, IVariable
     required public ParameterName ParameterName { get; init; }
 
     /// <inheritdoc/>
-    public IVariableName VariableName { get => ParameterName; }
+    IVariableName IVariable.VariableName { get => ParameterName; }
 
     /// <inheritdoc/>
     required public ExpressionType VariableType { get; init; }

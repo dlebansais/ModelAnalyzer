@@ -8,5 +8,5 @@ public interface IMethod
     /// <summary>
     /// Gets the method name.
     /// </summary>
-    string Name { get; }
+    MethodName MethodName { get; }
 }

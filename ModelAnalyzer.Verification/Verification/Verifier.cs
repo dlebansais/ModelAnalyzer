@@ -305,7 +305,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent require state for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.Name, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.MethodName.Text, ErrorIndex = i };
                 return false;
             }
         }
@@ -326,7 +326,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent ensure state for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.Name, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.MethodName.Text, ErrorIndex = i };
                 return false;
             }
         }

@@ -11,7 +11,7 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_BasicTest()
     {
-        FieldName TestObjectName = new() { Name = "Test" };
+        FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject = new(TestField);
 
@@ -23,7 +23,7 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_Increment()
     {
-        FieldName TestObjectName = new() { Name = "Test" };
+        FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject = new(TestField);
 
@@ -37,7 +37,7 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeNoIncrement()
     {
-        FieldName TestObjectName = new() { Name = "Test" };
+        FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);
@@ -53,7 +53,7 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeSymetric()
     {
-        FieldName TestObjectName = new() { Name = "Test" };
+        FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);
@@ -69,7 +69,7 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeOneIncrement()
     {
-        FieldName TestObjectName = new() { Name = "Test" };
+        FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);

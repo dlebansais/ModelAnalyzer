@@ -5,11 +5,11 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a field name.
 /// </summary>
-[DebuggerDisplay("{Name}")]
+[DebuggerDisplay("{Text}")]
 internal record FieldName : IClassMemberName, IVariableName
 {
     /// <summary>
     /// Gets the field name.
     /// </summary>
-    required public string Name { get; init; }
+    required public string Text { get; init; }
 }

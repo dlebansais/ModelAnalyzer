@@ -37,6 +37,6 @@ internal class VariableValueExpression : Expression
     /// <inheritdoc/>
     public override string ToString()
     {
-        return VariableName.Name;
+        return VariableName.Text;
     }
 }

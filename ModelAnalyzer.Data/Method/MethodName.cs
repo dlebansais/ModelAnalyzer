@@ -5,11 +5,11 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a method name.
 /// </summary>
-[DebuggerDisplay("{Name}")]
-internal record MethodName : IClassMemberName
+[DebuggerDisplay("{Text}")]
+public record MethodName : IClassMemberName
 {
     /// <summary>
     /// Gets the method name.
     /// </summary>
-    required public string Name { get; init; }
+    required public string Text { get; init; }
 }

@@ -1,16 +1,14 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 /// <summary>
 /// Represents an unsupported parameter.
 /// </summary>
-[DebuggerDisplay("{ParameterName.Name}")]
 public class UnsupportedParameter : IUnsupportedParameter
 {
     /// <inheritdoc/>
-    public IVariableName VariableName => new ParameterName() { Name = "*" };
+    public IVariableName VariableName => new ParameterName() { Text = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }

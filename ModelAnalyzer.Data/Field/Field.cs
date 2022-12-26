@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a class field.
 /// </summary>
-[DebuggerDisplay("{FieldName.Name}")]
+[DebuggerDisplay("{FieldName.Text}")]
 internal class Field : IField
 {
     /// <summary>
@@ -14,7 +14,7 @@ internal class Field : IField
     required public FieldName FieldName { get; init; }
 
     /// <inheritdoc/>
-    public IVariableName VariableName { get => FieldName; }
+    IVariableName IVariable.VariableName { get => FieldName; }
 
     /// <inheritdoc/>
     required public ExpressionType VariableType { get; init; }

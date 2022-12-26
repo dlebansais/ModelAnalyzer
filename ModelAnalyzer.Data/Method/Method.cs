@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a class method.
 /// </summary>
-[DebuggerDisplay("{MethodName.Name}()")]
+[DebuggerDisplay("{MethodName.Text}()")]
 internal class Method : IMethod
 {
     /// <summary>
@@ -38,7 +38,4 @@ internal class Method : IMethod
     /// Gets the method guarantees.
     /// </summary>
     required public List<Ensure> EnsureList { get; init; }
-
-    /// <inheritdoc/>
-    public string Name { get { return MethodName.Name; } }
 }

@@ -61,14 +61,14 @@ internal partial record ClassModel : IClassModel
         IVariable Result = null!;
 
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
-            if (Entry.Key.Name == variableName.Name)
+            if (Entry.Key.Text == variableName.Text)
             {
                 Result = Entry.Value;
                 break;
             }
 
         foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
-            if (Entry.Key.Name == variableName.Name)
+            if (Entry.Key.Text == variableName.Text)
             {
                 Result = Entry.Value;
                 break;
@@ -99,7 +99,7 @@ internal partial record ClassModel : IClassModel
             else
                 InitializerString = string.Empty;
 
-            builder.AppendLine($"  {TypeString} {Field.VariableName.Name}{InitializerString}");
+            builder.AppendLine($"  {TypeString} {Field.FieldName.Text}{InitializerString}");
         }
     }
 
@@ -120,11 +120,11 @@ internal partial record ClassModel : IClassModel
 
             Parameter Parameter = ParameterEntry.Value;
             string ParameterTypeString = ExpressionTypeToString(Parameter.VariableType);
-            Parameters += $"{ParameterTypeString} {Parameter.ParameterName.Name}";
+            Parameters += $"{ParameterTypeString} {Parameter.ParameterName.Text}";
         }
 
         string ReturnTypeString = ExpressionTypeToString(method.ReturnType);
-        builder.AppendLine($"  {ReturnTypeString} {method.Name}({Parameters})");
+        builder.AppendLine($"  {ReturnTypeString} {method.MethodName.Text}({Parameters})");
 
         foreach (Require Require in method.RequireList)
             AppendAssertion(builder, "require", Require.BooleanExpression);
@@ -183,7 +183,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
     {
-        AppendStatementText(builder, $"{statement.DestinationName.Name} = {statement.Expression}", indentation);
+        AppendStatementText(builder, $"{statement.DestinationName.Text} = {statement.Expression}", indentation);
     }
 
     private void AppendConditionalStatement(StringBuilder builder, ConditionalStatement statement, int indentation)

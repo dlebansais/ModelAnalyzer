@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents an assignment statement.
 /// </summary>
-[DebuggerDisplay("{Destination} = {Expression}")]
+[DebuggerDisplay("{DestinationName.Text} = {Expression}")]
 internal class AssignmentStatement : Statement
 {
     /// <summary>

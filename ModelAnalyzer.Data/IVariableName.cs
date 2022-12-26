@@ -6,7 +6,7 @@
 public interface IVariableName
 {
     /// <summary>
-    /// Gets the variable name.
+    /// Gets the variable name text.
     /// </summary>
-    string Name { get; }
+    string Text { get; }
 }

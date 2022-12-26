@@ -32,8 +32,8 @@ internal partial class ClassDeclarationParser
 
     private void AddMethod(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
     {
-        string Name = methodDeclaration.Identifier.ValueText;
-        MethodName MethodName = new() { Name = Name };
+        string Text = methodDeclaration.Identifier.ValueText;
+        MethodName MethodName = new() { Text = Text };
 
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
@@ -103,7 +103,7 @@ internal partial class ClassDeclarationParser
 
         foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
-            ParameterName ParameterName = new() { Name = Parameter.Identifier.ValueText };
+            ParameterName ParameterName = new() { Text = Parameter.Identifier.ValueText };
 
             // Ignore duplicate names, the compiler will catch them.
             if (!ParameterTable.ContainsItem(ParameterName))
@@ -164,7 +164,7 @@ internal partial class ClassDeclarationParser
     private bool TryFindParameterByName(ReadOnlyParameterTable parameterTable, string parameterName, out IParameter parameter)
     {
         foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
-            if (Entry.Value.ParameterName.Name == parameterName)
+            if (Entry.Value.ParameterName.Text == parameterName)
             {
                 parameter = Entry.Value;
                 return true;

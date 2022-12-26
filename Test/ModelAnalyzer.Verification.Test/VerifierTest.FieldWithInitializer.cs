@@ -93,7 +93,7 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Name = FieldName },
+            FieldName = new FieldName { Text = FieldName },
             VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };
@@ -212,14 +212,14 @@ public partial class VerifierTest
 
         Field TestField1 = new()
         {
-            FieldName = new FieldName { Name = FieldName1 },
+            FieldName = new FieldName { Text = FieldName1 },
             VariableType = Zero1.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };
 
         Field TestField2 = new()
         {
-            FieldName = new FieldName { Name = FieldName2 },
+            FieldName = new FieldName { Text = FieldName2 },
             VariableType = Zero2.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Initializer,
         };

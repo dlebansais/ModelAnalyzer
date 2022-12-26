@@ -168,7 +168,7 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Name = FieldName },
+            FieldName = new FieldName { Text = FieldName },
             VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = null,
         };
@@ -196,7 +196,7 @@ public partial class VerifierTest
         };
 
         string TestMethodName = "Write";
-        MethodName MethodName = new() { Name = TestMethodName };
+        MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
             MethodName = MethodName,

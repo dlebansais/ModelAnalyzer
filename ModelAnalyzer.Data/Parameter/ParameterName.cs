@@ -5,11 +5,11 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a parameter name.
 /// </summary>
-[DebuggerDisplay("{Name}")]
+[DebuggerDisplay("{Text}")]
 internal record ParameterName : IVariableName
 {
     /// <summary>
     /// Gets the parameter name.
     /// </summary>
-    required public string Name { get; init; }
+    required public string Text { get; init; }
 }

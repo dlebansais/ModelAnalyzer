@@ -6,7 +6,7 @@
 public interface IClassMemberName
 {
     /// <summary>
-    /// Gets the member name.
+    /// Gets the member name text.
     /// </summary>
-    string Name { get; }
+    string Text { get; }
 }

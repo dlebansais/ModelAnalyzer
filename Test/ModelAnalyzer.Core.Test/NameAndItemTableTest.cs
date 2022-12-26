@@ -41,7 +41,7 @@ public class NameAndItemTableTest
     public void NameAndItemTable_ReadOnlyFieldTable()
     {
         FieldTable TestTable = new();
-        FieldName TestFieldName = new FieldName() { Name = "*" };
+        FieldName TestFieldName = new FieldName() { Text = "*" };
         Field TestField = new Field() { FieldName = TestFieldName, VariableType = ExpressionType.Other, Initializer = null };
 
         TestTable.AddItem(TestFieldName, TestField);
@@ -66,7 +66,7 @@ public class NameAndItemTableTest
     public void NameAndItemTable_ReadOnlyMethodTable()
     {
         MethodTable TestTable = new();
-        MethodName TestMethodName = new MethodName() { Name = "*" };
+        MethodName TestMethodName = new MethodName() { Text = "*" };
         Method TestMethod = new Method()
         {
             MethodName = TestMethodName,
@@ -99,7 +99,7 @@ public class NameAndItemTableTest
     public void NameAndItemTable_ReadOnlyParameterTable()
     {
         ParameterTable TestTable = new();
-        ParameterName TestParameterName = new ParameterName() { Name = "*" };
+        ParameterName TestParameterName = new ParameterName() { Text = "*" };
         Parameter TestParameter = new Parameter() { ParameterName = TestParameterName, VariableType = ExpressionType.Other };
 
         TestTable.AddItem(TestParameterName, TestParameter);

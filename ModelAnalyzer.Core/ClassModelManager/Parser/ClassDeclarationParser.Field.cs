@@ -56,7 +56,7 @@ internal partial class ClassDeclarationParser
 
     private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported, ExpressionType fieldType)
     {
-        FieldName FieldName = new() { Name = variable.Identifier.ValueText };
+        FieldName FieldName = new() { Text = variable.Identifier.ValueText };
         bool IsErrorReported = false;
 
         // Ignore duplicate names, the compiler will catch them.
@@ -90,7 +90,7 @@ internal partial class ClassDeclarationParser
     private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out Field field)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
-            if (Entry.Value.FieldName.Name == fieldName)
+            if (Entry.Value.FieldName.Text == fieldName)
             {
                 field = Entry.Value;
                 return true;
