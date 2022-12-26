@@ -30,7 +30,7 @@ class Program_CoreClassModelManager_0
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
-        Assert.IsFalse(IsIgnored);
+        Assert.That(IsIgnored, Is.False);
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -58,7 +58,7 @@ class Program_CoreClassModelManager_1
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
-        Assert.IsTrue(IsIgnored);
+        Assert.That(IsIgnored, Is.True);
     }
 
     [Test]
@@ -76,7 +76,7 @@ class Program_CoreClassModelManager_2
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
-        Assert.IsFalse(IsIgnored);
+        Assert.That(IsIgnored, Is.False);
     }
 
     [Test]
@@ -167,7 +167,7 @@ class Program_CoreClassModelManager_5
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
-        Assert.IsTrue(IsIgnored);
+        Assert.That(IsIgnored, Is.True);
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -355,7 +355,9 @@ using System;
 
 class Program_CoreClassModelManager_16
 {
+    int X;
 }
+// Invariant: X > 0
 ");
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
@@ -556,7 +558,7 @@ class Program_CoreClassModelManager_16
         IClassModel ClassModel;
 
         // Wait to be sure the verifier process exited. Otherwise, the different capacity will break the channel.
-        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(5));
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(10));
 
         int OldCapacity = Channel.Capacity;
         Channel.Capacity = sizeof(int);
@@ -570,6 +572,8 @@ class Program_CoreClassModelManager_16
         Manager.GetVerifiedModel(ClassModel);
 
         Channel.Capacity = OldCapacity;
+
+        Assert.That(ClassModel.IsInvariantViolated, Is.False);
     }
 
     [Test]

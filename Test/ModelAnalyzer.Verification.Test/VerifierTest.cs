@@ -28,7 +28,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -50,7 +50,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -62,7 +62,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -74,7 +74,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
@@ -87,7 +87,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -99,7 +99,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
@@ -112,7 +112,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -124,7 +124,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
@@ -177,7 +177,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -189,7 +189,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
@@ -202,7 +202,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -214,7 +214,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
@@ -227,7 +227,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess);
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
     [Test]
@@ -239,7 +239,7 @@ public class VerifierTest
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError);
+        Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 

@@ -41,7 +41,7 @@ public class AliasNameTest
 
         TestObject2.Merge(TestObject1, out bool IsUpdated);
 
-        Assert.IsFalse(IsUpdated);
+        Assert.That(IsUpdated, Is.False);
         Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_0"));
         Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_0"));
     }
@@ -56,7 +56,7 @@ public class AliasNameTest
 
         TestObject1.Merge(TestObject2, out bool IsUpdated);
 
-        Assert.IsFalse(IsUpdated);
+        Assert.That(IsUpdated, Is.False);
         Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_0"));
         Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_0"));
     }
@@ -73,7 +73,7 @@ public class AliasNameTest
 
         TestObject2.Merge(TestObject1, out bool IsUpdated);
 
-        Assert.IsTrue(IsUpdated);
+        Assert.That(IsUpdated, Is.True);
         Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_1"));
         Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_1"));
     }

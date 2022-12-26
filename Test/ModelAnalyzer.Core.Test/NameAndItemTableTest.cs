@@ -33,7 +33,7 @@ public class NameAndItemTableTest
             if (Entry.Key == "*" && Entry.Value == 0)
                 IsFound = true;
 
-        Assert.IsTrue(IsFound);
+        Assert.That(IsFound, Is.True);
     }
 
     [Test]
@@ -58,7 +58,7 @@ public class NameAndItemTableTest
             if (Entry.Key == TestFieldName && Entry.Value == TestField)
                 IsFound = true;
 
-        Assert.IsTrue(IsFound);
+        Assert.That(IsFound, Is.True);
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class NameAndItemTableTest
             if (Entry.Key == TestMethodName && Entry.Value == TestMethod)
                 IsFound = true;
 
-        Assert.IsTrue(IsFound);
+        Assert.That(IsFound, Is.True);
     }
 
     [Test]
@@ -116,6 +116,6 @@ public class NameAndItemTableTest
             if (Entry.Key == TestParameterName && Entry.Value == TestParameter)
                 IsFound = true;
 
-        Assert.IsTrue(IsFound);
+        Assert.That(IsFound, Is.True);
     }
 }

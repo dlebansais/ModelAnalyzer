@@ -14,7 +14,7 @@ public class CallSequenceTest
     {
         CallSequence TestObject = new();
 
-        Assert.That(TestObject.IsEmpty);
+        Assert.That(TestObject.IsEmpty, Is.True);
         Assert.That(TestObject.ToString(), Is.EqualTo(string.Empty));
     }
 
@@ -38,7 +38,7 @@ public class CallSequenceTest
 
         CallSequence TestObject1 = TestObject0.WithAddedCall(Method1);
 
-        Assert.That(!TestObject1.IsEmpty);
+        Assert.That(TestObject1.IsEmpty, Is.False);
         Assert.That(TestObject1.ToString(), Is.EqualTo(MethodName1));
 
         Method Method2 = new()
@@ -53,10 +53,10 @@ public class CallSequenceTest
 
         CallSequence TestObject2 = TestObject1.WithAddedCall(Method2);
 
-        Assert.That(!TestObject2.IsEmpty);
+        Assert.That(TestObject2.IsEmpty, Is.False);
         Assert.That(TestObject2.ToString(), Is.EqualTo($"{MethodName1}, {MethodName2}"));
 
-        Assert.That(TestObject0.IsEmpty);
+        Assert.That(TestObject0.IsEmpty, Is.True);
         Assert.That(TestObject0.ToString(), Is.EqualTo(string.Empty));
     }
 
@@ -79,7 +79,7 @@ public class CallSequenceTest
 
         TestObject = TestObject.WithAddedCall(Method);
 
-        Assert.That(!TestObject.IsEmpty);
+        Assert.That(TestObject.IsEmpty, Is.False);
         Assert.That(TestObject.ToString(), Is.EqualTo(MethodName));
 
         List<Method> MethodList = new();

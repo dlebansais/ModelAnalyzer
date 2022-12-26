@@ -15,16 +15,16 @@ public class CompilationContextTest
         CompilationContext Context2 = CompilationContext.GetAnother();
         CompilationContext Context3 = CompilationContext.GetAnother();
 
-        Assert.IsTrue(Context1.IsCompatibleWith(Context1));
-        Assert.IsTrue(Context2.IsCompatibleWith(Context2));
-        Assert.IsTrue(Context3.IsCompatibleWith(Context3));
+        Assert.That(Context1.IsCompatibleWith(Context1), Is.True);
+        Assert.That(Context2.IsCompatibleWith(Context2), Is.True);
+        Assert.That(Context3.IsCompatibleWith(Context3), Is.True);
 
-        Assert.IsFalse(Context1.IsCompatibleWith(Context2));
-        Assert.IsFalse(Context1.IsCompatibleWith(Context3));
-        Assert.IsFalse(Context2.IsCompatibleWith(Context3));
-        Assert.IsFalse(Context2.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context2));
+        Assert.That(Context1.IsCompatibleWith(Context2), Is.False);
+        Assert.That(Context1.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context1), Is.False);
+        Assert.That(Context3.IsCompatibleWith(Context1), Is.False);
+        Assert.That(Context3.IsCompatibleWith(Context2), Is.False);
     }
 
     [Test]
@@ -35,16 +35,16 @@ public class CompilationContextTest
         CompilationContext Context2 = new CompilationContext(10, false);
         CompilationContext Context3 = new CompilationContext(11, false);
 
-        Assert.IsTrue(Context1.IsCompatibleWith(Context1));
-        Assert.IsTrue(Context2.IsCompatibleWith(Context2));
-        Assert.IsTrue(Context3.IsCompatibleWith(Context3));
+        Assert.That(Context1.IsCompatibleWith(Context1), Is.True);
+        Assert.That(Context2.IsCompatibleWith(Context2), Is.True);
+        Assert.That(Context3.IsCompatibleWith(Context3), Is.True);
 
-        Assert.IsTrue(Context1.IsCompatibleWith(Context2));
-        Assert.IsFalse(Context1.IsCompatibleWith(Context3));
-        Assert.IsFalse(Context2.IsCompatibleWith(Context3));
-        Assert.IsTrue(Context2.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context2));
+        Assert.That(Context1.IsCompatibleWith(Context2), Is.True);
+        Assert.That(Context1.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context1), Is.True);
+        Assert.That(Context3.IsCompatibleWith(Context1), Is.False);
+        Assert.That(Context3.IsCompatibleWith(Context2), Is.False);
     }
 
     [Test]
@@ -55,11 +55,11 @@ public class CompilationContextTest
         CompilationContext Context2 = new CompilationContext(10, true);
         CompilationContext Context3 = new CompilationContext(11, true);
 
-        Assert.IsFalse(Context1.IsCompatibleWith(Context2));
-        Assert.IsFalse(Context1.IsCompatibleWith(Context3));
-        Assert.IsFalse(Context2.IsCompatibleWith(Context3));
-        Assert.IsTrue(Context2.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context1));
-        Assert.IsFalse(Context3.IsCompatibleWith(Context2));
+        Assert.That(Context1.IsCompatibleWith(Context2), Is.False);
+        Assert.That(Context1.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context3), Is.False);
+        Assert.That(Context2.IsCompatibleWith(Context1), Is.True);
+        Assert.That(Context3.IsCompatibleWith(Context1), Is.False);
+        Assert.That(Context3.IsCompatibleWith(Context2), Is.False);
     }
 }
