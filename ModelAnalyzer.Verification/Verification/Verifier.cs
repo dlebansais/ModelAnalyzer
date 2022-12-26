@@ -132,7 +132,7 @@ internal partial class Verifier : IDisposable
 
             aliasTable.AddName(FieldName);
 
-            string FieldNameAlias = aliasTable.GetAlias(Field.Name);
+            AliasName FieldNameAlias = aliasTable.GetAlias(Field.Name);
             ExpressionType FieldType = Field.VariableType;
 
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
@@ -144,25 +144,26 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private Expr CreateVariableExpr(string variableName, ExpressionType variableType)
+    private Expr CreateVariableExpr(AliasName aliasName, ExpressionType variableType)
     {
         bool IsHandled = false;
         Expr Result = null!;
+        string AliasString = aliasName.ToString();
 
         switch (variableType)
         {
             case ExpressionType.Boolean:
-                Result = Context.MkBoolConst(variableName);
+                Result = Context.MkBoolConst(AliasString);
                 IsHandled = true;
                 break;
 
             case ExpressionType.Integer:
-                Result = Context.MkIntConst(variableName);
+                Result = Context.MkIntConst(AliasString);
                 IsHandled = true;
                 break;
 
             case ExpressionType.FloatingPoint:
-                Result = Context.MkRealConst(variableName);
+                Result = Context.MkRealConst(AliasString);
                 IsHandled = true;
                 break;
         }
@@ -259,9 +260,9 @@ internal partial class Verifier : IDisposable
             Parameter Parameter = Entry.Value;
             string ParameterName = Parameter.Name;
             aliasTable.AddOrIncrementName(ParameterName);
-            string ParameterNameAlias = aliasTable.GetAlias(ParameterName);
+            AliasName ParameterNameAlias = aliasTable.GetAlias(ParameterName);
 
-            Context.MkIntConst(ParameterNameAlias);
+            CreateVariableExpr(ParameterNameAlias, Parameter.VariableType);
         }
     }
 

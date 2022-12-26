@@ -17,7 +17,7 @@ public class AliasTableTest
         TestObject.AddName(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_0"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_0"));
     }
 
     [Test]
@@ -29,19 +29,19 @@ public class AliasTableTest
         TestObject.AddName(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_0"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_0"));
 
         TestObject.AddOrIncrementName(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_1"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_1"));
 
         string TestName2 = "Test2";
 
         TestObject.AddOrIncrementName(TestName2);
 
         Assert.That(TestObject.ContainsName(TestName2), Is.True);
-        Assert.That(TestObject.GetAlias(TestName2), Is.EqualTo($"{TestName2}_0"));
+        Assert.That(TestObject.GetAlias(TestName2).ToString(), Is.EqualTo($"{TestName2}_0"));
     }
 
     [Test]
@@ -53,12 +53,12 @@ public class AliasTableTest
         TestObject.AddName(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_0"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_0"));
 
         TestObject.IncrementNameAlias(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_1"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_1"));
     }
 
     [Test]
@@ -70,17 +70,17 @@ public class AliasTableTest
         TestObject.AddName(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_0"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_0"));
 
         TestObject.IncrementNameAlias(TestName);
 
         Assert.That(TestObject.ContainsName(TestName), Is.True);
-        Assert.That(TestObject.GetAlias(TestName), Is.EqualTo($"{TestName}_1"));
+        Assert.That(TestObject.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_1"));
 
         AliasTable CloneTable = TestObject.Clone();
 
         Assert.That(CloneTable.ContainsName(TestName), Is.True);
-        Assert.That(CloneTable.GetAlias(TestName), Is.EqualTo($"{TestName}_1"));
+        Assert.That(CloneTable.GetAlias(TestName).ToString(), Is.EqualTo($"{TestName}_1"));
     }
 
     [Test]
@@ -99,7 +99,7 @@ public class AliasTableTest
         TestObject2.AddName(TestName1);
         TestObject2.AddName(TestName2);
 
-        List<string> Difference;
+        List<AliasName> Difference;
 
         Difference = TestObject1.GetAliasDifference(TestObject2);
 
@@ -110,14 +110,14 @@ public class AliasTableTest
         Difference = TestObject1.GetAliasDifference(TestObject2);
 
         Assert.That(Difference.Count, Is.EqualTo(1));
-        Assert.That(Difference[0], Is.EqualTo($"{TestName3}_0"));
+        Assert.That(Difference[0].ToString(), Is.EqualTo($"{TestName3}_0"));
 
         TestObject1.IncrementNameAlias(TestName1);
         Difference = TestObject1.GetAliasDifference(TestObject2);
 
         Assert.That(Difference.Count, Is.EqualTo(2));
-        Assert.That(Difference.Contains($"{TestName3}_0"), Is.True);
-        Assert.That(Difference.Contains($"{TestName1}_1"), Is.True);
+        Assert.That(Difference.Exists(aliasName => aliasName.ToString() == $"{TestName3}_0"), Is.True);
+        Assert.That(Difference.Exists(aliasName => aliasName.ToString() == $"{TestName1}_1"), Is.True);
 
         Difference = TestObject2.GetAliasDifference(TestObject1);
 
@@ -141,14 +141,14 @@ public class AliasTableTest
         TestObject2.AddName(TestName2);
 
         Assert.That(TestObject1.ContainsName(TestName1), Is.True);
-        Assert.That(TestObject1.GetAlias(TestName1), Is.EqualTo($"{TestName1}_0"));
+        Assert.That(TestObject1.GetAlias(TestName1).ToString(), Is.EqualTo($"{TestName1}_0"));
         Assert.That(TestObject1.ContainsName(TestName2), Is.True);
-        Assert.That(TestObject1.GetAlias(TestName2), Is.EqualTo($"{TestName2}_0"));
+        Assert.That(TestObject1.GetAlias(TestName2).ToString(), Is.EqualTo($"{TestName2}_0"));
 
         Assert.That(TestObject2.ContainsName(TestName1), Is.True);
-        Assert.That(TestObject2.GetAlias(TestName1), Is.EqualTo($"{TestName1}_0"));
+        Assert.That(TestObject2.GetAlias(TestName1).ToString(), Is.EqualTo($"{TestName1}_0"));
         Assert.That(TestObject2.ContainsName(TestName2), Is.True);
-        Assert.That(TestObject2.GetAlias(TestName2), Is.EqualTo($"{TestName2}_0"));
+        Assert.That(TestObject2.GetAlias(TestName2).ToString(), Is.EqualTo($"{TestName2}_0"));
 
         List<string> UpdatedNameList;
 
@@ -162,7 +162,7 @@ public class AliasTableTest
 
         Assert.That(UpdatedNameList.Count, Is.EqualTo(1));
         Assert.That(UpdatedNameList[0], Is.EqualTo(TestName1));
-        Assert.That(TestObject1.GetAlias(TestName1), Is.EqualTo($"{TestName1}_2"));
+        Assert.That(TestObject1.GetAlias(TestName1).ToString(), Is.EqualTo($"{TestName1}_2"));
 
         TestObject2.AddName(TestName3);
 
@@ -170,6 +170,6 @@ public class AliasTableTest
 
         Assert.That(UpdatedNameList.Count, Is.EqualTo(1));
         Assert.That(UpdatedNameList[0], Is.EqualTo(TestName1));
-        Assert.That(TestObject1.GetAlias(TestName1), Is.EqualTo($"{TestName1}_3"));
+        Assert.That(TestObject1.GetAlias(TestName1).ToString(), Is.EqualTo($"{TestName1}_3"));
     }
 }

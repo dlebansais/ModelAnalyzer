@@ -45,24 +45,8 @@ internal partial class Verifier : IDisposable
 
         string DestinationName = assignmentStatement.Destination.Name;
         aliasTable.IncrementNameAlias(DestinationName);
-        string DestinationNameAlias = aliasTable.GetAlias(DestinationName);
-
-        Expr DestinationExpr = null!;
-
-        switch (SourceExpr)
-        {
-            case BoolExpr:
-                DestinationExpr = Context.MkBoolConst(DestinationNameAlias);
-                break;
-            case IntExpr:
-                DestinationExpr = Context.MkIntConst(DestinationNameAlias);
-                break;
-            case RealExpr:
-                DestinationExpr = Context.MkRealConst(DestinationNameAlias);
-                break;
-        }
-
-        Debug.Assert(DestinationExpr is not null);
+        AliasName DestinationNameAlias = aliasTable.GetAlias(DestinationName);
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, assignmentStatement.Expression.ExpressionType);
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
@@ -75,49 +59,67 @@ internal partial class Verifier : IDisposable
 
         AliasTable BeforeWhenTrue = aliasTable.Clone();
         AddStatementListExecution(solver, aliasTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
-        List<string> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
+        List<AliasName> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
         AliasTable WhenTrueAliasTable = aliasTable.Clone();
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
         AddStatementListExecution(solver, aliasTable, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
-        List<string> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
+        List<AliasName> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
 
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
         // Merge aliases from the if branche (the table currently contains the end of the end branch).
         aliasTable.Merge(WhenTrueAliasTable, out List<string> UpdatedNameList);
 
-        foreach (string NameAlias in AliasesOnlyWhenFalse)
-        {
-            IntExpr AliasExpr = Context.MkIntConst(NameAlias);
-            BoolExpr InitExpr = Context.MkEq(AliasExpr, Zero);
-            AddToSolver(solver, TrueBranchExpr, InitExpr);
-        }
-
-        foreach (string NameAlias in AliasesOnlyWhenTrue)
-        {
-            IntExpr AliasExpr = Context.MkIntConst(NameAlias);
-            BoolExpr InitExpr = Context.MkEq(AliasExpr, Zero);
-            AddToSolver(solver, FalseBranchExpr, InitExpr);
-        }
+        AddConditionalAliases(solver, TrueBranchExpr, AliasesOnlyWhenFalse);
+        AddConditionalAliases(solver, FalseBranchExpr, AliasesOnlyWhenTrue);
 
         foreach (string Name in UpdatedNameList)
         {
-            string NameAlias = aliasTable.GetAlias(Name);
-            IntExpr DestinationExpr = Context.MkIntConst(NameAlias);
+            FieldName FieldName = new() { Name = Name };
+            foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+                if (Entry.Key == FieldName)
+                {
+                    Field Field = Entry.Value;
+                    ExpressionType FieldType = Field.VariableType;
 
-            string WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Name);
-            IntExpr WhenTrueSourceExpr = Context.MkIntConst(WhenTrueNameAlias);
-            BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
+                    AliasName NameAlias = aliasTable.GetAlias(Name);
+                    Expr DestinationExpr = CreateVariableExpr(NameAlias, FieldType);
 
-            string WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Name);
-            IntExpr WhenFalseSourceExpr = Context.MkIntConst(WhenFalseNameAlias);
-            BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
+                    AliasName WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Name);
+                    Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, FieldType);
+                    BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
-            AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
-            AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);
+                    AliasName WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Name);
+                    Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, FieldType);
+                    BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
+
+                    AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
+                    AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);
+                    break;
+                }
+        }
+    }
+
+    private void AddConditionalAliases(Solver solver, BoolExpr branchExpr, List<AliasName> aliasList)
+    {
+        foreach (AliasName FieldNameAlias in aliasList)
+        {
+            FieldName FieldName = new() { Name = FieldNameAlias.VariableName };
+            foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+                if (Entry.Key == FieldName)
+                {
+                    Field Field = Entry.Value;
+                    ExpressionType FieldType = Field.VariableType;
+
+                    Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
+                    Expr InitializerExpr = GetFieldInitializer(Field);
+                    BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
+
+                    AddToSolver(solver, branchExpr, InitExpr);
+                }
         }
     }
 

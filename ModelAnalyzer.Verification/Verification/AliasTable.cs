@@ -22,7 +22,7 @@ internal class AliasTable
     /// </summary>
     /// <param name="table">The table to clone.</param>
     /// <param name="allAliases">The aliases to clone.</param>
-    private AliasTable(Dictionary<string, AliasName> table, List<string> allAliases)
+    private AliasTable(Dictionary<string, AliasName> table, List<AliasName> allAliases)
         : this()
     {
         foreach (KeyValuePair<string, AliasName> Entry in table)
@@ -48,8 +48,10 @@ internal class AliasTable
     {
         Debug.Assert(!ContainsName(name));
 
-        Table.Add(name, new AliasName { VariableName = name });
-        AllAliases.Add(Table[name].Alias);
+        AliasName NewAlias = new AliasName { VariableName = name };
+
+        Table.Add(name, NewAlias);
+        AllAliases.Add(NewAlias);
     }
 
     /// <summary>
@@ -59,28 +61,31 @@ internal class AliasTable
     /// <param name="name">The name.</param>
     public void AddOrIncrementName(string name)
     {
+        AliasName NewAlias;
+
         if (Table.ContainsKey(name))
         {
-            AllAliases.Remove(Table[name].Alias);
-            Table[name].Increment();
-            AllAliases.Add(Table[name].Alias);
+            AliasName OldAlias = Table[name];
+
+            AllAliases.Remove(OldAlias);
+            NewAlias = OldAlias.Incremented();
         }
         else
-        {
-            Table.Add(name, new AliasName { VariableName = name });
-            AllAliases.Add(Table[name].Alias);
-        }
+            NewAlias = new AliasName { VariableName = name };
+
+        Table[name] = NewAlias;
+        AllAliases.Add(NewAlias);
     }
 
     /// <summary>
     /// Gets the current alias of a name.
     /// </summary>
     /// <param name="name">The name.</param>
-    public string GetAlias(string name)
+    public AliasName GetAlias(string name)
     {
         Debug.Assert(ContainsName(name));
 
-        return Table[name].Alias;
+        return Table[name];
     }
 
     /// <summary>
@@ -91,8 +96,11 @@ internal class AliasTable
     {
         Debug.Assert(ContainsName(name));
 
-        Table[name].Increment();
-        AllAliases.Add(Table[name].Alias);
+        AliasName OldAlias = Table[name];
+        AliasName NewAlias = OldAlias.Incremented();
+
+        Table[name] = NewAlias;
+        AllAliases.Add(NewAlias);
     }
 
     /// <summary>
@@ -107,17 +115,13 @@ internal class AliasTable
     /// Gets a list of aliases that this instance and the other don't have in common.
     /// </summary>
     /// <param name="other">The other instance.</param>
-    public List<string> GetAliasDifference(AliasTable other)
+    public List<AliasName> GetAliasDifference(AliasTable other)
     {
-        List<string> AliasDifference = new();
+        List<AliasName> AliasDifference = new();
 
-        foreach (string Alias in AllAliases)
-        {
+        foreach (AliasName Alias in AllAliases)
             if (!other.AllAliases.Contains(Alias))
-            {
                 AliasDifference.Add(Alias);
-            }
-        }
 
         return AliasDifference;
     }
@@ -130,21 +134,26 @@ internal class AliasTable
     public void Merge(AliasTable other, out List<string> updatedNameList)
     {
         updatedNameList = new();
+        Dictionary<string, AliasName> UpdatedTable = new();
 
         foreach (KeyValuePair<string, AliasName> Entry in Table)
         {
             string Name = Entry.Key;
             AliasName OtherNameAlias = other.Table[Name];
-            Entry.Value.Merge(OtherNameAlias, out bool IsUpdated);
+            AliasName MergedAlias = Entry.Value.Merged(OtherNameAlias, out bool IsUpdated);
 
             if (IsUpdated)
             {
                 updatedNameList.Add(Name);
-                AllAliases.Add(Table[Name].Alias);
+                UpdatedTable.Add(Name, MergedAlias);
+                AllAliases.Add(MergedAlias);
             }
         }
+
+        foreach (KeyValuePair<string, AliasName> Entry in UpdatedTable)
+            Table[Entry.Key] = Entry.Value;
     }
 
     private Dictionary<string, AliasName> Table;
-    private List<string> AllAliases;
+    private List<AliasName> AllAliases;
 }

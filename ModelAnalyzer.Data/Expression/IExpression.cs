@@ -5,4 +5,8 @@
 /// </summary>
 public interface IExpression
 {
+    /// <summary>
+    /// Gets the expression type.
+    /// </summary>
+    ExpressionType ExpressionType { get; }
 }

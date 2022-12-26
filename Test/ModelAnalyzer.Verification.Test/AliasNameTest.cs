@@ -15,7 +15,7 @@ public class AliasNameTest
         AliasName TestObject = new() { VariableName = TestObjectName };
 
         Assert.That(TestObject.VariableName, Is.EqualTo(TestObjectName));
-        Assert.That(TestObject.Alias, Is.EqualTo($"{TestObjectName}_0"));
+        Assert.That(TestObject.ToString(), Is.EqualTo($"{TestObjectName}_0"));
     }
 
     [Test]
@@ -25,10 +25,10 @@ public class AliasNameTest
         string TestObjectName = "Test";
         AliasName TestObject = new() { VariableName = TestObjectName };
 
-        TestObject.Increment();
+        TestObject = TestObject.Incremented();
 
         Assert.That(TestObject.VariableName, Is.EqualTo(TestObjectName));
-        Assert.That(TestObject.Alias, Is.EqualTo($"{TestObjectName}_1"));
+        Assert.That(TestObject.ToString(), Is.EqualTo($"{TestObjectName}_1"));
     }
 
     [Test]
@@ -39,11 +39,11 @@ public class AliasNameTest
         AliasName TestObject1 = new() { VariableName = TestObjectName };
         AliasName TestObject2 = new() { VariableName = TestObjectName };
 
-        TestObject2.Merge(TestObject1, out bool IsUpdated);
+        TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_0"));
-        Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_0"));
+        Assert.That(TestObject1.ToString(), Is.EqualTo($"{TestObjectName}_0"));
+        Assert.That(TestObject2.ToString(), Is.EqualTo($"{TestObjectName}_0"));
     }
 
     [Test]
@@ -54,11 +54,11 @@ public class AliasNameTest
         AliasName TestObject1 = new() { VariableName = TestObjectName };
         AliasName TestObject2 = new() { VariableName = TestObjectName };
 
-        TestObject1.Merge(TestObject2, out bool IsUpdated);
+        TestObject1 = TestObject1.Merged(TestObject2, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.False);
-        Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_0"));
-        Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_0"));
+        Assert.That(TestObject1.ToString(), Is.EqualTo($"{TestObjectName}_0"));
+        Assert.That(TestObject2.ToString(), Is.EqualTo($"{TestObjectName}_0"));
     }
 
     [Test]
@@ -69,12 +69,11 @@ public class AliasNameTest
         AliasName TestObject1 = new() { VariableName = TestObjectName };
         AliasName TestObject2 = new() { VariableName = TestObjectName };
 
-        TestObject1.Increment();
-
-        TestObject2.Merge(TestObject1, out bool IsUpdated);
+        TestObject1 = TestObject1.Incremented();
+        TestObject2 = TestObject2.Merged(TestObject1, out bool IsUpdated);
 
         Assert.That(IsUpdated, Is.True);
-        Assert.That(TestObject1.Alias, Is.EqualTo($"{TestObjectName}_1"));
-        Assert.That(TestObject2.Alias, Is.EqualTo($"{TestObjectName}_1"));
+        Assert.That(TestObject1.ToString(), Is.EqualTo($"{TestObjectName}_1"));
+        Assert.That(TestObject2.ToString(), Is.EqualTo($"{TestObjectName}_1"));
     }
 }

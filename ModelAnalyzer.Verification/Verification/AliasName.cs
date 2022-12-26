@@ -13,16 +13,14 @@ internal record AliasName
     required public string VariableName { get; init; }
 
     /// <summary>
-    /// Gets the alias.
+    /// Return the alias with <see cref="Index"/> incremented.
     /// </summary>
-    public string Alias { get { return $"{VariableName}_{Index}"; } }
-
-    /// <summary>
-    /// Increment the alias so that <see cref="Alias"/> is changed.
-    /// </summary>
-    public void Increment()
+    public AliasName Incremented()
     {
-        Index++;
+        AliasName Result = new() { VariableName = VariableName };
+        Result.Index = Index + 1;
+
+        return Result;
     }
 
     /// <summary>
@@ -30,17 +28,26 @@ internal record AliasName
     /// </summary>
     /// <param name="other">The other alias.</param>
     /// <param name="isUpdated"><see langword="true"/> upon return if this alias was incremented; otherwise, <see langword="false"/>.</param>
-    public void Merge(AliasName other, out bool isUpdated)
+    public AliasName Merged(AliasName other, out bool isUpdated)
     {
         Debug.Assert(VariableName == other.VariableName);
 
         if (other.Index != Index)
         {
             isUpdated = true;
-            Increment();
+            return Incremented();
         }
         else
+        {
             isUpdated = false;
+            return this;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{VariableName}_{Index}";
     }
 
     private int Index;

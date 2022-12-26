@@ -87,6 +87,7 @@ class Program_CoreExpression_2
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Expressions[0].ExpressionType, Is.EqualTo(ExpressionType.Other));
     }
 
     [Test]
