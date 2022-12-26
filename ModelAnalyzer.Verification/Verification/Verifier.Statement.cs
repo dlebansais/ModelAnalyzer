@@ -77,6 +77,7 @@ internal partial class Verifier : IDisposable
         AddStatementListExecution(solver, aliasTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
         List<string> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
 
+        // For the else branch, start alias indexes from what they are at the end of the if branch.
         AliasTable WhenTrueAliasTable = aliasTable.Clone();
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
@@ -85,6 +86,7 @@ internal partial class Verifier : IDisposable
 
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
+        // Merge aliases from the if branche (the table currently contains the end of the end branch).
         aliasTable.Merge(WhenTrueAliasTable, out List<string> UpdatedNameList);
 
         foreach (string NameAlias in AliasesOnlyWhenFalse)
