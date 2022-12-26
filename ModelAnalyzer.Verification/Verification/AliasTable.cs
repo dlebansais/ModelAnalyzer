@@ -48,7 +48,7 @@ internal class AliasTable
     {
         Debug.Assert(!ContainsName(name));
 
-        AliasName NewAlias = new AliasName { VariableName = name };
+        AliasName NewAlias = new AliasName(name);
 
         Table.Add(name, NewAlias);
         AllAliases.Add(NewAlias);
@@ -71,7 +71,7 @@ internal class AliasTable
             NewAlias = OldAlias.Incremented();
         }
         else
-            NewAlias = new AliasName { VariableName = name };
+            NewAlias = new AliasName(name);
 
         Table[name] = NewAlias;
         AllAliases.Add(NewAlias);

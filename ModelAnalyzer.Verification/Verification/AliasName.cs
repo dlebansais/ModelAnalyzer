@@ -8,19 +8,42 @@ using System.Diagnostics;
 internal record AliasName
 {
     /// <summary>
+    /// Initializes a new instance of the <see cref="AliasName"/> class.
+    /// </summary>
+    /// <param name="variableName">The variable name.</param>
+    public AliasName(string variableName)
+    {
+        VariableName = variableName;
+        Index = 0;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AliasName"/> class.
+    /// </summary>
+    /// <param name="variableName">The variable name.</param>
+    /// <param name="index">The index.</param>
+    public AliasName(string variableName, int index)
+    {
+        VariableName = variableName;
+        Index = index;
+    }
+
+    /// <summary>
     /// Gets the variable name.
     /// </summary>
-    required public string VariableName { get; init; }
+    public string VariableName { get; }
+
+    /// <summary>
+    /// Gets the alias index.
+    /// </summary>
+    public int Index { get; }
 
     /// <summary>
     /// Return the alias with <see cref="Index"/> incremented.
     /// </summary>
     public AliasName Incremented()
     {
-        AliasName Result = new() { VariableName = VariableName };
-        Result.Index = Index + 1;
-
-        return Result;
+        return new AliasName(VariableName, Index + 1);
     }
 
     /// <summary>
@@ -49,6 +72,4 @@ internal record AliasName
     {
         return $"{VariableName}_{Index}";
     }
-
-    private int Index;
 }
