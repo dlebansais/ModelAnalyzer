@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ModelAnalyzer.Verification\ModelAnalyzer.Verification.csproj" />
+    <ProjectReference Include="..\..\ModelAnalyzer.Core\ModelAnalyzer.Core.csproj" />
   </ItemGroup>
 
 </Project>
