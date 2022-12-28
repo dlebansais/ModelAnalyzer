@@ -93,9 +93,6 @@ internal partial class ClassDeclarationParser
 
                 IsMethodSupported = false;
             }
-            else
-            {
-            }
 
         return IsMethodSupported;
     }
