@@ -30,7 +30,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     [Test]
@@ -55,7 +55,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     [Test]
@@ -80,7 +80,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     [Test]
@@ -105,7 +105,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     [Test]
@@ -130,7 +130,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     [Test]
@@ -155,7 +155,7 @@ public partial class VerifierTest
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
     private Verifier CreateConditionalAssignmentVerifier<TValue, TExpression>(TValue invariantTestValue, TValue assignmentValue, int maxDepth, bool whenTrue)

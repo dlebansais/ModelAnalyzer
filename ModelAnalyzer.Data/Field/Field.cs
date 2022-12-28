@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a class field.
 /// </summary>
-[DebuggerDisplay("{FieldName.Text}")]
+[DebuggerDisplay("{Name.Text}")]
 internal class Field : IField, INameable<FieldName>
 {
     /// <summary>

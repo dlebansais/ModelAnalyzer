@@ -239,13 +239,17 @@ internal partial class Verifier : IDisposable
 
     private bool AddClassInvariant(Solver solver, AliasTable aliasTable)
     {
+        bool Result = true;
+
         Log($"Invariant for class {ClassName}");
 
-        for (int i = 0; i < InvariantList.Count; i++)
+        for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
             Invariant Invariant = InvariantList[i];
             BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, ReadOnlyParameterTable.Empty, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
+
+            solver.Push();
 
             Log($"Adding invariant opposite {InvariantOpposite}");
             solver.Assert(InvariantOpposite);
@@ -258,11 +262,13 @@ internal partial class Verifier : IDisposable
                 string ModelString = TextBuilder.Normalized(solver.Model.ToString());
                 Log(ModelString);
 
-                return false;
+                Result = false;
             }
+
+            solver.Pop();
         }
 
-        return true;
+        return Result;
     }
 
     private bool AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
@@ -315,23 +321,34 @@ internal partial class Verifier : IDisposable
 
     private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
     {
-        for (int i = 0; i < method.EnsureList.Count; i++)
+        bool Result = true;
+
+        for (int i = 0; i < method.EnsureList.Count && Result == true; i++)
         {
             Ensure Ensure = method.EnsureList[i];
             BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, Ensure.BooleanExpression);
+            BoolExpr EnsureOppositeExpr = Context.MkNot(EnsureExpr);
 
-            Log($"Adding {EnsureExpr}");
-            solver.Assert(EnsureExpr);
+            solver.Push();
 
-            if (solver.Check() != Status.SATISFIABLE)
+            Log($"Adding ensure opposite {EnsureOppositeExpr}");
+            solver.Assert(EnsureOppositeExpr);
+
+            if (solver.Check() == Status.SATISFIABLE)
             {
-                Log($"Inconsistent ensure state for class {ClassName}");
+                Log($"Ensure violation for class {ClassName}");
                 VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = i };
-                return false;
+
+                string ModelString = TextBuilder.Normalized(solver.Model.ToString());
+                Log(ModelString);
+
+                Result = false;
             }
+
+            solver.Pop();
         }
 
-        return true;
+        return Result;
     }
 
     private void AddToSolver(Solver solver, BoolExpr branch, BoolExpr boolExpr)

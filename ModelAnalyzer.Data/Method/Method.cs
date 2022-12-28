@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a class method.
 /// </summary>
-[DebuggerDisplay("{MethodName.Text}()")]
+[DebuggerDisplay("{Name.Text}()")]
 internal class Method : IMethod
 {
     /// <summary>

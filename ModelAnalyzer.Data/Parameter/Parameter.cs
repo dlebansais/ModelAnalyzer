@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a method parameter.
 /// </summary>
-[DebuggerDisplay("{ParameterName.Text}")]
+[DebuggerDisplay("{Name.Text}")]
 internal class Parameter : IParameter, INameable<ParameterName>
 {
     /// <summary>
