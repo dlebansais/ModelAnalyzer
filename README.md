@@ -45,8 +45,9 @@ To help the analyzer, programmers can add contract clauses:
 
 The analyzer supports:
 
-+ Private fields of type `int`. Ex: `private int X, Y;`. Fields can only use default initialization (to zero).
-+ Private or public methods that return either `void` or `int` and take zero or more `int` parameters.
++ `bool`, `int` and `double` types only.
++ Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
++ Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields.
   * Parameters cannot be assigned, they are read-only.
 + Assignment of an expression to a field.
@@ -58,7 +59,7 @@ The analyzer supports:
   * Parenthesis.
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
-  * Integer constants (ex: `0`), `true` and `false`.
+  * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
   * Variables, either fields or parameters.
 
 Everything else, attributes, preprocessor directives etc. is not supported.
