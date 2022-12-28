@@ -170,34 +170,31 @@ internal partial class ClassDeclarationParser
     {
         variableType = ExpressionType.Other;
 
-        if (type is not PredefinedTypeSyntax PredefinedType)
-            return false;
-
-        SyntaxKind TypeKind = PredefinedType.Keyword.Kind();
-
-        switch (TypeKind)
+        if (type is PredefinedTypeSyntax PredefinedType)
         {
-            default:
-                return false;
+            SyntaxKind TypeKind = PredefinedType.Keyword.Kind();
 
-            case SyntaxKind.VoidKeyword:
-                variableType = ExpressionType.Void;
-                break;
+            switch (TypeKind)
+            {
+                case SyntaxKind.VoidKeyword:
+                    variableType = ExpressionType.Void;
+                    return true;
 
-            case SyntaxKind.BoolKeyword:
-                variableType = ExpressionType.Boolean;
-                break;
+                case SyntaxKind.BoolKeyword:
+                    variableType = ExpressionType.Boolean;
+                    return true;
 
-            case SyntaxKind.IntKeyword:
-                variableType = ExpressionType.Integer;
-                break;
+                case SyntaxKind.IntKeyword:
+                    variableType = ExpressionType.Integer;
+                    return true;
 
-            case SyntaxKind.DoubleKeyword:
-                variableType = ExpressionType.FloatingPoint;
-                break;
+                case SyntaxKind.DoubleKeyword:
+                    variableType = ExpressionType.FloatingPoint;
+                    return true;
+            }
         }
 
-        return true;
+        return false;
     }
 
     private bool TryParseAssertionTextInTrivia(string text, out SyntaxTree syntaxTree, out int offset)

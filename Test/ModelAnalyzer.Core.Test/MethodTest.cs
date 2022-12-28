@@ -226,7 +226,7 @@ class Program_CoreMethod_6
 
     [Test]
     [Category("Core")]
-    public void Method_Modifier()
+    public void Method_PublicModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
@@ -258,12 +258,76 @@ class Program_CoreMethod_7
 
     [Test]
     [Category("Core")]
-    public void Method_InvalidModifier()
+    public void Method_PrivateModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreMethod_8
+{
+    int X;
+
+    private void Write(int x, int y)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_8
+  int X
+  void Write(int x, int y)
+  {
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void InternalModifier()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_9
+{
+    int X;
+
+    internal void Write(int x, int y)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_9
+  int X
+  void Write(int x, int y)
+  {
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Method_InvalidModifier()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_10
 {
     static void Write()
     {
@@ -286,7 +350,7 @@ class Program_CoreMethod_8
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreMethod_9
+class Program_CoreMethod_11
 {
     int X;
 
