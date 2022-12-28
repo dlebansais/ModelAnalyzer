@@ -365,6 +365,32 @@ class Program_CoreClassModelManager_16
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithLittleCapacity);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_VerificationWithResult()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_17
+{
+    int X;
+
+    int Read()
+    {
+        X = 1;
+        return X;
+    }
+    // Ensure: Result == 0
+}
+// Invariant: X == 0
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithResult);
+    }
+
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
@@ -569,11 +595,24 @@ class Program_CoreClassModelManager_16
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
-        Manager.GetVerifiedModel(ClassModel);
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Channel.Capacity = OldCapacity;
 
         Assert.That(ClassModel.IsInvariantViolated, Is.False);
+    }
+
+    private void VerificationWithResult(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
+
+        Assert.That(ClassModel.IsInvariantViolated, Is.True);
     }
 
     [Test]
