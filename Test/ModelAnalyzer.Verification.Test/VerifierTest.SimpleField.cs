@@ -92,15 +92,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Name = new FieldName { Text = FieldName },
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()

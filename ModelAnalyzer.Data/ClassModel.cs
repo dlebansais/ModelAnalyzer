@@ -89,7 +89,7 @@ internal partial record ClassModel : IClassModel
         foreach (KeyValuePair<FieldName, Field> FieldEntry in FieldTable)
         {
             Field Field = FieldEntry.Value;
-            string TypeString = ExpressionTypeToString(Field.VariableType);
+            string TypeString = ExpressionTypeToString(Field.Type);
 
             string InitializerString;
             ILiteralExpression? Initializer = Field.Initializer;
@@ -99,7 +99,7 @@ internal partial record ClassModel : IClassModel
             else
                 InitializerString = string.Empty;
 
-            builder.AppendLine($"  {TypeString} {Field.FieldName.Text}{InitializerString}");
+            builder.AppendLine($"  {TypeString} {Field.Name.Text}{InitializerString}");
         }
     }
 
@@ -119,12 +119,12 @@ internal partial record ClassModel : IClassModel
                 Parameters += ", ";
 
             Parameter Parameter = ParameterEntry.Value;
-            string ParameterTypeString = ExpressionTypeToString(Parameter.VariableType);
-            Parameters += $"{ParameterTypeString} {Parameter.ParameterName.Text}";
+            string ParameterTypeString = ExpressionTypeToString(Parameter.Type);
+            Parameters += $"{ParameterTypeString} {Parameter.Name.Text}";
         }
 
         string ReturnTypeString = ExpressionTypeToString(method.ReturnType);
-        builder.AppendLine($"  {ReturnTypeString} {method.MethodName.Text}({Parameters})");
+        builder.AppendLine($"  {ReturnTypeString} {method.Name.Text}({Parameters})");
 
         foreach (Require Require in method.RequireList)
             AppendAssertion(builder, "require", Require.BooleanExpression);

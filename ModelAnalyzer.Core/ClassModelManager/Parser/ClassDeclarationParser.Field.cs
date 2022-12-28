@@ -76,8 +76,8 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { FieldName = FieldName, VariableType = fieldType, Initializer = Initializer };
-                fieldTable.AddItem(FieldName, NewField);
+                Field NewField = new Field { Name = FieldName, Type = fieldType, Initializer = Initializer };
+                fieldTable.AddItem(NewField);
             }
             else if (!IsErrorReported)
             {
@@ -90,7 +90,7 @@ internal partial class ClassDeclarationParser
     private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out Field field)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
-            if (Entry.Value.FieldName.Text == fieldName)
+            if (Entry.Value.Name.Text == fieldName)
             {
                 field = Entry.Value;
                 return true;

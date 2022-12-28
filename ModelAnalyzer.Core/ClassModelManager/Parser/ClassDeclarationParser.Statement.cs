@@ -109,7 +109,7 @@ internal partial class ClassDeclarationParser
                     if (Expression is not null)
                     {
                         if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, Destination, Expression))
-                            NewStatement = new AssignmentStatement { DestinationName = Destination.FieldName, Expression = Expression };
+                            NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
                         else
                             Log("Source cannot be assigned to destination.");
                     }
@@ -130,9 +130,9 @@ internal partial class ClassDeclarationParser
 
     private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field destination, Expression source)
     {
-        if (destination.VariableType == source.GetExpressionType(fieldTable, parameterTable))
+        if (destination.Type == source.GetExpressionType(fieldTable, parameterTable))
             return true;
-        else if (destination.VariableType == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable) == ExpressionType.Integer)
+        else if (destination.Type == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable) == ExpressionType.Integer)
             return true;
         else
             return false;

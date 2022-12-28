@@ -6,16 +6,16 @@ using System.Diagnostics;
 /// Represents a method parameter.
 /// </summary>
 [DebuggerDisplay("{ParameterName.Text}")]
-internal class Parameter : IParameter, IVariable
+internal class Parameter : IParameter, INameable<ParameterName>
 {
     /// <summary>
     /// Gets the parameter name.
     /// </summary>
-    required public ParameterName ParameterName { get; init; }
+    required public ParameterName Name { get; init; }
 
     /// <inheritdoc/>
-    IVariableName IVariable.VariableName { get => ParameterName; }
+    IVariableName IVariable.Name { get => Name; }
 
     /// <inheritdoc/>
-    required public ExpressionType VariableType { get; init; }
+    required public ExpressionType Type { get; init; }
 }

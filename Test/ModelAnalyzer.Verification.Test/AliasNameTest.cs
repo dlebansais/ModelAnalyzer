@@ -12,7 +12,7 @@ public class AliasNameTest
     public void AliasName_BasicTest()
     {
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject = new(TestField);
 
         Assert.That(TestObject.Variable, Is.EqualTo(TestField));
@@ -24,7 +24,7 @@ public class AliasNameTest
     public void AliasName_Increment()
     {
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject = new(TestField);
 
         TestObject = TestObject.Incremented();
@@ -38,7 +38,7 @@ public class AliasNameTest
     public void AliasName_MergeNoIncrement()
     {
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);
 
@@ -54,7 +54,7 @@ public class AliasNameTest
     public void AliasName_MergeSymetric()
     {
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);
 
@@ -70,7 +70,7 @@ public class AliasNameTest
     public void AliasName_MergeOneIncrement()
     {
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { FieldName = TestObjectName, VariableType = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
         VariableAlias TestObject1 = new(TestField);
         VariableAlias TestObject2 = new(TestField);
 

@@ -3,10 +3,6 @@
 /// <summary>
 /// Provides information about a method.
 /// </summary>
-public interface IMethod
+public interface IMethod : INameable<MethodName>
 {
-    /// <summary>
-    /// Gets the method name.
-    /// </summary>
-    MethodName MethodName { get; }
 }

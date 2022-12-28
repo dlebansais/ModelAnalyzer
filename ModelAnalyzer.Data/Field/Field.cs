@@ -6,18 +6,18 @@ using System.Diagnostics;
 /// Represents a class field.
 /// </summary>
 [DebuggerDisplay("{FieldName.Text}")]
-internal class Field : IField
+internal class Field : IField, INameable<FieldName>
 {
     /// <summary>
     /// Gets the field name.
     /// </summary>
-    required public FieldName FieldName { get; init; }
+    required public FieldName Name { get; init; }
 
     /// <inheritdoc/>
-    IVariableName IVariable.VariableName { get => FieldName; }
+    IVariableName IVariable.Name { get => Name; }
 
     /// <inheritdoc/>
-    required public ExpressionType VariableType { get; init; }
+    required public ExpressionType Type { get; init; }
 
     /// <summary>
     /// Gets the field initializer.

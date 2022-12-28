@@ -8,9 +8,14 @@
     <IsPackable>false</IsPackable>
     <Version>0.0.3</Version>
     <RootNamespace>ModelAnalyzer</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Avoid ID conflicts with the package project. -->
     <PackageId>*$(MSBuildProjectFile)*</PackageId>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>SA0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

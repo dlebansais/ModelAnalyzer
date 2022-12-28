@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
-using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
@@ -13,7 +12,7 @@ public class NameAndItemTableTest
     [Category("Core")]
     public void NameAndItemTable_BasicTest()
     {
-        NameAndItemTable<string, int> TestTable = new();
+        NameAndItemTable<ItemNameTest, ItemTest> TestTable = new();
 
         Assert.That(TestTable.ContainsItem("*"), Is.False);
     }
@@ -22,15 +21,16 @@ public class NameAndItemTableTest
     [Category("Core")]
     public void NameAndItemTable_AddItem()
     {
-        NameAndItemTable<string, int> TestTable = new();
+        NameAndItemTable<ItemNameTest, ItemTest> TestTable = new();
+        ItemTest TestObject = new() { Name = "*" };
 
-        TestTable.AddItem("*", 0);
+        TestTable.AddItem(TestObject);
 
         Assert.That(TestTable.ContainsItem("*"), Is.True);
 
         bool IsFound = false;
-        foreach (KeyValuePair<string, int> Entry in TestTable)
-            if (Entry.Key == "*" && Entry.Value == 0)
+        foreach (KeyValuePair<ItemNameTest, ItemTest> Entry in TestTable)
+            if (Entry.Key == "*" && Entry.Value == TestObject)
                 IsFound = true;
 
         Assert.That(IsFound, Is.True);
@@ -42,9 +42,9 @@ public class NameAndItemTableTest
     {
         FieldTable TestTable = new();
         FieldName TestFieldName = new FieldName() { Text = "*" };
-        Field TestField = new Field() { FieldName = TestFieldName, VariableType = ExpressionType.Other, Initializer = null };
+        Field TestField = new Field() { Name = TestFieldName, Type = ExpressionType.Other, Initializer = null };
 
-        TestTable.AddItem(TestFieldName, TestField);
+        TestTable.AddItem(TestField);
 
         Assert.That(TestTable.ContainsItem(TestFieldName), Is.True);
 
@@ -69,7 +69,7 @@ public class NameAndItemTableTest
         MethodName TestMethodName = new MethodName() { Text = "*" };
         Method TestMethod = new Method()
         {
-            MethodName = TestMethodName,
+            Name = TestMethodName,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
@@ -77,7 +77,7 @@ public class NameAndItemTableTest
             ReturnType = ExpressionType.Void,
         };
 
-        TestTable.AddItem(TestMethodName, TestMethod);
+        TestTable.AddItem(TestMethod);
 
         Assert.That(TestTable.ContainsItem(TestMethodName), Is.True);
 
@@ -100,9 +100,9 @@ public class NameAndItemTableTest
     {
         ParameterTable TestTable = new();
         ParameterName TestParameterName = new ParameterName() { Text = "*" };
-        Parameter TestParameter = new Parameter() { ParameterName = TestParameterName, VariableType = ExpressionType.Other };
+        Parameter TestParameter = new Parameter() { Name = TestParameterName, Type = ExpressionType.Other };
 
-        TestTable.AddItem(TestParameterName, TestParameter);
+        TestTable.AddItem(TestParameter);
 
         Assert.That(TestTable.ContainsItem(TestParameterName), Is.True);
 

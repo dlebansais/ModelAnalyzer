@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 public class UnsupportedMethod : IUnsupportedMethod
 {
     /// <inheritdoc/>
-    public MethodName MethodName => new MethodName() { Text = "*" };
+    public MethodName Name => new MethodName() { Text = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }

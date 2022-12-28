@@ -8,10 +8,10 @@ public interface IVariable
     /// <summary>
     /// Gets the variable name.
     /// </summary>
-    IVariableName VariableName { get; }
+    IVariableName Name { get; }
 
     /// <summary>
     /// Gets the variable type.
     /// </summary>
-    ExpressionType VariableType { get; }
+    ExpressionType Type { get; }
 }

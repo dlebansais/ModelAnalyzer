@@ -12,7 +12,7 @@ internal class Method : IMethod
     /// <summary>
     /// Gets the method name.
     /// </summary>
-    required public MethodName MethodName { get; init; }
+    required public MethodName Name { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the method returns a value.

@@ -47,7 +47,7 @@ internal partial class ClassDeclarationParser
 
                 Method NewMethod = new Method
                 {
-                    MethodName = MethodName,
+                    Name = MethodName,
                     ReturnType = ReturnType,
                     ParameterTable = ParameterTable,
                     RequireList = RequireList,
@@ -55,7 +55,7 @@ internal partial class ClassDeclarationParser
                     EnsureList = EnsureList,
                 };
 
-                methodTable.AddItem(MethodName, NewMethod);
+                methodTable.AddItem(NewMethod);
             }
             else
             {
@@ -110,8 +110,8 @@ internal partial class ClassDeclarationParser
             {
                 if (IsParameterSupported(Parameter, fieldTable, out ExpressionType ParameterType))
                 {
-                    Parameter NewParameter = new Parameter() { ParameterName = ParameterName, VariableType = ParameterType };
-                    ParameterTable.AddItem(ParameterName, NewParameter);
+                    Parameter NewParameter = new Parameter() { Name = ParameterName, Type = ParameterType };
+                    ParameterTable.AddItem(NewParameter);
                 }
                 else
                 {
@@ -164,7 +164,7 @@ internal partial class ClassDeclarationParser
     private bool TryFindParameterByName(ReadOnlyParameterTable parameterTable, string parameterName, out IParameter parameter)
     {
         foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
-            if (Entry.Value.ParameterName.Text == parameterName)
+            if (Entry.Value.Name.Text == parameterName)
             {
                 parameter = Entry.Value;
                 return true;

@@ -319,15 +319,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Name = new FieldName { Text = FieldName },
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Zero,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         BinaryArithmeticExpression OperationExpression = new() { Left = Variable, Operator = binaryOperator, Right = Operand };
         EqualityExpression VariableEqualZero = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = Zero };
         EqualityExpression VariableEqualOperand = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = OperandResult };
@@ -341,13 +341,13 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = OperationExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = OperationExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -356,7 +356,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {
@@ -428,15 +428,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Name = new FieldName { Text = FieldName },
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = Zero,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         UnaryArithmeticExpression OperationExpression = new() { Operand = Variable, Operator = unaryOperator };
         EqualityExpression VariableEqualZero = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = Zero };
         EqualityExpression VariableEqualOperand = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = OperandResult };
@@ -450,13 +450,13 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = OperationExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = OperationExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -465,7 +465,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {
@@ -789,15 +789,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = ExpressionType.Boolean,
+            Name = new FieldName { Text = FieldName },
+            Type = ExpressionType.Boolean,
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualFalse = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = False };
 
         Invariant TestInvariant = new()
@@ -811,13 +811,13 @@ public partial class VerifierTest
         TExpression Left = new() { Value = leftValue };
         TExpression Right = new() { Value = rightValue };
         ComparisonExpression Comparison = new() { Left = Left, Operator = comparisonOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = Comparison };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = Comparison };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -826,7 +826,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {
@@ -960,15 +960,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = ExpressionType.Boolean,
+            Name = new FieldName { Text = FieldName },
+            Type = ExpressionType.Boolean,
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualFalse = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = False };
 
         Invariant TestInvariant = new()
@@ -982,13 +982,13 @@ public partial class VerifierTest
         LiteralBooleanValueExpression Left = new() { Value = leftValue };
         LiteralBooleanValueExpression Right = new() { Value = rightValue };
         BinaryLogicalExpression LogicalExpression = new() { Left = Left, Operator = binaryOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = LogicalExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = LogicalExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -997,7 +997,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {
@@ -1057,15 +1057,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = ExpressionType.Boolean,
+            Name = new FieldName { Text = FieldName },
+            Type = ExpressionType.Boolean,
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualFalse = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = False };
 
         Invariant TestInvariant = new()
@@ -1078,13 +1078,13 @@ public partial class VerifierTest
 
         LiteralBooleanValueExpression Operand = new() { Value = operandValue };
         UnaryLogicalExpression LogicalExpression = new() { Operator = unaryOperator, Operand = Operand };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = LogicalExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = LogicalExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -1093,7 +1093,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {
@@ -1217,15 +1217,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = ExpressionType.Boolean,
+            Name = new FieldName { Text = FieldName },
+            Type = ExpressionType.Boolean,
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualFalse = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = False };
 
         Invariant TestInvariant = new()
@@ -1239,13 +1239,13 @@ public partial class VerifierTest
         TExpression Left = new() { Value = leftValue };
         TExpression Right = new() { Value = rightValue };
         EqualityExpression Equality = new() { Left = Left, Operator = equalityOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = Equality };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = Equality };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Assignment },
@@ -1254,7 +1254,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {

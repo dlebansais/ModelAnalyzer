@@ -8,11 +8,11 @@ using Microsoft.CodeAnalysis;
 public class UnsupportedParameter : IUnsupportedParameter
 {
     /// <inheritdoc/>
-    public IVariableName VariableName => new ParameterName() { Text = "*" };
+    public IVariableName Name => new ParameterName() { Text = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }
 
     /// <inheritdoc/>
-    public ExpressionType VariableType => ExpressionType.Other;
+    public ExpressionType Type => ExpressionType.Other;
 }

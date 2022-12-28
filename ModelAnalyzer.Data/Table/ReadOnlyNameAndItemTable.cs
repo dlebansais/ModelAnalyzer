@@ -10,6 +10,7 @@ using System.Collections.Generic;
 /// <typeparam name="TItem">The item type.</typeparam>
 internal class ReadOnlyNameAndItemTable<TName, TItem>
     where TName : IEquatable<TName>
+    where TItem : INameable<TName>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ReadOnlyNameAndItemTable{TName, TItem}"/> class.

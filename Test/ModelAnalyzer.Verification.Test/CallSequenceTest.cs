@@ -28,7 +28,7 @@ public class CallSequenceTest
 
         Method Method1 = new()
         {
-            MethodName = new MethodName() { Text = MethodName1 },
+            Name = new MethodName() { Text = MethodName1 },
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
@@ -43,7 +43,7 @@ public class CallSequenceTest
 
         Method Method2 = new()
         {
-            MethodName = new MethodName() { Text = MethodName2 },
+            Name = new MethodName() { Text = MethodName2 },
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
@@ -69,7 +69,7 @@ public class CallSequenceTest
 
         Method Method = new()
         {
-            MethodName = new MethodName() { Text = MethodName },
+            Name = new MethodName() { Text = MethodName },
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),

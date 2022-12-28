@@ -42,6 +42,53 @@ class Program_Verifier_MiscStatement1
 // Invariant: X == 0
 ";
 
+    private const string SourceCode2 = @"
+using System;
+
+class Program_Verifier_MiscStatement2
+{
+    int X;
+
+    void Write1()
+    {
+        X = X + 1;
+
+        if (X == 1)
+        {
+            X = X * 1;
+
+            if (X == 1)
+            {
+            }
+            else
+                X = 2;
+        }
+        else
+            X = 2;
+    }
+
+    void Write2()
+    {
+        X = X + 2;
+
+        if (X == 2)
+        {
+            X = X * 2;
+
+            if (X == 4)
+            {
+                X = X - 3;
+            }
+            else
+                X = 2;
+        }
+        else
+            X = 2;
+    }
+}
+// Invariant: X == 0 || X == 1
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -52,6 +99,31 @@ class Program_Verifier_MiscStatement1
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements2_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(SourceCode2, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements2_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(SourceCode2, maxDepth: 2);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType == VerificationErrorType.InvariantError);
     }
 
     private Verifier CreateVerifierFromSourceCode(string sourceCode, int maxDepth)

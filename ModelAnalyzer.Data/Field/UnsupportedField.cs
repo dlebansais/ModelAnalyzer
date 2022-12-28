@@ -8,11 +8,11 @@ using Microsoft.CodeAnalysis;
 public class UnsupportedField : IUnsupportedField
 {
     /// <inheritdoc/>
-    public IVariableName VariableName => new FieldName() { Text = "*" };
+    public IVariableName Name => new FieldName() { Text = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }
 
     /// <inheritdoc/>
-    public ExpressionType VariableType => ExpressionType.Other;
+    public ExpressionType Type => ExpressionType.Other;
 }

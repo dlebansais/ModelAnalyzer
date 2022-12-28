@@ -168,15 +168,15 @@ public partial class VerifierTest
         string FieldName = "X";
         Field TestField = new()
         {
-            FieldName = new FieldName { Text = FieldName },
-            VariableType = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Name = new FieldName { Text = FieldName },
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
             Initializer = null,
         };
 
         FieldTable TestFieldTable = new();
-        TestFieldTable.AddItem(TestField.FieldName, TestField);
+        TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.FieldName };
+        VariableValueExpression Variable = new() { VariableName = TestField.Name };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
@@ -187,7 +187,7 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.FieldName, Expression = AssignmentSource };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = AssignmentSource };
         ConditionalStatement Conditional = new()
         {
             Condition = VariableEqualZero,
@@ -199,7 +199,7 @@ public partial class VerifierTest
         MethodName MethodName = new() { Text = TestMethodName };
         Method TestMethod = new()
         {
-            MethodName = MethodName,
+            Name = MethodName,
             RequireList = new(),
             ParameterTable = ReadOnlyParameterTable.Empty,
             StatementList = new() { Conditional },
@@ -208,7 +208,7 @@ public partial class VerifierTest
         };
 
         MethodTable MethodTable = new();
-        MethodTable.AddItem(TestMethod.MethodName, TestMethod);
+        MethodTable.AddItem(TestMethod);
 
         Verifier TestObject = new()
         {

@@ -78,7 +78,7 @@ internal partial class Verifier : IDisposable
 
         foreach (IVariable Variable in UpdatedNameList)
         {
-            ExpressionType VariableType = Variable.VariableType;
+            ExpressionType VariableType = Variable.Type;
 
             VariableAlias NameAlias = aliasTable.GetAlias(Variable);
             Expr DestinationExpr = CreateVariableExpr(NameAlias, VariableType);
@@ -101,7 +101,7 @@ internal partial class Verifier : IDisposable
         foreach (VariableAlias Alias in aliasList)
         {
             IVariable Variable = Alias.Variable;
-            ExpressionType FieldType = Variable.VariableType;
+            ExpressionType FieldType = Variable.Type;
 
             Expr FieldExpr = CreateVariableExpr(Alias, FieldType);
             Expr InitializerExpr = CreateVariableInitializer(Variable);

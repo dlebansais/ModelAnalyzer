@@ -124,6 +124,6 @@ internal partial class Verifier : IDisposable
         IVariable Variable = variableValueExpression.GetVariable(FieldTable, parameterTable);
         VariableAlias VariableAliasName = aliasTable.GetAlias(Variable);
 
-        return CreateVariableExpr(VariableAliasName, Variable.VariableType);
+        return CreateVariableExpr(VariableAliasName, Variable.Type);
     }
 }

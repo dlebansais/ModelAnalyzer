@@ -58,8 +58,8 @@ class Program_CoreField_1
         Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
 
         IUnsupportedField UnsupportedField = ClassModel.Unsupported.Fields[0];
-        Assert.That(UnsupportedField.VariableName.Text, Is.EqualTo("*"));
-        Assert.That(UnsupportedField.VariableType, Is.EqualTo(ExpressionType.Other));
+        Assert.That(UnsupportedField.Name.Text, Is.EqualTo("*"));
+        Assert.That(UnsupportedField.Type, Is.EqualTo(ExpressionType.Other));
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_1

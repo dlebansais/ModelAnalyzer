@@ -43,7 +43,7 @@ internal record CallSequence
             if (Result.Length > 0)
                 Result += ", ";
 
-            Result += Method.MethodName.Text;
+            Result += Method.Name.Text;
         }
 
         return Result;

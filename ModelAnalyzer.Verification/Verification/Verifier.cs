@@ -132,7 +132,7 @@ internal partial class Verifier : IDisposable
             aliasTable.AddVariable(Field);
 
             VariableAlias FieldNameAlias = aliasTable.GetAlias(Field);
-            ExpressionType FieldType = Field.VariableType;
+            ExpressionType FieldType = Field.Type;
 
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
             Expr InitializerExpr = CreateFieldInitializer(Field);
@@ -177,7 +177,7 @@ internal partial class Verifier : IDisposable
         Expr InitializerExpr = null!;
         bool IsHandled = false;
 
-        switch (field.VariableType)
+        switch (field.Type)
         {
             case ExpressionType.Boolean:
                 if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
@@ -214,7 +214,7 @@ internal partial class Verifier : IDisposable
         Expr InitializerExpr = null!;
         bool IsHandled = false;
 
-        switch (variable.VariableType)
+        switch (variable.Type)
         {
             case ExpressionType.Boolean:
                 InitializerExpr = False;
@@ -288,7 +288,7 @@ internal partial class Verifier : IDisposable
             aliasTable.AddOrIncrement(Parameter);
             VariableAlias ParameterNameAlias = aliasTable.GetAlias(Parameter);
 
-            CreateVariableExpr(ParameterNameAlias, Parameter.VariableType);
+            CreateVariableExpr(ParameterNameAlias, Parameter.Type);
         }
     }
 
@@ -305,7 +305,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent require state for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.MethodName.Text, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = i };
                 return false;
             }
         }
@@ -326,7 +326,7 @@ internal partial class Verifier : IDisposable
             if (solver.Check() != Status.SATISFIABLE)
             {
                 Log($"Inconsistent ensure state for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.MethodName.Text, ErrorIndex = i };
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = i };
                 return false;
             }
         }

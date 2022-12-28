@@ -16,7 +16,7 @@ internal class VariableValueExpression : Expression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable)
     {
-        return GetVariable(fieldTable, parameterTable).VariableType;
+        return GetVariable(fieldTable, parameterTable).Type;
     }
 
     /// <summary>
