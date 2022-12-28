@@ -55,8 +55,9 @@ internal partial record ClassModel : IClassModel
     /// </summary>
     /// <param name="fieldTable">The table of fields.</param>
     /// <param name="parameterTable">The table of parameters.</param>
+    /// <param name="resultField">The optional result field.</param>
     /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, IVariableName variableName)
+    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, IVariableName variableName)
     {
         IVariable Result = null!;
 
@@ -73,6 +74,13 @@ internal partial record ClassModel : IClassModel
                 Result = Entry.Value;
                 break;
             }
+
+        if (resultField is not null && resultField.Name.Text == variableName.Text)
+        {
+            Debug.Assert(Result is null);
+
+            Result = resultField;
+        }
 
         Debug.Assert(Result is not null);
 

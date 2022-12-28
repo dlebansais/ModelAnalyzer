@@ -12,7 +12,7 @@ internal class UnaryLogicalExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable) => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField) => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the logical operator.

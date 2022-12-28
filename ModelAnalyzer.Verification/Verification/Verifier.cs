@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using AnalysisLogger;
 using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
@@ -134,7 +135,7 @@ internal partial class Verifier : IDisposable
             VariableAlias FieldNameAlias = aliasTable.GetAlias(Field);
             ExpressionType FieldType = Field.Type;
 
-            Expr FieldExpr = CreateVariableExpr(FieldNameAlias, FieldType);
+            Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), FieldType);
             Expr InitializerExpr = CreateFieldInitializer(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
@@ -143,26 +144,25 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private Expr CreateVariableExpr(VariableAlias aliasName, ExpressionType variableType)
+    private Expr CreateVariableExpr(string aliasString, ExpressionType variableType)
     {
         bool IsHandled = false;
         Expr Result = null!;
-        string AliasString = aliasName.ToString();
 
         switch (variableType)
         {
             case ExpressionType.Boolean:
-                Result = Context.MkBoolConst(AliasString);
+                Result = Context.MkBoolConst(aliasString);
                 IsHandled = true;
                 break;
 
             case ExpressionType.Integer:
-                Result = Context.MkIntConst(AliasString);
+                Result = Context.MkIntConst(aliasString);
                 IsHandled = true;
                 break;
 
             case ExpressionType.FloatingPoint:
-                Result = Context.MkRealConst(AliasString);
+                Result = Context.MkRealConst(aliasString);
                 IsHandled = true;
                 break;
         }
@@ -246,7 +246,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
             Invariant Invariant = InvariantList[i];
-            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, ReadOnlyParameterTable.Empty, Invariant.BooleanExpression);
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, ReadOnlyParameterTable.Empty, resultField: null, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
 
             solver.Push();
@@ -294,7 +294,7 @@ internal partial class Verifier : IDisposable
             aliasTable.AddOrIncrement(Parameter);
             VariableAlias ParameterNameAlias = aliasTable.GetAlias(Parameter);
 
-            CreateVariableExpr(ParameterNameAlias, Parameter.Type);
+            CreateVariableExpr(ParameterNameAlias.ToString(), Parameter.Type);
         }
     }
 
@@ -303,7 +303,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.RequireList.Count; i++)
         {
             Require Require = method.RequireList[i];
-            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, Require.BooleanExpression);
+            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, resultField: null, Require.BooleanExpression);
 
             Log($"Adding {RequireExpr}");
             solver.Assert(RequireExpr);
@@ -319,14 +319,39 @@ internal partial class Verifier : IDisposable
         return true;
     }
 
+    private void AddMethodResult(Solver solver, AliasTable aliasTable, Method method, out Field? resultField)
+    {
+        if (method.ReturnType == ExpressionType.Void)
+            resultField = null;
+        else
+        {
+            Debug.Assert(method.StatementList.Count > 0);
+            Statement LastStatement = method.StatementList.Last();
+            Debug.Assert(LastStatement is ReturnStatement);
+            ReturnStatement ReturnStatement = (ReturnStatement)LastStatement;
+            IExpression ReturnExpression = ReturnStatement.Expression ?? throw new InvalidOperationException("Return expression expected.");
+
+            resultField = new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = method.ReturnType, Initializer = null };
+
+            Expr ResultFieldExpr = CreateVariableExpr(Ensure.ResultKeyword, resultField.Type);
+            Expr ResultInitializerExpr = BuildExpression<Expr>(aliasTable, method.ParameterTable, resultField: null, ReturnExpression);
+            BoolExpr ResultInitExpr = Context.MkEq(ResultFieldExpr, ResultInitializerExpr);
+
+            Log($"Adding {ResultInitExpr}");
+            solver.Assert(ResultInitExpr);
+        }
+    }
+
     private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
     {
         bool Result = true;
 
+        AddMethodResult(solver, aliasTable, method, out Field? ResultField);
+
         for (int i = 0; i < method.EnsureList.Count && Result == true; i++)
         {
             Ensure Ensure = method.EnsureList[i];
-            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, Ensure.BooleanExpression);
+            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, ResultField, Ensure.BooleanExpression);
             BoolExpr EnsureOppositeExpr = Context.MkNot(EnsureExpr);
 
             solver.Push();

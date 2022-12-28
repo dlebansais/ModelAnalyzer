@@ -50,6 +50,7 @@ The analyzer supports:
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields.
   * Parameters cannot be assigned, they are read-only.
++ The `Result` name is reserved and cannot be used for fields or parameters.
 + Assignment of an expression to a field.
 + `return`, but at the end of a method only.
 + The `if` `else` statement.
@@ -61,6 +62,7 @@ The analyzer supports:
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
   * Variables, either fields or parameters.
+  * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.
 
@@ -71,16 +73,13 @@ To add a require clause to a method, put a line starting with `// Require:` belo
 For example:
 
 ````csharp
-int N;
-
 int Sum(int x, int y)
 // Require: x >= 0 && x <= 256 
 // Require: y >= 0 && y <= 256 
 {
-  N = x + y;
-  return N;
+  return x + y;
 }
-// Ensure: N >= 0 && N <= 512
+// Ensure: Result >= 0 && Result <= 512
 ````
 
 Assertions support the same subset of expressions as the code.

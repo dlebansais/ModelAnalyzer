@@ -547,6 +547,58 @@ class Program_CoreExpression_18
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
+    [Test]
+    [Category("Core")]
+    public void Expression_ResultInsideEnsure()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_19
+{
+    int X;
+
+    int Write()
+    {
+        return X;
+    }
+    // Ensure: Result == 0
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_ResultOutsideEnsure()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_20
+{
+    int X;
+
+    bool Write()
+    {
+        return Result == 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
     private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
     {
         MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];

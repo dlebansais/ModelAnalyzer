@@ -14,9 +14,9 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable)
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
     {
-        return GetVariable(fieldTable, parameterTable).Type;
+        return GetVariable(fieldTable, parameterTable, resultField).Type;
     }
 
     /// <summary>
@@ -29,9 +29,10 @@ internal class VariableValueExpression : Expression
     /// </summary>
     /// <param name="fieldTable">The table of fields.</param>
     /// <param name="parameterTable">The table of parameters.</param>
-    public IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable)
+    /// <param name="resultField">The optional result field.</param>
+    public IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
     {
-        return ClassModel.GetVariable(fieldTable, parameterTable, VariableName);
+        return ClassModel.GetVariable(fieldTable, parameterTable, resultField, VariableName);
     }
 
     /// <inheritdoc/>

@@ -56,14 +56,18 @@ internal partial class ClassDeclarationParser
 
     private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported, ExpressionType fieldType)
     {
-        FieldName FieldName = new() { Text = variable.Identifier.ValueText };
+        string FieldName = variable.Identifier.ValueText;
+        FieldName Name = new() { Text = FieldName };
         bool IsErrorReported = false;
 
         // Ignore duplicate names, the compiler will catch them.
-        if (!fieldTable.ContainsItem(FieldName))
+        if (!fieldTable.ContainsItem(Name))
         {
             bool IsFieldSupported = isFieldSupported; // Initialize with the result of previous checks (type etc.)
             ILiteralExpression? Initializer = null;
+
+            if (FieldName == Ensure.ResultKeyword)
+                IsFieldSupported = false;
 
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
@@ -76,7 +80,7 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { Name = FieldName, Type = fieldType, Initializer = Initializer };
+                Field NewField = new Field { Name = Name, Type = fieldType, Initializer = Initializer };
                 fieldTable.AddItem(NewField);
             }
             else if (!IsErrorReported)

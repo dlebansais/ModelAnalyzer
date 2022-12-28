@@ -41,19 +41,19 @@ internal partial class Verifier : IDisposable
 
     private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
-        Expr SourceExpr = BuildExpression<Expr>(aliasTable, parameterTable, assignmentStatement.Expression);
-        IVariable Destination = ClassModel.GetVariable(FieldTable, parameterTable, assignmentStatement.DestinationName);
+        Expr SourceExpr = BuildExpression<Expr>(aliasTable, parameterTable, resultField: null, assignmentStatement.Expression);
+        IVariable Destination = ClassModel.GetVariable(FieldTable, parameterTable, resultField: null, assignmentStatement.DestinationName);
 
         aliasTable.IncrementAlias(Destination);
         VariableAlias DestinationNameAlias = aliasTable.GetAlias(Destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, assignmentStatement.Expression.GetExpressionType(FieldTable, parameterTable));
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), assignmentStatement.Expression.GetExpressionType(FieldTable, parameterTable, resultField: null));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
 
     private void AddConditionalExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, ConditionalStatement conditionalStatement)
     {
-        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, parameterTable, conditionalStatement.Condition);
+        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField: null, conditionalStatement.Condition);
         BoolExpr TrueBranchExpr = Context.MkAnd(branch, ConditionExpr);
         BoolExpr FalseBranchExpr = Context.MkAnd(branch, Context.MkNot(ConditionExpr));
 
@@ -70,7 +70,7 @@ internal partial class Verifier : IDisposable
 
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
-        // Merge aliases from the if branche (the table currently contains the end of the end branch).
+        // Merge aliases from the if branch (the table currently contains the end of the end branch).
         aliasTable.Merge(WhenTrueAliasTable, out List<IVariable> UpdatedNameList);
 
         AddConditionalAliases(solver, TrueBranchExpr, AliasesOnlyWhenFalse);
@@ -81,14 +81,14 @@ internal partial class Verifier : IDisposable
             ExpressionType VariableType = Variable.Type;
 
             VariableAlias NameAlias = aliasTable.GetAlias(Variable);
-            Expr DestinationExpr = CreateVariableExpr(NameAlias, VariableType);
+            Expr DestinationExpr = CreateVariableExpr(NameAlias.ToString(), VariableType);
 
             VariableAlias WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
-            Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, VariableType);
+            Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias.ToString(), VariableType);
             BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
             VariableAlias WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
-            Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, VariableType);
+            Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias.ToString(), VariableType);
             BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
             AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
@@ -103,7 +103,7 @@ internal partial class Verifier : IDisposable
             IVariable Variable = Alias.Variable;
             ExpressionType FieldType = Variable.Type;
 
-            Expr FieldExpr = CreateVariableExpr(Alias, FieldType);
+            Expr FieldExpr = CreateVariableExpr(Alias.ToString(), FieldType);
             Expr InitializerExpr = CreateVariableInitializer(Variable);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 

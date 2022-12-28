@@ -67,7 +67,7 @@ internal partial class ClassDeclarationParser
         {
             LocationContext LocationContext = new(trivia, header, Offset);
 
-            if (IsValidAssertionSyntaxTree(fieldTable, ReadOnlyParameterTable.Empty, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(fieldTable, ReadOnlyParameterTable.Empty, resultField: null, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
             }

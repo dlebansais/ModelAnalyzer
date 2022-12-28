@@ -43,7 +43,10 @@ internal partial class ClassDeclarationParser
                 ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
-                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, unsupported);
+
+                Field? ResultField = ReturnType == ExpressionType.Void ? null : new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
+
+                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, ResultField, unsupported);
 
                 Method NewMethod = new Method
                 {

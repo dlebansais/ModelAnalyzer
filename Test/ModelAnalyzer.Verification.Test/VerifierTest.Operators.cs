@@ -320,7 +320,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty, resultField: null),
             Initializer = Zero,
         };
 
@@ -429,7 +429,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty),
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty, resultField: null),
             Initializer = Zero,
         };
 

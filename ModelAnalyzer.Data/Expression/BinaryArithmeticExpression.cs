@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -12,12 +13,18 @@ internal class BinaryArithmeticExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable)
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
     {
-        if (Left.GetExpressionType(fieldTable, parameterTable) == ExpressionType.FloatingPoint || Right.GetExpressionType(fieldTable, parameterTable) == ExpressionType.FloatingPoint)
+        ExpressionType LeftExpressionType = Left.GetExpressionType(fieldTable, parameterTable, resultField);
+        ExpressionType RightExpressionType = Right.GetExpressionType(fieldTable, parameterTable, resultField);
+
+        if (LeftExpressionType == ExpressionType.FloatingPoint || RightExpressionType == ExpressionType.FloatingPoint)
             return ExpressionType.FloatingPoint;
-        else
-            return ExpressionType.Integer;
+
+        Debug.Assert(LeftExpressionType == ExpressionType.Integer);
+        Debug.Assert(RightExpressionType == ExpressionType.Integer);
+
+        return ExpressionType.Integer;
     }
 
     /// <summary>

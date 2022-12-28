@@ -10,22 +10,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private Expression? ParseExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, bool isNested)
+    private Expression? ParseExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, bool isNested)
     {
         Expression? NewExpression = null;
         Location Location = locationContext.GetLocation(expressionNode);
         bool IsErrorReported = false;
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, unsupported, locationContext, BinaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParseBinaryExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, BinaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is PrefixUnaryExpressionSyntax PrefixUnaryExpression)
-            NewExpression = TryParsePrefixUnaryExpression(fieldTable, parameterTable, unsupported, locationContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParsePrefixUnaryExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
-            NewExpression = TryParseVariableValueExpression(fieldTable, parameterTable, IdentifierName);
+            NewExpression = TryParseVariableValueExpression(fieldTable, parameterTable, resultField, IdentifierName);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
-            NewExpression = TryParseParenthesizedExpression(fieldTable, parameterTable, unsupported, locationContext, ParenthesizedExpression, ref IsErrorReported);
+            NewExpression = TryParseParenthesizedExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, ParenthesizedExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -40,11 +40,11 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseBinaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParseBinaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported, LocationContext locationContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? LeftExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, binaryExpression.Left, isNested: true);
-        Expression? RightExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, binaryExpression.Right, isNested: true);
+        Expression? LeftExpression = ParseExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, binaryExpression.Left, isNested: true);
+        Expression? RightExpression = ParseExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, binaryExpression.Right, isNested: true);
 
         if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
@@ -71,10 +71,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParsePrefixUnaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParsePrefixUnaryExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported, LocationContext locationContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? OperandExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, prefixUnaryExpression.Operand, isNested: true);
+        Expression? OperandExpression = ParseExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, prefixUnaryExpression.Operand, isNested: true);
 
         if (OperandExpression is Expression Operand)
         {
@@ -181,12 +181,12 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Expression? TryParseVariableValueExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, IdentifierNameSyntax identifierName)
+    private Expression? TryParseVariableValueExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, IdentifierNameSyntax identifierName)
     {
         Expression? NewExpression = null;
         string VariableName = identifierName.Identifier.ValueText;
 
-        if (TryFindVariableByName(fieldTable, parameterTable, VariableName, out IVariable Variable))
+        if (TryFindVariableByName(fieldTable, parameterTable, resultField, VariableName, out IVariable Variable))
             NewExpression = new VariableValueExpression { VariableName = Variable.Name };
         else
             Log($"Unknown variable '{VariableName}'.");
@@ -213,10 +213,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseParenthesizedExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, LocationContext locationContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
+    private Expression? TryParseParenthesizedExpression(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported, LocationContext locationContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
     {
         Expression? NewExpression = null;
-        Expression? NestedExpression = ParseExpression(fieldTable, parameterTable, unsupported, locationContext, parenthesizedExpression.Expression, isNested: true);
+        Expression? NestedExpression = ParseExpression(fieldTable, parameterTable, resultField, unsupported, locationContext, parenthesizedExpression.Expression, isNested: true);
 
         if (NestedExpression is not null)
             NewExpression = NestedExpression;

@@ -685,4 +685,26 @@ class Program_ClassModel_32
 }
 ");
     }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithResultField_Diagnostic()
+    {
+        await VerifyCS.VerifyCodeFixAsync(@"
+using System;
+
+class [|Program_ClassModel_33|]
+{
+    int Result;
+}
+", @"
+using System;
+
+// No model
+class Program_ClassModel_33
+{
+    int Result;
+}
+");
+    }
 }

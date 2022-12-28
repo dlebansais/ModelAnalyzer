@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Ensure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported)
     {
         List<Ensure> EnsureList;
 
@@ -18,14 +18,14 @@ internal partial class ClassDeclarationParser
         SyntaxToken NextToken = LastToken.GetNextToken();
 
         if (NextToken.HasLeadingTrivia)
-            EnsureList = ParseEnsures(NextToken.LeadingTrivia, fieldTable, parameterTable, unsupported);
+            EnsureList = ParseEnsures(NextToken.LeadingTrivia, fieldTable, parameterTable, resultField, unsupported);
         else
             EnsureList = new();
 
         return EnsureList;
     }
 
-    private List<Ensure> ParseEnsures(SyntaxTriviaList triviaList, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported)
+    private List<Ensure> ParseEnsures(SyntaxTriviaList triviaList, ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported)
     {
         List<Ensure> EnsureList = new();
 
@@ -36,13 +36,13 @@ internal partial class ClassDeclarationParser
                 string EnsureHeader = $"// {Modeling.Ensure}";
 
                 if (Comment.StartsWith(EnsureHeader))
-                    ParseEnsure(fieldTable, parameterTable, unsupported, EnsureList, Trivia, Comment, EnsureHeader);
+                    ParseEnsure(fieldTable, parameterTable, resultField, unsupported, EnsureList, Trivia, Comment, EnsureHeader);
             }
 
         return EnsureList;
     }
 
-    private void ParseEnsure(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
+    private void ParseEnsure(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Unsupported unsupported, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
@@ -55,7 +55,7 @@ internal partial class ClassDeclarationParser
         {
             LocationContext LocationContext = new(trivia, header, Offset);
 
-            if (IsValidAssertionSyntaxTree(fieldTable, parameterTable, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(fieldTable, parameterTable, resultField, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
             }

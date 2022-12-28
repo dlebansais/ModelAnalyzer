@@ -27,7 +27,7 @@ internal partial class ClassDeclarationParser
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
 
-        Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, expressionBody, isNested: false);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
@@ -105,10 +105,10 @@ internal partial class ClassDeclarationParser
                     ExpressionSyntax SourceExpression = AssignmentExpression.Right;
                     LocationContext LocationContext = new(SourceExpression);
 
-                    Expression? Expression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, SourceExpression, isNested: false);
+                    Expression? Expression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, SourceExpression, isNested: false);
                     if (Expression is not null)
                     {
-                        if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, Destination, Expression))
+                        if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, resultField: null, Destination, Expression))
                             NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
                         else
                             Log("Source cannot be assigned to destination.");
@@ -128,11 +128,11 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field destination, Expression source)
+    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Field destination, Expression source)
     {
-        if (destination.Type == source.GetExpressionType(fieldTable, parameterTable))
+        if (destination.Type == source.GetExpressionType(fieldTable, parameterTable, resultField))
             return true;
-        else if (destination.Type == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable) == ExpressionType.Integer)
+        else if (destination.Type == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable, resultField) == ExpressionType.Integer)
             return true;
         else
             return false;
@@ -144,7 +144,7 @@ internal partial class ClassDeclarationParser
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
 
-        Expression? Condition = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, ConditionExpression, isNested: false);
+        Expression? Condition = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, ConditionExpression, isNested: false);
         if (Condition is not null)
         {
             List<Statement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, parameterTable, unsupported, ifStatement.Statement);
@@ -170,7 +170,7 @@ internal partial class ClassDeclarationParser
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
             LocationContext LocationContext = new(ResultExpression);
-            Expression? ReturnExpression = ParseExpression(fieldTable, parameterTable, unsupported, LocationContext, ResultExpression, isNested: false);
+            Expression? ReturnExpression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, ResultExpression, isNested: false);
 
             if (ReturnExpression is not null)
                 NewStatement = new ReturnStatement { Expression = ReturnExpression };
