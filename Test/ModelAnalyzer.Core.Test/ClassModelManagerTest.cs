@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using FileExtractor;
@@ -391,6 +392,139 @@ class Program_CoreClassModelManager_17
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithResult);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_VerificationWithContradictoryRequire()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_18
+{
+    int X;
+
+    void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithContradictoryRequire);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithInvariantDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_19
+{
+    int X;
+}
+// Invariant: X > 0
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_19
+{
+    int X;
+}
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantDisappeared);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithRequireDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_20
+{
+    int X;
+
+    void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_20
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireDisappeared);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithEnsureDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_21
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == 0
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_21
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureDisappeared);
+    }
+
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
@@ -613,6 +747,106 @@ class Program_CoreClassModelManager_17
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
+    }
+
+    private void VerificationWithContradictoryRequire(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
+
+        Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+    }
+
+    private void UpdateWithInvariantDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
+        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        IClassModel ClassModel0;
+        IClassModel ClassModel1;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
+        Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
+
+        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
+        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
+            Thread.Sleep(0);
+
+        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
+        Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
+
+        GetClassModelTask0.Wait();
+        GetClassModelTask1.Wait();
+
+        ClassModel0 = GetClassModelTask0.Result;
+        ClassModel1 = GetClassModelTask1.Result;
+
+        Assert.That(ClassModel0.InvariantViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel1.InvariantViolations.Count, Is.EqualTo(0));
+    }
+
+    private void UpdateWithRequireDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
+        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        IClassModel ClassModel0;
+        IClassModel ClassModel1;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
+        Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
+
+        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
+        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
+            Thread.Sleep(0);
+
+        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
+        Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
+
+        GetClassModelTask0.Wait();
+        GetClassModelTask1.Wait();
+
+        ClassModel0 = GetClassModelTask0.Result;
+        ClassModel1 = GetClassModelTask1.Result;
+
+        Assert.That(ClassModel0.RequireViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel1.RequireViolations.Count, Is.EqualTo(0));
+    }
+
+    private void UpdateWithEnsureDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
+        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        IClassModel ClassModel0;
+        IClassModel ClassModel1;
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
+        Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
+
+        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
+        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
+            Thread.Sleep(0);
+
+        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
+        Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
+
+        GetClassModelTask0.Wait();
+        GetClassModelTask1.Wait();
+
+        ClassModel0 = GetClassModelTask0.Result;
+        ClassModel1 = GetClassModelTask1.Result;
+
+        Assert.That(ClassModel0.EnsureViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel1.EnsureViolations.Count, Is.EqualTo(0));
     }
 
     [Test]

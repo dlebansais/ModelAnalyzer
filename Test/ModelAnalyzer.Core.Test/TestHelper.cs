@@ -13,7 +13,7 @@ internal class TestHelper
 {
     private static List<string> ClassNameList = new();
 
-    public static ClassDeclarationSyntax FromSourceCode(string sourceCode)
+    public static ClassDeclarationSyntax FromSourceCode(string sourceCode, bool isClassNameRepeated = false)
     {
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText(sourceCode, Options);
@@ -38,7 +38,7 @@ internal class TestHelper
 
         string ClassName = ClassDeclaration.Identifier.ValueText;
 
-        Debug.Assert(!ClassNameList.Contains(ClassName));
+        Debug.Assert(!ClassNameList.Contains(ClassName) || isClassNameRepeated);
         ClassNameList.Add(ClassName);
 
         return ClassDeclaration;
