@@ -33,6 +33,8 @@ public partial class ClassModelManager : IDisposable
     /// <param name="classModel">The class classModel.</param>
     private IClassModel WaitForVerification(IClassModel classModel)
     {
+        Thread.Sleep(DelayBeforeReadingVerificationResult);
+
         string ClassName = classModel.Name;
 
         if (!classModel.Unsupported.IsEmpty)
@@ -114,8 +116,6 @@ public partial class ClassModelManager : IDisposable
 
     private void UpdateVerificationEvents()
     {
-        Thread.Sleep(DelayBeforeReadingVerificationResult);
-
         byte[]? Data = FromServerChannel.Read();
 
         if (Data is null)
