@@ -55,18 +55,22 @@ before_test:
   - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
   - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
   - |-
-    printf "@echo ************************************************************** Starting Tests..\n" > runtests.bat
-    printf "timeout 2\n" >> runtests.bat
-    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests.bat
-    printf "timeout 2\n" >> runtests.bat
-    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Core.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Core.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests.bat
-    printf "timeout 2\n" >> runtests.bat
-    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Verification.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Verification.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests.bat
+    printf "@echo ************************************************************** Starting Tests..\n" > runtests1.bat
+    printf "timeout 2\n" >> runtests1.bat
+    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests1.bat
+  - |-
+    printf "timeout 2\n" > runtests2.bat
+    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Core.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Core.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests2.bat
+  - |-
+    printf "timeout 2\n" > runtests3.bat
+    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.Verification.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.Verification.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" >> runtests3.bat
   - rename .\packages\OpenCover.%opencover_version%\tools Tools
   - timeout 10
 
 test_script:
-  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests.bat -filter:"+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*" -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
+  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests1.bat -filter:"+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*" -mergeoutput -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
+  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests2.bat -filter:"+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*" -mergeoutput -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
+  - .\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:runtests3.bat -filter:"+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*" -mergeoutput -output:"Coverage-%APPVEYOR_PROJECT_NAME%".xml
 
 after_test:
   - ps: Get-Content Coverage-*.xml -Head 3
