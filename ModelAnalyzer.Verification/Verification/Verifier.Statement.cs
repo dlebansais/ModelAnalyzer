@@ -10,28 +10,28 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, List<Statement> statementList)
+    private void AddStatementListExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, List<Statement> statementList)
     {
         foreach (Statement Statement in statementList)
-            AddStatementExecution(solver, aliasTable, parameterTable, branch, Statement);
+            AddStatementExecution(solver, aliasTable, parameterTable, ref resultField, branch, Statement);
     }
 
-    private void AddStatementExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, Statement statement)
+    private void AddStatementExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, Statement statement)
     {
         bool IsAdded = false;
 
         switch (statement)
         {
             case AssignmentStatement Assignment:
-                AddAssignmentExecution(solver, aliasTable, parameterTable, branch, Assignment);
+                AddAssignmentExecution(solver, aliasTable, parameterTable, ref resultField, branch, Assignment);
                 IsAdded = true;
                 break;
             case ConditionalStatement Conditional:
-                AddConditionalExecution(solver, aliasTable, parameterTable, branch, Conditional);
+                AddConditionalExecution(solver, aliasTable, parameterTable, ref resultField, branch, Conditional);
                 IsAdded = true;
                 break;
             case ReturnStatement Return:
-                AddReturnExecution(solver, aliasTable, branch, Return);
+                AddReturnExecution(solver, aliasTable, parameterTable, ref resultField, branch, Return);
                 IsAdded = true;
                 break;
         }
@@ -39,33 +39,33 @@ internal partial class Verifier : IDisposable
         Debug.Assert(IsAdded);
     }
 
-    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, AssignmentStatement assignmentStatement)
+    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
-        Expr SourceExpr = BuildExpression<Expr>(aliasTable, parameterTable, resultField: null, assignmentStatement.Expression);
-        IVariable Destination = ClassModel.GetVariable(FieldTable, parameterTable, resultField: null, assignmentStatement.DestinationName);
+        Expr SourceExpr = BuildExpression<Expr>(aliasTable, parameterTable, resultField, assignmentStatement.Expression);
+        IVariable Destination = ClassModel.GetVariable(FieldTable, parameterTable, resultField, assignmentStatement.DestinationName);
 
         aliasTable.IncrementAlias(Destination);
         VariableAlias DestinationNameAlias = aliasTable.GetAlias(Destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), assignmentStatement.Expression.GetExpressionType(FieldTable, parameterTable, resultField: null));
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), assignmentStatement.Expression.GetExpressionType(FieldTable, parameterTable, resultField));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
 
-    private void AddConditionalExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, BoolExpr branch, ConditionalStatement conditionalStatement)
+    private void AddConditionalExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, ConditionalStatement conditionalStatement)
     {
-        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField: null, conditionalStatement.Condition);
+        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField, conditionalStatement.Condition);
         BoolExpr TrueBranchExpr = Context.MkAnd(branch, ConditionExpr);
         BoolExpr FalseBranchExpr = Context.MkAnd(branch, Context.MkNot(ConditionExpr));
 
         AliasTable BeforeWhenTrue = aliasTable.Clone();
-        AddStatementListExecution(solver, aliasTable, parameterTable, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
+        AddStatementListExecution(solver, aliasTable, parameterTable, ref resultField, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
         List<VariableAlias> AliasesOnlyWhenTrue = aliasTable.GetAliasDifference(BeforeWhenTrue);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
         AliasTable WhenTrueAliasTable = aliasTable.Clone();
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
-        AddStatementListExecution(solver, aliasTable, parameterTable, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
+        AddStatementListExecution(solver, aliasTable, parameterTable, ref resultField, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
         List<VariableAlias> AliasesOnlyWhenFalse = aliasTable.GetAliasDifference(BeforeWhenFalse);
 
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
@@ -111,7 +111,21 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private void AddReturnExecution(Solver solver, AliasTable aliasTable, BoolExpr branch, ReturnStatement returnStatement)
+    private void AddReturnExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, ReturnStatement returnStatement)
     {
+        Expression? ReturnExpression = (Expression?)returnStatement.Expression;
+
+        if (ReturnExpression is null)
+            resultField = null;
+        else
+        {
+            ExpressionType ResultType = ReturnExpression.GetExpressionType(FieldTable, parameterTable, resultField: null);
+            resultField = new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ResultType, Initializer = null };
+
+            Expr ResultFieldExpr = CreateVariableExpr(Ensure.ResultKeyword, ResultType);
+            Expr ResultInitializerExpr = BuildExpression<Expr>(aliasTable, parameterTable, resultField: null, ReturnExpression);
+
+            AddToSolver(solver, branch, Context.MkEq(ResultFieldExpr, ResultInitializerExpr));
+        }
     }
 }

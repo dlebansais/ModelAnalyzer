@@ -278,9 +278,10 @@ internal partial class Verifier : IDisposable
             return false;
 
         BoolExpr MainBranch = Context.MkBool(true);
+        Field? ResultField = null;
 
-        AddStatementListExecution(solver, aliasTable, method.ParameterTable, MainBranch, method.StatementList);
-        if (!AddMethodEnsures(solver, aliasTable, method))
+        AddStatementListExecution(solver, aliasTable, method.ParameterTable, ref ResultField, MainBranch, method.StatementList);
+        if (!AddMethodEnsures(solver, aliasTable, method, ResultField))
             return false;
 
         return true;
@@ -319,39 +320,14 @@ internal partial class Verifier : IDisposable
         return true;
     }
 
-    private void AddMethodResult(Solver solver, AliasTable aliasTable, Method method, out Field? resultField)
-    {
-        if (method.ReturnType == ExpressionType.Void)
-            resultField = null;
-        else
-        {
-            Debug.Assert(method.StatementList.Count > 0);
-            Statement LastStatement = method.StatementList.Last();
-            Debug.Assert(LastStatement is ReturnStatement);
-            ReturnStatement ReturnStatement = (ReturnStatement)LastStatement;
-            IExpression ReturnExpression = ReturnStatement.Expression ?? throw new InvalidOperationException("Return expression expected.");
-
-            resultField = new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = method.ReturnType, Initializer = null };
-
-            Expr ResultFieldExpr = CreateVariableExpr(Ensure.ResultKeyword, resultField.Type);
-            Expr ResultInitializerExpr = BuildExpression<Expr>(aliasTable, method.ParameterTable, resultField: null, ReturnExpression);
-            BoolExpr ResultInitExpr = Context.MkEq(ResultFieldExpr, ResultInitializerExpr);
-
-            Log($"Adding {ResultInitExpr}");
-            solver.Assert(ResultInitExpr);
-        }
-    }
-
-    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method)
+    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Field? resultField)
     {
         bool Result = true;
-
-        AddMethodResult(solver, aliasTable, method, out Field? ResultField);
 
         for (int i = 0; i < method.EnsureList.Count && Result == true; i++)
         {
             Ensure Ensure = method.EnsureList[i];
-            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, ResultField, Ensure.BooleanExpression);
+            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, resultField, Ensure.BooleanExpression);
             BoolExpr EnsureOppositeExpr = Context.MkNot(EnsureExpr);
 
             solver.Push();

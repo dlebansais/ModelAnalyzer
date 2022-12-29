@@ -70,6 +70,6 @@ internal record VariableAlias
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{Variable.Name}_{Index}";
+        return $"{Variable.Name.Text}_{Index}";
     }
 }

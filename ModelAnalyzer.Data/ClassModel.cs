@@ -59,7 +59,7 @@ internal partial record ClassModel : IClassModel
     /// <param name="variableName">The variable name.</param>
     public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, IVariableName variableName)
     {
-        IVariable Result = null!;
+        IVariable? Result = null;
 
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
             if (Entry.Key.Text == variableName.Text)
