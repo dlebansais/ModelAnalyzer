@@ -250,6 +250,33 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Method ensure clause is violated..
+        /// </summary>
+        internal static string EnsureViolationAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("EnsureViolationAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method &apos;{0}&apos; ensure clause &apos;{1}&apos; is violated.
+        /// </summary>
+        internal static string EnsureViolationAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("EnsureViolationAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method ensure clause is violated.
+        /// </summary>
+        internal static string EnsureViolationAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("EnsureViolationAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Class invariant is violated..
         /// </summary>
         internal static string InvariantViolationAnalyzerDescription {
@@ -259,7 +286,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class &apos;{0}&apos; invariant is violated.
+        ///   Looks up a localized string similar to Class &apos;{0}&apos; invariant &apos;{1}&apos; is violated.
         /// </summary>
         internal static string InvariantViolationAnalyzerMessageFormat {
             get {
@@ -300,6 +327,33 @@ namespace ModelAnalyzer {
         internal static string MakeConstAnalyzerTitle {
             get {
                 return ResourceManager.GetString("MakeConstAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method require clause is violated..
+        /// </summary>
+        internal static string RequireViolationAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("RequireViolationAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method &apos;{0}&apos; require clause &apos;{1}&apos; is violated.
+        /// </summary>
+        internal static string RequireViolationAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("RequireViolationAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method require clause is violated.
+        /// </summary>
+        internal static string RequireViolationAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("RequireViolationAnalyzerTitle", resourceCulture);
             }
         }
     }

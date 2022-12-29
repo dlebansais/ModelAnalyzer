@@ -208,7 +208,9 @@ public partial class ClassModelManager : IDisposable
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
                         Unsupported = Parser.Unsupported,
-                        IsInvariantViolated = false,
+                        InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+                        RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+                        EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
                     };
 
                     ClassModelExchange NewClassModelExchange = new()

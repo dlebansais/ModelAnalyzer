@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
+
 /// <summary>
 /// Provides information about a class model.
 /// </summary>
@@ -16,7 +18,17 @@ public interface IClassModel
     Unsupported Unsupported { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the invariant is violated.
+    /// Gets the list of violated invariants.
     /// </summary>
-    bool IsInvariantViolated { get; }
+    IReadOnlyList<IInvariantViolation> InvariantViolations { get; }
+
+    /// <summary>
+    /// Gets the list of violated require clauses.
+    /// </summary>
+    IReadOnlyList<IRequireViolation> RequireViolations { get; }
+
+    /// <summary>
+    /// Gets the list of violated ensure clauses.
+    /// </summary>
+    IReadOnlyList<IEnsureViolation> EnsureViolations { get; }
 }

@@ -15,3 +15,5 @@ MA0005  | Design   | Warning  | BadRequireAnalyzer
 MA0006  | Design   | Warning  | BadStatementAnalyzer
 MA0007  | Design   | Warning  | ClassModelAnalyzer
 MA0008  | Design   | Error    | InvariantViolationAnalyzer
+MA0009  | Design   | Error    | RequireViolationAnalyzer
+MA0010  | Design   | Error    | EnsureViolationAnalyzer

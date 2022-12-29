@@ -129,3 +129,5 @@ public class Test
 | [MA0006](doc/MA0006.md) | Invalid statement        |
 | [MA0007](doc/MA0007.md) | Error in class model     |
 | [MA0008](doc/MA0008.md) | Invariant violation      |
+| [MA0009](doc/MA0009.md) | Require clause violation |
+| [MA0010](doc/MA0010.md) | Ensure clause violation  |

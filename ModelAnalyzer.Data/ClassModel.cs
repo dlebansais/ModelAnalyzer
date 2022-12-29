@@ -9,9 +9,7 @@ using System.Text;
 /// </summary>
 internal partial record ClassModel : IClassModel
 {
-    /// <summary>
-    /// Gets the class name.
-    /// </summary>
+    /// <inheritdoc/>
     required public string Name { get; init; }
 
     /// <summary>
@@ -29,13 +27,17 @@ internal partial record ClassModel : IClassModel
     /// </summary>
     required public List<Invariant> InvariantList { get; init; }
 
-    /// <summary>
-    /// Gets unsupported class elements.
-    /// </summary>
+    /// <inheritdoc/>
     required public Unsupported Unsupported { get; init; }
 
     /// <inheritdoc/>
-    required public bool IsInvariantViolated { get; init; }
+    required public IReadOnlyList<IInvariantViolation> InvariantViolations { get; init; }
+
+    /// <inheritdoc/>
+    required public IReadOnlyList<IRequireViolation> RequireViolations { get; init; }
+
+    /// <inheritdoc/>
+    required public IReadOnlyList<IEnsureViolation> EnsureViolations { get; init; }
 
     /// <inheritdoc/>
     public override string ToString()

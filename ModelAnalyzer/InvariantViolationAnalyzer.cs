@@ -38,12 +38,14 @@ public class InvariantViolationAnalyzer : Analyzer
             classModel = Manager.GetVerifiedModel(classModel);
         }
 
-        if (!classModel.IsInvariantViolated)
-            return;
-
         Location Location = classDeclaration.Identifier.GetLocation();
 
-        Logger.Log(LogLevel.Error, $"Class '{classModel.Name}': reporting invariant violated.");
-        context.ReportDiagnostic(Diagnostic.Create(Rule, Location, classDeclaration.Identifier.ValueText));
+        foreach (IInvariantViolation InvariantViolation in classModel.InvariantViolations)
+        {
+            string InvariantText = InvariantViolation.Invariant.Text;
+
+            Logger.Log(LogLevel.Error, $"Class '{ClassName}': reporting invariant '{InvariantText}' violated.");
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ClassName, InvariantText));
+        }
     }
 }

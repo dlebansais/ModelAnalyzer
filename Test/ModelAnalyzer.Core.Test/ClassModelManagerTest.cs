@@ -574,8 +574,8 @@ class Program_CoreClassModelManager_17
         ClassModel0 = Manager.GetVerifiedModel(ClassModel0);
         ClassModel1 = Manager.GetVerifiedModel(ClassModel1);
 
-        Assert.That(ClassModel0.IsInvariantViolated, Is.False);
-        Assert.That(ClassModel1.IsInvariantViolated, Is.True);
+        Assert.That(ClassModel0.InvariantViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel1.InvariantViolations.Count, Is.EqualTo(1));
     }
 
     private void UpdateWithLittleCapacity(List<ClassDeclarationSyntax> classDeclarationList)
@@ -599,7 +599,7 @@ class Program_CoreClassModelManager_17
 
         Channel.Capacity = OldCapacity;
 
-        Assert.That(ClassModel.IsInvariantViolated, Is.False);
+        Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(0));
     }
 
     private void VerificationWithResult(List<ClassDeclarationSyntax> classDeclarationList)
@@ -612,7 +612,7 @@ class Program_CoreClassModelManager_17
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
-        Assert.That(ClassModel.IsInvariantViolated, Is.True);
+        Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
     }
 
     [Test]

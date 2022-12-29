@@ -201,12 +201,24 @@
     <value>Class can be modeled</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="EnsureViolationAnalyzerDescription" xml:space="preserve">
+    <value>Method ensure clause is violated.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="EnsureViolationAnalyzerMessageFormat" xml:space="preserve">
+    <value>Method '{0}' ensure clause '{1}' is violated</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="EnsureViolationAnalyzerTitle" xml:space="preserve">
+    <value>Method ensure clause is violated</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="InvariantViolationAnalyzerDescription" xml:space="preserve">
     <value>Class invariant is violated.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="InvariantViolationAnalyzerMessageFormat" xml:space="preserve">
-    <value>Class '{0}' invariant is violated</value>
+    <value>Class '{0}' invariant '{1}' is violated</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="InvariantViolationAnalyzerTitle" xml:space="preserve">
@@ -223,6 +235,18 @@
   </data>
   <data name="MakeConstAnalyzerTitle" xml:space="preserve">
     <value>Variable can be made constant</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="RequireViolationAnalyzerDescription" xml:space="preserve">
+    <value>Method require clause is violated.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="RequireViolationAnalyzerMessageFormat" xml:space="preserve">
+    <value>Method '{0}' require clause '{1}' is violated</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="RequireViolationAnalyzerTitle" xml:space="preserve">
+    <value>Method require clause is violated</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>

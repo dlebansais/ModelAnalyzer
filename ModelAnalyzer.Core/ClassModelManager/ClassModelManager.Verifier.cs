@@ -59,7 +59,7 @@ public partial class ClassModelManager : IDisposable
                 return classModel;
             }
 
-            CheckVerificationStatus(ClassName, out bool IsFound, out bool IsVerified, out bool IsInvariantViolated);
+            CheckVerificationStatus(ClassName, out bool IsFound, out bool IsVerified, out IReadOnlyList<IInvariantViolation> InvariantViolations, out IReadOnlyList<IRequireViolation> RequireViolations, out IReadOnlyList<IEnsureViolation> EnsureViolations);
 
             if (!IsFound)
             {
@@ -69,8 +69,8 @@ public partial class ClassModelManager : IDisposable
 
             if (IsVerified)
             {
-                Log($"Verification loop completed, class {ClassName} verified, invariant violation: {IsInvariantViolated}.");
-                return ((ClassModel)classModel) with { IsInvariantViolated = IsInvariantViolated };
+                Log($"Verification loop completed, class {ClassName} verified, invariant violation: {InvariantViolations.Count}, require violation: {RequireViolations.Count}, ensure violation: {EnsureViolations.Count}.");
+                return ((ClassModel)classModel) with { InvariantViolations = InvariantViolations, RequireViolations = RequireViolations, EnsureViolations = EnsureViolations };
             }
 
             UpdateVerificationEvents();
@@ -78,8 +78,12 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    private void CheckVerificationStatus(string className, out bool isFound, out bool isVerified, out bool isInvariantViolated)
+    private void CheckVerificationStatus(string className, out bool isFound, out bool isVerified, out IReadOnlyList<IInvariantViolation> invariantViolations, out IReadOnlyList<IRequireViolation> requireViolations, out IReadOnlyList<IEnsureViolation> ensureViolations)
     {
+        invariantViolations = null!;
+        requireViolations = null!;
+        ensureViolations = null!;
+
         lock (Context.Lock)
         {
             if (Context.ClassModelTable.ContainsKey(className))
@@ -88,13 +92,17 @@ public partial class ClassModelManager : IDisposable
 
                 VerificationState VerificationState = Context.ClassModelTable[className];
                 isVerified = VerificationState.VerificationResult != VerificationResult.Default;
-                isInvariantViolated = VerificationState.ClassModelExchange.ClassModel.IsInvariantViolated;
+                if (isVerified)
+                {
+                    invariantViolations = VerificationState.ClassModelExchange.ClassModel.InvariantViolations;
+                    requireViolations = VerificationState.ClassModelExchange.ClassModel.RequireViolations;
+                    ensureViolations = VerificationState.ClassModelExchange.ClassModel.EnsureViolations;
+                }
             }
             else
             {
                 isFound = false;
                 isVerified = false;
-                isInvariantViolated = false;
             }
         }
     }
@@ -141,12 +149,17 @@ public partial class ClassModelManager : IDisposable
     private bool TryUpdateVerificationEventForClass(VerificationResult verificationResult, VerificationState verificationState)
     {
         string ClassName = verificationResult.ClassName;
-        bool IsInvariantViolated = verificationResult.IsError;
 
         if (verificationState.ClassModelExchange.ClassModel.Name == ClassName)
         {
             ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
-            ClassModel NewClassModel = OldClassModel with { IsInvariantViolated = IsInvariantViolated };
+            FillViolationLists(verificationResult, OldClassModel, out List<IInvariantViolation> InvariantViolations, out List<IRequireViolation> RequireViolations, out List<IEnsureViolation> EnsureViolations);
+            ClassModel NewClassModel = OldClassModel with
+            {
+                InvariantViolations = InvariantViolations.AsReadOnly(),
+                RequireViolations = RequireViolations.AsReadOnly(),
+                EnsureViolations = EnsureViolations.AsReadOnly(),
+            };
 
             ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
             ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
@@ -156,6 +169,47 @@ public partial class ClassModelManager : IDisposable
         }
 
         return false;
+    }
+
+    private void FillViolationLists(VerificationResult verificationResult, ClassModel classModel, out List<IInvariantViolation> invariantViolations, out List<IRequireViolation> requireViolations, out List<IEnsureViolation> ensureViolations)
+    {
+        invariantViolations = new List<IInvariantViolation>();
+        requireViolations = new List<IRequireViolation>();
+        ensureViolations = new List<IEnsureViolation>();
+
+        int ErrorIndex = verificationResult.ErrorIndex;
+
+        string MethodName = verificationResult.MethodName;
+        Method? SelectedMethod = null;
+
+        foreach (var Entry in classModel.MethodTable)
+            if (Entry.Key.Text == MethodName)
+            {
+                SelectedMethod = Entry.Value;
+                break;
+            }
+
+        if (verificationResult.ErrorType == VerificationErrorType.InvariantError)
+        {
+            List<Invariant> InvariantList = classModel.InvariantList;
+
+            if (ErrorIndex >= 0 && ErrorIndex < InvariantList.Count)
+                invariantViolations.Add(new InvariantViolation() { Invariant = InvariantList[ErrorIndex] });
+        }
+        else if (verificationResult.ErrorType == VerificationErrorType.RequireError && SelectedMethod is not null)
+        {
+            List<Require> RequireList = SelectedMethod.RequireList;
+
+            if (ErrorIndex >= 0 && ErrorIndex < RequireList.Count)
+                requireViolations.Add(new RequireViolation() { Method = SelectedMethod, Require = RequireList[ErrorIndex] });
+        }
+        else if (verificationResult.ErrorType == VerificationErrorType.EnsureError && SelectedMethod is not null)
+        {
+            List<Ensure> EnsureList = SelectedMethod.EnsureList;
+
+            if (ErrorIndex >= 0 && ErrorIndex < EnsureList.Count)
+                ensureViolations.Add(new EnsureViolation() { Method = SelectedMethod, Ensure = EnsureList[ErrorIndex] });
+        }
     }
 
     private void ScheduleAsynchronousVerification()
