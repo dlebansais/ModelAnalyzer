@@ -200,21 +200,27 @@ public partial class ClassModelManager : IDisposable
         {
             List<Invariant> InvariantList = classModel.InvariantList;
 
-            if (ErrorIndex >= 0 && ErrorIndex < InvariantList.Count)
+            Debug.Assert(ErrorIndex >= 0);
+
+            if (ErrorIndex < InvariantList.Count)
                 invariantViolations.Add(new InvariantViolation() { Invariant = InvariantList[ErrorIndex] });
         }
         else if (verificationResult.ErrorType == VerificationErrorType.RequireError && SelectedMethod is not null)
         {
             List<Require> RequireList = SelectedMethod.RequireList;
 
-            if (ErrorIndex >= 0 && ErrorIndex < RequireList.Count)
+            Debug.Assert(ErrorIndex >= 0);
+
+            if (ErrorIndex < RequireList.Count)
                 requireViolations.Add(new RequireViolation() { Method = SelectedMethod, Require = RequireList[ErrorIndex] });
         }
         else if (verificationResult.ErrorType == VerificationErrorType.EnsureError && SelectedMethod is not null)
         {
             List<Ensure> EnsureList = SelectedMethod.EnsureList;
 
-            if (ErrorIndex >= 0 && ErrorIndex < EnsureList.Count)
+            Debug.Assert(ErrorIndex >= 0);
+
+            if (ErrorIndex < EnsureList.Count)
                 ensureViolations.Add(new EnsureViolation() { Method = SelectedMethod, Ensure = EnsureList[ErrorIndex] });
         }
     }
