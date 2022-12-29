@@ -55,14 +55,14 @@ before_test:
   - nuget install OpenCover -Version %opencover_version% -OutputDirectory packages
   - nuget install CodecovUploader -Version %codecov_version% -OutputDirectory packages
   - |-
-    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.%%1.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.%%1.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" > runtests.bat
+    printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.\%1.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.\%1.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" > runtests.bat
   - |-
     printf "@echo ************************************************************** Starting Tests..\n" > runtests1.bat
     printf "runtests.bat Verification\n" >> runtests1.bat
   - |-
     printf "runtests.bat Core\n" > runtests2.bat
   - |-
-    printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:%%1 -filter:""+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*"" -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
+    printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:\%1 -filter:""+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*"" -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
   - type opencover.bat
   - type runtests1.bat
   - type runtests2.bat
