@@ -148,9 +148,9 @@ internal partial class Verifier : IDisposable
     {
         Dictionary<ExpressionType, Func<string, Expr>> SwitchTable = new()
         {
-            { ExpressionType.Boolean, (string aliasString) => Context.MkBoolConst(aliasString) },
-            { ExpressionType.Integer, (string aliasString) => Context.MkIntConst(aliasString) },
-            { ExpressionType.FloatingPoint, (string aliasString) => Context.MkRealConst(aliasString) },
+            { ExpressionType.Boolean, Context.MkBoolConst },
+            { ExpressionType.Integer, Context.MkIntConst },
+            { ExpressionType.FloatingPoint, Context.MkRealConst },
         };
 
         Debug.Assert(SwitchTable.ContainsKey(variableType));
@@ -161,67 +161,58 @@ internal partial class Verifier : IDisposable
 
     private Expr CreateFieldInitializer(Field field)
     {
-        Expr InitializerExpr = null!;
-        bool IsHandled = false;
-
-        switch (field.Type)
+        ExpressionType FieldType = field.Type;
+        Dictionary<ExpressionType, Func<Field, Expr>> SwitchTable = new()
         {
-            case ExpressionType.Boolean:
-                if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
-                    InitializerExpr = LiteralBoolean.Value == true ? True : False;
-                else
-                    InitializerExpr = False;
-                IsHandled = true;
-                break;
+            { ExpressionType.Boolean, CreateBooleanFieldInitializer },
+            { ExpressionType.Integer, CreateIntegerFieldInitializer },
+            { ExpressionType.FloatingPoint, CreateFloatingPointFieldInitializer },
+        };
 
-            case ExpressionType.Integer:
-                if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
-                    InitializerExpr = LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
-                else
-                    InitializerExpr = Zero;
-                IsHandled = true;
-                break;
+        Debug.Assert(SwitchTable.ContainsKey(FieldType));
+        Expr Result = SwitchTable[FieldType](field);
 
-            case ExpressionType.FloatingPoint:
-                if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
-                    InitializerExpr = LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
-                else
-                    InitializerExpr = Zero;
-                IsHandled = true;
-                break;
-        }
+        return Result;
+    }
 
-        Debug.Assert(IsHandled);
+    private Expr CreateBooleanFieldInitializer(Field field)
+    {
+        if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
+            return LiteralBoolean.Value == true ? True : False;
+        else
+            return False;
+    }
 
-        return InitializerExpr;
+    private Expr CreateIntegerFieldInitializer(Field field)
+    {
+        if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
+            return LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
+        else
+            return Zero;
+    }
+
+    private Expr CreateFloatingPointFieldInitializer(Field field)
+    {
+        if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
+            return LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
+        else
+            return Zero;
     }
 
     private Expr CreateVariableInitializer(IVariable variable)
     {
-        Expr InitializerExpr = null!;
-        bool IsHandled = false;
-
-        switch (variable.Type)
+        ExpressionType VariableType = variable.Type;
+        Dictionary<ExpressionType, Expr> SwitchTable = new()
         {
-            case ExpressionType.Boolean:
-                InitializerExpr = False;
-                IsHandled = true;
-                break;
+            { ExpressionType.Boolean, False },
+            { ExpressionType.Integer, Zero },
+            { ExpressionType.FloatingPoint, Zero },
+        };
 
-            case ExpressionType.Integer:
-                InitializerExpr = Zero;
-                IsHandled = true;
-                break;
+        Debug.Assert(SwitchTable.ContainsKey(VariableType));
+        Expr Result = SwitchTable[VariableType];
 
-            case ExpressionType.FloatingPoint:
-                InitializerExpr = Zero;
-                IsHandled = true;
-                break;
-        }
-
-        Debug.Assert(IsHandled);
-
-        return InitializerExpr;
+        return Result;
     }
 
     private bool AddClassInvariant(Solver solver, AliasTable aliasTable)

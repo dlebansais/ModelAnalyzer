@@ -63,10 +63,6 @@ before_test:
     printf "runtests.bat Core\n" > runtests2.bat
   - |-
     printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:\x25\x31 -filter:""+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*"" -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
-  - type opencover.bat
-  - type runtests1.bat
-  - type runtests2.bat
-  - type runtests.bat
 
 test_script:
   - opencover.bat runtests1.bat
