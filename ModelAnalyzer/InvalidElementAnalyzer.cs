@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Data;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

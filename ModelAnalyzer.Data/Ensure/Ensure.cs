@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -15,6 +16,10 @@ internal class Ensure : IEnsure
     /// <inheritdoc/>
     [JsonIgnore]
     required public string Text { get; init; }
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    required public Location Location { get; init; }
 
     /// <summary>
     /// Gets the expression guaranteed to be true.

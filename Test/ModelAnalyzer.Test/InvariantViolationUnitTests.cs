@@ -31,11 +31,11 @@ class {ForSynchronousTestOnly}_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_1|]
+class {ForSynchronousTestOnly}_1
 {{
     int X;
 }}
-// Invariant: X == 1
+[|// Invariant: X == 1|]
 ");
     }
 
@@ -66,7 +66,7 @@ class {ForSynchronousTestOnly}_2
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_3|]
+class {ForSynchronousTestOnly}_3
 {{
     int X;
 
@@ -75,7 +75,7 @@ class [|{ForSynchronousTestOnly}_3|]
         X = 1;
     }}
 }}
-// Invariant: X == 0
+[|// Invariant: X == 0|]
 ");
     }
 
@@ -109,7 +109,7 @@ class {ForSynchronousTestOnly}_4
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_5|]
+class {ForSynchronousTestOnly}_5
 {{
     int X;
 
@@ -121,7 +121,7 @@ class [|{ForSynchronousTestOnly}_5|]
             X = 1;
     }}
 }}
-// Invariant: X == 0 || X == 1
+[|// Invariant: X == 0 || X == 1|]
 ");
     }
 
@@ -132,7 +132,7 @@ class [|{ForSynchronousTestOnly}_5|]
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_6|]
+class {ForSynchronousTestOnly}_6
 {{
     int X;
 
@@ -144,7 +144,7 @@ class [|{ForSynchronousTestOnly}_6|]
             X = 2;
     }}
 }}
-// Invariant: X == 0 || X == 1
+[|// Invariant: X == 0 || X == 1|]
 ");
     }
 
@@ -155,7 +155,7 @@ class [|{ForSynchronousTestOnly}_6|]
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_7|]
+class {ForSynchronousTestOnly}_7
 {{
     int X;
 
@@ -164,7 +164,7 @@ class [|{ForSynchronousTestOnly}_7|]
         X = x;
     }}
 }}
-// Invariant: X == 0
+[|// Invariant: X == 0|]
 ");
     }
 

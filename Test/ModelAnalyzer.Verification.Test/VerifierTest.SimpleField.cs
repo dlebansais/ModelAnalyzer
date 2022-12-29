@@ -106,6 +106,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualZero,
+            Location = default!,
             Text = VariableEqualZero.ToString(),
         };
 

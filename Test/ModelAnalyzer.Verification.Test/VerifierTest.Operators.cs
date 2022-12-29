@@ -336,6 +336,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = OrExpression,
+            Location = default!,
             Text = OrExpression.ToString(),
         };
 
@@ -445,6 +446,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = OrExpression,
+            Location = default!,
             Text = OrExpression.ToString(),
         };
 
@@ -803,6 +805,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualFalse,
+            Location = default!,
             Text = VariableEqualFalse.ToString(),
         };
 
@@ -974,6 +977,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualFalse,
+            Location = default!,
             Text = VariableEqualFalse.ToString(),
         };
 
@@ -1071,6 +1075,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualFalse,
+            Location = default!,
             Text = VariableEqualFalse.ToString(),
         };
 
@@ -1231,6 +1236,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualFalse,
+            Location = default!,
             Text = VariableEqualFalse.ToString(),
         };
 

@@ -1,6 +1,9 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 /// <summary>
@@ -32,6 +35,21 @@ class Program_CoreRequire_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        IReadOnlyList<IMethod> Methods = ClassModel.GetMethods();
+
+        Assert.That(Methods.Count, Is.EqualTo(1));
+
+        IMethod FirstMethod = Methods.First();
+
+        IReadOnlyList<IRequire> Requires = FirstMethod.GetRequires();
+
+        Assert.That(Requires.Count, Is.EqualTo(1));
+
+        IRequire FirstRequire = Requires.First();
+
+        Assert.That(FirstRequire.Text, Is.EqualTo("x >= 0"));
+        Assert.That(FirstRequire.Location.IsInSource, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_0

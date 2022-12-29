@@ -13,6 +13,21 @@ public interface IClassModel
     string Name { get; }
 
     /// <summary>
+    /// Gets the list of fields.
+    /// </summary>
+    IReadOnlyList<IField> GetFields();
+
+    /// <summary>
+    /// Gets the list of methods.
+    /// </summary>
+    IReadOnlyList<IMethod> GetMethods();
+
+    /// <summary>
+    /// Gets the list of invariants.
+    /// </summary>
+    IReadOnlyList<IInvariant> GetInvariants();
+
+    /// <summary>
     /// Gets unsupported class elements.
     /// </summary>
     Unsupported Unsupported { get; }

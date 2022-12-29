@@ -57,7 +57,7 @@ internal partial class ClassDeclarationParser
 
             if (IsValidAssertionSyntaxTree(fieldTable, parameterTable, resultField, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
-                NewEnsure = new Ensure { Text = Text, BooleanExpression = BooleanExpression };
+                NewEnsure = new Ensure { Text = Text, Location = trivia.GetLocation(), BooleanExpression = BooleanExpression };
             }
         }
 

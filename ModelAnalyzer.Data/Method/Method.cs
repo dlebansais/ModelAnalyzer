@@ -38,4 +38,26 @@ internal class Method : IMethod
     /// Gets the method guarantees.
     /// </summary>
     required public List<Ensure> EnsureList { get; init; }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IRequire> GetRequires()
+    {
+        List<IRequire> Result = new();
+
+        foreach (Require Item in RequireList)
+            Result.Add(Item);
+
+        return Result.AsReadOnly();
+    }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IEnsure> GetEnsures()
+    {
+        List<IEnsure> Result = new();
+
+        foreach (Ensure Item in EnsureList)
+            Result.Add(Item);
+
+        return Result.AsReadOnly();
+    }
 }

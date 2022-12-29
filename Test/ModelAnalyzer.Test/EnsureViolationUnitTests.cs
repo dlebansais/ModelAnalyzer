@@ -44,7 +44,7 @@ class {ForSynchronousTestOnly}_Boolean_1
     {{
         X = x;
     }}
-    // Ensure: X == false
+    [|// Ensure: X == false|]
 }}
 ");
     }
@@ -84,7 +84,7 @@ class {ForSynchronousTestOnly}_Integer_1
     {{
         X = x;
     }}
-    // Ensure: X == 0
+    [|// Ensure: X == 0|]
 }}
 ");
     }
@@ -100,11 +100,11 @@ class {ForSynchronousTestOnly}_FloatingPoint_0
 {{
     double X;
     void Write(double x)
-    // Ensure: x == 0.0
+    // Require: x == 0.0
     {{
         X = x;
     }}
-    // Require: X == 0.0
+    // Ensure: X == 0.0
 }}
 // Invariant: X == 0.0
 ");
@@ -124,7 +124,7 @@ class {ForSynchronousTestOnly}_FloatingPoint_1
     {{
         X = x;
     }}
-    // Require: X == 0.0
+    [|// Ensure: X == 0.0|]
 }}
 ");
     }

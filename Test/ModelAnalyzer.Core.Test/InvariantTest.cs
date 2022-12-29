@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -32,6 +34,15 @@ class Program_CoreInvariant_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        IReadOnlyList<IInvariant> Invariants = ClassModel.GetInvariants();
+
+        Assert.That(Invariants.Count, Is.EqualTo(1));
+
+        IInvariant FirstInvariant = Invariants.First();
+
+        Assert.That(FirstInvariant.Text, Is.EqualTo("X >= 0 || X < 0"));
+        Assert.That(FirstInvariant.Location.IsInSource, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreInvariant_0

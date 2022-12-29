@@ -24,15 +24,23 @@ public class EnsureViolationAnalyzer : Analyzer
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
+        string ClassName = classDeclaration.Identifier.ValueText;
+        bool ForceSynchronous = ClassName.StartsWith(InvariantViolationAnalyzer.ForSynchronousTestOnly);
+
         if (!classModel.Unsupported.IsEmpty)
             return;
 
-        Location Location = classDeclaration.Identifier.GetLocation();
+        if (ForceSynchronous)
+        {
+            Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
+            classModel = Manager.GetVerifiedModel(classModel);
+        }
 
         foreach (IEnsureViolation EnsureViolation in classModel.EnsureViolations)
         {
             string MethodName = EnsureViolation.Method.Name.Text;
             string EnsureText = EnsureViolation.Ensure.Text;
+            Location Location = EnsureViolation.Ensure.Location;
 
             Logger.Log(LogLevel.Error, $"Method '{MethodName}': reporting require '{EnsureText}' violated.");
             context.ReportDiagnostic(Diagnostic.Create(Rule, Location, MethodName, EnsureText));

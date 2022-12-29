@@ -448,12 +448,41 @@ isClassNameRepeated: true);
 
     [Test]
     [Category("Core")]
-    public void ClassModelManager_UpdateWithRequireDisappeared()
+    public void ClassModelManager_UpdateWithInvariantStillThere()
     {
         ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreClassModelManager_20
+{
+    int X;
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_20
+{
+    int X;
+}
+// Invariant: X > 0
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantStillThere);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithRequireDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_21
 {
     int X;
 
@@ -469,7 +498,7 @@ class Program_CoreClassModelManager_20
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_20
+class Program_CoreClassModelManager_21
 {
     int X;
 
@@ -488,12 +517,52 @@ isClassNameRepeated: true);
 
     [Test]
     [Category("Core")]
+    public void ClassModelManager_UpdateWithRequireStillThere()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_22
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_22
+{
+    int X;
+
+    void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireStillThere);
+    }
+
+    [Test]
+    [Category("Core")]
     public void ClassModelManager_UpdateWithEnsureDisappeared()
     {
         ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_21
+class Program_CoreClassModelManager_23
 {
     int X;
 
@@ -508,7 +577,7 @@ class Program_CoreClassModelManager_21
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClassModelManager_21
+class Program_CoreClassModelManager_23
 {
     int X;
 
@@ -523,6 +592,45 @@ isClassNameRepeated: true);
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureDisappeared);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithEnsureStillThere()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_24
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+}
+");
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_24
+{
+    int X;
+
+    void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == 0
+}
+",
+isClassNameRepeated: true);
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureStillThere);
     }
 
     private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
@@ -764,29 +872,62 @@ isClassNameRepeated: true);
 
     private void UpdateWithInvariantDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
+        UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(0));
     }
 
+    private void UpdateWithInvariantStillThere(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        UpdateWithReadingUnchangedDelay(classDeclarationList, out IClassModel ClassModel);
+
+        Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(1));
+    }
+
     private void UpdateWithRequireDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
+        UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(0));
     }
 
+    private void UpdateWithRequireStillThere(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        UpdateWithReadingUnchangedDelay(classDeclarationList, out IClassModel ClassModel);
+
+        Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+    }
+
     private void UpdateWithEnsureDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
+        UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(0));
     }
 
-    private void UpdateWithReadingDelayDisappeared(List<ClassDeclarationSyntax> classDeclarationList, out IClassModel classModel)
+    private void UpdateWithEnsureStillThere(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        UpdateWithReadingUnchangedDelay(classDeclarationList, out IClassModel ClassModel);
+
+        Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
+    }
+
+    private void UpdateWithReadingDelayAdded(List<ClassDeclarationSyntax> classDeclarationList, out IClassModel classModel)
+    {
+        UpdateWithReadingDelayChange(classDeclarationList, isVerificationSlow: true, out classModel);
+    }
+
+    private void UpdateWithReadingUnchangedDelay(List<ClassDeclarationSyntax> classDeclarationList, out IClassModel classModel)
+    {
+        UpdateWithReadingDelayChange(classDeclarationList, isVerificationSlow: false, out classModel);
+    }
+
+    private void UpdateWithReadingDelayChange(List<ClassDeclarationSyntax> classDeclarationList, bool isVerificationSlow, out IClassModel classModel)
     {
         TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
-        ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
+
+        if (isVerificationSlow)
+            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
 
         ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
         ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
@@ -798,9 +939,12 @@ isClassNameRepeated: true);
         ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
         Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
 
-        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
-        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
-            Thread.Sleep(0);
+        if (isVerificationSlow)
+        {
+            SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
+            while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
+                Thread.Sleep(0);
+        }
 
         ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
         Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);

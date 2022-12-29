@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 /// <summary>
@@ -12,4 +13,10 @@ public class UnsupportedMethod : IUnsupportedMethod
 
     /// <inheritdoc/>
     required public Location Location { get; init; }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IRequire> GetRequires() => new List<IRequire>().AsReadOnly();
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IEnsure> GetEnsures() => new List<IEnsure>().AsReadOnly();
 }

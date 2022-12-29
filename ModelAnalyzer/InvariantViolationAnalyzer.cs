@@ -38,11 +38,10 @@ public class InvariantViolationAnalyzer : Analyzer
             classModel = Manager.GetVerifiedModel(classModel);
         }
 
-        Location Location = classDeclaration.Identifier.GetLocation();
-
         foreach (IInvariantViolation InvariantViolation in classModel.InvariantViolations)
         {
             string InvariantText = InvariantViolation.Invariant.Text;
+            Location Location = InvariantViolation.Invariant.Location;
 
             Logger.Log(LogLevel.Error, $"Class '{ClassName}': reporting invariant '{InvariantText}' violated.");
             context.ReportDiagnostic(Diagnostic.Create(Rule, Location, ClassName, InvariantText));

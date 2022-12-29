@@ -69,7 +69,7 @@ internal partial class ClassDeclarationParser
 
             if (IsValidAssertionSyntaxTree(fieldTable, ReadOnlyParameterTable.Empty, resultField: null, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
-                NewInvariant = new Invariant { Text = Text, BooleanExpression = BooleanExpression };
+                NewInvariant = new Invariant { Text = Text, Location = trivia.GetLocation(), BooleanExpression = BooleanExpression };
             }
         }
 

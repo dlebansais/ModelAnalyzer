@@ -107,6 +107,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = VariableEqualZero,
+            Location = default!,
             Text = VariableEqualZero.ToString(),
         };
 
@@ -238,6 +239,7 @@ public partial class VerifierTest
         Invariant TestInvariant = new()
         {
             BooleanExpression = AndExpression,
+            Location = default!,
             Text = AndExpression.ToString(),
         };
 

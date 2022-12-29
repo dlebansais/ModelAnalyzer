@@ -41,7 +41,7 @@ class {ForSynchronousTestOnly}_Boolean_1
     bool X;
     void Write(bool x)
     // Require: x == false
-    // Require: x != false
+    [|// Require: x != false|]
     {{
         X = x;
     }}
@@ -81,7 +81,7 @@ class {ForSynchronousTestOnly}_Integer_1
     int X;
     void Write(int x)
     // Require: x == 0
-    // Require: x != 0
+    [|// Require: x != 0|]
     {{
         X = x;
     }}
@@ -121,7 +121,7 @@ class {ForSynchronousTestOnly}_FloatingPoint_1
     double X;
     void Write(double x)
     // Require: x == 0.0
-    // Require: x != 0.0
+    [|// Require: x != 0.0|]
     {{
         X = x;
     }}

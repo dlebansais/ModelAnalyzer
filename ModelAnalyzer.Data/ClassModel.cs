@@ -17,15 +17,48 @@ internal partial record ClassModel : IClassModel
     /// </summary>
     required public ReadOnlyFieldTable FieldTable { get; init; }
 
+    /// <inheritdoc/>
+    public IReadOnlyList<IField> GetFields()
+    {
+        List<IField> Result = new();
+
+        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+            Result.Add(Entry.Value);
+
+        return Result.AsReadOnly();
+    }
+
     /// <summary>
     /// Gets the method table.
     /// </summary>
     required public ReadOnlyMethodTable MethodTable { get; init; }
 
+    /// <inheritdoc/>
+    public IReadOnlyList<IMethod> GetMethods()
+    {
+        List<IMethod> Result = new();
+
+        foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
+            Result.Add(Entry.Value);
+
+        return Result.AsReadOnly();
+    }
+
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
     required public List<Invariant> InvariantList { get; init; }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IInvariant> GetInvariants()
+    {
+        List<IInvariant> Result = new();
+
+        foreach (Invariant Item in InvariantList)
+            Result.Add(Item);
+
+        return Result.AsReadOnly();
+    }
 
     /// <inheritdoc/>
     required public Unsupported Unsupported { get; init; }

@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -10,6 +11,10 @@ internal class Require : IRequire
     /// <inheritdoc/>
     [JsonIgnore]
     required public string Text { get; init; }
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    required public Location Location { get; init; }
 
     /// <summary>
     /// Gets the expression representing the requirement.

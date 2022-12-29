@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,15 +24,23 @@ public class RequireViolationAnalyzer : Analyzer
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
+        string ClassName = classDeclaration.Identifier.ValueText;
+        bool ForceSynchronous = ClassName.StartsWith(InvariantViolationAnalyzer.ForSynchronousTestOnly);
+
         if (!classModel.Unsupported.IsEmpty)
             return;
 
-        Location Location = classDeclaration.Identifier.GetLocation();
+        if (ForceSynchronous)
+        {
+            Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
+            classModel = Manager.GetVerifiedModel(classModel);
+        }
 
         foreach (IRequireViolation RequireViolation in classModel.RequireViolations)
         {
             string MethodName = RequireViolation.Method.Name.Text;
             string RequireText = RequireViolation.Require.Text;
+            Location Location = RequireViolation.Require.Location;
 
             Logger.Log(LogLevel.Error, $"Method '{MethodName}': reporting require '{RequireText}' violated.");
             context.ReportDiagnostic(Diagnostic.Create(Rule, Location, MethodName, RequireText));

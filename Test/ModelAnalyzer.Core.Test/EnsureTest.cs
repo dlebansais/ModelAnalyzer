@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -32,6 +34,21 @@ class Program_CoreEnsure_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        IReadOnlyList<IMethod> Methods = ClassModel.GetMethods();
+
+        Assert.That(Methods.Count, Is.EqualTo(1));
+
+        IMethod FirstMethod = Methods.First();
+
+        IReadOnlyList<IEnsure> Ensures = FirstMethod.GetEnsures();
+
+        Assert.That(Ensures.Count, Is.EqualTo(1));
+
+        IEnsure FirstEnsure = Ensures.First();
+
+        Assert.That(FirstEnsure.Text, Is.EqualTo("X == x"));
+        Assert.That(FirstEnsure.Location.IsInSource, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_0
