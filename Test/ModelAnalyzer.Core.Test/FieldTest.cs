@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -28,6 +30,15 @@ class Program_CoreField_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        IReadOnlyList<IField> Fields = ClassModel.GetFields();
+
+        Assert.That(Fields.Count, Is.EqualTo(3));
+
+        IField FirstField = Fields.First();
+
+        Assert.That(FirstField.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstField.Type, Is.EqualTo(ExpressionType.Boolean));
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_0

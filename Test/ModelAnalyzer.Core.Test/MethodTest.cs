@@ -292,7 +292,7 @@ class Program_CoreMethod_8
 
     [Test]
     [Category("Core")]
-    public void InternalModifier()
+    public void Method_InternalModifier()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;

@@ -927,7 +927,7 @@ isClassNameRepeated: true);
         TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
 
         if (isVerificationSlow)
-            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
+            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(30);
 
         ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
         ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
