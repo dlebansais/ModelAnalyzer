@@ -764,64 +764,30 @@ isClassNameRepeated: true);
 
     private void UpdateWithInvariantDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
-        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
-        IClassModel ClassModel0;
-        IClassModel ClassModel1;
+        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
-
-        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
-        Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
-
-        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
-        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
-            Thread.Sleep(0);
-
-        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
-        Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
-
-        GetClassModelTask0.Wait();
-        GetClassModelTask1.Wait();
-
-        ClassModel0 = GetClassModelTask0.Result;
-        ClassModel1 = GetClassModelTask1.Result;
-
-        Assert.That(ClassModel0.InvariantViolations.Count, Is.EqualTo(0));
-        Assert.That(ClassModel1.InvariantViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(0));
     }
 
     private void UpdateWithRequireDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
-        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
-        IClassModel ClassModel0;
-        IClassModel ClassModel1;
+        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
 
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
-
-        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
-        Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
-
-        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
-        while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
-            Thread.Sleep(0);
-
-        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
-        Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
-
-        GetClassModelTask0.Wait();
-        GetClassModelTask1.Wait();
-
-        ClassModel0 = GetClassModelTask0.Result;
-        ClassModel1 = GetClassModelTask1.Result;
-
-        Assert.That(ClassModel0.RequireViolations.Count, Is.EqualTo(0));
-        Assert.That(ClassModel1.RequireViolations.Count, Is.EqualTo(0));
+        Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(0));
     }
 
     private void UpdateWithEnsureDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
+        UpdateWithReadingDelayDisappeared(classDeclarationList, out IClassModel ClassModel);
+
+        Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(0));
+    }
+
+    private void UpdateWithReadingDelayDisappeared(List<ClassDeclarationSyntax> classDeclarationList, out IClassModel classModel)
+    {
+        TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
+        ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
+
         ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
         ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
         IClassModel ClassModel0;
@@ -845,8 +811,9 @@ isClassNameRepeated: true);
         ClassModel0 = GetClassModelTask0.Result;
         ClassModel1 = GetClassModelTask1.Result;
 
-        Assert.That(ClassModel0.EnsureViolations.Count, Is.EqualTo(0));
-        Assert.That(ClassModel1.EnsureViolations.Count, Is.EqualTo(0));
+        ClassModelManager.DelayBeforeReadingVerificationResult = OldDelay;
+
+        classModel = ClassModel1;
     }
 
     [Test]

@@ -23,6 +23,11 @@ public partial class ClassModelManager : IDisposable
     }
 
     /// <summary>
+    /// Gets or sets the delay before reading the result of a verification.
+    /// </summary>
+    public static TimeSpan DelayBeforeReadingVerificationResult { get; set; } = TimeSpan.Zero;
+
+    /// <summary>
     /// Starts verifying classes. Only needed if <see cref="StartMode"/> is <see cref="VerificationProcessStartMode.Auto"/>.
     /// </summary>
     /// <param name="classModel">The class classModel.</param>
@@ -109,6 +114,8 @@ public partial class ClassModelManager : IDisposable
 
     private void UpdateVerificationEvents()
     {
+        Thread.Sleep(DelayBeforeReadingVerificationResult);
+
         byte[]? Data = FromServerChannel.Read();
 
         if (Data is null)
