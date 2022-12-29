@@ -120,6 +120,135 @@ class Program_Verifier_RequireBoolean7
 // Invariant: Z == false
 ";
 
+    private const string RequireSourceCodeBoolean8 = @"
+using System;
+
+class Program_Verifier_RequireBoolean8
+{
+    bool X;
+
+    void Write(bool x)
+    // Require: x == false
+    // Require: x != false
+    {
+        X = x;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean1_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean1_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean2_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean2, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean3_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean3, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean4_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean4, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean5_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean5, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean6_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean6, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean7_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean7, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireBoolean8_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean8, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
     private const string RequireSourceCodeInteger1 = @"
 using System;
 
@@ -232,6 +361,135 @@ class Program_Verifier_RequireInteger7
 }
 // Invariant: Z == 0
 ";
+
+    private const string RequireSourceCodeInteger8 = @"
+using System;
+
+class Program_Verifier_RequireInteger8
+{
+    int X;
+
+    void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger1_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger1_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger2_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger2, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger3_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger3, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger4_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger4, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger5_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger5, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger6_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger6, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger7_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger7, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireInteger8_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger8, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
 
     private const string RequireSourceCodeFloatingPoint1 = @"
 using System;
@@ -346,205 +604,21 @@ class Program_Verifier_RequireFloatingPoint7
 // Invariant: Z == 0
 ";
 
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean1_Success()
+    private const string RequireSourceCodeFloatingPoint8 = @"
+using System;
+
+class Program_Verifier_RequireFloatingPoint8
+{
+    double X;
+
+    void Write(double x)
+    // Require: x == 0.0
+    // Require: x != 0.0
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 0);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
+        X = x;
     }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean1_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean2_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean2, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean3_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean3, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean4_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean4, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean5_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean5, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean6_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean6, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireBoolean7_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean7, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger1_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 0);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger1_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger2_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger2, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger3_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger3, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger4_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger4, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger5_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger5, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger6_Error()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger6, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_RequireInteger7_Success()
-    {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger7, maxDepth: 1);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
+}
+";
 
     [Test]
     [Category("Verification")]
@@ -644,5 +718,18 @@ class Program_Verifier_RequireFloatingPoint7
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_RequireFloatingPoint8_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint8, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
     }
 }

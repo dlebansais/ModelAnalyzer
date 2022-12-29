@@ -1,11 +1,5 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
 /// <summary>
@@ -89,6 +83,21 @@ class Program_Verifier_MiscStatement2
 // Invariant: X == 0 || X == 1
 ";
 
+    private const string MiscStatementSourceCode3 = @"
+using System;
+
+class Program_Verifier_MiscStatement3
+{
+    int X;
+
+    void Write()
+    {
+        X = X + 1;
+    }
+}
+// Invariant: X == 0 || X == 1
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -118,6 +127,44 @@ class Program_Verifier_MiscStatement2
     public void Verifier_MiscStatements2_Error()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode2, maxDepth: 2);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements3_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements3_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 2);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements3_ErrorAgain()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 3);
 
         TestObject.Verify();
 

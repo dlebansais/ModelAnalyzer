@@ -78,6 +78,21 @@ class Program_Verifier_ReturnBoolean1
 }
 ";
 
+    private const string ReturnSourceCodeBoolean6 = @"
+using System;
+
+class Program_Verifier_ReturnBoolean1
+{
+    bool X;
+
+    void Read()
+    {
+        return;
+    }
+    // Ensure: X == false
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_ReturnBoolean1_Success()
@@ -132,6 +147,18 @@ class Program_Verifier_ReturnBoolean1
     public void Verifier_ReturnBoolean5_Success()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeBoolean5, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ReturnBoolean6_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeBoolean6, maxDepth: 1);
 
         TestObject.Verify();
 
@@ -210,6 +237,21 @@ class Program_Verifier_ReturnInteger1
 }
 ";
 
+    private const string ReturnSourceCodeInteger6 = @"
+using System;
+
+class Program_Verifier_ReturnInteger1
+{
+    int X;
+
+    void Read()
+    {
+        return;
+    }
+    // Ensure: X == 0
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_ReturnInteger1_Success()
@@ -264,6 +306,18 @@ class Program_Verifier_ReturnInteger1
     public void Verifier_ReturnInteger5_Success()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeInteger5, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ReturnInteger6_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeInteger6, maxDepth: 1);
 
         TestObject.Verify();
 
@@ -342,6 +396,21 @@ class Program_Verifier_ReturnFloatingPoint1
 }
 ";
 
+    private const string ReturnSourceCodeFloatingPoint6 = @"
+using System;
+
+class Program_Verifier_ReturnInteger1
+{
+    double X;
+
+    void Read()
+    {
+        return;
+    }
+    // Ensure: X == 0.0
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_ReturnFloatingPoint1_Success()
@@ -396,6 +465,18 @@ class Program_Verifier_ReturnFloatingPoint1
     public void Verifier_ReturnFloatingPoint5_Success()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeFloatingPoint5, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ReturnFloatingPoint6_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeFloatingPoint6, maxDepth: 1);
 
         TestObject.Verify();
 

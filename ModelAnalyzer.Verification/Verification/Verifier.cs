@@ -146,28 +146,15 @@ internal partial class Verifier : IDisposable
 
     private Expr CreateVariableExpr(string aliasString, ExpressionType variableType)
     {
-        bool IsHandled = false;
-        Expr Result = null!;
-
-        switch (variableType)
+        Dictionary<ExpressionType, Func<string, Expr>> SwitchTable = new()
         {
-            case ExpressionType.Boolean:
-                Result = Context.MkBoolConst(aliasString);
-                IsHandled = true;
-                break;
+            { ExpressionType.Boolean, (string aliasString) => Context.MkBoolConst(aliasString) },
+            { ExpressionType.Integer, (string aliasString) => Context.MkIntConst(aliasString) },
+            { ExpressionType.FloatingPoint, (string aliasString) => Context.MkRealConst(aliasString) },
+        };
 
-            case ExpressionType.Integer:
-                Result = Context.MkIntConst(aliasString);
-                IsHandled = true;
-                break;
-
-            case ExpressionType.FloatingPoint:
-                Result = Context.MkRealConst(aliasString);
-                IsHandled = true;
-                break;
-        }
-
-        Debug.Assert(IsHandled);
+        Debug.Assert(SwitchTable.ContainsKey(variableType));
+        Expr Result = SwitchTable[variableType](aliasString);
 
         return Result;
     }
@@ -376,11 +363,6 @@ internal partial class Verifier : IDisposable
     private void Log(string message)
     {
         Logger.Log(message);
-    }
-
-    private void LogError(string message)
-    {
-        Logger.Log(LogLevel.Error, message);
     }
 
     private Context Context;
