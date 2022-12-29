@@ -33,8 +33,6 @@ public partial class ClassModelManager : IDisposable
     /// <param name="classModel">The class classModel.</param>
     private IClassModel WaitForVerification(IClassModel classModel)
     {
-        Thread.Sleep(DelayBeforeReadingVerificationResult);
-
         string ClassName = classModel.Name;
 
         if (!classModel.Unsupported.IsEmpty)
@@ -53,6 +51,8 @@ public partial class ClassModelManager : IDisposable
             ScheduleAsynchronousVerification();
 
         Log("Starting the verification loop.");
+
+        Thread.Sleep(DelayBeforeReadingVerificationResult);
 
         TimeSpan Timeout = Timeouts.VerificationAcknowledgeTimeout;
         Stopwatch Watch = new();

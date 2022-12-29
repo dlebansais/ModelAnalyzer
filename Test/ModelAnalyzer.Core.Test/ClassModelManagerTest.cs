@@ -403,7 +403,12 @@ class Program_CoreClassModelManager_18
 {
     int X;
 
-    void Write(int x)
+    void Write1(int x)
+    {
+        X = x;
+    }
+
+    void Write2(int x)
     // Require: x == 0
     // Require: x != 0
     {
@@ -943,7 +948,12 @@ isClassNameRepeated: true);
         {
             SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
             while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
-                Thread.Sleep(0);
+                GetClassModelTask0.Wait(TimeSpan.FromMilliseconds(10));
+        }
+        else
+        {
+            GetClassModelTask0.Wait(TimeSpan.FromSeconds(10));
+            Thread.Sleep(TimeSpan.FromSeconds(2));
         }
 
         ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
