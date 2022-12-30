@@ -223,4 +223,31 @@ class Program_CoreInvariant_6
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Invariant_UnknownField()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreInvariant_7
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+}
+// Invariant: Y == 0
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }

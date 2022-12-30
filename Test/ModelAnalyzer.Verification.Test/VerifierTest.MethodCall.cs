@@ -49,23 +49,24 @@ using System;
 class Program_Verifier_MethodCallInteger3
 {
     int X;
+    int Y;
 
-    public void Write1(int x)
+    public void Write1(int y)
     {
-        Write2(x);
+        Write2(y);
     }
 
-    void Write2(int x)
+    void Write2(int y)
     {
-        Write3(x);
+        Write3(y);
     }
 
-    void Write3(int x)
+    void Write3(int y)
     {
-        X = x;
+        Y = y;
     }
 }
-// Invariant: X == 0
+// Invariant: Y == 0
 ";
 
     private const string MethodCallSourceCodeInteger4 = @"
@@ -174,6 +175,74 @@ class Program_Verifier_MethodCallInteger8
 }
 ";
 
+    private const string MethodCallSourceCodeInteger9 = @"
+using System;
+
+class Program_Verifier_MethodCallInteger9
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        Write2(x);
+    }
+
+    void Write2(int x)
+    {
+        Write3(x);
+    }
+
+    void Write3(int x)
+    // Require: x == 0
+    {
+        X = x;
+    }
+}
+// Invariant: X == 0
+";
+
+    private const string MethodCallSourceCodeInteger10 = @"
+using System;
+
+class Program_Verifier_MethodCallInteger10
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        Write2(x);
+    }
+    // Ensure: X == 1
+
+    void Write2(int x)
+    {
+        Write3(x);
+    }
+    // Ensure: X == 0
+
+    void Write3(int x)
+    {
+        X = x;
+    }
+}
+// Invariant: X == 0
+";
+
+    private const string MethodCallSourceCodeInteger11 = @"
+using System;
+
+class Program_Verifier_MethodCallInteger11
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == 0 && X != 0
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MethodCallInteger1_Success()
@@ -272,5 +341,44 @@ class Program_Verifier_MethodCallInteger8
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MethodCallInteger9_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger9, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MethodCallInteger10_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger10, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MethodCallInteger11_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger11, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
 }

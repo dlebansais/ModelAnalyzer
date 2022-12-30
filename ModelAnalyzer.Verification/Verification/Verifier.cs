@@ -322,10 +322,10 @@ internal partial class Verifier : IDisposable
             string AssertionType = "ensure";
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 
-            if (!AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
+            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
                 return false;
 
-            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
+            if (!AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
                 return false;
         }
 
@@ -403,49 +403,6 @@ internal partial class Verifier : IDisposable
     private ArithExpr CreateFloatingPointExpr(double value)
     {
         return (ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
-    }
-
-    /// <summary>
-    /// Gets a variable from its name.
-    /// </summary>
-    /// <param name="fieldTable">The table of fields.</param>
-    /// <param name="hostMethod">The host method, null in invariants.</param>
-    /// <param name="resultField">The optional result field.</param>
-    /// <param name="variableName">The variable name.</param>
-    public static Variable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, IVariableName variableName)
-    {
-        Variable? Result = null;
-
-        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
-            if (Entry.Key.Text == variableName.Text)
-            {
-                Field Field = Entry.Value;
-                Result = new Variable(Field.Name, Field.Type);
-                break;
-            }
-
-        if (hostMethod is not null)
-        {
-            foreach (KeyValuePair<ParameterName, Parameter> Entry in hostMethod.ParameterTable)
-                if (Entry.Key.Text == variableName.Text)
-                {
-                    Parameter Parameter = Entry.Value;
-                    ParameterName ParameterLocalName = CreateParameterLocalName(hostMethod, Parameter);
-                    Result = new Variable(ParameterLocalName, Parameter.Type);
-                    break;
-                }
-        }
-
-        if (resultField is not null && resultField.Name.Text == variableName.Text)
-        {
-            Debug.Assert(Result is null);
-
-            Result = new Variable(resultField.Name, resultField.Type);
-        }
-
-        Debug.Assert(Result is not null);
-
-        return Result!;
     }
 
     private void Log(string message)

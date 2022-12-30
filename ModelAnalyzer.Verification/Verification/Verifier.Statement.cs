@@ -51,12 +51,25 @@ internal partial class Verifier : IDisposable
 
     private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, Method hostMethod, ref Field? resultField, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
-        Expr SourceExpr = BuildExpression<Expr>(aliasTable, hostMethod, resultField, assignmentStatement.Expression);
-        Variable Destination = GetVariable(FieldTable, hostMethod, resultField, assignmentStatement.DestinationName);
+        Expression Source = assignmentStatement.Expression;
 
-        aliasTable.IncrementAlias(Destination);
-        VariableAlias DestinationNameAlias = aliasTable.GetAlias(Destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), assignmentStatement.Expression.GetExpressionType(FieldTable, hostMethod, resultField));
+        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+            if (Entry.Key.Text == assignmentStatement.DestinationName.Text)
+            {
+                Field Field = Entry.Value;
+                Variable Destination = new Variable(Field.Name, Field.Type);
+                AddAssignmentExecution(solver, aliasTable, hostMethod, ref resultField, branch, Destination, Source);
+                break;
+            }
+    }
+
+    private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, Method hostMethod, ref Field? resultField, BoolExpr branch, Variable destination, Expression source)
+    {
+        Expr SourceExpr = BuildExpression<Expr>(aliasTable, hostMethod, resultField, source);
+
+        aliasTable.IncrementAlias(destination);
+        VariableAlias DestinationNameAlias = aliasTable.GetAlias(destination);
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(FieldTable, hostMethod, resultField));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }

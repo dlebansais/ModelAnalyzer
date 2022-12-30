@@ -267,19 +267,10 @@ internal partial class ClassDeclarationParser
             return true;
         }
 
-        if (hostMethod is not null)
+        if (hostMethod is not null && TryFindParameterByName(hostMethod.ParameterTable, variableName, out IParameter Parameter))
         {
-            if (TryFindParameterByName(hostMethod.ParameterTable, variableName, out IParameter Parameter))
-            {
-                variable = Parameter;
-                return true;
-            }
-            else
-            {
-            }
-        }
-        else
-        {
+            variable = Parameter;
+            return true;
         }
 
         if (resultField is not null && resultField.Name.Text == variableName)
