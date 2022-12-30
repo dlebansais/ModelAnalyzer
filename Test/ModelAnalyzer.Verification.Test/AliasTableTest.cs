@@ -14,11 +14,12 @@ public class AliasTableTest
     {
         FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
-        TestObject.AddVariable(TestField);
+        TestObject.AddVariable(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 0)));
     }
 
     [Test]
@@ -27,24 +28,26 @@ public class AliasTableTest
     {
         FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
-        TestObject.AddVariable(TestField);
+        TestObject.AddVariable(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 0)));
 
-        TestObject.AddOrIncrement(TestField);
+        TestObject.AddOrIncrement(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 1)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 1)));
 
         FieldName TestObjectName2 = new() { Text = "Test2" };
         Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
 
-        TestObject.AddOrIncrement(TestField2);
+        TestObject.AddOrIncrement(TestVariable2);
 
-        Assert.That(TestObject.ContainsVariable(TestField2), Is.True);
-        Assert.That(TestObject.GetAlias(TestField2), Is.EqualTo(new VariableAlias(TestField2, 0)));
+        Assert.That(TestObject.ContainsVariable(TestVariable2), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable2), Is.EqualTo(new VariableAlias(TestVariable2, 0)));
     }
 
     [Test]
@@ -53,16 +56,17 @@ public class AliasTableTest
     {
         FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
-        TestObject.AddVariable(TestField);
+        TestObject.AddVariable(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 0)));
 
-        TestObject.IncrementAlias(TestField);
+        TestObject.IncrementAlias(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 1)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 1)));
     }
 
     [Test]
@@ -71,21 +75,22 @@ public class AliasTableTest
     {
         FieldName TestObjectName = new() { Text = "Test" };
         Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
-        TestObject.AddVariable(TestField);
+        TestObject.AddVariable(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 0)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 0)));
 
-        TestObject.IncrementAlias(TestField);
+        TestObject.IncrementAlias(TestVariable);
 
-        Assert.That(TestObject.ContainsVariable(TestField), Is.True);
-        Assert.That(TestObject.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 1)));
+        Assert.That(TestObject.ContainsVariable(TestVariable), Is.True);
+        Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 1)));
 
         AliasTable CloneTable = TestObject.Clone();
 
-        Assert.That(CloneTable.ContainsVariable(TestField), Is.True);
-        Assert.That(CloneTable.GetAlias(TestField), Is.EqualTo(new VariableAlias(TestField, 1)));
+        Assert.That(CloneTable.ContainsVariable(TestVariable), Is.True);
+        Assert.That(CloneTable.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 1)));
     }
 
     [Test]
@@ -94,18 +99,21 @@ public class AliasTableTest
     {
         FieldName TestObjectName1 = new() { Text = "Test1" };
         Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable1 = new Variable(TestField1.Name, TestField1.Type);
         FieldName TestObjectName2 = new() { Text = "Test2" };
         Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
         FieldName TestObjectName3 = new() { Text = "Test3" };
         Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable3 = new Variable(TestField3.Name, TestField3.Type);
 
         AliasTable TestObject1 = new();
-        TestObject1.AddVariable(TestField1);
-        TestObject1.AddVariable(TestField2);
+        TestObject1.AddVariable(TestVariable1);
+        TestObject1.AddVariable(TestVariable2);
 
         AliasTable TestObject2 = new();
-        TestObject2.AddVariable(TestField1);
-        TestObject2.AddVariable(TestField2);
+        TestObject2.AddVariable(TestVariable1);
+        TestObject2.AddVariable(TestVariable2);
 
         List<VariableAlias> Difference;
 
@@ -113,19 +121,19 @@ public class AliasTableTest
 
         Assert.That(Difference.Count, Is.EqualTo(0));
 
-        TestObject1.AddVariable(TestField3);
+        TestObject1.AddVariable(TestVariable3);
 
         Difference = TestObject1.GetAliasDifference(TestObject2);
 
         Assert.That(Difference.Count, Is.EqualTo(1));
-        Assert.That(Difference[0], Is.EqualTo(new VariableAlias(TestField3, 0)));
+        Assert.That(Difference[0], Is.EqualTo(new VariableAlias(TestVariable3, 0)));
 
-        TestObject1.IncrementAlias(TestField1);
+        TestObject1.IncrementAlias(TestVariable1);
         Difference = TestObject1.GetAliasDifference(TestObject2);
 
         Assert.That(Difference.Count, Is.EqualTo(2));
-        Assert.That(Difference.Exists(aliasName => aliasName == new VariableAlias(TestField3, 0)), Is.True);
-        Assert.That(Difference.Exists(aliasName => aliasName == new VariableAlias(TestField1, 1)), Is.True);
+        Assert.That(Difference.Exists(aliasName => aliasName == new VariableAlias(TestVariable3, 0)), Is.True);
+        Assert.That(Difference.Exists(aliasName => aliasName == new VariableAlias(TestVariable1, 1)), Is.True);
 
         Difference = TestObject2.GetAliasDifference(TestObject1);
 
@@ -138,49 +146,52 @@ public class AliasTableTest
     {
         FieldName TestObjectName1 = new() { Text = "Test1" };
         Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable1 = new Variable(TestField1.Name, TestField1.Type);
         FieldName TestObjectName2 = new() { Text = "Test2" };
         Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
         FieldName TestObjectName3 = new() { Text = "Test3" };
         Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null };
+        Variable TestVariable3 = new Variable(TestField3.Name, TestField3.Type);
 
         AliasTable TestObject1 = new();
-        TestObject1.AddVariable(TestField1);
-        TestObject1.AddVariable(TestField2);
+        TestObject1.AddVariable(TestVariable1);
+        TestObject1.AddVariable(TestVariable2);
 
         AliasTable TestObject2 = new();
-        TestObject2.AddVariable(TestField1);
-        TestObject2.AddVariable(TestField2);
+        TestObject2.AddVariable(TestVariable1);
+        TestObject2.AddVariable(TestVariable2);
 
-        Assert.That(TestObject1.ContainsVariable(TestField1), Is.True);
-        Assert.That(TestObject1.GetAlias(TestField1), Is.EqualTo(new VariableAlias(TestField1, 0)));
-        Assert.That(TestObject1.ContainsVariable(TestField2), Is.True);
-        Assert.That(TestObject1.GetAlias(TestField2), Is.EqualTo(new VariableAlias(TestField2, 0)));
+        Assert.That(TestObject1.ContainsVariable(TestVariable1), Is.True);
+        Assert.That(TestObject1.GetAlias(TestVariable1), Is.EqualTo(new VariableAlias(TestVariable1, 0)));
+        Assert.That(TestObject1.ContainsVariable(TestVariable2), Is.True);
+        Assert.That(TestObject1.GetAlias(TestVariable2), Is.EqualTo(new VariableAlias(TestVariable2, 0)));
 
-        Assert.That(TestObject2.ContainsVariable(TestField1), Is.True);
-        Assert.That(TestObject2.GetAlias(TestField1), Is.EqualTo(new VariableAlias(TestField1, 0)));
-        Assert.That(TestObject2.ContainsVariable(TestField2), Is.True);
-        Assert.That(TestObject2.GetAlias(TestField2), Is.EqualTo(new VariableAlias(TestField2, 0)));
+        Assert.That(TestObject2.ContainsVariable(TestVariable1), Is.True);
+        Assert.That(TestObject2.GetAlias(TestVariable1), Is.EqualTo(new VariableAlias(TestVariable1, 0)));
+        Assert.That(TestObject2.ContainsVariable(TestVariable2), Is.True);
+        Assert.That(TestObject2.GetAlias(TestVariable2), Is.EqualTo(new VariableAlias(TestVariable2, 0)));
 
-        List<IVariable> UpdatedVariableList;
+        List<Variable> UpdatedVariableList;
 
         TestObject1.Merge(TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(0));
 
-        TestObject1.IncrementAlias(TestField1);
+        TestObject1.IncrementAlias(TestVariable1);
 
         TestObject1.Merge(TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(1));
-        Assert.That(UpdatedVariableList[0], Is.EqualTo(TestField1));
-        Assert.That(TestObject1.GetAlias(TestField1), Is.EqualTo(new VariableAlias(TestField1, 2)));
+        Assert.That(UpdatedVariableList[0], Is.EqualTo(TestVariable1));
+        Assert.That(TestObject1.GetAlias(TestVariable1), Is.EqualTo(new VariableAlias(TestVariable1, 2)));
 
-        TestObject2.AddVariable(TestField3);
+        TestObject2.AddVariable(TestVariable3);
 
         TestObject1.Merge(TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(1));
-        Assert.That(UpdatedVariableList[0], Is.EqualTo(TestField1));
-        Assert.That(TestObject1.GetAlias(TestField1), Is.EqualTo(new VariableAlias(TestField1, 3)));
+        Assert.That(UpdatedVariableList[0], Is.EqualTo(TestVariable1));
+        Assert.That(TestObject1.GetAlias(TestVariable1), Is.EqualTo(new VariableAlias(TestVariable1, 3)));
     }
 }

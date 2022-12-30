@@ -130,7 +130,8 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == VariableName)
             {
                 Field Field = Entry.Value;
-                VariableAlias FieldAlias = aliasTable.GetAlias(Field);
+                Variable FieldVariable = new(Field.Name, Field.Type);
+                VariableAlias FieldAlias = aliasTable.GetAlias(FieldVariable);
                 VariableString = FieldAlias.ToString();
                 VariableType = Field.Type;
                 break;
@@ -144,8 +145,9 @@ internal partial class Verifier : IDisposable
                 if (Entry.Key.Text == VariableName)
                 {
                     Parameter Parameter = Entry.Value;
-                    Parameter ParameterLocal = CreateParameterLocal(hostMethod, Parameter);
-                    VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterLocal);
+                    ParameterName ParameterLocalName = CreateParameterLocalName(hostMethod, Parameter);
+                    Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
+                    VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterVariable);
                     VariableString = ParameterAlias.ToString();
                     VariableType = Parameter.Type;
                     break;

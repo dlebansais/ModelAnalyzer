@@ -52,7 +52,7 @@ internal partial class Verifier : IDisposable
     private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, Method hostMethod, ref Field? resultField, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
         Expr SourceExpr = BuildExpression<Expr>(aliasTable, hostMethod, resultField, assignmentStatement.Expression);
-        IVariable Destination = ClassModel.GetVariable(FieldTable, hostMethod, resultField, assignmentStatement.DestinationName);
+        Variable Destination = GetVariable(FieldTable, hostMethod, resultField, assignmentStatement.DestinationName);
 
         aliasTable.IncrementAlias(Destination);
         VariableAlias DestinationNameAlias = aliasTable.GetAlias(Destination);
@@ -81,14 +81,14 @@ internal partial class Verifier : IDisposable
         AliasTable WhenFalseAliasTable = aliasTable.Clone();
 
         // Merge aliases from the if branch (the table currently contains the end of the end branch).
-        aliasTable.Merge(WhenTrueAliasTable, out List<IVariable> UpdatedNameList);
+        aliasTable.Merge(WhenTrueAliasTable, out List<Variable> UpdatedNameList);
 
         AddConditionalAliases(solver, TrueBranchExpr, AliasesOnlyWhenFalse);
         AddConditionalAliases(solver, FalseBranchExpr, AliasesOnlyWhenTrue);
 
-        foreach (IVariable Variable in UpdatedNameList)
+        foreach (Variable Variable in UpdatedNameList)
         {
-            ExpressionType VariableType = Variable.Type;
+            ExpressionType VariableType = Variable.VariableType;
 
             VariableAlias NameAlias = aliasTable.GetAlias(Variable);
             Expr DestinationExpr = CreateVariableExpr(NameAlias.ToString(), VariableType);
@@ -112,11 +112,11 @@ internal partial class Verifier : IDisposable
     {
         foreach (VariableAlias Alias in aliasList)
         {
-            IVariable Variable = Alias.Variable;
-            ExpressionType FieldType = Variable.Type;
+            Variable Variable = Alias.Variable;
+            ExpressionType VariableType = Variable.VariableType;
 
-            Expr FieldExpr = CreateVariableExpr(Alias.ToString(), FieldType);
-            Expr InitializerExpr = CreateVariableInitializer(Variable);
+            Expr FieldExpr = CreateVariableExpr(Alias.ToString(), VariableType);
+            Expr InitializerExpr = CreateVariableInitializer(VariableType);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
             AddToSolver(solver, branchExpr, InitExpr);
@@ -151,12 +151,13 @@ internal partial class Verifier : IDisposable
         {
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
-            Parameter ParameterLocal = CreateParameterLocal(calledMethod, Parameter);
+            ParameterName ParameterLocalName = CreateParameterLocalName(calledMethod, Parameter);
+            Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
 
-            aliasTable.AddVariable(ParameterLocal);
-            VariableAlias FieldNameAlias = aliasTable.GetAlias(ParameterLocal);
+            aliasTable.AddVariable(ParameterVariable);
+            VariableAlias FieldNameAlias = aliasTable.GetAlias(ParameterVariable);
 
-            Expr TemporaryLocalExpr = CreateVariableExpr(FieldNameAlias.ToString(), ParameterLocal.Type);
+            Expr TemporaryLocalExpr = CreateVariableExpr(FieldNameAlias.ToString(), Parameter.Type);
             Expr InitializerExpr = BuildExpression<Expr>(aliasTable, hostMethod, resultField, Argument.Expression);
             BoolExpr InitExpr = Context.MkEq(TemporaryLocalExpr, InitializerExpr);
 

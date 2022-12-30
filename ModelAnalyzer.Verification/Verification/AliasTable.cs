@@ -22,10 +22,10 @@ internal class AliasTable
     /// </summary>
     /// <param name="table">The table to clone.</param>
     /// <param name="allAliases">The aliases to clone.</param>
-    private AliasTable(Dictionary<IVariable, VariableAlias> table, List<VariableAlias> allAliases)
+    private AliasTable(Dictionary<Variable, VariableAlias> table, List<VariableAlias> allAliases)
         : this()
     {
-        foreach (KeyValuePair<IVariable, VariableAlias> Entry in table)
+        foreach (KeyValuePair<Variable, VariableAlias> Entry in table)
             Table.Add(Entry.Key, Entry.Value);
 
         AllAliases.AddRange(allAliases);
@@ -35,7 +35,7 @@ internal class AliasTable
     /// Checks whether a variable is in the table.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public bool ContainsVariable(IVariable variable)
+    public bool ContainsVariable(Variable variable)
     {
         return Table.ContainsKey(variable);
     }
@@ -44,7 +44,7 @@ internal class AliasTable
     /// Adds a variable to the table and creates its first alias.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public void AddVariable(IVariable variable)
+    public void AddVariable(Variable variable)
     {
         Debug.Assert(!ContainsVariable(variable));
 
@@ -59,7 +59,7 @@ internal class AliasTable
     /// If the variable already exists, increment the alias.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public void AddOrIncrement(IVariable variable)
+    public void AddOrIncrement(Variable variable)
     {
         VariableAlias NewAlias;
 
@@ -81,7 +81,7 @@ internal class AliasTable
     /// Gets the current alias of a variable.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public VariableAlias GetAlias(IVariable variable)
+    public VariableAlias GetAlias(Variable variable)
     {
         Debug.Assert(ContainsVariable(variable));
 
@@ -92,7 +92,7 @@ internal class AliasTable
     /// Increments the variable alias.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public void IncrementAlias(IVariable variable)
+    public void IncrementAlias(Variable variable)
     {
         Debug.Assert(ContainsVariable(variable));
 
@@ -131,14 +131,14 @@ internal class AliasTable
     /// </summary>
     /// <param name="other">The other instance.</param>
     /// <param name="updatedFieldList">The list of variables for which the alias has been incremented as a result of the merge.</param>
-    public void Merge(AliasTable other, out List<IVariable> updatedFieldList)
+    public void Merge(AliasTable other, out List<Variable> updatedFieldList)
     {
         updatedFieldList = new();
-        Dictionary<IVariable, VariableAlias> UpdatedTable = new();
+        Dictionary<Variable, VariableAlias> UpdatedTable = new();
 
-        foreach (KeyValuePair<IVariable, VariableAlias> Entry in Table)
+        foreach (KeyValuePair<Variable, VariableAlias> Entry in Table)
         {
-            IVariable Variable = Entry.Key;
+            Variable Variable = Entry.Key;
             VariableAlias OtherNameAlias = other.Table[Variable];
             VariableAlias MergedAlias = Entry.Value.Merged(OtherNameAlias, out bool IsUpdated);
 
@@ -150,10 +150,10 @@ internal class AliasTable
             }
         }
 
-        foreach (KeyValuePair<IVariable, VariableAlias> Entry in UpdatedTable)
+        foreach (KeyValuePair<Variable, VariableAlias> Entry in UpdatedTable)
             Table[Entry.Key] = Entry.Value;
     }
 
-    private Dictionary<IVariable, VariableAlias> Table;
+    private Dictionary<Variable, VariableAlias> Table;
     private List<VariableAlias> AllAliases;
 }

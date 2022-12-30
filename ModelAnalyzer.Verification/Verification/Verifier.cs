@@ -133,13 +133,12 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
         {
             Field Field = Entry.Value;
+            Variable FieldVariable = new(Field.Name, Field.Type);
 
-            aliasTable.AddVariable(Field);
+            aliasTable.AddVariable(FieldVariable);
 
-            VariableAlias FieldNameAlias = aliasTable.GetAlias(Field);
-            ExpressionType FieldType = Field.Type;
-
-            Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), FieldType);
+            VariableAlias FieldNameAlias = aliasTable.GetAlias(FieldVariable);
+            Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), Field.Type);
             Expr InitializerExpr = CreateFieldInitializer(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
@@ -203,9 +202,8 @@ internal partial class Verifier : IDisposable
             return Zero;
     }
 
-    private Expr CreateVariableInitializer(IVariable variable)
+    private Expr CreateVariableInitializer(ExpressionType variableType)
     {
-        ExpressionType VariableType = variable.Type;
         Dictionary<ExpressionType, Expr> SwitchTable = new()
         {
             { ExpressionType.Boolean, False },
@@ -213,8 +211,8 @@ internal partial class Verifier : IDisposable
             { ExpressionType.FloatingPoint, Zero },
         };
 
-        Debug.Assert(SwitchTable.ContainsKey(VariableType));
-        Expr Result = SwitchTable[VariableType];
+        Debug.Assert(SwitchTable.ContainsKey(variableType));
+        Expr Result = SwitchTable[variableType];
 
         return Result;
     }
@@ -276,24 +274,33 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            Parameter ParameterLocal = CreateParameterLocal(method, Parameter);
-            aliasTable.AddOrIncrement(ParameterLocal);
-            VariableAlias ParameterLocalAlias = aliasTable.GetAlias(ParameterLocal);
+            ParameterName ParameterLocalName = CreateParameterLocalName(method, Parameter);
+            Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
 
-            CreateVariableExpr(ParameterLocalAlias.ToString(), ParameterLocal.Type);
+            aliasTable.AddOrIncrement(ParameterVariable);
+
+            VariableAlias ParameterLocalAlias = aliasTable.GetAlias(ParameterVariable);
+
+            CreateVariableExpr(ParameterLocalAlias.ToString(), Parameter.Type);
         }
     }
 
-    private Parameter CreateParameterLocal(Method method, Parameter parameter)
+    private static Parameter CreateParameterLocal(Method method, Parameter parameter)
     {
-        string ParameterLocalText = GetParameterLocalText(method, parameter);
+        ParameterName ParameterLocalName = CreateParameterLocalName(method, parameter);
         ExpressionType ParameterLocalType = parameter.Type;
-        Parameter ParameterLocal = new Parameter() { Name = new ParameterName() { Text = ParameterLocalText }, Type = ParameterLocalType };
+        Parameter ParameterLocal = new Parameter() { Name = ParameterLocalName, Type = ParameterLocalType };
 
         return ParameterLocal;
     }
 
-    private string GetParameterLocalText(Method method, Parameter parameter)
+    private static ParameterName CreateParameterLocalName(Method method, Parameter parameter)
+    {
+        string ParameterLocalText = GetParameterLocalText(method, parameter);
+        return new ParameterName() { Text = ParameterLocalText };
+    }
+
+    private static string GetParameterLocalText(Method method, Parameter parameter)
     {
         return $"{method.Name.Text}${parameter.Name.Text}";
     }
@@ -370,6 +377,49 @@ internal partial class Verifier : IDisposable
     private ArithExpr CreateFloatingPointExpr(double value)
     {
         return (ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
+    }
+
+    /// <summary>
+    /// Gets a variable from its name.
+    /// </summary>
+    /// <param name="fieldTable">The table of fields.</param>
+    /// <param name="hostMethod">The host method, null in invariants.</param>
+    /// <param name="resultField">The optional result field.</param>
+    /// <param name="variableName">The variable name.</param>
+    public static Variable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, IVariableName variableName)
+    {
+        Variable? Result = null;
+
+        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
+            if (Entry.Key.Text == variableName.Text)
+            {
+                Field Field = Entry.Value;
+                Result = new Variable(Field.Name, Field.Type);
+                break;
+            }
+
+        if (hostMethod is not null)
+        {
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in hostMethod.ParameterTable)
+                if (Entry.Key.Text == variableName.Text)
+                {
+                    Parameter Parameter = Entry.Value;
+                    ParameterName ParameterLocalName = CreateParameterLocalName(hostMethod, Parameter);
+                    Result = new Variable(ParameterLocalName, Parameter.Type);
+                    break;
+                }
+        }
+
+        if (resultField is not null && resultField.Name.Text == variableName.Text)
+        {
+            Debug.Assert(Result is null);
+
+            Result = new Variable(resultField.Name, resultField.Type);
+        }
+
+        Debug.Assert(Result is not null);
+
+        return Result!;
     }
 
     private void Log(string message)

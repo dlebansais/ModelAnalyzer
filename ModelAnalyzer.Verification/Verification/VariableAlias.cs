@@ -11,7 +11,7 @@ internal record VariableAlias
     /// Initializes a new instance of the <see cref="VariableAlias"/> class.
     /// </summary>
     /// <param name="variable">The variable.</param>
-    public VariableAlias(IVariable variable)
+    public VariableAlias(Variable variable)
     {
         Variable = variable;
         Index = 0;
@@ -22,7 +22,7 @@ internal record VariableAlias
     /// </summary>
     /// <param name="variable">The variable.</param>
     /// <param name="index">The index.</param>
-    public VariableAlias(IVariable variable, int index)
+    public VariableAlias(Variable variable, int index)
     {
         Variable = variable;
         Index = index;
@@ -31,7 +31,7 @@ internal record VariableAlias
     /// <summary>
     /// Gets the variable.
     /// </summary>
-    public IVariable Variable { get; }
+    public Variable Variable { get; }
 
     /// <summary>
     /// Gets the alias index.
@@ -70,6 +70,6 @@ internal record VariableAlias
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{Variable.Name.Text}_{Index}";
+        return $"{Variable.VariableName.Text}_{Index}";
     }
 }
