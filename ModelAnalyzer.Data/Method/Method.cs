@@ -35,6 +35,11 @@ internal class Method : IMethod
     required public List<Require> RequireList { get; init; }
 
     /// <summary>
+    /// Gets the method local variables.
+    /// </summary>
+    required public ReadOnlyLocalTable LocalTable { get; init; }
+
+    /// <summary>
     /// Gets the method statements.
     /// </summary>
     required public List<Statement> StatementList { get; init; }

@@ -74,6 +74,7 @@ public class NameAndItemTableTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
+            LocalTable = ReadOnlyLocalTable.Empty,
             StatementList = new(),
             ReturnType = ExpressionType.Void,
         };

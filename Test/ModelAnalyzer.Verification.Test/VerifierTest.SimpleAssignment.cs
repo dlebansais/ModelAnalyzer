@@ -162,6 +162,7 @@ public partial class VerifierTest
             AccessModifier = AccessModifier.Public,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
+            LocalTable = ReadOnlyLocalTable.Empty,
             StatementList = new() { Assignment },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,

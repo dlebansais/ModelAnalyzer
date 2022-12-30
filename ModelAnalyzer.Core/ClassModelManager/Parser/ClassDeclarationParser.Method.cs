@@ -51,6 +51,7 @@ internal partial class ClassDeclarationParser
                     ParameterTable = ParameterTable,
                     ReturnType = ReturnType,
                     RequireList = new List<Require>(),
+                    LocalTable = ReadOnlyLocalTable.Empty,
                     StatementList = new List<Statement>(),
                     EnsureList = new List<Ensure>(),
                 };
@@ -67,6 +68,7 @@ internal partial class ClassDeclarationParser
                     ParameterTable = ParameterTable,
                     ReturnType = ReturnType,
                     RequireList = RequireList,
+                    LocalTable = ReadOnlyLocalTable.Empty,
                     StatementList = StatementList,
                     EnsureList = EnsureList,
                 };

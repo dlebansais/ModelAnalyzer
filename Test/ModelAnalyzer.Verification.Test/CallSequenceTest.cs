@@ -33,6 +33,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
+            LocalTable = ReadOnlyLocalTable.Empty,
             StatementList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -49,6 +50,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
+            LocalTable = ReadOnlyLocalTable.Empty,
             StatementList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -76,6 +78,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
+            LocalTable = ReadOnlyLocalTable.Empty,
             StatementList = new(),
             ReturnType = ExpressionType.Void,
         };
