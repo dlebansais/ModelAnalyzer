@@ -3,4 +3,4 @@
 /// <summary>
 /// Represents a variable.
 /// </summary>
-internal record Variable(IVariableName VariableName, ExpressionType VariableType);
+internal record Variable(IVariableName Name, ExpressionType Type) : IVariable;
