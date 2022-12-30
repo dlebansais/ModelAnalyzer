@@ -167,13 +167,7 @@ public partial class ClassModelManager : IDisposable
         string ClassName = verificationResult.ClassName;
 
         ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
-        FillViolationLists(verificationResult, OldClassModel, out List<IInvariantViolation> InvariantViolations, out List<IRequireViolation> RequireViolations, out List<IEnsureViolation> EnsureViolations);
-        ClassModel NewClassModel = OldClassModel with
-        {
-            InvariantViolations = InvariantViolations.AsReadOnly(),
-            RequireViolations = RequireViolations.AsReadOnly(),
-            EnsureViolations = EnsureViolations.AsReadOnly(),
-        };
+        ClassModel NewClassModel = WithFilledViolationLists(OldClassModel, verificationResult);
 
         ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
         ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
@@ -181,18 +175,18 @@ public partial class ClassModelManager : IDisposable
         Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, VerificationResult = verificationResult };
     }
 
-    private void FillViolationLists(VerificationResult verificationResult, ClassModel classModel, out List<IInvariantViolation> invariantViolations, out List<IRequireViolation> requireViolations, out List<IEnsureViolation> ensureViolations)
+    private ClassModel WithFilledViolationLists(ClassModel oldClassModel, VerificationResult verificationResult)
     {
-        invariantViolations = new List<IInvariantViolation>();
-        requireViolations = new List<IRequireViolation>();
-        ensureViolations = new List<IEnsureViolation>();
+        List<IInvariantViolation> InvariantViolations = new();
+        List<IRequireViolation> RequireViolations = new();
+        List<IEnsureViolation> EnsureViolations = new();
 
         int ErrorIndex = verificationResult.ErrorIndex;
 
         string MethodName = verificationResult.MethodName;
         Method? SelectedMethod = null;
 
-        foreach (var Entry in classModel.MethodTable)
+        foreach (var Entry in oldClassModel.MethodTable)
             if (Entry.Key.Text == MethodName)
             {
                 SelectedMethod = Entry.Value;
@@ -201,12 +195,12 @@ public partial class ClassModelManager : IDisposable
 
         if (verificationResult.ErrorType == VerificationErrorType.InvariantError)
         {
-            List<Invariant> InvariantList = classModel.InvariantList;
+            List<Invariant> InvariantList = oldClassModel.InvariantList;
 
             Debug.Assert(ErrorIndex >= 0);
 
             if (ErrorIndex < InvariantList.Count)
-                invariantViolations.Add(new InvariantViolation() { Invariant = InvariantList[ErrorIndex] });
+                InvariantViolations.Add(new InvariantViolation() { Invariant = InvariantList[ErrorIndex] });
         }
         else if (verificationResult.ErrorType == VerificationErrorType.RequireError && SelectedMethod is not null)
         {
@@ -215,7 +209,7 @@ public partial class ClassModelManager : IDisposable
             Debug.Assert(ErrorIndex >= 0);
 
             if (ErrorIndex < RequireList.Count)
-                requireViolations.Add(new RequireViolation() { Method = SelectedMethod, Require = RequireList[ErrorIndex] });
+                RequireViolations.Add(new RequireViolation() { Method = SelectedMethod, Require = RequireList[ErrorIndex] });
         }
         else if (verificationResult.ErrorType == VerificationErrorType.EnsureError && SelectedMethod is not null)
         {
@@ -224,8 +218,17 @@ public partial class ClassModelManager : IDisposable
             Debug.Assert(ErrorIndex >= 0);
 
             if (ErrorIndex < EnsureList.Count)
-                ensureViolations.Add(new EnsureViolation() { Method = SelectedMethod, Ensure = EnsureList[ErrorIndex] });
+                EnsureViolations.Add(new EnsureViolation() { Method = SelectedMethod, Ensure = EnsureList[ErrorIndex] });
         }
+
+        ClassModel NewClassModel = oldClassModel with
+        {
+            InvariantViolations = InvariantViolations.AsReadOnly(),
+            RequireViolations = RequireViolations.AsReadOnly(),
+            EnsureViolations = EnsureViolations.AsReadOnly(),
+        };
+
+        return NewClassModel;
     }
 
     private void ScheduleAsynchronousVerification()
