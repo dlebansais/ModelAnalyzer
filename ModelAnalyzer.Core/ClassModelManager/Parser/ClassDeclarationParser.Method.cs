@@ -27,6 +27,8 @@ internal partial class ClassDeclarationParser
                 ReportUnsupportedEnsures(unsupported, TriviaList);
         }
 
+        ReportInvalidMethodCalls(MethodTable, unsupported);
+
         return MethodTable.ToReadOnly();
     }
 
@@ -190,5 +192,102 @@ internal partial class ClassDeclarationParser
 
         parameter = null!;
         return false;
+    }
+
+    private void ReportInvalidMethodCalls(MethodTable methodTable, Unsupported unsupported)
+    {
+        List<Method> VisitedMethodList = new();
+
+        foreach (KeyValuePair<MethodName, Method> Entry in methodTable)
+            ReportInvalidMethodCalls(methodTable, VisitedMethodList, unsupported, Entry.Value);
+    }
+
+    private void ReportInvalidMethodCalls(MethodTable methodTable, List<Method> visitedMethodList, Unsupported unsupported, Method method)
+    {
+        List<Statement> StatementList = method.StatementList;
+        int i = 0;
+
+        while (i < StatementList.Count)
+        {
+            if (StatementList[i] is MethodCallStatement MethodCall)
+            {
+                if (!IsValidMethodCall(methodTable, visitedMethodList, unsupported, method, MethodCall, out Location Location))
+                {
+                    unsupported.AddUnsupportedStatement(Location);
+                    StatementList.RemoveAt(i);
+                }
+                else
+                    i++;
+            }
+            else
+                i++;
+        }
+    }
+
+    private bool IsValidMethodCall(MethodTable methodTable, List<Method> visitedMethodList, Unsupported unsupported, Method methodHost, MethodCallStatement methodCall, out Location location)
+    {
+        location = methodCall.NameLocation;
+
+        if (methodCall.MethodName == methodHost.Name)
+            return false;
+
+        Method? CalledMethod = null;
+
+        foreach (var Entry in methodTable)
+            if (Entry.Key == methodCall.MethodName)
+            {
+                CalledMethod = Entry.Value;
+                break;
+            }
+
+        if (CalledMethod is null)
+            return false;
+
+        if (visitedMethodList.Contains(CalledMethod))
+            return false;
+
+        int Count = methodCall.ArgumentList.Count;
+
+        if (Count != CalledMethod.ParameterTable.Count)
+            return false;
+
+        int Index = 0;
+        bool AllArgumentsValid = true;
+
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in CalledMethod.ParameterTable)
+        {
+            Argument Argument = methodCall.ArgumentList[Index++];
+            Parameter Parameter = Entry.Value;
+
+            if (!IsValidMethodCallArgument(methodHost, Argument, Parameter))
+            {
+                location = Argument.Location;
+                AllArgumentsValid = false;
+                break;
+            }
+        }
+
+        if (!AllArgumentsValid)
+            return false;
+
+        List<Method> NewVisitedMethodList = new();
+        NewVisitedMethodList.AddRange(visitedMethodList);
+        NewVisitedMethodList.Add(CalledMethod);
+
+        ReportInvalidMethodCalls(methodTable, NewVisitedMethodList, unsupported, CalledMethod);
+
+        return true;
+    }
+
+    private bool IsValidMethodCallArgument(Method methodHost, Argument argument, Parameter parameter)
+    {
+        Expression ArgumentExpression = (Expression)argument.Expression;
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, methodHost.ParameterTable, resultField: null);
+        ExpressionType ParameterType = parameter.Type;
+
+        if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))
+            return false;
+
+        return true;
     }
 }

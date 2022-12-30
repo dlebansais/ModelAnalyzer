@@ -103,4 +103,21 @@ class Program_BadStatement_4
 }
 ");
     }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task InvalidRecursiveCall_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadStatement_5
+{
+    public void Write()
+    {
+        [|Write|]MA0006();
+    }
+}
+");
+    }
 }

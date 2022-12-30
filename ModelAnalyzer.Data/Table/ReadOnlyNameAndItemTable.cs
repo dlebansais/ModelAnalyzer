@@ -35,6 +35,11 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     public bool IsEmpty { get => List.Count == 0; }
 
     /// <summary>
+    /// Gets the count of items in the table.
+    /// </summary>
+    public int Count { get => List.Count; }
+
+    /// <summary>
     /// Checks whether the collection contains a given item.
     /// </summary>
     /// <param name="itemName">The item name.</param>

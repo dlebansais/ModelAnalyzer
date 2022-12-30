@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -143,9 +142,17 @@ internal partial class ClassDeclarationParser
 
     private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, Field destination, Expression source)
     {
-        if (destination.Type == source.GetExpressionType(fieldTable, parameterTable, resultField))
+        ExpressionType DestinationType = destination.Type;
+        ExpressionType SourceType = source.GetExpressionType(fieldTable, parameterTable, resultField);
+
+        return IsSourceAndDestinationTypeCompatible(DestinationType, SourceType);
+    }
+
+    private bool IsSourceAndDestinationTypeCompatible(ExpressionType destinationType, ExpressionType sourceType)
+    {
+        if (destinationType == sourceType)
             return true;
-        else if (destination.Type == ExpressionType.FloatingPoint && source.GetExpressionType(fieldTable, parameterTable, resultField) == ExpressionType.Integer)
+        else if (destinationType == ExpressionType.FloatingPoint && sourceType == ExpressionType.Integer)
             return true;
         else
             return false;
@@ -159,7 +166,7 @@ internal partial class ClassDeclarationParser
         {
             MethodName MethodName = new() { Text = IdentifierName.Identifier.ValueText };
             SeparatedSyntaxList<ArgumentSyntax> InvocationArgumentList = invocationExpression.ArgumentList.Arguments;
-            List<IExpression> ArgumentList = new();
+            List<Argument> ArgumentList = new();
 
             foreach (ArgumentSyntax InvocationArgument in InvocationArgumentList)
             {
@@ -172,14 +179,17 @@ internal partial class ClassDeclarationParser
                     ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
                     LocationContext LocationContext = new(ArgumentExpression);
 
-                    Expression? Argument = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
-                    if (Argument is not null)
-                        ArgumentList.Add(Argument);
+                    Expression? Expression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
+                    if (Expression is not null)
+                    {
+                        Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
+                        ArgumentList.Add(NewArgument);
+                    }
                 }
             }
 
             if (ArgumentList.Count == InvocationArgumentList.Count)
-                NewStatement = new MethodCallStatement { MethodName = MethodName, ArgumentList = ArgumentList };
+                NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
         }
         else
             Log("Unsupported method name.");

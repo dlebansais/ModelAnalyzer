@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents a return statement.
@@ -15,7 +17,13 @@ internal class MethodCallStatement : Statement
     required public MethodName MethodName { get; init; }
 
     /// <summary>
+    /// Gets the method name location.
+    /// </summary>
+    [JsonIgnore]
+    required public Location NameLocation { get; init; }
+
+    /// <summary>
     /// Gets the list of arguments.
     /// </summary>
-    required public List<IExpression> ArgumentList { get; init; }
+    required public List<Argument> ArgumentList { get; init; }
 }
