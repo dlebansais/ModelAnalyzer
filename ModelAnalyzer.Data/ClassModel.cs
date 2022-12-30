@@ -191,7 +191,7 @@ internal partial record ClassModel : IClassModel
             AppendAssertion(builder, "ensure", Ensure.BooleanExpression);
     }
 
-    private void AppendAssertion(StringBuilder builder, string text, Expression booleanExpression)
+    private void AppendAssertion(StringBuilder builder, string text, IExpression booleanExpression)
     {
         builder.AppendLine($"  # {text} {booleanExpression}");
     }

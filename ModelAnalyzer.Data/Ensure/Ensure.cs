@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a guarantee when a method returns.
 /// </summary>
-internal class Ensure : IEnsure
+internal class Ensure : IEnsure, IAssertion
 {
     /// <summary>
     /// The result keyword for ensure assertions.
@@ -21,10 +21,8 @@ internal class Ensure : IEnsure
     [JsonIgnore]
     required public Location Location { get; init; }
 
-    /// <summary>
-    /// Gets the expression guaranteed to be true.
-    /// </summary>
-    required public Expression BooleanExpression { get; init; }
+    /// <inheritdoc/>
+    required public IExpression BooleanExpression { get; init; }
 
     /// <inheritdoc/>
     public override string ToString()

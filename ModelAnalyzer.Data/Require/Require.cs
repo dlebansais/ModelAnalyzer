@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a requirement assertion.
 /// </summary>
-internal class Require : IRequire
+internal class Require : IRequire, IAssertion
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -16,10 +16,8 @@ internal class Require : IRequire
     [JsonIgnore]
     required public Location Location { get; init; }
 
-    /// <summary>
-    /// Gets the expression representing the requirement.
-    /// </summary>
-    required public Expression BooleanExpression { get; init; }
+    /// <inheritdoc/>
+    required public IExpression BooleanExpression { get; init; }
 
     /// <inheritdoc/>
     public override string ToString()

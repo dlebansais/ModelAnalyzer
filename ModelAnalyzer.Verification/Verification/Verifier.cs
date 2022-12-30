@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using AnalysisLogger;
 using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
@@ -254,7 +255,7 @@ internal partial class Verifier : IDisposable
     private bool AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
     {
         AddMethodParameterStates(solver, aliasTable, method);
-        if (!AddMethodRequires(solver, aliasTable, method))
+        if (!AddMethodRequires(solver, aliasTable, method, checkOpposite: false))
             return false;
 
         BoolExpr MainBranch = Context.MkBool(true);
@@ -263,7 +264,7 @@ internal partial class Verifier : IDisposable
         if (!AddStatementListExecution(solver, aliasTable, method, ref ResultField, MainBranch, method.StatementList))
             return false;
 
-        if (!AddMethodEnsures(solver, aliasTable, method, ResultField))
+        if (!AddMethodEnsures(solver, aliasTable, method, ResultField, keepNormal: false))
             return false;
 
         return true;
@@ -285,75 +286,100 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private static Parameter CreateParameterLocal(Method method, Parameter parameter)
-    {
-        ParameterName ParameterLocalName = CreateParameterLocalName(method, parameter);
-        ExpressionType ParameterLocalType = parameter.Type;
-        Parameter ParameterLocal = new Parameter() { Name = ParameterLocalName, Type = ParameterLocalType };
-
-        return ParameterLocal;
-    }
-
     private static ParameterName CreateParameterLocalName(Method method, Parameter parameter)
     {
-        string ParameterLocalText = GetParameterLocalText(method, parameter);
+        string ParameterLocalText = $"{method.Name.Text}${parameter.Name.Text}";
         return new ParameterName() { Text = ParameterLocalText };
     }
 
-    private static string GetParameterLocalText(Method method, Parameter parameter)
-    {
-        return $"{method.Name.Text}${parameter.Name.Text}";
-    }
-
-    private bool AddMethodRequires(Solver solver, AliasTable aliasTable, Method method)
+    // checkOpposite: false for a call outside the call (the call is assumed to fulfill the contract)
+    //                true for a call from within the class (the call must fulfill the contract)
+    private bool AddMethodRequires(Solver solver, AliasTable aliasTable, Method method, bool checkOpposite)
     {
         for (int i = 0; i < method.RequireList.Count; i++)
         {
             Require Require = method.RequireList[i];
-            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField: null, Require.BooleanExpression);
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField: null, Require.BooleanExpression);
+            string AssertionType = "require";
+            VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
-            Log($"Adding {RequireExpr}");
-            solver.Assert(RequireExpr);
-
-            if (solver.Check() != Status.SATISFIABLE)
-            {
-                Log($"Inconsistent require state for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.RequireError, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = i };
+            if (checkOpposite && !AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
                 return false;
-            }
+
+            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal: true))
+                return false;
         }
 
         return true;
     }
 
-    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Field? resultField)
+    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Field? resultField, bool keepNormal)
+    {
+        for (int i = 0; i < method.EnsureList.Count; i++)
+        {
+            Ensure Ensure = method.EnsureList[i];
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField, Ensure.BooleanExpression);
+            string AssertionType = "ensure";
+            VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
+
+            if (!AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
+                return false;
+
+            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
+                return false;
+        }
+
+        return true;
+    }
+
+    // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
+    private bool AddMethodAssertionNormal(Solver solver, Method method, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType, bool keepNormal)
     {
         bool Result = true;
 
-        for (int i = 0; i < method.EnsureList.Count && Result == true; i++)
-        {
-            Ensure Ensure = method.EnsureList[i];
-            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField, Ensure.BooleanExpression);
-            BoolExpr EnsureOppositeExpr = Context.MkNot(EnsureExpr);
-
+        if (!keepNormal)
             solver.Push();
 
-            Log($"Adding ensure opposite {EnsureOppositeExpr}");
-            solver.Assert(EnsureOppositeExpr);
+        Log($"Adding {assertionType} {assertionExpr}");
+        solver.Assert(assertionExpr);
 
-            if (solver.Check() == Status.SATISFIABLE)
-            {
-                Log($"Ensure violation for class {ClassName}");
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.EnsureError, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = i };
+        if (solver.Check() != Status.SATISFIABLE)
+        {
+            Log($"Inconsistent {assertionType} state for class {ClassName}");
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = index };
 
-                string ModelString = TextBuilder.Normalized(solver.Model.ToString());
-                Log(ModelString);
-
-                Result = false;
-            }
-
-            solver.Pop();
+            Result = false;
         }
+
+        if (!keepNormal)
+            solver.Pop();
+
+        return Result;
+    }
+
+    private bool AddMethodAssertionOpposite(Solver solver, Method method, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType)
+    {
+        bool Result = true;
+
+        BoolExpr AssertionOppositeExpr = Context.MkNot(assertionExpr);
+
+        solver.Push();
+
+        Log($"Adding {assertionType} opposite {AssertionOppositeExpr}");
+        solver.Assert(AssertionOppositeExpr);
+
+        if (solver.Check() == Status.SATISFIABLE)
+        {
+            Log($"Violation of {assertionType} for class {ClassName}");
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = index };
+
+            string ModelString = TextBuilder.Normalized(solver.Model.ToString());
+            Log(ModelString);
+
+            Result = false;
+        }
+
+        solver.Pop();
 
         return Result;
     }

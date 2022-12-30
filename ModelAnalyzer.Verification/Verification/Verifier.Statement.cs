@@ -154,7 +154,7 @@ internal partial class Verifier : IDisposable
             ParameterName ParameterLocalName = CreateParameterLocalName(calledMethod, Parameter);
             Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
 
-            aliasTable.AddVariable(ParameterVariable);
+            aliasTable.AddOrIncrement(ParameterVariable);
             VariableAlias FieldNameAlias = aliasTable.GetAlias(ParameterVariable);
 
             Expr TemporaryLocalExpr = CreateVariableExpr(FieldNameAlias.ToString(), Parameter.Type);
@@ -164,14 +164,14 @@ internal partial class Verifier : IDisposable
             AddToSolver(solver, branch, InitExpr);
         }
 
-        if (!AddMethodRequires(solver, aliasTable, calledMethod))
+        if (!AddMethodRequires(solver, aliasTable, calledMethod, checkOpposite: true))
             return false;
 
         Field? CalledResultField = null;
         if (!AddStatementListExecution(solver, aliasTable, calledMethod, ref CalledResultField, branch, calledMethod.StatementList))
             return false;
 
-        if (!AddMethodEnsures(solver, aliasTable, calledMethod, resultField))
+        if (!AddMethodEnsures(solver, aliasTable, calledMethod, resultField, keepNormal: true))
             return false;
 
         return true;

@@ -54,7 +54,7 @@ The analyzer supports:
 + Assignment of an expression to a field.
 + `return`, but at the end of a method only.
 + The `if` `else` statement.
-+ Invocation of a method that has no return value.
++ Invocation of a method - of the same class only - that has no return value.
 + A restricted subset of expressions:
   * The `+`, `-`, `*` and `/` binary operators.
   * The `-` unary operator.

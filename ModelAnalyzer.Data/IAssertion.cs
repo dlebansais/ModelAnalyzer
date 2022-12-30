@@ -16,4 +16,9 @@ public interface IAssertion
     /// Gets the assertion location.
     /// </summary>
     Location Location { get; }
+
+    /// <summary>
+    /// Gets the assertion expression.
+    /// </summary>
+    IExpression BooleanExpression { get; }
 }
