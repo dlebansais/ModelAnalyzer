@@ -21,7 +21,7 @@ class Program_CoreInvariant_0
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -47,7 +47,8 @@ class Program_CoreInvariant_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreInvariant_0
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -66,7 +67,7 @@ class Program_CoreInvariant_1
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -96,7 +97,7 @@ class Program_CoreInvariant_2
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -126,7 +127,7 @@ class Program_CoreInvariant_3
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -156,7 +157,7 @@ class Program_CoreInvariant_4
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }

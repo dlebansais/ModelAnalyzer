@@ -201,8 +201,9 @@ public partial class VerifierTest
         Method TestMethod = new()
         {
             Name = MethodName,
-            RequireList = new(),
+            AccessModifier = AccessModifier.Public,
             ParameterTable = ReadOnlyParameterTable.Empty,
+            RequireList = new(),
             StatementList = new() { Conditional },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,

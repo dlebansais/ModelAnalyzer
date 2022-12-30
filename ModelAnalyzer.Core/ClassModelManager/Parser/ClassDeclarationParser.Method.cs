@@ -38,7 +38,7 @@ internal partial class ClassDeclarationParser
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
         {
-            if (IsMethodDeclarationValid(methodDeclaration, out ExpressionType ReturnType))
+            if (IsMethodDeclarationValid(methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
             {
                 ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
@@ -51,8 +51,9 @@ internal partial class ClassDeclarationParser
                 Method NewMethod = new Method
                 {
                     Name = MethodName,
-                    ReturnType = ReturnType,
+                    AccessModifier = AccessModifier,
                     ParameterTable = ParameterTable,
+                    ReturnType = ReturnType,
                     RequireList = RequireList,
                     StatementList = StatementList,
                     EnsureList = EnsureList,
@@ -71,7 +72,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out ExpressionType returnType)
+    private bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out AccessModifier accessModifier, out ExpressionType returnType)
     {
         bool IsMethodSupported = true;
 
@@ -89,13 +90,27 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
 
+        accessModifier = AccessModifier.Private;
+        Dictionary<SyntaxKind, AccessModifier> AccessModifierTable = new()
+        {
+            { SyntaxKind.PrivateKeyword, AccessModifier.Private },
+            { SyntaxKind.PublicKeyword, AccessModifier.Public },
+            { SyntaxKind.InternalKeyword, AccessModifier.Public },
+        };
+
         foreach (SyntaxToken Modifier in methodDeclaration.Modifiers)
-            if (!Modifier.IsKind(SyntaxKind.PrivateKeyword) && !Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword))
+        {
+            SyntaxKind ModifierKind = Modifier.Kind();
+
+            if (AccessModifierTable.ContainsKey(ModifierKind))
+                accessModifier = AccessModifierTable[ModifierKind];
+            else
             {
                 LogWarning($"Unsupported '{Modifier.ValueText}' method modifier.");
 
                 IsMethodSupported = false;
             }
+        }
 
         return IsMethodSupported;
     }

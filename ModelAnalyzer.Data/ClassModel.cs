@@ -148,12 +148,22 @@ internal partial record ClassModel : IClassModel
 
     private void AppendMethods(StringBuilder builder)
     {
+        bool IsFirst = true;
+
         foreach (KeyValuePair<MethodName, Method> MethodEntry in MethodTable)
+        {
+            if (!IsFirst || !FieldTable.IsEmpty)
+                builder.AppendLine();
+
             MethodToString(builder, MethodEntry.Value);
+            IsFirst = false;
+        }
     }
 
     private void MethodToString(StringBuilder builder, Method method)
     {
+        string Modifier = method.AccessModifier == AccessModifier.Public ? "public " : string.Empty;
+
         string Parameters = string.Empty;
 
         foreach (KeyValuePair<ParameterName, Parameter> ParameterEntry in method.ParameterTable)
@@ -167,7 +177,7 @@ internal partial record ClassModel : IClassModel
         }
 
         string ReturnTypeString = ExpressionTypeToString(method.ReturnType);
-        builder.AppendLine($"  {ReturnTypeString} {method.Name.Text}({Parameters})");
+        builder.AppendLine($"  {Modifier}{ReturnTypeString} {method.Name.Text}({Parameters})");
 
         foreach (Require Require in method.RequireList)
             AppendAssertion(builder, "require", Require.BooleanExpression);

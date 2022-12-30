@@ -8,7 +8,7 @@ using NUnit.Framework;
 public partial class VerifierTest
 {
     [Test]
-    [Category("Core")]
+    [Category("Verification")]
     public void VerifierTest_Dispose()
     {
         using (VerifierExtended TestObject = new VerifierExtended())
@@ -17,7 +17,7 @@ public partial class VerifierTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verification")]
     public void VerifierTest_DoubleDispose()
     {
         using (VerifierExtended TestObject = new VerifierExtended())
@@ -27,7 +27,7 @@ public partial class VerifierTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verification")]
     public void VerifierTest_FakeFinalize()
     {
         using (VerifierExtended TestObject = new VerifierExtended())
@@ -37,7 +37,7 @@ public partial class VerifierTest
     }
 
     [Test]
-    [Category("Core")]
+    [Category("Verification")]
     public void VerifierTest_Destructor()
     {
         using VerifierContainer Container = new();

@@ -159,7 +159,7 @@ class {ForSynchronousTestOnly}_7
 {{
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {{
         X = x;
     }}
@@ -179,7 +179,7 @@ class {ForSynchronousTestOnly}_8
 {{
     bool X;
 
-    void Write(bool x)
+    public void Write(bool x)
     // Require: x == false
     {{
         X = x;
@@ -200,7 +200,7 @@ class {ForSynchronousTestOnly}_9
 {{
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x == 0
     {{
         X = x;
@@ -221,7 +221,7 @@ class {ForSynchronousTestOnly}_10
 {{
     double X;
 
-    void Write(double x)
+    public void Write(double x)
     // Require: x == 0
     {{
         X = x;
@@ -243,7 +243,7 @@ class Program_InvariantViolation_11
 {{
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {{
         X = x;
     }}

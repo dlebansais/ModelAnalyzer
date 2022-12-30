@@ -21,7 +21,7 @@ class Program_CoreEnsure_0
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -53,7 +53,8 @@ class Program_CoreEnsure_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_0
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -72,7 +73,7 @@ class Program_CoreEnsure_1
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -98,7 +99,7 @@ class Program_CoreEnsure_2
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -128,7 +129,7 @@ class Program_CoreEnsure_3
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -149,7 +150,8 @@ class Program_CoreEnsure_3
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_3
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -167,7 +169,7 @@ class Program_CoreEnsure_4
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -184,7 +186,8 @@ class Program_CoreEnsure_4
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_4
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -202,7 +205,7 @@ class Program_CoreEnsure_5
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -232,13 +235,13 @@ class Program_CoreEnsure_6
 {
     int X;
 
-    void Write1(int x)
+    public void Write1(int x)
     {
         X = x;
     }
     // Ensure: X == x
 
-    void Write2(int x)
+    public void Write2(int x)
     {
         X = x;
     }
@@ -255,12 +258,14 @@ class Program_CoreEnsure_6
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_6
   int X
-  void Write1(int x)
+
+  public void Write1(int x)
   {
     X = x;
   }
   # ensure X == x
-  void Write2(int x)
+
+  public void Write2(int x)
   {
     X = x;
   }
@@ -279,7 +284,7 @@ class Program_CoreEnsure_7
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -301,7 +306,8 @@ class Program_CoreEnsure_7
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_7
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -320,7 +326,7 @@ class Program_CoreEnsure_8
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -338,7 +344,8 @@ class Program_CoreEnsure_8
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_8
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }
@@ -356,7 +363,7 @@ class Program_CoreEnsure_9
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Ensure: X == x
     {
         X = x;
@@ -374,7 +381,8 @@ class Program_CoreEnsure_9
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_9
   int X
-  void Write(int x)
+
+  public void Write(int x)
   {
     X = x;
   }

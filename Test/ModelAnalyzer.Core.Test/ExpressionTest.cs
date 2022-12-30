@@ -238,7 +238,7 @@ class Program_CoreExpression_8
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x >= 0
     // Require: (x + 1) >= (0)
     // Require: true
@@ -262,7 +262,8 @@ class Program_CoreExpression_8
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_8
   int X
-  void Write(int x)
+
+  public void Write(int x)
   # require x >= 0
   # require (x + 1) >= 0
   # require true
@@ -558,7 +559,7 @@ class Program_CoreExpression_19
 {
     int X;
 
-    int Write()
+    public int Write()
     {
         return X;
     }

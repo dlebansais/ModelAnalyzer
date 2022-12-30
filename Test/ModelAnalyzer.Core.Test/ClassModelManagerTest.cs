@@ -377,7 +377,7 @@ class Program_CoreClassModelManager_17
 {
     int X;
 
-    int Read()
+    public int Read()
     {
         X = 1;
         return X;
@@ -403,12 +403,12 @@ class Program_CoreClassModelManager_18
 {
     int X;
 
-    void Write1(int x)
+    public void Write1(int x)
     {
         X = x;
     }
 
-    void Write2(int x)
+    public void Write2(int x)
     // Require: x == 0
     // Require: x != 0
     {
@@ -491,7 +491,7 @@ class Program_CoreClassModelManager_21
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x == 0
     // Require: x != 0
     {
@@ -507,7 +507,7 @@ class Program_CoreClassModelManager_21
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -531,7 +531,7 @@ class Program_CoreClassModelManager_22
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -545,7 +545,7 @@ class Program_CoreClassModelManager_22
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x == 0
     // Require: x != 0
     {
@@ -571,7 +571,7 @@ class Program_CoreClassModelManager_23
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -586,7 +586,7 @@ class Program_CoreClassModelManager_23
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -610,7 +610,7 @@ class Program_CoreClassModelManager_24
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -624,7 +624,7 @@ class Program_CoreClassModelManager_24
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }

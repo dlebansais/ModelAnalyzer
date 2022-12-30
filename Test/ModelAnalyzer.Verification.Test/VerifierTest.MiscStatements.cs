@@ -14,7 +14,7 @@ class Program_Verifier_MiscStatement1
 {
     int X;
 
-    void Write()
+    public void Write()
     {
         X = X + 1;
 
@@ -43,7 +43,7 @@ class Program_Verifier_MiscStatement2
 {
     int X;
 
-    void Write1()
+    public void Write1()
     {
         X = X + 1;
 
@@ -90,7 +90,7 @@ class Program_Verifier_MiscStatement3
 {
     int X;
 
-    void Write()
+    public void Write()
     {
         X = X + 1;
     }

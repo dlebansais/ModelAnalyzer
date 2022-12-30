@@ -14,12 +14,12 @@ class Program_Verifier_EnsureBoolean1
 {
     bool X;
 
-    void Write1(bool x)
+    public void Write1(bool x)
     {
         X = x;
     }
 
-    void Write2(bool x)
+    public void Write2(bool x)
     {
         X = x;
     }
@@ -34,7 +34,7 @@ class Program_Verifier_EnsureBoolean2
 {
     bool X;
 
-    void Write(bool x)
+    public void Write(bool x)
     {
         X = x;
     }
@@ -48,7 +48,7 @@ class Program_Verifier_EnsureBoolean3
 {
     bool X;
 
-    void Write(bool x)
+    public void Write(bool x)
     // Require: x == false || x == true
     {
         X = x;
@@ -64,7 +64,7 @@ class Program_Verifier_EnsureBoolean4
 {
     bool X;
 
-    void Write(bool x)
+    public void Write(bool x)
     // Require: x == false
     {
         X = x;
@@ -82,7 +82,7 @@ class Program_Verifier_EnsureBoolean5
     bool X;
     bool Y;
 
-    void Write(bool x, bool y)
+    public void Write(bool x, bool y)
     // Require: x == false
     {
         X = x;
@@ -101,7 +101,7 @@ class Program_Verifier_EnsureBoolean6
     bool X;
     bool Y;
 
-    void Write(bool x, bool y)
+    public void Write(bool x, bool y)
     // Require: y == false
     {
         X = x;
@@ -120,7 +120,7 @@ class Program_Verifier_EnsureBoolean7
     bool X;
     bool Y;
 
-    void Write(bool x, bool y)
+    public void Write(bool x, bool y)
     // Require: x == false
     // Require: y == false
     {
@@ -239,12 +239,12 @@ class Program_Verifier_EnsureInteger1
 {
     int X;
 
-    void Write1(int x)
+    public void Write1(int x)
     {
         X = x;
     }
 
-    void Write2(int x)
+    public void Write2(int x)
     {
         X = x;
     }
@@ -259,7 +259,7 @@ class Program_Verifier_EnsureInteger2
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     {
         X = x;
     }
@@ -273,7 +273,7 @@ class Program_Verifier_EnsureInteger3
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x == 0
     {
         X = x;
@@ -289,7 +289,7 @@ class Program_Verifier_EnsureInteger4
 {
     int X;
 
-    void Write(int x)
+    public void Write(int x)
     // Require: x == 0
     {
         X = x;
@@ -307,7 +307,7 @@ class Program_Verifier_EnsureInteger5
     int X;
     int Y;
 
-    void Write(int x, int y)
+    public void Write(int x, int y)
     // Require: x == 0
     {
         X = x;
@@ -326,7 +326,7 @@ class Program_Verifier_EnsureInteger6
     int X;
     int Y;
 
-    void Write(int x, int y)
+    public void Write(int x, int y)
     // Require: y == 0
     {
         X = x;
@@ -345,7 +345,7 @@ class Program_Verifier_EnsureInteger7
     int X;
     int Y;
 
-    void Write(int x, int y)
+    public void Write(int x, int y)
     // Require: x == 0
     // Require: y == 0
     {
@@ -463,12 +463,12 @@ class Program_Verifier_EnsureFloatingPoint1
 {
     double X;
 
-    void Write1(double x)
+    public void Write1(double x)
     {
         X = x;
     }
 
-    void Write2(double x)
+    public void Write2(double x)
     {
         X = x;
     }
@@ -483,7 +483,7 @@ class Program_Verifier_EnsureFloatingPoint2
 {
     double X;
 
-    void Write(double x)
+    public void Write(double x)
     {
         X = x;
     }
@@ -497,7 +497,7 @@ class Program_Verifier_EnsureFloatingPoint3
 {
     double X;
 
-    void Write(double x)
+    public void Write(double x)
     // Require: x == 0
     {
         X = x;
@@ -513,7 +513,7 @@ class Program_Verifier_EnsureFloatingPoint4
 {
     double X;
 
-    void Write(double x)
+    public void Write(double x)
     // Require: x == 0
     {
         X = x;
@@ -531,7 +531,7 @@ class Program_Verifier_EnsureFloatingPoint5
     double X;
     double Y;
 
-    void Write(double x, double y)
+    public void Write(double x, double y)
     // Require: x == 0
     {
         X = x;
@@ -550,7 +550,7 @@ class Program_Verifier_EnsureFloatingPoint6
     double X;
     double Y;
 
-    void Write(double x, double y)
+    public void Write(double x, double y)
     // Require: y == 0
     {
         X = x;
@@ -569,7 +569,7 @@ class Program_Verifier_EnsureFloatingPoint7
     double X;
     double Y;
 
-    void Write(double x, double y)
+    public void Write(double x, double y)
     // Require: x == 0
     // Require: y == 0
     {

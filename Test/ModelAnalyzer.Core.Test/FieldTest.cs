@@ -233,7 +233,7 @@ class Program_CoreField_8
     string X;
     int Y;
 
-    void Write(int y)
+    public void Write(int y)
     {
         Y = y;
     }

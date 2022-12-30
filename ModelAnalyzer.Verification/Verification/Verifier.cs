@@ -89,9 +89,13 @@ internal partial class Verifier : IDisposable
             foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
             {
                 Method Method = Entry.Value;
-                CallSequence NewCallSequence = callSequence.WithAddedCall(Method);
 
-                CallMethods(depth - 1, NewCallSequence);
+                if (Method.AccessModifier == AccessModifier.Public)
+                {
+                    CallSequence NewCallSequence = callSequence.WithAddedCall(Method);
+
+                    CallMethods(depth - 1, NewCallSequence);
+                }
             }
         }
         else

@@ -116,6 +116,7 @@ class Program_CoreStatement_3
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_3
   int X
   int Y
+
   void Write(int x, int y)
   {
     if (x == 0)
@@ -164,6 +165,7 @@ class Program_CoreStatement_4
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_4
   int X
   int Y
+
   void Write(int x, int y)
   {
     if (x == 0)
@@ -204,6 +206,7 @@ class Program_CoreStatement_5
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_5
   int X
+
   int Read()
   {
     return X;
@@ -265,6 +268,7 @@ class Program_CoreStatement_7
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_7
   int X
+
   int Read()
   {
     return X;

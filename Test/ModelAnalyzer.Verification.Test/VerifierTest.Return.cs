@@ -14,7 +14,7 @@ class Program_Verifier_ReturnBoolean1
 {
     bool X;
 
-    bool Read()
+    public bool Read()
     {
         return X;
     }
@@ -28,7 +28,7 @@ class Program_Verifier_ReturnBoolean1
 {
     bool X;
 
-    bool Read()
+    public bool Read()
     {
         return X;
     }
@@ -41,7 +41,7 @@ using System;
 
 class Program_Verifier_ReturnBoolean1
 {
-    bool Read()
+    public bool Read()
     {
         return false;
     }
@@ -54,7 +54,7 @@ using System;
 
 class Program_Verifier_ReturnBoolean1
 {
-    bool Read()
+    public bool Read()
     {
         return true;
     }
@@ -70,7 +70,7 @@ class Program_Verifier_ReturnBoolean1
     bool X = true;
     bool Y = false;
 
-    bool Read()
+    public bool Read()
     {
         return X && Y;
     }
@@ -85,7 +85,7 @@ class Program_Verifier_ReturnBoolean1
 {
     bool X;
 
-    void Read()
+    public void Read()
     {
         return;
     }
@@ -173,7 +173,7 @@ class Program_Verifier_ReturnInteger1
 {
     int X;
 
-    int Read()
+    public int Read()
     {
         return X;
     }
@@ -187,7 +187,7 @@ class Program_Verifier_ReturnInteger1
 {
     int X;
 
-    int Read()
+    public int Read()
     {
         return X;
     }
@@ -200,7 +200,7 @@ using System;
 
 class Program_Verifier_ReturnInteger1
 {
-    int Read()
+    public int Read()
     {
         return 0;
     }
@@ -213,7 +213,7 @@ using System;
 
 class Program_Verifier_ReturnInteger1
 {
-    int Read()
+    public int Read()
     {
         return 1;
     }
@@ -229,7 +229,7 @@ class Program_Verifier_ReturnInteger1
     int X = 1;
     int Y = 0;
 
-    int Read()
+    public int Read()
     {
         return X + Y;
     }
@@ -244,7 +244,7 @@ class Program_Verifier_ReturnInteger1
 {
     int X;
 
-    void Read()
+    public void Read()
     {
         return;
     }
@@ -332,7 +332,7 @@ class Program_Verifier_ReturnFloatingPoint1
 {
     double X;
 
-    double Read()
+    public double Read()
     {
         return X;
     }
@@ -346,7 +346,7 @@ class Program_Verifier_ReturnFloatingPoint1
 {
     double X;
 
-    double Read()
+    public double Read()
     {
         return X;
     }
@@ -359,7 +359,7 @@ using System;
 
 class Program_Verifier_ReturnFloatingPoint1
 {
-    double Read()
+    public double Read()
     {
         return 0.0;
     }
@@ -372,7 +372,7 @@ using System;
 
 class Program_Verifier_ReturnFloatingPoint1
 {
-    double Read()
+    public double Read()
     {
         return 1.0;
     }
@@ -388,7 +388,7 @@ class Program_Verifier_ReturnFloatingPoint1
     double X = 1.0;
     double Y = 0.0;
 
-    double Read()
+    public double Read()
     {
         return X + Y;
     }
@@ -403,7 +403,7 @@ class Program_Verifier_ReturnInteger1
 {
     double X;
 
-    void Read()
+    public void Read()
     {
         return;
     }

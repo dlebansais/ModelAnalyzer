@@ -30,6 +30,11 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     }
 
     /// <summary>
+    /// Gets a value indicating whether the table is empty.
+    /// </summary>
+    public bool IsEmpty { get => List.Count == 0; }
+
+    /// <summary>
     /// Checks whether the collection contains a given item.
     /// </summary>
     /// <param name="itemName">The item name.</param>

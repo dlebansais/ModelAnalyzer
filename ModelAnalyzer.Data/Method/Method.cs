@@ -15,6 +15,11 @@ internal class Method : IMethod
     required public MethodName Name { get; init; }
 
     /// <summary>
+    /// Gets the access modifier.
+    /// </summary>
+    required public AccessModifier AccessModifier { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether the method returns a value.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }

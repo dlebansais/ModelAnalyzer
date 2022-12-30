@@ -34,6 +34,7 @@ class Program_CoreMethod_0
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_0
   int X
+
   void Write(int x, int y)
   {
   }
@@ -67,6 +68,7 @@ class Program_CoreMethod_1
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_1
   int X
+
   int Read()
   {
     return X;
@@ -148,7 +150,7 @@ using System;
 
 class Program_CoreMethod_4
 {
-    void Write()
+    public void Write()
     {
     }
 
@@ -166,7 +168,7 @@ class Program_CoreMethod_4
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_4
-  void Write()
+  public void Write()
   {
   }
 "));
@@ -252,7 +254,8 @@ class Program_CoreMethod_7
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_7
   int X
-  void Write(int x, int y)
+
+  public void Write(int x, int y)
   {
   }
 "));
@@ -284,6 +287,7 @@ class Program_CoreMethod_8
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_8
   int X
+
   void Write(int x, int y)
   {
   }
@@ -316,7 +320,8 @@ class Program_CoreMethod_9
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_9
   int X
-  void Write(int x, int y)
+
+  public void Write(int x, int y)
   {
   }
 "));

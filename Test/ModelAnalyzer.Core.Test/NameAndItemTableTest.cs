@@ -70,6 +70,7 @@ public class NameAndItemTableTest
         Method TestMethod = new Method()
         {
             Name = TestMethodName,
+            AccessModifier = AccessModifier.Public,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
