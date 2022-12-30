@@ -94,7 +94,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty, resultField: null),
+            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultField: null),
             Initializer = Initializer,
         };
 
@@ -214,14 +214,14 @@ public partial class VerifierTest
         Field TestField1 = new()
         {
             Name = new FieldName { Text = FieldName1 },
-            Type = Zero1.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty, resultField: null),
+            Type = Zero1.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultField: null),
             Initializer = Initializer,
         };
 
         Field TestField2 = new()
         {
             Name = new FieldName { Text = FieldName2 },
-            Type = Zero2.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty, resultField: null),
+            Type = Zero2.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultField: null),
             Initializer = Initializer,
         };
 

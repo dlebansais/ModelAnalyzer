@@ -13,10 +13,10 @@ internal class BinaryArithmeticExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField)
     {
-        ExpressionType LeftExpressionType = Left.GetExpressionType(fieldTable, parameterTable, resultField);
-        ExpressionType RightExpressionType = Right.GetExpressionType(fieldTable, parameterTable, resultField);
+        ExpressionType LeftExpressionType = Left.GetExpressionType(fieldTable, hostMethod, resultField);
+        ExpressionType RightExpressionType = Right.GetExpressionType(fieldTable, hostMethod, resultField);
 
         if (LeftExpressionType == ExpressionType.FloatingPoint || RightExpressionType == ExpressionType.FloatingPoint)
             return ExpressionType.FloatingPoint;

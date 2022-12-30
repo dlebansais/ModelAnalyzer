@@ -228,7 +228,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
             Invariant Invariant = InvariantList[i];
-            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, ReadOnlyParameterTable.Empty, resultField: null, Invariant.BooleanExpression);
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, hostMethod: null, resultField: null, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
 
             solver.Push();
@@ -262,7 +262,9 @@ internal partial class Verifier : IDisposable
         BoolExpr MainBranch = Context.MkBool(true);
         Field? ResultField = null;
 
-        AddStatementListExecution(solver, aliasTable, method.ParameterTable, ref ResultField, MainBranch, method.StatementList);
+        if (!AddStatementListExecution(solver, aliasTable, method, ref ResultField, MainBranch, method.StatementList))
+            return false;
+
         if (!AddMethodEnsures(solver, aliasTable, method, ResultField))
             return false;
 
@@ -274,11 +276,26 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            aliasTable.AddOrIncrement(Parameter);
-            VariableAlias ParameterNameAlias = aliasTable.GetAlias(Parameter);
+            Parameter ParameterLocal = CreateParameterLocal(method, Parameter);
+            aliasTable.AddOrIncrement(ParameterLocal);
+            VariableAlias ParameterLocalAlias = aliasTable.GetAlias(ParameterLocal);
 
-            CreateVariableExpr(ParameterNameAlias.ToString(), Parameter.Type);
+            CreateVariableExpr(ParameterLocalAlias.ToString(), ParameterLocal.Type);
         }
+    }
+
+    private Parameter CreateParameterLocal(Method method, Parameter parameter)
+    {
+        string ParameterLocalText = GetParameterLocalText(method, parameter);
+        ExpressionType ParameterLocalType = parameter.Type;
+        Parameter ParameterLocal = new Parameter() { Name = new ParameterName() { Text = ParameterLocalText }, Type = ParameterLocalType };
+
+        return ParameterLocal;
+    }
+
+    private string GetParameterLocalText(Method method, Parameter parameter)
+    {
+        return $"{method.Name.Text}${parameter.Name.Text}";
     }
 
     private bool AddMethodRequires(Solver solver, AliasTable aliasTable, Method method)
@@ -286,7 +303,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.RequireList.Count; i++)
         {
             Require Require = method.RequireList[i];
-            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, resultField: null, Require.BooleanExpression);
+            BoolExpr RequireExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField: null, Require.BooleanExpression);
 
             Log($"Adding {RequireExpr}");
             solver.Assert(RequireExpr);
@@ -309,7 +326,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.EnsureList.Count && Result == true; i++)
         {
             Ensure Ensure = method.EnsureList[i];
-            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method.ParameterTable, resultField, Ensure.BooleanExpression);
+            BoolExpr EnsureExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField, Ensure.BooleanExpression);
             BoolExpr EnsureOppositeExpr = Context.MkNot(EnsureExpr);
 
             solver.Push();

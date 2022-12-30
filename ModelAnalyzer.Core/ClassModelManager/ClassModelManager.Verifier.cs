@@ -143,39 +143,42 @@ public partial class ClassModelManager : IDisposable
     {
         Log($"Verification result decoded: {verificationResult}");
 
+        string ClassName = verificationResult.ClassName;
+
         lock (Context.Lock)
         {
             foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
-                if (TryUpdateVerificationEventForClass(verificationResult, Entry.Value))
+            {
+                VerificationState VerificationState = Entry.Value;
+
+                if (VerificationState.ClassModelExchange.ClassModel.Name == ClassName)
+                {
+                    UpdateVerificationEventForClass(verificationResult, VerificationState);
                     return;
+                }
+            }
         }
 
-        Log($"Class no longer in the list of models, verification result lost.");
+        Log($"Class '{ClassName}' no longer in the list of models, verification result lost.");
     }
 
-    private bool TryUpdateVerificationEventForClass(VerificationResult verificationResult, VerificationState verificationState)
+    private void UpdateVerificationEventForClass(VerificationResult verificationResult, VerificationState verificationState)
     {
         string ClassName = verificationResult.ClassName;
 
-        if (verificationState.ClassModelExchange.ClassModel.Name == ClassName)
+        ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
+        FillViolationLists(verificationResult, OldClassModel, out List<IInvariantViolation> InvariantViolations, out List<IRequireViolation> RequireViolations, out List<IEnsureViolation> EnsureViolations);
+        ClassModel NewClassModel = OldClassModel with
         {
-            ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
-            FillViolationLists(verificationResult, OldClassModel, out List<IInvariantViolation> InvariantViolations, out List<IRequireViolation> RequireViolations, out List<IEnsureViolation> EnsureViolations);
-            ClassModel NewClassModel = OldClassModel with
-            {
-                InvariantViolations = InvariantViolations.AsReadOnly(),
-                RequireViolations = RequireViolations.AsReadOnly(),
-                EnsureViolations = EnsureViolations.AsReadOnly(),
-            };
+            InvariantViolations = InvariantViolations.AsReadOnly(),
+            RequireViolations = RequireViolations.AsReadOnly(),
+            EnsureViolations = EnsureViolations.AsReadOnly(),
+        };
 
-            ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
-            ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
+        ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
+        ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
 
-            Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, VerificationResult = verificationResult };
-            return true;
-        }
-
-        return false;
+        Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, VerificationResult = verificationResult };
     }
 
     private void FillViolationLists(VerificationResult verificationResult, ClassModel classModel, out List<IInvariantViolation> invariantViolations, out List<IRequireViolation> requireViolations, out List<IEnsureViolation> ensureViolations)

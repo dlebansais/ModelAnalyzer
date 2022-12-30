@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Z3;
 
@@ -9,7 +10,7 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private T BuildExpression<T>(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, IExpression expression)
+    private T BuildExpression<T>(AliasTable aliasTable, Method? hostMethod, Field? resultField, IExpression expression)
         where T : Expr
     {
         Expr Result = null!;
@@ -18,27 +19,27 @@ internal partial class Verifier : IDisposable
         switch (expression)
         {
             case BinaryArithmeticExpression BinaryArithmetic:
-                Result = BuildBinaryArithmeticExpression(aliasTable, parameterTable, resultField, BinaryArithmetic);
+                Result = BuildBinaryArithmeticExpression(aliasTable, hostMethod, resultField, BinaryArithmetic);
                 IsAssigned = true;
                 break;
             case UnaryArithmeticExpression UnaryArithmetic:
-                Result = BuildUnaryArithmeticExpression(aliasTable, parameterTable, resultField, UnaryArithmetic);
+                Result = BuildUnaryArithmeticExpression(aliasTable, hostMethod, resultField, UnaryArithmetic);
                 IsAssigned = true;
                 break;
             case BinaryLogicalExpression BinaryLogical:
-                Result = BuildBinaryLogicalExpression(aliasTable, parameterTable, resultField, BinaryLogical);
+                Result = BuildBinaryLogicalExpression(aliasTable, hostMethod, resultField, BinaryLogical);
                 IsAssigned = true;
                 break;
             case UnaryLogicalExpression UnaryLogical:
-                Result = BuildUnaryLogicalExpression(aliasTable, parameterTable, resultField, UnaryLogical);
+                Result = BuildUnaryLogicalExpression(aliasTable, hostMethod, resultField, UnaryLogical);
                 IsAssigned = true;
                 break;
             case EqualityExpression Equality:
-                Result = BuildEqualityExpression(aliasTable, parameterTable, resultField, Equality);
+                Result = BuildEqualityExpression(aliasTable, hostMethod, resultField, Equality);
                 IsAssigned = true;
                 break;
             case ComparisonExpression Comparison:
-                Result = BuildComparisonExpression(aliasTable, parameterTable, resultField, Comparison);
+                Result = BuildComparisonExpression(aliasTable, hostMethod, resultField, Comparison);
                 IsAssigned = true;
                 break;
             case LiteralBooleanValueExpression LiteralBooleanValue:
@@ -54,7 +55,7 @@ internal partial class Verifier : IDisposable
                 IsAssigned = true;
                 break;
             case VariableValueExpression VariableValue:
-                Result = BuildVariableValueExpression(aliasTable, parameterTable, resultField, VariableValue);
+                Result = BuildVariableValueExpression(aliasTable, hostMethod, resultField, VariableValue);
                 IsAssigned = true;
                 break;
         }
@@ -64,43 +65,43 @@ internal partial class Verifier : IDisposable
         return (T)Result;
     }
 
-    private ArithExpr BuildBinaryArithmeticExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, BinaryArithmeticExpression binaryArithmeticExpression)
+    private ArithExpr BuildBinaryArithmeticExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, BinaryArithmeticExpression binaryArithmeticExpression)
     {
-        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, parameterTable, resultField, binaryArithmeticExpression.Left);
-        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, parameterTable, resultField, binaryArithmeticExpression.Right);
+        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultField, binaryArithmeticExpression.Left);
+        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultField, binaryArithmeticExpression.Right);
         return OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
     }
 
-    private ArithExpr BuildUnaryArithmeticExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, UnaryArithmeticExpression unaryArithmeticExpression)
+    private ArithExpr BuildUnaryArithmeticExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, UnaryArithmeticExpression unaryArithmeticExpression)
     {
-        ArithExpr Operand = BuildExpression<ArithExpr>(aliasTable, parameterTable, resultField, unaryArithmeticExpression.Operand);
+        ArithExpr Operand = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultField, unaryArithmeticExpression.Operand);
         return OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
     }
 
-    private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, BinaryLogicalExpression binaryLogicalExpression)
+    private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, BinaryLogicalExpression binaryLogicalExpression)
     {
-        BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField, binaryLogicalExpression.Left);
-        BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField, binaryLogicalExpression.Right);
+        BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultField, binaryLogicalExpression.Left);
+        BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultField, binaryLogicalExpression.Right);
         return OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildUnaryLogicalExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, UnaryLogicalExpression unaryLogicalExpression)
+    private BoolExpr BuildUnaryLogicalExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, UnaryLogicalExpression unaryLogicalExpression)
     {
-        BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, parameterTable, resultField, unaryLogicalExpression.Operand);
+        BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultField, unaryLogicalExpression.Operand);
         return OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
     }
 
-    private BoolExpr BuildEqualityExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, EqualityExpression equalityExpression)
+    private BoolExpr BuildEqualityExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, EqualityExpression equalityExpression)
     {
-        Expr Left = BuildExpression<Expr>(aliasTable, parameterTable, resultField, equalityExpression.Left);
-        Expr Right = BuildExpression<Expr>(aliasTable, parameterTable, resultField, equalityExpression.Right);
+        Expr Left = BuildExpression<Expr>(aliasTable, hostMethod, resultField, equalityExpression.Left);
+        Expr Right = BuildExpression<Expr>(aliasTable, hostMethod, resultField, equalityExpression.Right);
         return OperatorBuilder.Equality[equalityExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildComparisonExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, ComparisonExpression comparisonExpression)
+    private BoolExpr BuildComparisonExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, ComparisonExpression comparisonExpression)
     {
-        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, parameterTable, resultField, comparisonExpression.Left);
-        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, parameterTable, resultField, comparisonExpression.Right);
+        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultField, comparisonExpression.Left);
+        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultField, comparisonExpression.Right);
         return OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
     }
 
@@ -119,20 +120,49 @@ internal partial class Verifier : IDisposable
         return CreateFloatingPointExpr(literalFloatingPointValueExpression.Value);
     }
 
-    private Expr BuildVariableValueExpression(AliasTable aliasTable, ReadOnlyParameterTable parameterTable, Field? resultField, VariableValueExpression variableValueExpression)
+    private Expr BuildVariableValueExpression(AliasTable aliasTable, Method? hostMethod, Field? resultField, VariableValueExpression variableValueExpression)
     {
-        IVariable Variable = variableValueExpression.GetVariable(FieldTable, parameterTable, resultField);
+        string VariableName = variableValueExpression.VariableName.Text;
+        string? VariableString = null;
+        ExpressionType VariableType = ExpressionType.Other;
 
-        string VariableString;
+        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+            if (Entry.Key.Text == VariableName)
+            {
+                Field Field = Entry.Value;
+                VariableAlias FieldAlias = aliasTable.GetAlias(Field);
+                VariableString = FieldAlias.ToString();
+                VariableType = Field.Type;
+                break;
+            }
 
-        if (Variable == resultField)
-            VariableString = resultField.Name.Text;
-        else
+        if (hostMethod is not null)
         {
-            VariableAlias VariableAliasName = aliasTable.GetAlias(Variable);
-            VariableString = VariableAliasName.ToString();
+            ReadOnlyParameterTable ParameterTable = hostMethod.ParameterTable;
+
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in ParameterTable)
+                if (Entry.Key.Text == VariableName)
+                {
+                    Parameter Parameter = Entry.Value;
+                    Parameter ParameterLocal = CreateParameterLocal(hostMethod, Parameter);
+                    VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterLocal);
+                    VariableString = ParameterAlias.ToString();
+                    VariableType = Parameter.Type;
+                    break;
+                }
         }
 
-        return CreateVariableExpr(VariableString, Variable.Type);
+        if (resultField is not null && resultField.Name.Text == VariableName)
+        {
+            Debug.Assert(VariableString is null);
+
+            VariableString = resultField.Name.Text;
+            VariableType = resultField.Type;
+        }
+
+        Debug.Assert(VariableString is not null);
+        Debug.Assert(VariableType != ExpressionType.Other);
+
+        return CreateVariableExpr(VariableString!, VariableType);
     }
 }

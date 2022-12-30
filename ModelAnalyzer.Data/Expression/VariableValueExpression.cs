@@ -1,7 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
-using System.Diagnostics;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -14,26 +12,15 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField)
     {
-        return GetVariable(fieldTable, parameterTable, resultField).Type;
+        return ClassModel.GetVariable(fieldTable, hostMethod, resultField, VariableName).Type;
     }
 
     /// <summary>
     /// Gets the variable.
     /// </summary>
     required public IVariableName VariableName { get; init; }
-
-    /// <summary>
-    /// Gets a variable from its name.
-    /// </summary>
-    /// <param name="fieldTable">The table of fields.</param>
-    /// <param name="parameterTable">The table of parameters.</param>
-    /// <param name="resultField">The optional result field.</param>
-    public IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField)
-    {
-        return ClassModel.GetVariable(fieldTable, parameterTable, resultField, VariableName);
-    }
 
     /// <inheritdoc/>
     public override string ToString()

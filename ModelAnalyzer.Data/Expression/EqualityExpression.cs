@@ -13,7 +13,7 @@ internal class EqualityExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField) => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField) => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the left expression.

@@ -43,12 +43,22 @@ internal partial class ClassDeclarationParser
             if (IsMethodDeclarationValid(methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
             {
                 ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
-                List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, ParameterTable, unsupported);
-                List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, ParameterTable, unsupported);
 
+                Method TemporaryMethod = new Method
+                {
+                    Name = MethodName,
+                    AccessModifier = AccessModifier,
+                    ParameterTable = ParameterTable,
+                    ReturnType = ReturnType,
+                    RequireList = new List<Require>(),
+                    StatementList = new List<Statement>(),
+                    EnsureList = new List<Ensure>(),
+                };
+
+                List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
+                List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
                 Field? ResultField = ReturnType == ExpressionType.Void ? null : new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
-
-                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, ParameterTable, ResultField, unsupported);
+                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultField, unsupported);
 
                 Method NewMethod = new Method
                 {
@@ -279,10 +289,10 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidMethodCallArgument(Method methodHost, Argument argument, Parameter parameter)
+    private bool IsValidMethodCallArgument(Method hostMethod, Argument argument, Parameter parameter)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
-        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, methodHost.ParameterTable, resultField: null);
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, hostMethod, resultField: null);
         ExpressionType ParameterType = parameter.Type;
 
         if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))

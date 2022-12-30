@@ -89,10 +89,10 @@ internal partial record ClassModel : IClassModel
     /// Gets a variable from its name.
     /// </summary>
     /// <param name="fieldTable">The table of fields.</param>
-    /// <param name="parameterTable">The table of parameters.</param>
+    /// <param name="hostMethod">The host method, null in invariants.</param>
     /// <param name="resultField">The optional result field.</param>
     /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Field? resultField, IVariableName variableName)
+    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, IVariableName variableName)
     {
         IVariable? Result = null;
 
@@ -103,12 +103,15 @@ internal partial record ClassModel : IClassModel
                 break;
             }
 
-        foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
-            if (Entry.Key.Text == variableName.Text)
-            {
-                Result = Entry.Value;
-                break;
-            }
+        if (hostMethod is not null)
+        {
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in hostMethod.ParameterTable)
+                if (Entry.Key.Text == variableName.Text)
+                {
+                    Result = Entry.Value;
+                    break;
+                }
+        }
 
         if (resultField is not null && resultField.Name.Text == variableName.Text)
         {
