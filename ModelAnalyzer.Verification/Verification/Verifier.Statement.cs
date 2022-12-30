@@ -30,6 +30,10 @@ internal partial class Verifier : IDisposable
                 AddConditionalExecution(solver, aliasTable, parameterTable, ref resultField, branch, Conditional);
                 IsAdded = true;
                 break;
+            case MethodCallStatement MethodCall:
+                AddMethodCallExecution(solver, aliasTable, parameterTable, ref resultField, branch, MethodCall);
+                IsAdded = true;
+                break;
             case ReturnStatement Return:
                 AddReturnExecution(solver, aliasTable, parameterTable, ref resultField, branch, Return);
                 IsAdded = true;
@@ -109,6 +113,11 @@ internal partial class Verifier : IDisposable
 
             AddToSolver(solver, branchExpr, InitExpr);
         }
+    }
+
+    private void AddMethodCallExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, MethodCallStatement methodCallStatement)
+    {
+        // TODO
     }
 
     private void AddReturnExecution(Solver solver, AliasTable aliasTable, ReadOnlyParameterTable parameterTable, ref Field? resultField, BoolExpr branch, ReturnStatement returnStatement)

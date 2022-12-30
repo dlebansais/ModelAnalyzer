@@ -1,7 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
@@ -70,7 +72,7 @@ internal partial class ClassDeclarationParser
         bool IsErrorReported = false;
 
         if (statementNode is ExpressionStatementSyntax ExpressionStatement)
-            NewStatement = TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, ExpressionStatement, ref IsErrorReported);
+            NewStatement = TryParseExpressionStatement(fieldTable, parameterTable, unsupported, ExpressionStatement, ref IsErrorReported);
         else if (statementNode is IfStatementSyntax IfStatement)
             NewStatement = TryParseIfStatement(fieldTable, parameterTable, unsupported, IfStatement, ref IsErrorReported);
         else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
@@ -92,38 +94,49 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseAssignmentStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
+    private Statement? TryParseExpressionStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
+    {
+        ExpressionSyntax Expression = expressionStatement.Expression;
+
+        if (Expression is AssignmentExpressionSyntax AssignmentExpression)
+            return TryParseAssignmentStatement(fieldTable, parameterTable, unsupported, AssignmentExpression, ref isErrorReported);
+        else if (Expression is InvocationExpressionSyntax InvocationExpression)
+            return TryParseMethodCallStatement(fieldTable, parameterTable, unsupported, InvocationExpression, ref isErrorReported);
+        else
+        {
+            Log("Unsupported assignment statement source.");
+
+            return null;
+        }
+    }
+
+    private Statement? TryParseAssignmentStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, AssignmentExpressionSyntax assignmentExpression, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
-        if (expressionStatement.Expression is AssignmentExpressionSyntax AssignmentExpression)
+        if (assignmentExpression.Left is IdentifierNameSyntax IdentifierName)
         {
-            if (AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
+            if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out Field Destination))
             {
-                if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out Field Destination))
-                {
-                    ExpressionSyntax SourceExpression = AssignmentExpression.Right;
-                    LocationContext LocationContext = new(SourceExpression);
+                ExpressionSyntax SourceExpression = assignmentExpression.Right;
+                LocationContext LocationContext = new(SourceExpression);
 
-                    Expression? Expression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, SourceExpression, isNested: false);
-                    if (Expression is not null)
-                    {
-                        if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, resultField: null, Destination, Expression))
-                            NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
-                        else
-                            Log("Source cannot be assigned to destination.");
-                    }
+                Expression? Expression = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, SourceExpression, isNested: false);
+                if (Expression is not null)
+                {
+                    if (IsSourceAndDestinationTypeCompatible(fieldTable, parameterTable, resultField: null, Destination, Expression))
+                        NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
                     else
-                        isErrorReported = true;
+                        Log("Source cannot be assigned to destination.");
                 }
                 else
-                    Log("Unknown assignment statement destination.");
+                    isErrorReported = true;
             }
             else
-                Log("Unsupported assignment statement destination.");
+                Log("Unknown assignment statement destination.");
         }
         else
-            Log("Unsupported assignment statement source.");
+            Log("Unsupported assignment statement destination.");
 
         return NewStatement;
     }
@@ -136,6 +149,42 @@ internal partial class ClassDeclarationParser
             return true;
         else
             return false;
+    }
+
+    private Statement? TryParseMethodCallStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
+    {
+        Statement? NewStatement = null;
+
+        if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
+        {
+            MethodName MethodName = new() { Text = IdentifierName.Identifier.ValueText };
+            SeparatedSyntaxList<ArgumentSyntax> InvocationArgumentList = invocationExpression.ArgumentList.Arguments;
+            List<IExpression> ArgumentList = new();
+
+            foreach (ArgumentSyntax InvocationArgument in InvocationArgumentList)
+            {
+                if (InvocationArgument.NameColon is not null)
+                    Log("Named argument not supported.");
+                else if (!InvocationArgument.RefKindKeyword.IsKind(SyntaxKind.None))
+                    Log("ref, out or in arguments not supported.");
+                else
+                {
+                    ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
+                    LocationContext LocationContext = new(ArgumentExpression);
+
+                    Expression? Argument = ParseExpression(fieldTable, parameterTable, resultField: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
+                    if (Argument is not null)
+                        ArgumentList.Add(Argument);
+                }
+            }
+
+            if (ArgumentList.Count == InvocationArgumentList.Count)
+                NewStatement = new MethodCallStatement { MethodName = MethodName, ArgumentList = ArgumentList };
+        }
+        else
+            Log("Unsupported method name.");
+
+        return NewStatement;
     }
 
     private Statement? TryParseIfStatement(ReadOnlyFieldTable fieldTable, ReadOnlyParameterTable parameterTable, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)

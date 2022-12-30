@@ -225,6 +225,10 @@ internal partial record ClassModel : IClassModel
                 AppendConditionalStatement(builder, Conditional, indentation);
                 IsHandled = true;
                 break;
+            case MethodCallStatement MethodCall:
+                AppendMethodCallStatement(builder, MethodCall, indentation);
+                IsHandled = true;
+                break;
             case ReturnStatement Return:
                 AppendReturnStatement(builder, Return, indentation);
                 IsHandled = true;
@@ -251,6 +255,11 @@ internal partial record ClassModel : IClassModel
             builder.AppendLine("else");
             AppendStatements(builder, statement.WhenFalseStatementList, indentation);
         }
+    }
+
+    private void AppendMethodCallStatement(StringBuilder builder, MethodCallStatement statement, int indentation)
+    {
+        AppendStatementText(builder, $"{statement.MethodName.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }
 
     private void AppendReturnStatement(StringBuilder builder, ReturnStatement statement, int indentation)
