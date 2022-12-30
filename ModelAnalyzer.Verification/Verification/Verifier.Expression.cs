@@ -124,7 +124,7 @@ internal partial class Verifier : IDisposable
     {
         string VariableName = variableValueExpression.VariableName.Text;
         string? VariableString = null;
-        ExpressionType VariableType = ExpressionType.Other;
+        ExpressionType VariableType = variableValueExpression.GetExpressionType(FieldTable, hostMethod, resultField);
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Text == VariableName)
@@ -133,7 +133,6 @@ internal partial class Verifier : IDisposable
                 Variable FieldVariable = new(Field.Name, Field.Type);
                 VariableAlias FieldAlias = aliasTable.GetAlias(FieldVariable);
                 VariableString = FieldAlias.ToString();
-                VariableType = Field.Type;
                 break;
             }
 
@@ -149,7 +148,6 @@ internal partial class Verifier : IDisposable
                     Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
                     VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterVariable);
                     VariableString = ParameterAlias.ToString();
-                    VariableType = Parameter.Type;
                     break;
                 }
         }
@@ -159,7 +157,6 @@ internal partial class Verifier : IDisposable
             Debug.Assert(VariableString is null);
 
             VariableString = resultField.Name.Text;
-            VariableType = resultField.Type;
         }
 
         Debug.Assert(VariableString is not null);
