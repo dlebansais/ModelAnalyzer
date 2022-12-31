@@ -144,10 +144,23 @@ internal partial class Verifier : IDisposable
                 if (Entry.Key.Text == VariableName)
                 {
                     Parameter Parameter = Entry.Value;
-                    ParameterName ParameterLocalName = CreateParameterLocalName(hostMethod, Parameter);
-                    Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
+                    ParameterName ParameterBlockName = CreateParameterBlockName(hostMethod, Parameter);
+                    Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
                     VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterVariable);
                     VariableString = ParameterAlias.ToString();
+                    break;
+                }
+
+            ReadOnlyLocalTable LocalTable = hostMethod.LocalTable;
+
+            foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
+                if (Entry.Key.Text == VariableName)
+                {
+                    Local Local = Entry.Value;
+                    LocalName LocalBlockName = CreateLocalBlockName(hostMethod, Local);
+                    Variable LocalVariable = new(LocalBlockName, Local.Type);
+                    VariableAlias LocalAlias = aliasTable.GetAlias(LocalVariable);
+                    VariableString = LocalAlias.ToString();
                     break;
                 }
         }

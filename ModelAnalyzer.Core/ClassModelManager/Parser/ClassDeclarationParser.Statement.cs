@@ -116,7 +116,15 @@ internal partial class ClassDeclarationParser
 
         if (assignmentExpression.Left is IdentifierNameSyntax IdentifierName)
         {
-            if (TryFindFieldByName(fieldTable, IdentifierName.Identifier.ValueText, out Field Destination))
+            string DestinationName = IdentifierName.Identifier.ValueText;
+            IVariable? Destination = null;
+
+            if (TryFindFieldByName(fieldTable, DestinationName, out IField FieldDestination))
+                Destination = FieldDestination;
+            else if (TryFindLocalByName(hostMethod.LocalTable, DestinationName, out ILocal LocalDestination))
+                Destination = LocalDestination;
+
+            if (Destination is not null)
             {
                 ExpressionSyntax SourceExpression = assignmentExpression.Right;
                 LocationContext LocationContext = new(SourceExpression);
@@ -141,7 +149,7 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, Method hostMethod, Field? resultField, Field destination, Expression source)
+    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, Method hostMethod, Field? resultField, IVariable destination, Expression source)
     {
         ExpressionType DestinationType = destination.Type;
         ExpressionType SourceType = source.GetExpressionType(fieldTable, hostMethod, resultField);

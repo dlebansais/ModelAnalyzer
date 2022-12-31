@@ -275,7 +275,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterLocalName = CreateParameterLocalName(method, Parameter);
+            ParameterName ParameterLocalName = CreateParameterBlockName(method, Parameter);
             Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
 
             aliasTable.AddOrIncrement(ParameterVariable);
@@ -286,10 +286,16 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private static ParameterName CreateParameterLocalName(Method method, Parameter parameter)
+    private static ParameterName CreateParameterBlockName(Method method, Parameter parameter)
     {
-        string ParameterLocalText = $"{method.Name.Text}${parameter.Name.Text}";
-        return new ParameterName() { Text = ParameterLocalText };
+        string ParameterBlockText = $"{method.Name.Text}${parameter.Name.Text}";
+        return new ParameterName() { Text = ParameterBlockText };
+    }
+
+    private static LocalName CreateLocalBlockName(Method method, Local local)
+    {
+        string LocalBlockText = $"{method.Name.Text}${local.Name.Text}";
+        return new LocalName() { Text = LocalBlockText };
     }
 
     // checkOpposite: false for a call outside the call (the call is assumed to fulfill the contract)

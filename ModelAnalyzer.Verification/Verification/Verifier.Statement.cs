@@ -52,12 +52,22 @@ internal partial class Verifier : IDisposable
     private void AddAssignmentExecution(Solver solver, AliasTable aliasTable, Method hostMethod, ref Field? resultField, BoolExpr branch, AssignmentStatement assignmentStatement)
     {
         Expression Source = assignmentStatement.Expression;
+        string DestinationName = assignmentStatement.DestinationName.Text;
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
-            if (Entry.Key.Text == assignmentStatement.DestinationName.Text)
+            if (Entry.Key.Text == DestinationName)
             {
                 Field Field = Entry.Value;
                 Variable Destination = new Variable(Field.Name, Field.Type);
+                AddAssignmentExecution(solver, aliasTable, hostMethod, ref resultField, branch, Destination, Source);
+                break;
+            }
+
+        foreach (KeyValuePair<LocalName, Local> Entry in hostMethod.LocalTable)
+            if (Entry.Key.Text == DestinationName)
+            {
+                Local Local = Entry.Value;
+                Variable Destination = new Variable(Local.Name, Local.Type);
                 AddAssignmentExecution(solver, aliasTable, hostMethod, ref resultField, branch, Destination, Source);
                 break;
             }
@@ -164,8 +174,8 @@ internal partial class Verifier : IDisposable
         {
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterLocalName = CreateParameterLocalName(calledMethod, Parameter);
-            Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
+            ParameterName ParameterBlockName = CreateParameterBlockName(calledMethod, Parameter);
+            Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
 
             aliasTable.AddOrIncrement(ParameterVariable);
             VariableAlias FieldNameAlias = aliasTable.GetAlias(ParameterVariable);

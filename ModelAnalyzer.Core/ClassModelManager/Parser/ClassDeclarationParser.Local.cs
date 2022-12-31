@@ -112,7 +112,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool TryFindLocalByName(ReadOnlyLocalTable localTable, string localName, out Local local)
+    private bool TryFindLocalByName(ReadOnlyLocalTable localTable, string localName, out ILocal local)
     {
         foreach (KeyValuePair<LocalName, Local> Entry in localTable)
             if (Entry.Value.Name.Text == localName)

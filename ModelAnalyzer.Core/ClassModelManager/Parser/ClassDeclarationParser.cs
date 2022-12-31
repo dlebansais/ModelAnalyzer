@@ -261,16 +261,24 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindVariableByName(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, string variableName, out IVariable variable)
     {
-        if (TryFindFieldByName(fieldTable, variableName, out Field Field))
+        if (TryFindFieldByName(fieldTable, variableName, out IField Field))
         {
             variable = Field;
             return true;
         }
 
-        if (hostMethod is not null && TryFindParameterByName(hostMethod.ParameterTable, variableName, out IParameter Parameter))
+        if (hostMethod is not null)
         {
-            variable = Parameter;
-            return true;
+            if (TryFindParameterByName(hostMethod.ParameterTable, variableName, out IParameter Parameter))
+            {
+                variable = Parameter;
+                return true;
+            }
+            else if (TryFindLocalByName(hostMethod.LocalTable, variableName, out ILocal Local))
+            {
+                variable = Local;
+                return true;
+            }
         }
 
         if (resultField is not null && resultField.Name.Text == variableName)

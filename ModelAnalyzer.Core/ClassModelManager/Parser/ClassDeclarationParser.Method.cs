@@ -42,9 +42,11 @@ internal partial class ClassDeclarationParser
         {
             if (IsMethodDeclarationValid(methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
             {
+                Method TemporaryMethod;
+
                 ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
 
-                Method TemporaryMethod = new Method
+                TemporaryMethod = new Method
                 {
                     Name = MethodName,
                     AccessModifier = AccessModifier,
@@ -58,6 +60,19 @@ internal partial class ClassDeclarationParser
 
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
                 ReadOnlyLocalTable LocalTable = ParseLocals(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
+
+                TemporaryMethod = new Method
+                {
+                    Name = MethodName,
+                    AccessModifier = AccessModifier,
+                    ParameterTable = ParameterTable,
+                    ReturnType = ReturnType,
+                    RequireList = RequireList,
+                    LocalTable = LocalTable,
+                    StatementList = new List<Statement>(),
+                    EnsureList = new List<Ensure>(),
+                };
+
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
                 Field? ResultField = ReturnType == ExpressionType.Void ? null : new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
                 List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultField, unsupported);

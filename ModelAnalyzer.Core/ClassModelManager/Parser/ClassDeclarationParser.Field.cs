@@ -91,7 +91,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out Field field)
+    private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out IField field)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
             if (Entry.Value.Name.Text == fieldName)
