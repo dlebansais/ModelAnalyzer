@@ -19,8 +19,6 @@ internal class Field : IField, INameable<FieldName>
     /// <inheritdoc/>
     required public ExpressionType Type { get; init; }
 
-    /// <summary>
-    /// Gets the field initializer.
-    /// </summary>
+    /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
 }

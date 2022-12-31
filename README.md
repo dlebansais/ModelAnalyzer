@@ -50,9 +50,10 @@ The analyzer supports:
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields.
   * Parameters cannot be assigned, they are read-only.
-+ The `Result` name is reserved and cannot be used for fields or parameters.
-+ Assignment of an expression to a field.
-+ `return`, but at the end of a method only.
++ The `Result` name is reserved and cannot be used for fields or parameters. If `Result` is a local variable, then a return statement must be `return Result;`. 
++ Local variables of a supported type. They are not allowed to have the same name as fields or parameters.
++ Assignment of an expression to a field or local variable.
++ The `return` statement, but at the end of a method only.
 + The `if` `else` statement.
 + Invocation of a method - of the same class only - that has no return value.
 + A restricted subset of expressions:
@@ -62,7 +63,7 @@ The analyzer supports:
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
-  * Variables, either fields or parameters.
+  * Variables, either fields, local variables or parameters. Local variables are not allowed in method contracts (see below).
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.

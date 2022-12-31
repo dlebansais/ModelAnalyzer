@@ -15,4 +15,7 @@ public class UnsupportedLocal : IUnsupportedLocal
 
     /// <inheritdoc/>
     public ExpressionType Type => ExpressionType.Other;
+
+    /// <inheritdoc/>
+    public ILiteralExpression? Initializer => null;
 }

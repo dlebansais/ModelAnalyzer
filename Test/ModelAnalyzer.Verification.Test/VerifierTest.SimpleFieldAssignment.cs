@@ -10,9 +10,9 @@ public partial class VerifierTest
 {
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneBooleanFieldSuccess()
+    public void Verifier_SimpleFieldAssignment_OneBooleanFieldSuccess()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -22,9 +22,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneBooleanFieldError()
+    public void Verifier_SimpleFieldAssignment_OneBooleanFieldError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: true, assignmentValue: true, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: true, assignmentValue: true, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -35,9 +35,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneBooleanFieldWithWriteError()
+    public void Verifier_SimpleFieldAssignment_OneBooleanFieldWithWriteError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 1);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 1);
 
         TestObject.Verify();
 
@@ -48,9 +48,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneIntegerFieldSuccess()
+    public void Verifier_SimpleFieldAssignment_OneIntegerFieldSuccess()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -60,9 +60,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneIntegerFieldError()
+    public void Verifier_SimpleFieldAssignment_OneIntegerFieldError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 1, assignmentValue: 1, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 1, assignmentValue: 1, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -73,9 +73,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneIntegerFieldWithWriteError()
+    public void Verifier_SimpleFieldAssignment_OneIntegerFieldWithWriteError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 1);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 1);
 
         TestObject.Verify();
 
@@ -86,9 +86,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneFloatingPointFieldSuccess()
+    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldSuccess()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -98,9 +98,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneFloatingPointFieldError()
+    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 1.0, assignmentValue: 1.0, maxDepth: 0);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 1.0, assignmentValue: 1.0, maxDepth: 0);
 
         TestObject.Verify();
 
@@ -111,9 +111,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleAssignment_OneFloatingPointFieldWithWriteError()
+    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldWithWriteError()
     {
-        Verifier TestObject = CreateSimpleAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 1);
+        Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 1);
 
         TestObject.Verify();
 
@@ -122,7 +122,7 @@ public partial class VerifierTest
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
-    private Verifier CreateSimpleAssignmentVerifier<TValue, TExpression>(TValue invariantTestValue, TValue assignmentValue, int maxDepth)
+    private Verifier CreateSimpleFieldAssignmentVerifier<TValue, TExpression>(TValue invariantTestValue, TValue assignmentValue, int maxDepth)
         where TExpression : Expression, ILiteralExpression<TValue>, ILiteralExpression, new()
     {
         TExpression Zero = new() { Value = invariantTestValue };

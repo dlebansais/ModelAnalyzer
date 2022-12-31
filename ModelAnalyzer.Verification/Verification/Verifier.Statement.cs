@@ -67,7 +67,8 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == DestinationName)
             {
                 Local Local = Entry.Value;
-                Variable Destination = new Variable(Local.Name, Local.Type);
+                LocalName LocalBlockName = CreateLocalBlockName(hostMethod, Local);
+                Variable Destination = new(LocalBlockName, Local.Type);
                 AddAssignmentExecution(solver, aliasTable, hostMethod, ref resultField, branch, Destination, Source);
                 break;
             }

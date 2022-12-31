@@ -98,6 +98,24 @@ class Program_Verifier_MiscStatement3
 // Invariant: X == 0 || X == 1
 ";
 
+    private const string MiscStatementSourceCode4 = @"
+using System;
+
+class Program_Verifier_MiscStatement4
+{
+    int X;
+
+    public void Write()
+    {
+        int Y;
+
+        Y = X + 1;
+        X = Y;
+    }
+}
+// Invariant: X == 0 || X == 1
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -165,6 +183,44 @@ class Program_Verifier_MiscStatement3
     public void Verifier_MiscStatements3_ErrorAgain()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 3);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements4_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements4_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 2);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements4_ErrorAgain()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 3);
 
         TestObject.Verify();
 

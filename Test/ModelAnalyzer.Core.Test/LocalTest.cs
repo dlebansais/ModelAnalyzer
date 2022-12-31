@@ -86,6 +86,7 @@ class Program_CoreLocal_1
         IUnsupportedLocal UnsupportedLocal = ClassModel.Unsupported.Locals[0];
         Assert.That(UnsupportedLocal.Name.Text, Is.EqualTo("*"));
         Assert.That(UnsupportedLocal.Type, Is.EqualTo(ExpressionType.Other));
+        Assert.That(UnsupportedLocal.Initializer, Is.Null);
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreLocal_1

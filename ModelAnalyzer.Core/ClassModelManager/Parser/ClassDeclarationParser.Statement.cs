@@ -28,7 +28,7 @@ internal partial class ClassDeclarationParser
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
 
-        Expression? Expression = ParseExpression(fieldTable, hostMethod, resultField: null, unsupported, LocationContext, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultField: null, unsupported, LocationContext, expressionBody, isNested: false);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
@@ -129,7 +129,7 @@ internal partial class ClassDeclarationParser
                 ExpressionSyntax SourceExpression = assignmentExpression.Right;
                 LocationContext LocationContext = new(SourceExpression);
 
-                Expression? Expression = ParseExpression(fieldTable, hostMethod, resultField: null, unsupported, LocationContext, SourceExpression, isNested: false);
+                Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultField: null, unsupported, LocationContext, SourceExpression, isNested: false);
                 if (Expression is not null)
                 {
                     if (IsSourceAndDestinationTypeCompatible(fieldTable, hostMethod, resultField: null, Destination, Expression))
@@ -188,7 +188,7 @@ internal partial class ClassDeclarationParser
                     ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
                     LocationContext LocationContext = new(ArgumentExpression);
 
-                    Expression? Expression = ParseExpression(fieldTable, hostMethod, resultField: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
+                    Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultField: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
                     if (Expression is not null)
                     {
                         Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
@@ -212,7 +212,7 @@ internal partial class ClassDeclarationParser
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
 
-        Expression? Condition = ParseExpression(fieldTable, hostMethod, resultField: null, unsupported, LocationContext, ConditionExpression, isNested: false);
+        Expression? Condition = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultField: null, unsupported, LocationContext, ConditionExpression, isNested: false);
         if (Condition is not null)
         {
             List<Statement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, hostMethod, unsupported, ifStatement.Statement);
@@ -238,7 +238,7 @@ internal partial class ClassDeclarationParser
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
             LocationContext LocationContext = new(ResultExpression);
-            Expression? ReturnExpression = ParseExpression(fieldTable, hostMethod, resultField: null, unsupported, LocationContext, ResultExpression, isNested: false);
+            Expression? ReturnExpression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultField: null, unsupported, LocationContext, ResultExpression, isNested: false);
 
             if (ReturnExpression is not null)
                 NewStatement = new ReturnStatement { Expression = ReturnExpression };

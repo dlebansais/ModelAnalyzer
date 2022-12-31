@@ -140,7 +140,7 @@ internal partial class Verifier : IDisposable
 
             VariableAlias FieldNameAlias = aliasTable.GetAlias(FieldVariable);
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), Field.Type);
-            Expr InitializerExpr = CreateFieldInitializer(Field);
+            Expr InitializerExpr = CreateInitializerExpr(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
             Log($"Adding {InitExpr}");
@@ -163,41 +163,41 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private Expr CreateFieldInitializer(Field field)
+    private Expr CreateInitializerExpr(IVariableWithInitializer variable)
     {
-        ExpressionType FieldType = field.Type;
-        Dictionary<ExpressionType, Func<Field, Expr>> SwitchTable = new()
+        ExpressionType VariableType = variable.Type;
+        Dictionary<ExpressionType, Func<IVariableWithInitializer, Expr>> SwitchTable = new()
         {
-            { ExpressionType.Boolean, CreateBooleanFieldInitializer },
-            { ExpressionType.Integer, CreateIntegerFieldInitializer },
-            { ExpressionType.FloatingPoint, CreateFloatingPointFieldInitializer },
+            { ExpressionType.Boolean, CreateBooleanInitializer },
+            { ExpressionType.Integer, CreateIntegerInitializer },
+            { ExpressionType.FloatingPoint, CreateFloatingPointInitializer },
         };
 
-        Debug.Assert(SwitchTable.ContainsKey(FieldType));
-        Expr Result = SwitchTable[FieldType](field);
+        Debug.Assert(SwitchTable.ContainsKey(VariableType));
+        Expr Result = SwitchTable[VariableType](variable);
 
         return Result;
     }
 
-    private Expr CreateBooleanFieldInitializer(Field field)
+    private Expr CreateBooleanInitializer(IVariableWithInitializer variable)
     {
-        if (field.Initializer is LiteralBooleanValueExpression LiteralBoolean)
+        if (variable.Initializer is LiteralBooleanValueExpression LiteralBoolean)
             return LiteralBoolean.Value == true ? True : False;
         else
             return False;
     }
 
-    private Expr CreateIntegerFieldInitializer(Field field)
+    private Expr CreateIntegerInitializer(IVariableWithInitializer variable)
     {
-        if (field.Initializer is LiteralIntegerValueExpression LiteralInteger)
+        if (variable.Initializer is LiteralIntegerValueExpression LiteralInteger)
             return LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
         else
             return Zero;
     }
 
-    private Expr CreateFloatingPointFieldInitializer(Field field)
+    private Expr CreateFloatingPointInitializer(IVariableWithInitializer variable)
     {
-        if (field.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
+        if (variable.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
             return LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
         else
             return Zero;
@@ -258,6 +258,8 @@ internal partial class Verifier : IDisposable
         if (!AddMethodRequires(solver, aliasTable, method, checkOpposite: false))
             return false;
 
+        AddMethodLocalStates(solver, aliasTable, method);
+
         BoolExpr MainBranch = Context.MkBool(true);
         Field? ResultField = null;
 
@@ -275,14 +277,14 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterLocalName = CreateParameterBlockName(method, Parameter);
-            Variable ParameterVariable = new(ParameterLocalName, Parameter.Type);
+            ParameterName ParameterBlockName = CreateParameterBlockName(method, Parameter);
+            Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
 
             aliasTable.AddOrIncrement(ParameterVariable);
 
-            VariableAlias ParameterLocalAlias = aliasTable.GetAlias(ParameterVariable);
+            VariableAlias ParameterBlockAlias = aliasTable.GetAlias(ParameterVariable);
 
-            CreateVariableExpr(ParameterLocalAlias.ToString(), Parameter.Type);
+            CreateVariableExpr(ParameterBlockAlias.ToString(), Parameter.Type);
         }
     }
 
@@ -290,6 +292,27 @@ internal partial class Verifier : IDisposable
     {
         string ParameterBlockText = $"{method.Name.Text}${parameter.Name.Text}";
         return new ParameterName() { Text = ParameterBlockText };
+    }
+
+    private void AddMethodLocalStates(Solver solver, AliasTable aliasTable, Method method)
+    {
+        foreach (KeyValuePair<LocalName, Local> Entry in method.LocalTable)
+        {
+            Local Local = Entry.Value;
+            LocalName LocalBlockName = CreateLocalBlockName(method, Local);
+            Variable LocalVariable = new(LocalBlockName, Local.Type);
+
+            aliasTable.AddOrIncrement(LocalVariable);
+
+            VariableAlias LocalBlockAlias = aliasTable.GetAlias(LocalVariable);
+
+            Expr LocalExpr = CreateVariableExpr(LocalBlockAlias.ToString(), Local.Type);
+            Expr InitializerExpr = CreateInitializerExpr(Local);
+            BoolExpr InitExpr = Context.MkEq(LocalExpr, InitializerExpr);
+
+            Log($"Adding {InitExpr}");
+            solver.Assert(InitExpr);
+        }
     }
 
     private static LocalName CreateLocalBlockName(Method method, Local local)

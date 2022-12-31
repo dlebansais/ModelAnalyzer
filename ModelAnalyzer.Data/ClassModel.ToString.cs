@@ -45,6 +45,17 @@ internal partial record ClassModel : IClassModel
             foreach (KeyValuePair<ParameterName, Parameter> Entry in hostMethod.ParameterTable)
                 if (Entry.Key.Text == variableName.Text)
                 {
+                    Debug.Assert(Result is null);
+
+                    Result = Entry.Value;
+                    break;
+                }
+
+            foreach (KeyValuePair<LocalName, Local> Entry in hostMethod.LocalTable)
+                if (Entry.Key.Text == variableName.Text)
+                {
+                    Debug.Assert(Result is null);
+
                     Result = Entry.Value;
                     break;
                 }

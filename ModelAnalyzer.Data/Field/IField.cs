@@ -3,6 +3,6 @@
 /// <summary>
 /// Provides information about a field.
 /// </summary>
-public interface IField : IVariable
+public interface IField : IVariableWithInitializer
 {
 }

@@ -19,8 +19,6 @@ internal class Local : ILocal, INameable<LocalName>
     /// <inheritdoc/>
     required public ExpressionType Type { get; init; }
 
-    /// <summary>
-    /// Gets the local initializer.
-    /// </summary>
+    /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
 }

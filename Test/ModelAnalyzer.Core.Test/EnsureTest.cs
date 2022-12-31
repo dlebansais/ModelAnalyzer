@@ -388,4 +388,40 @@ class Program_CoreEnsure_9
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Ensure_LocalNotAllowed()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_10
+{
+    public void Write(int x)
+    {
+        int X;
+
+        X = x;
+    }
+    // Ensure: X == x
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_10
+  public void Write(int x)
+  {
+    int X
+    X = x;
+  }
+"));
+    }
 }

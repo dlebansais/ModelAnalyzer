@@ -210,7 +210,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidAssertionSyntaxTree(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionSyntaxTree(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Field? resultField, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -229,7 +229,7 @@ internal partial class ClassDeclarationParser
         AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
-        if (!IsValidAssertionExpression(fieldTable, hostMethod, resultField, unsupported, locationContext, Expression, out booleanExpression, out isErrorReported))
+        if (!IsValidAssertionExpression(fieldTable, hostMethod, isLocalAllowed, resultField, unsupported, locationContext, Expression, out booleanExpression, out isErrorReported))
             IsAssertionSupported = false;
         else
             isErrorReported = false;
@@ -237,12 +237,12 @@ internal partial class ClassDeclarationParser
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionExpression(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Field? resultField, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
         isErrorReported = false;
 
-        Expression? Expression = ParseExpression(fieldTable, hostMethod, resultField, unsupported, locationContext, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed, resultField, unsupported, locationContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
             if (Expression.GetExpressionType(fieldTable, hostMethod, resultField) == ExpressionType.Boolean)
@@ -259,7 +259,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryFindVariableByName(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, string variableName, out IVariable variable)
+    private bool TryFindVariableByName(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Field? resultField, string variableName, out IVariable variable)
     {
         if (TryFindFieldByName(fieldTable, variableName, out IField Field))
         {
@@ -274,7 +274,7 @@ internal partial class ClassDeclarationParser
                 variable = Parameter;
                 return true;
             }
-            else if (TryFindLocalByName(hostMethod.LocalTable, variableName, out ILocal Local))
+            else if (isLocalAllowed && TryFindLocalByName(hostMethod.LocalTable, variableName, out ILocal Local))
             {
                 variable = Local;
                 return true;
