@@ -86,6 +86,19 @@ internal partial class ClassDeclarationParser
                 }
             }
 
+            if (TryFindFieldByName(fieldTable, LocalName, out _))
+            {
+                LogWarning($"Local '{LocalName}' is already the name of a field.");
+
+                IsLocalSupported = false;
+            }
+            else if (TryFindParameterByName(hostMethod.ParameterTable, LocalName, out _))
+            {
+                LogWarning($"Local '{LocalName}' is already the name of a parameter.");
+
+                IsLocalSupported = false;
+            }
+
             if (IsLocalSupported)
             {
                 Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer };

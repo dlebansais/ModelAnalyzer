@@ -781,4 +781,30 @@ class Program_CoreStatement_26
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentInvalidLocalDestination()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_27
+{
+    void Write(int x)
+    {
+        int X;
+
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
 }

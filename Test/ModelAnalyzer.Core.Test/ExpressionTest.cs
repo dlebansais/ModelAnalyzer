@@ -364,12 +364,40 @@ class Program_CoreExpression_11
 
     [Test]
     [Category("Core")]
-    public void Expression_Unsupported_Parenthesized()
+    public void Expression_InvalidLocalName()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreExpression_12
+{
+    void Write(int x)
+    {
+        int X;
+
+        if (Y == 0)
+        {
+        }
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_Unsupported_Parenthesized()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_13
 {
     int X;
 
@@ -397,7 +425,7 @@ class Program_CoreExpression_12
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_13
+class Program_CoreExpression_14
 {
     int X;
 
@@ -425,7 +453,7 @@ class Program_CoreExpression_13
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_14
+class Program_CoreExpression_15
 {
     int X;
 
@@ -450,7 +478,7 @@ class Program_CoreExpression_14
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_15
+class Program_CoreExpression_16
 {
     int X;
 
@@ -476,7 +504,7 @@ class Program_CoreExpression_15
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_16
+class Program_CoreExpression_17
 {
     int X;
 
@@ -502,7 +530,7 @@ class Program_CoreExpression_16
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_17
+class Program_CoreExpression_18
 {
     int X;
 
@@ -529,7 +557,7 @@ class Program_CoreExpression_17
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_18
+class Program_CoreExpression_19
 {
     double X;
 
@@ -555,7 +583,7 @@ class Program_CoreExpression_18
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_19
+class Program_CoreExpression_20
 {
     int X;
 
@@ -581,7 +609,7 @@ class Program_CoreExpression_19
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_20
+class Program_CoreExpression_21
 {
     int X;
 
