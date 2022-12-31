@@ -12,7 +12,7 @@ internal class LiteralBooleanValueExpression : Expression, ILiteralExpression<bo
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField) => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal) => ExpressionType.Boolean;
 
     /// <inheritdoc/>
     public bool Value { get; set; }

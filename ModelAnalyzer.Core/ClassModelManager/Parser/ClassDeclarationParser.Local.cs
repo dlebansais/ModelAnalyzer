@@ -74,9 +74,6 @@ internal partial class ClassDeclarationParser
             bool IsLocalSupported = isLocalSupported; // Initialize with the result of previous checks (type etc.)
             ILiteralExpression? Initializer = null;
 
-            if (LocalName == Ensure.ResultKeyword)
-                IsLocalSupported = false;
-
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
                 if (!TryParseInitializerNode(unsupported, EqualsValueClause, localType, out Initializer))

@@ -15,6 +15,6 @@ internal abstract class Expression : IExpression
     /// </summary>
     /// <param name="fieldTable">The table of fields.</param>
     /// <param name="hostMethod">The host method, null in invariants.</param>
-    /// <param name="resultField">The optional result field.</param>
-    public abstract ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField);
+    /// <param name="resultLocal">The optional result local.</param>
+    public abstract ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal);
 }

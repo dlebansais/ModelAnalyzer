@@ -227,7 +227,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
             Invariant Invariant = InvariantList[i];
-            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, hostMethod: null, resultField: null, Invariant.BooleanExpression);
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, hostMethod: null, resultLocal: null, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
 
             solver.Push();
@@ -261,12 +261,12 @@ internal partial class Verifier : IDisposable
         AddMethodLocalStates(solver, aliasTable, method);
 
         BoolExpr MainBranch = Context.MkBool(true);
-        Field? ResultField = null;
+        Local? ResultLocal = null;
 
-        if (!AddStatementListExecution(solver, aliasTable, method, ref ResultField, MainBranch, method.StatementList))
+        if (!AddStatementListExecution(solver, aliasTable, method, ref ResultLocal, MainBranch, method.StatementList))
             return false;
 
-        if (!AddMethodEnsures(solver, aliasTable, method, ResultField, keepNormal: false))
+        if (!AddMethodEnsures(solver, aliasTable, method, ResultLocal, keepNormal: false))
             return false;
 
         return true;
@@ -328,7 +328,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < method.RequireList.Count; i++)
         {
             Require Require = method.RequireList[i];
-            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField: null, Require.BooleanExpression);
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultLocal: null, Require.BooleanExpression);
             string AssertionType = "require";
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
@@ -342,12 +342,12 @@ internal partial class Verifier : IDisposable
         return true;
     }
 
-    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Field? resultField, bool keepNormal)
+    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Local? resultLocal, bool keepNormal)
     {
         for (int i = 0; i < method.EnsureList.Count; i++)
         {
             Ensure Ensure = method.EnsureList[i];
-            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultField, Ensure.BooleanExpression);
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultLocal, Ensure.BooleanExpression);
             string AssertionType = "ensure";
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 

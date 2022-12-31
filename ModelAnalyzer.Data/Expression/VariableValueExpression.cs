@@ -12,9 +12,9 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField)
+    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal)
     {
-        return ClassModel.GetVariable(fieldTable, hostMethod, resultField, VariableName).Type;
+        return ClassModel.GetVariable(fieldTable, hostMethod, resultLocal, VariableName).Type;
     }
 
     /// <summary>

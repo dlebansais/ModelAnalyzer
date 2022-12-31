@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -74,8 +75,27 @@ internal partial class ClassDeclarationParser
                 };
 
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
-                Field? ResultField = ReturnType == ExpressionType.Void ? null : new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
-                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultField, unsupported);
+
+                Local? ResultLocal = null;
+
+                if (ReturnType != ExpressionType.Void)
+                {
+                    Debug.Assert(ReturnType != ExpressionType.Other);
+
+                    LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+
+                    foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
+                        if (Entry.Key == ResultName)
+                        {
+                            ResultLocal = Entry.Value;
+                            break;
+                        }
+
+                    if (ResultLocal is null)
+                        ResultLocal = new Local() { Name = ResultName, Type = ReturnType, Initializer = null };
+                }
+
+                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultLocal, unsupported);
 
                 Method NewMethod = new Method
                 {
@@ -199,6 +219,13 @@ internal partial class ClassDeclarationParser
 
         string ParameterName = parameter.Identifier.ValueText;
 
+        if (ParameterName == Ensure.ResultKeyword)
+        {
+            LogWarning($"Parameter '{ParameterName}' is not allowed.");
+
+            IsParameterSupported = false;
+        }
+
         if (TryFindFieldByName(fieldTable, ParameterName, out _))
         {
             LogWarning($"Parameter '{ParameterName}' is already the name of a field.");
@@ -310,7 +337,7 @@ internal partial class ClassDeclarationParser
     private bool IsValidMethodCallArgument(Method hostMethod, Argument argument, Parameter parameter)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
-        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, hostMethod, resultField: null);
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, hostMethod, resultLocal: null);
         ExpressionType ParameterType = parameter.Type;
 
         if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))

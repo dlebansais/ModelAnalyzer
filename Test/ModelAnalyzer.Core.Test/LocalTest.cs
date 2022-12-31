@@ -289,30 +289,6 @@ class Program_CoreLocal_9
 
     [Test]
     [Category("Core")]
-    public void Local_InvalidLocalResult()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreLocal_10
-{
-    public void Write()
-    {
-        int Result;
-    }
-}
-");
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Locals.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
     public void Local_NameCollisionWithField()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"

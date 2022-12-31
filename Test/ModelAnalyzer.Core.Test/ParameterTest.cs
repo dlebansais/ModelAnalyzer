@@ -188,4 +188,30 @@ class Program_CoreParameter_7
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Parameter_InvalidParameterName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreParameter_8
+{
+    void Write(int Result)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
+        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
+
+        IUnsupportedParameter UnsupportedParameter = ClassModel.Unsupported.Parameters[0];
+    }
 }

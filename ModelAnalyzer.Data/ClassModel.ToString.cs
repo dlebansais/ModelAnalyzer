@@ -27,9 +27,9 @@ internal partial record ClassModel : IClassModel
     /// </summary>
     /// <param name="fieldTable">The table of fields.</param>
     /// <param name="hostMethod">The host method, null in invariants.</param>
-    /// <param name="resultField">The optional result field.</param>
+    /// <param name="resultLocal">The optional result local.</param>
     /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Field? resultField, IVariableName variableName)
+    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal, IVariableName variableName)
     {
         IVariable? Result = null;
 
@@ -61,11 +61,11 @@ internal partial record ClassModel : IClassModel
                 }
         }
 
-        if (resultField is not null && resultField.Name.Text == variableName.Text)
+        if (resultLocal is not null && resultLocal.Name.Text == variableName.Text)
         {
             Debug.Assert(Result is null);
 
-            Result = resultField;
+            Result = resultLocal;
         }
 
         Debug.Assert(Result is not null);
