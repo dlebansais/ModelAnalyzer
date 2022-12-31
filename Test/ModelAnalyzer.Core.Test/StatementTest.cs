@@ -192,6 +192,7 @@ class Program_CoreStatement_5
 
     int Read()
     {
+        int Y;
         return X;
     }
 }
@@ -209,6 +210,7 @@ class Program_CoreStatement_5
 
   int Read()
   {
+    int Y
     return X;
   }
 "));
