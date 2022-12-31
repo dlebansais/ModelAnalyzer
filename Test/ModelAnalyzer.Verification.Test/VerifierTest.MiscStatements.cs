@@ -116,6 +116,23 @@ class Program_Verifier_MiscStatement4
 // Invariant: X == 0 || X == 1
 ";
 
+    private const string MiscStatementSourceCode5 = @"
+using System;
+
+class Program_Verifier_MiscStatement5
+{
+    public int Write(int x)
+    // Require: x == 0
+    {
+        int Result;
+
+        Result = x;
+        return Result;
+    }
+    // Ensure: Result == 0
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -227,5 +244,17 @@ class Program_Verifier_MiscStatement4
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements5_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode5, maxDepth: 2);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 }

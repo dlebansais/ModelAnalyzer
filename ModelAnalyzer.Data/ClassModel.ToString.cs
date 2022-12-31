@@ -61,12 +61,8 @@ internal partial record ClassModel : IClassModel
                 }
         }
 
-        if (resultLocal is not null && resultLocal.Name.Text == variableName.Text)
-        {
-            Debug.Assert(Result is null);
-
+        if (Result is null && resultLocal is not null && resultLocal.Name.Text == variableName.Text)
             Result = resultLocal;
-        }
 
         Debug.Assert(Result is not null);
 
@@ -174,9 +170,9 @@ internal partial record ClassModel : IClassModel
         builder.AppendLine($"    {TypeString} {local.Name.Text}{InitializerString}");
     }
 
-    private void AppendBlock(StringBuilder builder, List<Statement> statementList, int indentation, bool forceBraces = false)
+    private void AppendBlock(StringBuilder builder, List<Statement> statementList, int indentation)
     {
-        if (forceBraces || statementList.Count > 1)
+        if (statementList.Count > 1)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("{");
@@ -184,7 +180,7 @@ internal partial record ClassModel : IClassModel
 
         AppendStatements(builder, statementList, indentation);
 
-        if (forceBraces || statementList.Count > 1)
+        if (statementList.Count > 1)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("}");

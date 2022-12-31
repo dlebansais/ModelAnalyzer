@@ -165,12 +165,8 @@ internal partial class Verifier : IDisposable
                 }
         }
 
-        if (resultLocal is not null && resultLocal.Name.Text == VariableName)
-        {
-            Debug.Assert(VariableString is null);
-
+        if (VariableString is null && resultLocal is not null && resultLocal.Name.Text == VariableName)
             VariableString = resultLocal.Name.Text;
-        }
 
         Debug.Assert(VariableString is not null);
         Debug.Assert(VariableType != ExpressionType.Other);
