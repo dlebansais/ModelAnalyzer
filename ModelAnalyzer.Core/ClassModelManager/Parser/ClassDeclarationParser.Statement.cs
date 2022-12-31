@@ -15,15 +15,15 @@ internal partial class ClassDeclarationParser
         List<Statement> StatementList = new();
 
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
-            StatementList = ParseExpressionBody(fieldTable, hostMethod, unsupported, ArrowExpressionClause.Expression);
+            StatementList = ParseExpressionBodyStatements(fieldTable, hostMethod, unsupported, ArrowExpressionClause.Expression);
 
         if (methodDeclaration.Body is BlockSyntax Block)
-            StatementList = ParseBlock(fieldTable, hostMethod, unsupported, Block, isMainBlock: true);
+            StatementList = ParseBlockStatements(fieldTable, hostMethod, unsupported, Block, isMainBlock: true);
 
         return StatementList;
     }
 
-    private List<Statement> ParseExpressionBody(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, ExpressionSyntax expressionBody)
+    private List<Statement> ParseExpressionBodyStatements(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, ExpressionSyntax expressionBody)
     {
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
@@ -35,16 +35,17 @@ internal partial class ClassDeclarationParser
         return Result;
     }
 
-    private List<Statement> ParseBlock(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
+    private List<Statement> ParseBlockStatements(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
     {
         List<Statement> StatementList = new();
 
         foreach (StatementSyntax Item in block.Statements)
-        {
-            Statement? NewStatement = ParseStatement(fieldTable, hostMethod, unsupported, Item, isMainBlock && Item == block.Statements.Last());
-            if (NewStatement is not null)
-                StatementList.Add(NewStatement);
-        }
+            if (Item is not LocalDeclarationStatementSyntax)
+            {
+                Statement? NewStatement = ParseStatement(fieldTable, hostMethod, unsupported, Item, isMainBlock && Item == block.Statements.Last());
+                if (NewStatement is not null)
+                    StatementList.Add(NewStatement);
+            }
 
         return StatementList;
     }
@@ -54,7 +55,7 @@ internal partial class ClassDeclarationParser
         List<Statement> StatementList = new();
 
         if (node is BlockSyntax Block)
-            StatementList = ParseBlock(fieldTable, hostMethod, unsupported, Block, isMainBlock: false);
+            StatementList = ParseBlockStatements(fieldTable, hostMethod, unsupported, Block, isMainBlock: false);
         else
         {
             Statement? NewStatement = ParseStatement(fieldTable, hostMethod, unsupported, node, isLastStatement: false);

@@ -41,7 +41,7 @@ class Program_CoreEnsure_0
 
         IMethod FirstMethod = Methods.First();
 
-        IReadOnlyList<IEnsure> Ensures = FirstMethod.GetEnsures();
+        IList<IEnsure> Ensures = FirstMethod.GetEnsures();
 
         Assert.That(Ensures.Count, Is.EqualTo(1));
 

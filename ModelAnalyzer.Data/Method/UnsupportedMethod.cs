@@ -15,8 +15,11 @@ public class UnsupportedMethod : IUnsupportedMethod
     required public Location Location { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IRequire> GetRequires() => new List<IRequire>().AsReadOnly();
+    public IList<IRequire> GetRequires() => new List<IRequire>();
 
     /// <inheritdoc/>
-    public IReadOnlyList<IEnsure> GetEnsures() => new List<IEnsure>().AsReadOnly();
+    public IList<ILocal> GetLocals() => new List<ILocal>();
+
+    /// <inheritdoc/>
+    public IList<IEnsure> GetEnsures() => new List<IEnsure>();
 }

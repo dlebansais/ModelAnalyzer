@@ -48,6 +48,11 @@ public interface IUnsupported
     IReadOnlyList<IUnsupportedEnsure> Ensures { get; }
 
     /// <summary>
+    /// Gets the list of unsupported local variables.
+    /// </summary>
+    IReadOnlyList<IUnsupportedLocal> Locals { get; }
+
+    /// <summary>
     /// Gets the list of unsupported statements.
     /// </summary>
     IReadOnlyList<IUnsupportedStatement> Statements { get; }

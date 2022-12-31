@@ -42,7 +42,7 @@ class Program_CoreRequire_0
 
         IMethod FirstMethod = Methods.First();
 
-        IReadOnlyList<IRequire> Requires = FirstMethod.GetRequires();
+        IList<IRequire> Requires = FirstMethod.GetRequires();
 
         Assert.That(Requires.Count, Is.EqualTo(1));
 

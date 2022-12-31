@@ -57,6 +57,7 @@ internal partial class ClassDeclarationParser
                 };
 
                 List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
+                ReadOnlyLocalTable LocalTable = ParseLocals(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
                 List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
                 Field? ResultField = ReturnType == ExpressionType.Void ? null : new Field() { Name = new FieldName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
                 List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultField, unsupported);
@@ -68,7 +69,7 @@ internal partial class ClassDeclarationParser
                     ParameterTable = ParameterTable,
                     ReturnType = ReturnType,
                     RequireList = RequireList,
-                    LocalTable = ReadOnlyLocalTable.Empty,
+                    LocalTable = LocalTable,
                     StatementList = StatementList,
                     EnsureList = EnsureList,
                 };

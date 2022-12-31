@@ -105,6 +105,7 @@ class Program_CoreMethod_2
         IUnsupportedMethod UnsupportedMethod = ClassModel.Unsupported.Methods[0];
         Assert.That(UnsupportedMethod.Name.Text, Is.EqualTo("*"));
         Assert.That(UnsupportedMethod.GetRequires().Count, Is.EqualTo(0));
+        Assert.That(UnsupportedMethod.GetLocals().Count, Is.EqualTo(0));
         Assert.That(UnsupportedMethod.GetEnsures().Count, Is.EqualTo(0));
 
         string? ClassModelString = ClassModel.ToString();

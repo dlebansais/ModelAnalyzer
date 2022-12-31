@@ -50,24 +50,11 @@ internal class Method : IMethod
     required public List<Ensure> EnsureList { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IRequire> GetRequires()
-    {
-        List<IRequire> Result = new();
-
-        foreach (Require Item in RequireList)
-            Result.Add(Item);
-
-        return Result.AsReadOnly();
-    }
+    public IList<IRequire> GetRequires() => new List<IRequire>(RequireList);
 
     /// <inheritdoc/>
-    public IReadOnlyList<IEnsure> GetEnsures()
-    {
-        List<IEnsure> Result = new();
+    public IList<ILocal> GetLocals() => new List<ILocal>(LocalTable.List.ConvertAll(entry => entry.Value));
 
-        foreach (Ensure Item in EnsureList)
-            Result.Add(Item);
-
-        return Result.AsReadOnly();
-    }
+    /// <inheritdoc/>
+    public IList<IEnsure> GetEnsures() => new List<IEnsure>(EnsureList);
 }

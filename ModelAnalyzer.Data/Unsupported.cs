@@ -12,14 +12,15 @@ public record Unsupported : IUnsupported
     /// <inheritdoc/>
     public bool IsEmpty => !InvalidDeclaration &&
                            !HasUnsupporteMember &&
-                           Fields.Count == 0 &&
-                           Methods.Count == 0 &&
-                           Parameters.Count == 0 &&
-                           Requires.Count == 0 &&
-                           Ensures.Count == 0 &&
-                           Statements.Count == 0 &&
-                           Expressions.Count == 0 &&
-                           Invariants.Count == 0;
+                           InternalFields.Count == 0 &&
+                           InternalMethods.Count == 0 &&
+                           InternalParameters.Count == 0 &&
+                           InternalRequires.Count == 0 &&
+                           InternalEnsures.Count == 0 &&
+                           InternalLocals.Count == 0 &&
+                           InternalStatements.Count == 0 &&
+                           InternalExpressions.Count == 0 &&
+                           InternalInvariants.Count == 0;
 
     /// <inheritdoc/>
     public bool InvalidDeclaration { get; set; }
@@ -46,7 +47,7 @@ public record Unsupported : IUnsupported
     public IReadOnlyList<IUnsupportedMethod> Methods => InternalMethods.AsReadOnly();
 
     /// <summary>
-    /// Adds an unsupported field.
+    /// Adds an unsupported method.
     /// </summary>
     /// <param name="location">The method location.</param>
     public void AddUnsupportedMethod(Location location)
@@ -101,6 +102,20 @@ public record Unsupported : IUnsupported
 
     /// <inheritdoc/>
     [JsonIgnore]
+    public IReadOnlyList<IUnsupportedLocal> Locals => InternalLocals.AsReadOnly();
+
+    /// <summary>
+    /// Adds an unsupported local.
+    /// </summary>
+    /// <param name="location">The local location.</param>
+    public void AddUnsupportedLocal(Location location)
+    {
+        UnsupportedLocal NewItem = new UnsupportedLocal { Location = location };
+        InternalLocals.Add(NewItem);
+    }
+
+    /// <inheritdoc/>
+    [JsonIgnore]
     public IReadOnlyList<IUnsupportedStatement> Statements => InternalStatements.AsReadOnly();
 
     /// <summary>
@@ -148,6 +163,7 @@ public record Unsupported : IUnsupported
     public List<UnsupportedParameter> InternalParameters { get; set; } = new();
     public List<UnsupportedRequire> InternalRequires { get; set; } = new();
     public List<UnsupportedEnsure> InternalEnsures { get; set; } = new();
+    public List<UnsupportedLocal> InternalLocals { get; set; } = new();
     public List<UnsupportedStatement> InternalStatements { get; set; } = new();
     public List<UnsupportedExpression> InternalExpressions { get; set; } = new();
     public List<UnsupportedInvariant> InternalInvariants { get; set; } = new();

@@ -10,10 +10,15 @@ public interface IMethod : INameable<MethodName>
     /// <summary>
     /// Gets the list of require clauses.
     /// </summary>
-    IReadOnlyList<IRequire> GetRequires();
+    IList<IRequire> GetRequires();
+
+    /// <summary>
+    /// Gets the list of local variables.
+    /// </summary>
+    IList<ILocal> GetLocals();
 
     /// <summary>
     /// Gets the list of ensure clauses.
     /// </summary>
-    IReadOnlyList<IEnsure> GetEnsures();
+    IList<IEnsure> GetEnsures();
 }
