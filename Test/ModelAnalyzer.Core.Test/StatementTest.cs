@@ -930,4 +930,53 @@ class Program_CoreStatement_31
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallMultiple()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_32
+{
+    public void Write1(int x)
+    {
+        Write2(x);
+        Write3(x);
+    }
+
+    void Write2(int x)
+    {
+    }
+
+    void Write3(int x)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_32
+  public void Write1(int x)
+  {
+    Write2(x);
+    Write3(x);
+  }
+
+  void Write2(int x)
+  {
+  }
+
+  void Write3(int x)
+  {
+  }
+"));
+    }
 }

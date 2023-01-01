@@ -15,7 +15,7 @@ internal class FunctionCallStatementEntry
     /// <summary>
     /// Gets the host method where the statement is found.
     /// </summary>
-    required public Method HostMethod { get; init; }
+    required public Method? HostMethod { get; init; }
 
     /// <summary>
     /// Gets the index within <see cref="ParentStatementList"/> of the statement where the expression is parsed. If -1, this is a method expression body.

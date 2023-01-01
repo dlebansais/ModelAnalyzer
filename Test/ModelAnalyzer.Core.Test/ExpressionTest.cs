@@ -810,7 +810,7 @@ class Program_CoreExpression_28
 {
     public int Write1(int x)
     {
-        return Write2(nameof(x));
+        return Write2(x[0]);
     }
 
     int Write2(int x)
@@ -1057,6 +1057,144 @@ class Program_CoreExpression_36
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_FunctionCallComposite()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_37
+{
+    public int Write1(int x)
+    {
+        return Write2(x) + Write2(x);
+    }
+
+    int Write2(int x)
+    {
+        return x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_37
+  public int Write1(int x)
+  {
+    return Write2(x) + Write2(x);
+  }
+
+  int Write2(int x)
+  {
+    return x;
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_FunctionCallInInvariant()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_38
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+
+    int Read(int x)
+    {
+        return x;
+    }
+}
+// Invariant: Read(X) >= 0 || Read(X) < 0
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_38
+  int X
+
+  public void Write(int x)
+  {
+    X = x;
+  }
+
+  int Read(int x)
+  {
+    return x;
+  }
+  * (Read(X) >= 0) || (Read(X) < 0)
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_FunctionCallExpressionBody()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_39
+{
+    public int Write1() => Write2();
+
+    int Write2() => Write1();
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_FunctionCallInvalidInvariantExpression()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_40
+{
+    int X;
+
+    int Write(int x, int y)
+    {
+        return 0;
+    }
+}
+// Invariant: Write(X) == 0
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)

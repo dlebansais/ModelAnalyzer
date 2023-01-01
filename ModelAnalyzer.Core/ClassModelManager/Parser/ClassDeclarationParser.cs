@@ -44,8 +44,8 @@ internal partial class ClassDeclarationParser
             ParsingContext = ParsingContext with { IsMethodParsingFirstPassDone = true };
             ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
             ParsingContext = ParsingContext with { IsMethodParsingComplete = true };
-            ReportInvalidMethodCalls(ParsingContext);
             ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
+            ReportInvalidMethodCalls(ParsingContext);
 
             FieldTable = ParsingContext.FieldTable.AsReadOnly();
             MethodTable = ParsingContext.MethodTable.AsReadOnly();

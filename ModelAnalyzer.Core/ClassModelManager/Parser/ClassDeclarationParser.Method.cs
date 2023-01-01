@@ -192,15 +192,18 @@ internal partial class ClassDeclarationParser
 
     private void ReportInvalidMethodCalls(ParsingContext parsingContext)
     {
-        List<Method> VisitedMethodList = new();
         Dictionary<Statement, List<Statement>> RemovedStatementTable = new();
+        bool IsErrorReported;
+
+        ParsingContext InvariantParsingContext = parsingContext with { HostMethod = null };
+        IsErrorReported = false;
+        ReportInvalidMethodCalls(InvariantParsingContext, new List<Method>(), RemovedStatementTable, ref IsErrorReported);
 
         foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
         {
             ParsingContext MethodParsingContext = parsingContext with { HostMethod = Entry.Value };
-
-            bool IsErrorReported = false;
-            ReportInvalidMethodCalls(MethodParsingContext, VisitedMethodList, RemovedStatementTable, ref IsErrorReported);
+            IsErrorReported = false;
+            ReportInvalidMethodCalls(MethodParsingContext, new List<Method>(), RemovedStatementTable, ref IsErrorReported);
         }
 
         foreach (KeyValuePair<Statement, List<Statement>> Entry in RemovedStatementTable)
@@ -216,7 +219,7 @@ internal partial class ClassDeclarationParser
     private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, ref bool isErrorReported)
     {
         foreach (MethodCallStatementEntry Entry in parsingContext.MethodCallStatementList)
-            if (Entry.HostMethod.Name == parsingContext.HostMethod?.Name)
+            if (parsingContext.HostMethod is not null && Entry.HostMethod.Name == parsingContext.HostMethod.Name)
             {
                 MethodCallStatement MethodCall = Entry.Statement;
 
@@ -228,7 +231,11 @@ internal partial class ClassDeclarationParser
             }
 
         foreach (FunctionCallStatementEntry Entry in parsingContext.FunctionCallExpressionList)
-            if (Entry.HostMethod.Name == parsingContext.HostMethod?.Name)
+        {
+            bool IsMethodFound = (Entry.HostMethod is Method EntryMethod && parsingContext.HostMethod is Method HostMethod && EntryMethod.Name == HostMethod.Name) ||
+                                 (Entry.HostMethod is null && parsingContext.HostMethod is null);
+
+            if (IsMethodFound)
             {
                 FunctionCallExpression FunctionCall = Entry.Expression;
 
@@ -238,23 +245,18 @@ internal partial class ClassDeclarationParser
                     {
                         parsingContext.Unsupported.AddUnsupportedExpression(Location);
 
-                        if (Entry.OwnerStatementIndex >= 0)
-                        {
-                            Debug.Assert(Entry.OwnerStatementIndex < Entry.ParentStatementList.Count);
+                        int OwnerStatementIndex = Entry.OwnerStatementIndex;
+                        List<Statement> ParentStatementList = Entry.ParentStatementList;
 
-                            Statement OwnerStatement = Entry.ParentStatementList[Entry.OwnerStatementIndex];
-                            removedStatementTable.Add(OwnerStatement, Entry.ParentStatementList);
-                        }
-                        else
+                        if (OwnerStatementIndex >= 0 && OwnerStatementIndex < ParentStatementList.Count)
                         {
-                            Debug.Assert(Entry.ParentStatementList.Count == 1);
-                            Debug.Assert(Entry.ParentStatementList[0] is ReturnStatement);
-
-                            removedStatementTable.Add(Entry.ParentStatementList[0], Entry.ParentStatementList);
+                            Statement OwnerStatement = ParentStatementList[OwnerStatementIndex];
+                            removedStatementTable.Add(OwnerStatement, ParentStatementList);
                         }
                     }
                 }
             }
+        }
     }
 
     private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, MethodCallStatement methodCall, out Location location, ref bool isErrorReported)
@@ -323,7 +325,7 @@ internal partial class ClassDeclarationParser
 
         location = functionCall.NameLocation;
 
-        if (functionCall.FunctionName == HostMethod?.Name)
+        if (HostMethod is not null && functionCall.FunctionName == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
@@ -408,18 +410,5 @@ internal partial class ClassDeclarationParser
         Local ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null };
 
         return ResultLocal;
-    }
-
-    private bool TryFindMethodByName(ParsingContext parsingContext, string fieldName, out IMethod field)
-    {
-        foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
-            if (Entry.Value.Name.Text == fieldName)
-            {
-                field = Entry.Value;
-                return true;
-            }
-
-        field = null!;
-        return false;
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
@@ -253,13 +252,10 @@ internal partial class ClassDeclarationParser
             {
                 NewExpression = new FunctionCallExpression { FunctionName = FunctionName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
 
-                if (parsingContext.HostMethod is Method HostMethod)
-                {
-                    List<Statement> ParentStatementList = parsingContext.StatementList;
-                    int OwnerStatementIndex = ParentStatementList.Count;
+                List<Statement> ParentStatementList = parsingContext.StatementList;
+                int OwnerStatementIndex = ParentStatementList.Count;
 
-                    parsingContext.FunctionCallExpressionList.Add(new FunctionCallStatementEntry() { HostMethod = HostMethod, Expression = NewExpression, OwnerStatementIndex = OwnerStatementIndex, ParentStatementList = ParentStatementList });
-                }
+                parsingContext.FunctionCallExpressionList.Add(new FunctionCallStatementEntry() { HostMethod = parsingContext.HostMethod, Expression = NewExpression, OwnerStatementIndex = OwnerStatementIndex, ParentStatementList = ParentStatementList });
             }
         }
 
