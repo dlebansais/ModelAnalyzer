@@ -309,4 +309,17 @@ internal partial class ClassDeclarationParser
 
         return ResultLocal;
     }
+
+    private bool TryFindMethodByName(ParsingContext parsingContext, string fieldName, out IMethod field)
+    {
+        foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
+            if (Entry.Value.Name.Text == fieldName)
+            {
+                field = Entry.Value;
+                return true;
+            }
+
+        field = null!;
+        return false;
+    }
 }

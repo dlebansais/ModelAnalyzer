@@ -182,33 +182,10 @@ internal partial class ClassDeclarationParser
         if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
         {
             MethodName MethodName = new() { Text = IdentifierName.Identifier.ValueText };
-            SeparatedSyntaxList<ArgumentSyntax> InvocationArgumentList = invocationExpression.ArgumentList.Arguments;
-            List<Argument> ArgumentList = new();
+            ArgumentListSyntax InvocationArgumentList = invocationExpression.ArgumentList;
+            List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
 
-            foreach (ArgumentSyntax InvocationArgument in InvocationArgumentList)
-            {
-                if (InvocationArgument.NameColon is not null)
-                    Log("Named argument not supported.");
-                else if (!InvocationArgument.RefKindKeyword.IsKind(SyntaxKind.None))
-                    Log("ref, out or in arguments not supported.");
-                else
-                {
-                    ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
-                    LocationContext LocationContext = new(ArgumentExpression);
-                    ParsingContext MethodCallParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
-
-                    Expression? Expression = ParseExpression(MethodCallParsingContext, ArgumentExpression);
-                    if (Expression is not null)
-                    {
-                        Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
-                        ArgumentList.Add(NewArgument);
-                    }
-                    else
-                        isErrorReported = true;
-                }
-            }
-
-            if (ArgumentList.Count == InvocationArgumentList.Count)
+            if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
                 NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
         }
         else

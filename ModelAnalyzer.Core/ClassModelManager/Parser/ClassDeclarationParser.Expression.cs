@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
@@ -31,6 +33,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
             NewExpression = TryParseParenthesizedExpression(NestedParsingContext, ParenthesizedExpression, ref IsErrorReported);
+        else if (expressionNode is InvocationExpressionSyntax InvocationExpression)
+            NewExpression = TryParseFunctionCallExpression(NestedParsingContext, InvocationExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -231,6 +235,23 @@ internal partial class ClassDeclarationParser
             NewExpression = NestedExpression;
         else
             isErrorReported = true;
+
+        return NewExpression;
+    }
+
+    private Expression? TryParseFunctionCallExpression(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
+    {
+        Expression? NewExpression = null;
+
+        if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
+        {
+            MethodName FunctionName = new() { Text = IdentifierName.Identifier.ValueText };
+            ArgumentListSyntax InvocationArgumentList = invocationExpression.ArgumentList;
+            List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
+
+            if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
+                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, ArgumentList = ArgumentList };
+        }
 
         return NewExpression;
     }

@@ -13,6 +13,11 @@ internal interface IMemberCollectionContext
     List<Field> GetFields();
 
     /// <summary>
+    /// Gets the list of class methods.
+    /// </summary>
+    List<Method> GetMethods();
+
+    /// <summary>
     /// Gets the current method with parameters and locals.
     /// </summary>
     Method? HostMethod { get; }

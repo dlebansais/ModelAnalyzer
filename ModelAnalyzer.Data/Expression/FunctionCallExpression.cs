@@ -1,0 +1,50 @@
+﻿namespace ModelAnalyzer;
+
+using System.Collections.Generic;
+using System.Diagnostics;
+using Newtonsoft.Json;
+
+/// <summary>
+/// Represents a call to a function as an expression.
+/// </summary>
+internal class FunctionCallExpression : Expression
+{
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public override bool IsSimple => true;
+
+    /// <inheritdoc/>
+    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext)
+    {
+        ExpressionType Result = ExpressionType.Other;
+
+        foreach (Method Method in memberCollectionContext.GetMethods())
+            if (Method.Name.Text == FunctionName.Text)
+            {
+                Result = Method.ReturnType;
+                break;
+            }
+
+        Debug.Assert(Result != ExpressionType.Other);
+
+        return Result;
+    }
+
+    /// <summary>
+    /// Gets the function name.
+    /// </summary>
+    required public MethodName FunctionName { get; init; }
+
+    /// <summary>
+    /// Gets the list of arguments.
+    /// </summary>
+    required public List<Argument> ArgumentList { get; init; }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        string ArgumentString = string.Join(", ", ArgumentList);
+
+        return $"{FunctionName.Text}({ArgumentString})";
+    }
+}

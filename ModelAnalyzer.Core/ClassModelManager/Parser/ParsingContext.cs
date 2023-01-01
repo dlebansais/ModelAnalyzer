@@ -38,6 +38,17 @@ internal record ParsingContext : IMemberCollectionContext
     /// </summary>
     public MethodTable MethodTable { get; set; } = new();
 
+    /// <inheritdoc/>
+    List<Method> IMemberCollectionContext.GetMethods()
+    {
+        List<Method> Result = new();
+
+        foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
+            Result.Add(Entry.Value);
+
+        return Result;
+    }
+
     /// <summary>
     /// Gets or sets a value indicating whether all passes of method parsing are done.
     /// </summary>
