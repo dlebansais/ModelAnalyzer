@@ -595,7 +595,7 @@ class Program_CoreStatement_19
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
     [Test]

@@ -202,6 +202,8 @@ internal partial class ClassDeclarationParser
                         Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
                         ArgumentList.Add(NewArgument);
                     }
+                    else
+                        isErrorReported = true;
                 }
             }
 

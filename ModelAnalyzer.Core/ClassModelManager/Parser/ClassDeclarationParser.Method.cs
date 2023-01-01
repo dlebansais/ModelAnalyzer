@@ -19,12 +19,12 @@ internal partial class ClassDeclarationParser
         {
             SyntaxTriviaList TriviaList;
 
-            if (parsingContext.IsMethodParsingStarted && TryFindLeadingTrivia(Member, out TriviaList))
+            if (parsingContext.IsMethodParsingFirstPassDone && TryFindLeadingTrivia(Member, out TriviaList))
                 ReportUnsupportedRequires(parsingContext, TriviaList);
 
             if (Member is MethodDeclarationSyntax MethodDeclaration)
                 AddMethod(parsingContext, MethodTable, MethodDeclaration);
-            else if (parsingContext.IsMethodParsingStarted && TryFindTrailingTrivia(Member, out TriviaList))
+            else if (parsingContext.IsMethodParsingFirstPassDone && TryFindTrailingTrivia(Member, out TriviaList))
                 ReportUnsupportedEnsures(parsingContext, TriviaList);
         }
 
@@ -64,7 +64,7 @@ internal partial class ClassDeclarationParser
                 List<Statement> StatementList;
                 List<Ensure> EnsureList;
 
-                if (parsingContext.IsMethodParsingStarted)
+                if (parsingContext.IsMethodParsingFirstPassDone)
                 {
                     TemporaryMethod = new Method
                     {
@@ -136,7 +136,7 @@ internal partial class ClassDeclarationParser
 
                 methodTable.AddItem(NewMethod);
             }
-            else if (parsingContext.IsMethodParsingStarted)
+            else if (parsingContext.IsMethodParsingFirstPassDone)
             {
                 if (TryFindTrailingTrivia(methodDeclaration, out SyntaxTriviaList TriviaList))
                     ReportUnsupportedEnsures(parsingContext, TriviaList);

@@ -25,7 +25,7 @@ internal partial class ClassDeclarationParser
                     Parameter NewParameter = new Parameter() { Name = ParameterName, Type = ParameterType };
                     ParameterTable.AddItem(NewParameter);
                 }
-                else if (!parsingContext.IsMethodParsingStarted)
+                else if (!parsingContext.IsMethodParsingFirstPassDone)
                 {
                     Location Location = Parameter.GetLocation();
                     parsingContext.Unsupported.AddUnsupportedParameter(Location);
