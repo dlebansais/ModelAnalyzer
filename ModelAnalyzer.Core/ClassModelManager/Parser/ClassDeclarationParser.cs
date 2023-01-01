@@ -221,7 +221,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidAssertionSyntaxTree(ParsingContext parsingContext, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionSyntaxTree(ParsingContext parsingContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -240,7 +240,7 @@ internal partial class ClassDeclarationParser
         AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
-        if (!IsValidAssertionExpression(parsingContext, locationContext, Expression, out booleanExpression, out isErrorReported))
+        if (!IsValidAssertionExpression(parsingContext, Expression, out booleanExpression, out isErrorReported))
             IsAssertionSupported = false;
         else
             isErrorReported = false;
@@ -248,12 +248,12 @@ internal partial class ClassDeclarationParser
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(ParsingContext parsingContext, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionExpression(ParsingContext parsingContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
         isErrorReported = false;
 
-        Expression? Expression = ParseExpression(parsingContext, locationContext, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
             if (Expression.GetExpressionType(parsingContext) == ExpressionType.Boolean)

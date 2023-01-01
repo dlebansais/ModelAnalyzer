@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,22 +11,24 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private Expression? ParseExpression(ParsingContext parsingContext, LocationContext locationContext, ExpressionSyntax expressionNode, bool isNested)
+    private Expression? ParseExpression(ParsingContext parsingContext, ExpressionSyntax expressionNode, bool isNested)
     {
+        Debug.Assert(parsingContext.LocationContext is not null);
+
         Expression? NewExpression = null;
-        Location Location = locationContext.GetLocation(expressionNode);
+        Location Location = parsingContext.LocationContext!.GetLocation(expressionNode);
         bool IsErrorReported = false;
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            NewExpression = TryParseBinaryExpression(parsingContext, locationContext, BinaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParseBinaryExpression(parsingContext, BinaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is PrefixUnaryExpressionSyntax PrefixUnaryExpression)
-            NewExpression = TryParsePrefixUnaryExpression(parsingContext, locationContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParsePrefixUnaryExpression(parsingContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
             NewExpression = TryParseVariableValueExpression(parsingContext, IdentifierName);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
-            NewExpression = TryParseParenthesizedExpression(parsingContext, locationContext, ParenthesizedExpression, ref IsErrorReported);
+            NewExpression = TryParseParenthesizedExpression(parsingContext, ParenthesizedExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -40,11 +43,11 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseBinaryExpression(ParsingContext parsingContext, LocationContext locationContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParseBinaryExpression(ParsingContext parsingContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? LeftExpression = ParseExpression(parsingContext, locationContext, binaryExpression.Left, isNested: true);
-        Expression? RightExpression = ParseExpression(parsingContext, locationContext, binaryExpression.Right, isNested: true);
+        Expression? LeftExpression = ParseExpression(parsingContext, binaryExpression.Left, isNested: true);
+        Expression? RightExpression = ParseExpression(parsingContext, binaryExpression.Right, isNested: true);
 
         if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
@@ -62,7 +65,9 @@ internal partial class ClassDeclarationParser
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
 
-                location = locationContext.GetLocation(OperatorToken);
+                Debug.Assert(parsingContext.LocationContext is not null);
+
+                location = parsingContext.LocationContext!.GetLocation(OperatorToken);
             }
         }
         else
@@ -71,10 +76,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParsePrefixUnaryExpression(ParsingContext parsingContext, LocationContext locationContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
+    private Expression? TryParsePrefixUnaryExpression(ParsingContext parsingContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? OperandExpression = ParseExpression(parsingContext, locationContext, prefixUnaryExpression.Operand, isNested: true);
+        Expression? OperandExpression = ParseExpression(parsingContext, prefixUnaryExpression.Operand, isNested: true);
 
         if (OperandExpression is Expression Operand)
         {
@@ -88,7 +93,9 @@ internal partial class ClassDeclarationParser
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
 
-                location = locationContext.GetLocation(OperatorToken);
+                Debug.Assert(parsingContext.LocationContext is not null);
+
+                location = parsingContext.LocationContext!.GetLocation(OperatorToken);
             }
         }
         else
@@ -213,10 +220,10 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseParenthesizedExpression(ParsingContext parsingContext, LocationContext locationContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
+    private Expression? TryParseParenthesizedExpression(ParsingContext parsingContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
     {
         Expression? NewExpression = null;
-        Expression? NestedExpression = ParseExpression(parsingContext, locationContext, parenthesizedExpression.Expression, isNested: true);
+        Expression? NestedExpression = ParseExpression(parsingContext, parenthesizedExpression.Expression, isNested: true);
 
         if (NestedExpression is not null)
             NewExpression = NestedExpression;

@@ -16,4 +16,5 @@ internal record ParsingContext
     public List<Invariant> InvariantList { get; set; } = new();
     public bool IsLocalAllowed { get; set; }
     public Local? ResultLocal { get; set; }
+    public LocationContext? LocationContext { get; set; }
 }
