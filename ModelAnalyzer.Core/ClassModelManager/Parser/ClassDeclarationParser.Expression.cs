@@ -241,7 +241,7 @@ internal partial class ClassDeclarationParser
 
     private Expression? TryParseFunctionCallExpression(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
-        Expression? NewExpression = null;
+        FunctionCallExpression? NewExpression = null;
 
         if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
         {
@@ -250,7 +250,17 @@ internal partial class ClassDeclarationParser
             List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
 
             if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
-                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, ArgumentList = ArgumentList };
+            {
+                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+
+                if (parsingContext.HostMethod is Method HostMethod)
+                {
+                    List<Statement> ParentStatementList = parsingContext.StatementList;
+                    int OwnerStatementIndex = ParentStatementList.Count;
+
+                    parsingContext.FunctionCallExpressionList.Add(new FunctionCallStatementEntry() { HostMethod = HostMethod, Expression = NewExpression, OwnerStatementIndex = OwnerStatementIndex, ParentStatementList = ParentStatementList });
+                }
+            }
         }
 
         return NewExpression;

@@ -1,7 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -25,8 +25,7 @@ internal class FunctionCallExpression : Expression
                 break;
             }
 
-        Debug.Assert(Result != ExpressionType.Other);
-
+        // Can return ExpressionType.Other if the expression doesn't match an existing function name.
         return Result;
     }
 
@@ -34,6 +33,12 @@ internal class FunctionCallExpression : Expression
     /// Gets the function name.
     /// </summary>
     required public MethodName FunctionName { get; init; }
+
+    /// <summary>
+    /// Gets the function name location.
+    /// </summary>
+    [JsonIgnore]
+    required public Location NameLocation { get; init; }
 
     /// <summary>
     /// Gets the list of arguments.

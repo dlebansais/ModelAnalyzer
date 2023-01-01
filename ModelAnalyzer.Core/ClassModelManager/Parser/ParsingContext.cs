@@ -83,4 +83,19 @@ internal record ParsingContext : IMemberCollectionContext
     /// Gets or sets a value indicating whether parsing is taking place inside an expression. This is mainly to avoid logging pieces of an invalid expression, we just want to log the entire expression after it's parsed.
     /// </summary>
     public bool IsExpressionNested { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of parsed statements.
+    /// </summary>
+    public List<Statement> StatementList { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of method call statements.
+    /// </summary>
+    public List<MethodCallStatementEntry> MethodCallStatementList { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of function call expressions.
+    /// </summary>
+    public List<FunctionCallStatementEntry> FunctionCallExpressionList { get; set; } = new();
 }

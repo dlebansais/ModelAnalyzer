@@ -164,14 +164,12 @@ public partial class VerifierTest
         TExpression Zero = new() { Value = invariantTestValue };
         TExpression AssignmentSource = new() { Value = assignmentValue };
 
-        VerificationContext VerificationContext = new();
-
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(VerificationContext),
+            Type = Zero.GetExpressionType(memberCollectionContext: null!),
             Initializer = null,
         };
 

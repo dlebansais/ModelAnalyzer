@@ -10,16 +10,16 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private bool AddStatementListExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, List<Statement> statementList)
+    private bool AddStatementListExecution(VerificationContext verificationContext, List<Statement> statementList)
     {
         foreach (Statement Statement in statementList)
-            if (!AddStatementExecution(verificationContext, solver, branch, Statement))
+            if (!AddStatementExecution(verificationContext, Statement))
                 return false;
 
         return true;
     }
 
-    private bool AddStatementExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, Statement statement)
+    private bool AddStatementExecution(VerificationContext verificationContext, Statement statement)
     {
         bool Result = true;
         bool IsAdded = false;
@@ -27,19 +27,19 @@ internal partial class Verifier : IDisposable
         switch (statement)
         {
             case AssignmentStatement Assignment:
-                AddAssignmentExecution(verificationContext, solver, branch, Assignment);
+                AddAssignmentExecution(verificationContext, Assignment);
                 IsAdded = true;
                 break;
             case ConditionalStatement Conditional:
-                Result = AddConditionalExecution(verificationContext, solver, branch, Conditional);
+                Result = AddConditionalExecution(verificationContext, Conditional);
                 IsAdded = true;
                 break;
             case MethodCallStatement MethodCall:
-                Result = AddMethodCallExecution(verificationContext, solver, branch, MethodCall);
+                Result = AddMethodCallExecution(verificationContext, MethodCall);
                 IsAdded = true;
                 break;
             case ReturnStatement Return:
-                AddReturnExecution(verificationContext, solver, branch, Return);
+                AddReturnExecution(verificationContext, Return);
                 IsAdded = true;
                 break;
         }
@@ -49,20 +49,22 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private void AddAssignmentExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, AssignmentStatement assignmentStatement)
+    private bool AddAssignmentExecution(VerificationContext verificationContext, AssignmentStatement assignmentStatement)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
+        ReadOnlyFieldTable FieldTable = verificationContext.FieldTable;
         Method HostMethod = verificationContext.HostMethod!;
         Expression Source = assignmentStatement.Expression;
         string DestinationName = assignmentStatement.DestinationName.Text;
+        bool Result = false;
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Text == DestinationName)
             {
                 Field Field = Entry.Value;
                 Variable Destination = new Variable(Field.Name, Field.Type);
-                AddAssignmentExecution(verificationContext, solver, branch, Destination, Source);
+                Result = AddAssignmentExecution(verificationContext, Destination, Source);
                 break;
             }
 
@@ -72,40 +74,59 @@ internal partial class Verifier : IDisposable
                 Local Local = Entry.Value;
                 LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
                 Variable Destination = new(LocalBlockName, Local.Type);
-                AddAssignmentExecution(verificationContext, solver, branch, Destination, Source);
+                Result = AddAssignmentExecution(verificationContext, Destination, Source);
                 break;
             }
+
+        return Result;
     }
 
-    private void AddAssignmentExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, Variable destination, Expression source)
+    private bool AddAssignmentExecution(VerificationContext verificationContext, Variable destination, Expression source)
     {
         AliasTable AliasTable = verificationContext.AliasTable;
-        Expr SourceExpr = BuildExpression<Expr>(verificationContext, source);
+        if (!BuildExpression(verificationContext, source, out Expr SourceExpr))
+            return false;
 
         AliasTable.IncrementAlias(destination);
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
         Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(verificationContext));
 
-        AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
+        AddToSolver(verificationContext, Context.MkEq(DestinationExpr, SourceExpr));
+        return true;
     }
 
-    private bool AddConditionalExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, ConditionalStatement conditionalStatement)
+    private bool AddConditionalExecution(VerificationContext verificationContext, ConditionalStatement conditionalStatement)
     {
         AliasTable AliasTable = verificationContext.AliasTable;
 
-        BoolExpr ConditionExpr = BuildExpression<BoolExpr>(verificationContext, conditionalStatement.Condition);
-        BoolExpr TrueBranchExpr = Context.MkAnd(branch, ConditionExpr);
-        BoolExpr FalseBranchExpr = Context.MkAnd(branch, Context.MkNot(ConditionExpr));
+        if (!BuildExpression(verificationContext, conditionalStatement.Condition, out BoolExpr ConditionExpr))
+            return false;
+
+        BoolExpr TrueBranchExpr;
+        BoolExpr FalseBranchExpr;
+
+        if (verificationContext.Branch is BoolExpr Branch)
+        {
+            TrueBranchExpr = Context.MkAnd(Branch, ConditionExpr);
+            FalseBranchExpr = Context.MkAnd(Branch, Context.MkNot(ConditionExpr));
+        }
+        else
+        {
+            TrueBranchExpr = ConditionExpr;
+            FalseBranchExpr = Context.MkNot(ConditionExpr);
+        }
 
         AliasTable BeforeWhenTrue = AliasTable.Clone();
-        bool TrueBranchResult = AddStatementListExecution(verificationContext, solver, TrueBranchExpr, conditionalStatement.WhenTrueStatementList);
+        VerificationContext TrueBranchVerificationContext = verificationContext with { Branch = TrueBranchExpr };
+        bool TrueBranchResult = AddStatementListExecution(TrueBranchVerificationContext, conditionalStatement.WhenTrueStatementList);
         List<VariableAlias> AliasesOnlyWhenTrue = AliasTable.GetAliasDifference(BeforeWhenTrue);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
         AliasTable WhenTrueAliasTable = AliasTable.Clone();
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
-        bool FalseBranchResult = AddStatementListExecution(verificationContext, solver, FalseBranchExpr, conditionalStatement.WhenFalseStatementList);
+        VerificationContext FalseBranchVerificationContext = verificationContext with { Branch = FalseBranchExpr };
+        bool FalseBranchResult = AddStatementListExecution(FalseBranchVerificationContext, conditionalStatement.WhenFalseStatementList);
         List<VariableAlias> AliasesOnlyWhenFalse = AliasTable.GetAliasDifference(BeforeWhenFalse);
 
         AliasTable WhenFalseAliasTable = AliasTable.Clone();
@@ -113,8 +134,8 @@ internal partial class Verifier : IDisposable
         // Merge aliases from the if branch (the table currently contains the end of the end branch).
         AliasTable.Merge(WhenTrueAliasTable, out List<Variable> UpdatedNameList);
 
-        AddConditionalAliases(solver, TrueBranchExpr, AliasesOnlyWhenFalse);
-        AddConditionalAliases(solver, FalseBranchExpr, AliasesOnlyWhenTrue);
+        AddConditionalAliases(TrueBranchVerificationContext, AliasesOnlyWhenFalse);
+        AddConditionalAliases(FalseBranchVerificationContext, AliasesOnlyWhenTrue);
 
         foreach (Variable Variable in UpdatedNameList)
         {
@@ -131,14 +152,14 @@ internal partial class Verifier : IDisposable
             Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias.ToString(), VariableType);
             BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
-            AddToSolver(solver, TrueBranchExpr, WhenTrueInitExpr);
-            AddToSolver(solver, FalseBranchExpr, WhenFalseInitExpr);
+            AddToSolver(TrueBranchVerificationContext, WhenTrueInitExpr);
+            AddToSolver(FalseBranchVerificationContext, WhenFalseInitExpr);
         }
 
         return TrueBranchResult && FalseBranchResult;
     }
 
-    private void AddConditionalAliases(Solver solver, BoolExpr branchExpr, List<VariableAlias> aliasList)
+    private void AddConditionalAliases(VerificationContext verificationContext, List<VariableAlias> aliasList)
     {
         foreach (VariableAlias Alias in aliasList)
         {
@@ -146,14 +167,14 @@ internal partial class Verifier : IDisposable
             ExpressionType VariableType = Variable.Type;
 
             Expr FieldExpr = CreateVariableExpr(Alias.ToString(), VariableType);
-            Expr InitializerExpr = CreateVariableInitializer(VariableType);
+            Expr InitializerExpr = GetDefaultExpr(VariableType);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
-            AddToSolver(solver, branchExpr, InitExpr);
+            AddToSolver(verificationContext, InitExpr);
         }
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, MethodCallStatement methodCallStatement)
+    private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement)
     {
         bool Result = true;
         bool IsExecuted = false;
@@ -162,7 +183,7 @@ internal partial class Verifier : IDisposable
             if (Entry.Key == methodCallStatement.MethodName)
             {
                 Method CalledMethod = Entry.Value;
-                Result = AddMethodCallExecution(verificationContext, solver, branch, methodCallStatement, CalledMethod);
+                Result = AddMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
                 IsExecuted = true;
                 break;
             }
@@ -172,7 +193,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, MethodCallStatement methodCallStatement, Method calledMethod)
+    private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement, Method calledMethod)
     {
         AliasTable AliasTable = verificationContext.AliasTable;
         List<Argument> ArgumentList = methodCallStatement.ArgumentList;
@@ -189,27 +210,30 @@ internal partial class Verifier : IDisposable
             VariableAlias FieldNameAlias = AliasTable.GetAlias(ParameterVariable);
 
             Expr TemporaryLocalExpr = CreateVariableExpr(FieldNameAlias.ToString(), Parameter.Type);
-            Expr InitializerExpr = BuildExpression<Expr>(verificationContext, Argument.Expression);
+
+            if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
+                return false;
+
             BoolExpr InitExpr = Context.MkEq(TemporaryLocalExpr, InitializerExpr);
 
-            AddToSolver(solver, branch, InitExpr);
+            AddToSolver(verificationContext, InitExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, ResultLocal = null };
 
-        if (!AddMethodRequires(CallVerificationContext, solver, checkOpposite: true))
+        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
             return false;
 
-        if (!AddStatementListExecution(CallVerificationContext, solver, branch, calledMethod.StatementList))
+        if (!AddStatementListExecution(CallVerificationContext, calledMethod.StatementList))
             return false;
 
-        if (!AddMethodEnsures(CallVerificationContext, solver, keepNormal: true))
+        if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
         return true;
     }
 
-    private void AddReturnExecution(VerificationContext verificationContext, Solver solver, BoolExpr branch, ReturnStatement returnStatement)
+    private bool AddReturnExecution(VerificationContext verificationContext, ReturnStatement returnStatement)
     {
         Expression? ReturnExpression = (Expression?)returnStatement.Expression;
 
@@ -222,7 +246,8 @@ internal partial class Verifier : IDisposable
             Local ResultLocal = verificationContext.ResultLocal!;
             AliasTable AliasTable = verificationContext.AliasTable;
 
-            Expr ResultInitializerExpr = BuildExpression<Expr>(verificationContext, ReturnExpression);
+            if (!BuildExpression(verificationContext, ReturnExpression, out Expr ResultInitializerExpr))
+                return false;
 
             LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
             Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
@@ -231,7 +256,9 @@ internal partial class Verifier : IDisposable
             VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
             Expr ResultLocalExpr = CreateVariableExpr(ResultLocalAlias.ToString(), ResultLocal.Type);
 
-            AddToSolver(solver, branch, Context.MkEq(ResultLocalExpr, ResultInitializerExpr));
+            AddToSolver(verificationContext, Context.MkEq(ResultLocalExpr, ResultInitializerExpr));
         }
+
+        return true;
     }
 }

@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
@@ -26,15 +25,15 @@ internal partial class ClassDeclarationParser
 
     private List<Statement> ParseMethodExpressionBody(ParsingContext parsingContext, ExpressionSyntax expressionBody)
     {
-        List<Statement> Result = new();
+        List<Statement> StatementList = new();
         LocationContext LocationContext = new(expressionBody);
-        ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext };
+        ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext, StatementList = StatementList };
 
         Expression? Expression = ParseExpression(ExpressionBodyContext, expressionBody);
         if (Expression is not null)
-            Result.Add(new ReturnStatement { Expression = Expression });
+            StatementList.Add(new ReturnStatement { Expression = Expression });
 
-        return Result;
+        return StatementList;
     }
 
     private List<Statement> ParseMethodBlock(ParsingContext parsingContext, BlockSyntax block)
@@ -45,11 +44,12 @@ internal partial class ClassDeclarationParser
     private List<Statement> ParseBlockStatements(ParsingContext parsingContext, BlockSyntax block, bool isMainBlock)
     {
         List<Statement> StatementList = new();
+        ParsingContext BlockContext = parsingContext with { StatementList = StatementList };
 
         foreach (StatementSyntax Item in block.Statements)
             if (Item is not LocalDeclarationStatementSyntax)
             {
-                Statement? NewStatement = ParseStatement(parsingContext, Item, isMainBlock && Item == block.Statements.Last());
+                Statement? NewStatement = ParseStatement(BlockContext, Item, isMainBlock && Item == block.Statements.Last());
                 if (NewStatement is not null)
                     StatementList.Add(NewStatement);
             }
@@ -65,7 +65,9 @@ internal partial class ClassDeclarationParser
             StatementList = ParseBlockStatements(parsingContext, Block, isMainBlock: false);
         else
         {
-            Statement? NewStatement = ParseStatement(parsingContext, node, isLastStatement: false);
+            ParsingContext SingleStatementContext = parsingContext with { StatementList = StatementList };
+
+            Statement? NewStatement = ParseStatement(SingleStatementContext, node, isLastStatement: false);
             if (NewStatement is not null)
                 StatementList.Add(NewStatement);
         }
@@ -119,7 +121,7 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseAssignmentStatement(ParsingContext parsingContext, AssignmentExpressionSyntax assignmentExpression, ref bool isErrorReported)
     {
-        Statement? NewStatement = null;
+        AssignmentStatement? NewStatement = null;
 
         if (assignmentExpression.Left is IdentifierNameSyntax IdentifierName)
         {
@@ -177,7 +179,7 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseMethodCallStatement(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
-        Statement? NewStatement = null;
+        MethodCallStatement? NewStatement = null;
 
         if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
         {
@@ -186,7 +188,12 @@ internal partial class ClassDeclarationParser
             List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
 
             if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
+            {
                 NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+
+                if (parsingContext.HostMethod is Method HostMethod)
+                    parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = HostMethod, Statement = NewStatement, ParentStatementList = parsingContext.StatementList });
+            }
         }
         else
             Log("Unsupported method name.");
@@ -196,7 +203,7 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseIfStatement(ParsingContext parsingContext, IfStatementSyntax ifStatement, ref bool isErrorReported)
     {
-        Statement? NewStatement = null;
+        ConditionalStatement? NewStatement = null;
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
         ParsingContext ConditionParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
@@ -225,7 +232,7 @@ internal partial class ClassDeclarationParser
         Debug.Assert(parsingContext.HostMethod is not null);
 
         Method HostMethod = parsingContext.HostMethod!;
-        Statement? NewStatement = null;
+        ReturnStatement? NewStatement = null;
 
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
@@ -243,9 +250,7 @@ internal partial class ClassDeclarationParser
                     bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariableName.Text == ResultName.Text;
 
                     if (IsResultReturned || !IsResultInLocals)
-                    {
                         NewStatement = new ReturnStatement { Expression = ReturnExpression };
-                    }
                 }
                 else
                     isErrorReported = true;

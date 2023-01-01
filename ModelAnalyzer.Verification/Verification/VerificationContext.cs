@@ -1,12 +1,18 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using Microsoft.Z3;
 
 /// <summary>
 /// Represents the context to use when verifying a class.
 /// </summary>
 internal record VerificationContext : IMemberCollectionContext
 {
+    /// <summary>
+    /// Gets the solver.
+    /// </summary>
+    required public Solver Solver { get; init; }
+
     /// <summary>
     /// Gets or sets the table of class fields.
     /// </summary>
@@ -53,4 +59,9 @@ internal record VerificationContext : IMemberCollectionContext
     /// Gets or sets the table of aliases.
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the execution branch. Null if not within some conditional statement.
+    /// </summary>
+    public BoolExpr? Branch { get; set; }
 }

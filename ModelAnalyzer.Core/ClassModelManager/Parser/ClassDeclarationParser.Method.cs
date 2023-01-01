@@ -193,37 +193,71 @@ internal partial class ClassDeclarationParser
     private void ReportInvalidMethodCalls(ParsingContext parsingContext)
     {
         List<Method> VisitedMethodList = new();
+        Dictionary<Statement, List<Statement>> RemovedStatementTable = new();
 
         foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
         {
             ParsingContext MethodParsingContext = parsingContext with { HostMethod = Entry.Value };
-            ReportInvalidMethodCalls(MethodParsingContext, VisitedMethodList);
+
+            bool IsErrorReported = false;
+            ReportInvalidMethodCalls(MethodParsingContext, VisitedMethodList, RemovedStatementTable, ref IsErrorReported);
+        }
+
+        foreach (KeyValuePair<Statement, List<Statement>> Entry in RemovedStatementTable)
+        {
+            Statement OwnerStatement = Entry.Key;
+            List<Statement> ParentStatementList = Entry.Value;
+
+            bool IsRemoved = ParentStatementList.Remove(OwnerStatement);
+            Debug.Assert(IsRemoved);
         }
     }
 
-    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList)
+    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, ref bool isErrorReported)
     {
-        List<Statement> StatementList = parsingContext.HostMethod!.StatementList;
-        int i = 0;
-
-        while (i < StatementList.Count)
-        {
-            if (StatementList[i] is MethodCallStatement MethodCall)
+        foreach (MethodCallStatementEntry Entry in parsingContext.MethodCallStatementList)
+            if (Entry.HostMethod.Name == parsingContext.HostMethod?.Name)
             {
-                if (!IsValidMethodCall(parsingContext, visitedMethodList, MethodCall, out Location Location))
+                MethodCallStatement MethodCall = Entry.Statement;
+
+                if (!IsValidMethodCall(parsingContext, visitedMethodList, removedStatementTable, MethodCall, out Location Location, ref isErrorReported))
                 {
                     parsingContext.Unsupported.AddUnsupportedStatement(Location);
-                    StatementList.RemoveAt(i);
+                    removedStatementTable.Add(MethodCall, Entry.ParentStatementList);
                 }
-                else
-                    i++;
             }
-            else
-                i++;
-        }
+
+        foreach (FunctionCallStatementEntry Entry in parsingContext.FunctionCallExpressionList)
+            if (Entry.HostMethod.Name == parsingContext.HostMethod?.Name)
+            {
+                FunctionCallExpression FunctionCall = Entry.Expression;
+
+                if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedStatementTable, FunctionCall, out Location Location, ref isErrorReported))
+                {
+                    if (!isErrorReported)
+                    {
+                        parsingContext.Unsupported.AddUnsupportedExpression(Location);
+
+                        if (Entry.OwnerStatementIndex >= 0)
+                        {
+                            Debug.Assert(Entry.OwnerStatementIndex < Entry.ParentStatementList.Count);
+
+                            Statement OwnerStatement = Entry.ParentStatementList[Entry.OwnerStatementIndex];
+                            removedStatementTable.Add(OwnerStatement, Entry.ParentStatementList);
+                        }
+                        else
+                        {
+                            Debug.Assert(Entry.ParentStatementList.Count == 1);
+                            Debug.Assert(Entry.ParentStatementList[0] is ReturnStatement);
+
+                            removedStatementTable.Add(Entry.ParentStatementList[0], Entry.ParentStatementList);
+                        }
+                    }
+                }
+            }
     }
 
-    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, MethodCallStatement methodCall, out Location location)
+    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, MethodCallStatement methodCall, out Location location, ref bool isErrorReported)
     {
         MethodTable MethodTable = parsingContext.MethodTable;
         Method HostMethod = parsingContext.HostMethod!;
@@ -261,7 +295,7 @@ internal partial class ClassDeclarationParser
             Argument Argument = methodCall.ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!IsValidMethodCallArgument(parsingContext, Argument, Parameter))
+            if (!IsValidMethodCallArgument(parsingContext, Argument, Parameter, ref isErrorReported))
             {
                 location = Argument.Location;
                 AllArgumentsValid = false;
@@ -277,21 +311,87 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.Add(CalledMethod);
 
         ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
-        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList);
+        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedStatementTable, ref isErrorReported);
 
         return true;
     }
 
-    private bool IsValidMethodCallArgument(ParsingContext parsingContext, Argument argument, Parameter parameter)
+    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, FunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
+    {
+        MethodTable MethodTable = parsingContext.MethodTable;
+        Method? HostMethod = parsingContext.HostMethod;
+
+        location = functionCall.NameLocation;
+
+        if (functionCall.FunctionName == HostMethod?.Name)
+            return false;
+
+        Method? CalledMethod = null;
+
+        foreach (var Entry in MethodTable)
+            if (Entry.Key == functionCall.FunctionName)
+            {
+                CalledMethod = Entry.Value;
+                break;
+            }
+
+        if (CalledMethod is null)
+            return false;
+
+        if (visitedMethodList.Contains(CalledMethod))
+            return false;
+
+        int Count = functionCall.ArgumentList.Count;
+
+        if (Count != CalledMethod.ParameterTable.Count)
+            return false;
+
+        int Index = 0;
+        bool AllArgumentsValid = true;
+
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in CalledMethod.ParameterTable)
+        {
+            Argument Argument = functionCall.ArgumentList[Index++];
+            Parameter Parameter = Entry.Value;
+
+            if (!IsValidMethodCallArgument(parsingContext, Argument, Parameter, ref isErrorReported))
+            {
+                location = Argument.Location;
+                AllArgumentsValid = false;
+                break;
+            }
+        }
+
+        if (!AllArgumentsValid)
+            return false;
+
+        List<Method> NewVisitedMethodList = new();
+        NewVisitedMethodList.AddRange(visitedMethodList);
+        NewVisitedMethodList.Add(CalledMethod);
+
+        ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
+        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedStatementTable, ref isErrorReported);
+
+        return true;
+    }
+
+    private bool IsValidMethodCallArgument(ParsingContext parsingContext, Argument argument, Parameter parameter, ref bool isErrorReported)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
         ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(parsingContext);
-        ExpressionType ParameterType = parameter.Type;
 
-        if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))
-            return false;
+        // If ArgumentType is ExpressionType.Other, this is an unsupported expression.
+        if (ArgumentType != ExpressionType.Other)
+        {
+            ExpressionType ParameterType = parameter.Type;
 
-        return true;
+            if (IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))
+                return true;
+        }
+        else
+            isErrorReported = true;
+
+        return false;
     }
 
     private Local FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType)

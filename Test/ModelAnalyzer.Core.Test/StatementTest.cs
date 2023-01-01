@@ -595,7 +595,7 @@ class Program_CoreStatement_19
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -700,12 +700,43 @@ class Program_CoreStatement_23
 
     [Test]
     [Category("Core")]
-    public void Statement_MethodCallMatchingArguments()
+    public void Statement_MethodCallTooManyArgumentsNested()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreStatement_24
+{
+    public void Write1(int x)
+    {
+        if (false)
+            Write2(x, x);
+        else
+            Write2(x);
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallMatchingArguments()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_25
 {
     public void Write1(bool x, int y, double z)
     {
@@ -734,7 +765,7 @@ class Program_CoreStatement_24
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_25
+class Program_CoreStatement_26
 {
     public void Write1()
     {
@@ -762,7 +793,7 @@ class Program_CoreStatement_25
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_26
+class Program_CoreStatement_27
 {
     public void Write1()
     {
@@ -781,7 +812,37 @@ class Program_CoreStatement_26
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallCircularNested()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_28
+{
+    public void Write1()
+    {
+        if (false)
+            Write2();
+    }
+
+    void Write2()
+    {
+        Write1();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(2));
     }
 
     [Test]
@@ -791,7 +852,7 @@ class Program_CoreStatement_26
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_27
+class Program_CoreStatement_29
 {
     int Read()
     {
@@ -809,7 +870,7 @@ class Program_CoreStatement_27
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_27
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_29
   int Read()
   {
     int Result = 1
@@ -825,7 +886,7 @@ class Program_CoreStatement_27
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_28
+class Program_CoreStatement_30
 {
     int Read()
     {
@@ -851,7 +912,7 @@ class Program_CoreStatement_28
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreStatement_29
+class Program_CoreStatement_31
 {
     void Read()
     {
