@@ -795,7 +795,6 @@ class Program_CoreStatement_27
 {
     int Read()
     {
-        int X;
         int Result = 1;
 
         return Result;
@@ -813,7 +812,6 @@ class Program_CoreStatement_27
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_27
   int Read()
   {
-    int X
     int Result = 1
     return Result;
   }

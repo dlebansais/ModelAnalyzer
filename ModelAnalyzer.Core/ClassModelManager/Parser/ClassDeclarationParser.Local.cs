@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -111,15 +112,16 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindLocalByName(ParsingContext parsingContext, string localName, out ILocal local)
     {
-        if (parsingContext.HostMethod is not null)
-        {
-            foreach (KeyValuePair<LocalName, Local> Entry in parsingContext.HostMethod.LocalTable)
-                if (Entry.Value.Name.Text == localName)
-                {
-                    local = Entry.Value;
-                    return true;
-                }
-        }
+        Debug.Assert(parsingContext.HostMethod is not null);
+
+        Method HostMethod = parsingContext.HostMethod!;
+
+        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
+            if (Entry.Value.Name.Text == localName)
+            {
+                local = Entry.Value;
+                return true;
+            }
 
         local = null!;
         return false;

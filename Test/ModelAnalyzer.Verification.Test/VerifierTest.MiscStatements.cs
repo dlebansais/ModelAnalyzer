@@ -124,6 +124,7 @@ class Program_Verifier_MiscStatement5
     public int Write(int x)
     // Require: x == 0
     {
+        int X;
         int Result;
 
         Result = x;
