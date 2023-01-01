@@ -47,8 +47,8 @@ internal partial class ClassDeclarationParser
             ReportInvalidMethodCalls(ParsingContext);
             ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
 
-            FieldTable = ParsingContext.FieldTable.ToReadOnly();
-            MethodTable = ParsingContext.MethodTable.ToReadOnly();
+            FieldTable = ParsingContext.FieldTable.AsReadOnly();
+            MethodTable = ParsingContext.MethodTable.AsReadOnly();
             InvariantList = ParsingContext.InvariantList.AsReadOnly();
         }
         else

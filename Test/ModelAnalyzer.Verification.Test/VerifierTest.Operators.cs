@@ -366,8 +366,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };
@@ -480,8 +480,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };
@@ -844,8 +844,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };
@@ -1018,8 +1018,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };
@@ -1117,8 +1117,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };
@@ -1281,8 +1281,8 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
-            MethodTable = MethodTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
+            MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
             MaxDepth = maxDepth,
         };

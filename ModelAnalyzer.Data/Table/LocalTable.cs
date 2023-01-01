@@ -6,9 +6,9 @@
 internal class LocalTable : NameAndItemTable<LocalName, Local>
 {
     /// <summary>
-    /// Returns a read-only table with the same elements as this instance.
+    /// Returns a read-only wrapper for the table.
     /// </summary>
-    public ReadOnlyLocalTable ToReadOnly()
+    public ReadOnlyLocalTable AsReadOnly()
     {
         return new ReadOnlyLocalTable(this);
     }

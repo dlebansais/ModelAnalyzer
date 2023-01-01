@@ -6,9 +6,9 @@
 internal class FieldTable : NameAndItemTable<FieldName, Field>
 {
     /// <summary>
-    /// Returns a read-only table with the same elements as this instance.
+    /// Returns a read-only wrapper for the table.
     /// </summary>
-    public ReadOnlyFieldTable ToReadOnly()
+    public ReadOnlyFieldTable AsReadOnly()
     {
         return new ReadOnlyFieldTable(this);
     }

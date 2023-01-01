@@ -53,7 +53,7 @@ internal class Method : IMethod
     public IList<IRequire> GetRequires() => new List<IRequire>(RequireList);
 
     /// <inheritdoc/>
-    public IList<ILocal> GetLocals() => new List<ILocal>(LocalTable.List.ConvertAll(entry => entry.Value));
+    public IList<ILocal> GetLocals() => new List<ILocal>(LocalTable.Table.List.ConvertAll(entry => entry.Value));
 
     /// <inheritdoc/>
     public IList<IEnsure> GetEnsures() => new List<IEnsure>(EnsureList);

@@ -6,9 +6,9 @@
 internal class MethodTable : NameAndItemTable<MethodName, Method>
 {
     /// <summary>
-    /// Returns a read-only table with the same elements as this instance.
+    /// Returns a read-only wrapper for the table.
     /// </summary>
-    public ReadOnlyMethodTable ToReadOnly()
+    public ReadOnlyMethodTable AsReadOnly()
     {
         return new ReadOnlyMethodTable(this);
     }

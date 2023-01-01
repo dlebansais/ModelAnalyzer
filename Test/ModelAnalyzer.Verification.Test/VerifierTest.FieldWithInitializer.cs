@@ -118,7 +118,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
             MaxDepth = 0,
@@ -252,7 +252,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
-            FieldTable = TestFieldTable.ToReadOnly(),
+            FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
             MaxDepth = 0,

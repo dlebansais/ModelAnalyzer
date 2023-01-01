@@ -6,9 +6,9 @@
 internal class ParameterTable : NameAndItemTable<ParameterName, Parameter>
 {
     /// <summary>
-    /// Returns a read-only table with the same elements as this instance.
+    /// Returns a read-only wrapper for the table.
     /// </summary>
-    public ReadOnlyParameterTable ToReadOnly()
+    public ReadOnlyParameterTable AsReadOnly()
     {
         return new ReadOnlyParameterTable(this);
     }

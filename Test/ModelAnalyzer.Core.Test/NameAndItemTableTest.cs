@@ -48,7 +48,7 @@ public class NameAndItemTableTest
 
         Assert.That(TestTable.ContainsItem(TestFieldName), Is.True);
 
-        ReadOnlyFieldTable ReadOnlyTestTable = TestTable.ToReadOnly();
+        ReadOnlyFieldTable ReadOnlyTestTable = TestTable.AsReadOnly();
 
         Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyFieldTable.Empty));
         Assert.That(ReadOnlyTestTable.ContainsItem(TestFieldName), Is.True);
@@ -83,7 +83,7 @@ public class NameAndItemTableTest
 
         Assert.That(TestTable.ContainsItem(TestMethodName), Is.True);
 
-        ReadOnlyMethodTable ReadOnlyTestTable = TestTable.ToReadOnly();
+        ReadOnlyMethodTable ReadOnlyTestTable = TestTable.AsReadOnly();
 
         Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyMethodTable.Empty));
         Assert.That(ReadOnlyTestTable.ContainsItem(TestMethodName), Is.True);
@@ -108,7 +108,7 @@ public class NameAndItemTableTest
 
         Assert.That(TestTable.ContainsItem(TestParameterName), Is.True);
 
-        ReadOnlyParameterTable ReadOnlyTestTable = TestTable.ToReadOnly();
+        ReadOnlyParameterTable ReadOnlyTestTable = TestTable.AsReadOnly();
 
         Assert.That(ReadOnlyTestTable, Is.Not.EqualTo(ReadOnlyParameterTable.Empty));
         Assert.That(ReadOnlyTestTable.ContainsItem(TestParameterName), Is.True);

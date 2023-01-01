@@ -17,6 +17,7 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     /// </summary>
     public ReadOnlyNameAndItemTable()
     {
+        Table = new NameAndItemTable<TName, TItem>();
     }
 
     /// <summary>
@@ -25,19 +26,18 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     /// <param name="table">The source table.</param>
     public ReadOnlyNameAndItemTable(NameAndItemTable<TName, TItem> table)
     {
-        foreach (KeyValuePair<TName, TItem> Entry in table)
-            List.Add(Entry);
+        Table = table;
     }
 
     /// <summary>
     /// Gets a value indicating whether the table is empty.
     /// </summary>
-    public bool IsEmpty { get => List.Count == 0; }
+    public bool IsEmpty { get => Table.List.Count == 0; }
 
     /// <summary>
     /// Gets the count of items in the table.
     /// </summary>
-    public int Count { get => List.Count; }
+    public int Count { get => Table.List.Count; }
 
     /// <summary>
     /// Checks whether the collection contains a given item.
@@ -46,13 +46,13 @@ internal class ReadOnlyNameAndItemTable<TName, TItem>
     /// <returns><see langword="true"/> if the collection contains an item with this name; otherwise, <see langword="false"/>.</returns>
     public bool ContainsItem(TName itemName)
     {
-        return List.Exists((KeyValuePair<TName, TItem> entry) => entry.Key is TName Key && Key.Equals(itemName));
+        return Table.List.Exists((KeyValuePair<TName, TItem> entry) => entry.Key is TName Key && Key.Equals(itemName));
     }
 
     /// <summary>
     /// Enumerates the collection.
     /// </summary>
-    public IEnumerator<KeyValuePair<TName, TItem>> GetEnumerator() => List.GetEnumerator();
+    public IEnumerator<KeyValuePair<TName, TItem>> GetEnumerator() => Table.List.GetEnumerator();
 
-    public List<KeyValuePair<TName, TItem>> List { get; set; } = new();
+    public NameAndItemTable<TName, TItem> Table { get; set; }
 }

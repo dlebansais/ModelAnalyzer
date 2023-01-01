@@ -57,7 +57,7 @@ internal partial class ClassDeclarationParser
                 };
                 MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
 
-                ReadOnlyParameterTable ParameterTable = ParseParameters(MethodParsingContext, methodDeclaration).ToReadOnly();
+                ReadOnlyParameterTable ParameterTable = ParseParameters(MethodParsingContext, methodDeclaration).AsReadOnly();
 
                 List<Require> RequireList;
                 ReadOnlyLocalTable LocalTable;
@@ -81,7 +81,7 @@ internal partial class ClassDeclarationParser
 
                     RequireList = ParseRequires(MethodParsingContext, methodDeclaration);
 
-                    LocalTable = ParseLocals(MethodParsingContext, methodDeclaration).ToReadOnly();
+                    LocalTable = ParseLocals(MethodParsingContext, methodDeclaration).AsReadOnly();
 
                     TemporaryMethod = new Method
                     {
