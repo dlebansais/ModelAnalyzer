@@ -4,10 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using AnalysisLogger;
-using Microsoft.Extensions.Logging;
 using Microsoft.Z3;
 
 /// <summary>
@@ -106,10 +103,9 @@ internal partial class Verifier : IDisposable
     private void AddMethodCalls(CallSequence callSequence)
     {
         using Solver solver = Context.MkSolver();
+        VerificationContext VerificationContext = new() { FieldTable = FieldTable };
 
-        AliasTable aliasTable = new();
-
-        AddInitialState(solver, aliasTable);
+        AddInitialState(VerificationContext, solver);
 
         if (callSequence.IsEmpty)
             Log($"Call sequence empty");
@@ -117,28 +113,30 @@ internal partial class Verifier : IDisposable
             Log($"Call sequence: {callSequence}");
 
         foreach (Method Method in callSequence)
-            if (!AddMethodCallState(solver, aliasTable, Method))
+            if (!AddMethodCallStateWithInit(VerificationContext, solver, Method))
                 return;
 
-        if (!AddClassInvariant(solver, aliasTable))
+        if (!AddClassInvariant(VerificationContext, solver))
             return;
 
         VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Success, ClassName = ClassName };
         Log($"Invariant preserved for class {ClassName}");
     }
 
-    private void AddInitialState(Solver solver, AliasTable aliasTable)
+    private void AddInitialState(VerificationContext verificationContext, Solver solver)
     {
         Log($"Initial state for class {ClassName}");
 
-        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
             Variable FieldVariable = new(Field.Name, Field.Type);
 
-            aliasTable.AddVariable(FieldVariable);
+            AliasTable.AddVariable(FieldVariable);
 
-            VariableAlias FieldNameAlias = aliasTable.GetAlias(FieldVariable);
+            VariableAlias FieldNameAlias = AliasTable.GetAlias(FieldVariable);
             Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), Field.Type);
             Expr InitializerExpr = CreateInitializerExpr(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
@@ -146,6 +144,27 @@ internal partial class Verifier : IDisposable
             Log($"Adding {InitExpr}");
             solver.Assert(InitExpr);
         }
+    }
+
+    private Local FindOrCreateResultLocal(VerificationContext verificationContext, ExpressionType returnType)
+    {
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
+            if (Entry.Key.Text == Ensure.ResultKeyword)
+                return Entry.Value;
+
+        LocalName ResultLocalName = new LocalName() { Text = Ensure.ResultKeyword };
+        Local ResultLocal = new Local() { Name = ResultLocalName, Type = returnType, Initializer = null };
+        LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
+        Variable ResultLocalVariable = new(ResultLocalBlockName, returnType);
+
+        AliasTable.AddVariable(ResultLocalVariable);
+
+        return ResultLocal;
     }
 
     private Expr CreateVariableExpr(string aliasString, ExpressionType variableType)
@@ -218,7 +237,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddClassInvariant(Solver solver, AliasTable aliasTable)
+    private bool AddClassInvariant(VerificationContext verificationContext, Solver solver)
     {
         bool Result = true;
 
@@ -227,7 +246,7 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
             Invariant Invariant = InvariantList[i];
-            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(aliasTable, hostMethod: null, resultLocal: null, Invariant.BooleanExpression);
+            BoolExpr InvariantExpression = BuildExpression<BoolExpr>(verificationContext, Invariant.BooleanExpression);
             BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
 
             solver.Push();
@@ -252,37 +271,54 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodCallState(Solver solver, AliasTable aliasTable, Method method)
+    private bool AddMethodCallStateWithInit(VerificationContext verificationContext, Solver solver, Method hostMethod)
     {
-        AddMethodParameterStates(solver, aliasTable, method);
-        if (!AddMethodRequires(solver, aliasTable, method, checkOpposite: false))
+        VerificationContext LocalVerificationContext = verificationContext with { HostMethod = hostMethod };
+        Local? ResultLocal = hostMethod.ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType) : null;
+        VerificationContext StatementVerificationContext = LocalVerificationContext with { ResultLocal = ResultLocal };
+
+        return AddMethodCallState(StatementVerificationContext, solver);
+    }
+
+    private bool AddMethodCallState(VerificationContext verificationContext, Solver solver)
+    {
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+
+        AddMethodParameterStates(verificationContext, solver);
+        if (!AddMethodRequires(verificationContext, solver, checkOpposite: false))
             return false;
 
-        AddMethodLocalStates(solver, aliasTable, method);
+        AddMethodLocalStates(verificationContext, solver);
 
         BoolExpr MainBranch = Context.MkBool(true);
-        Local? ResultLocal = null;
 
-        if (!AddStatementListExecution(solver, aliasTable, method, ref ResultLocal, MainBranch, method.StatementList))
+        if (!AddStatementListExecution(verificationContext, solver, MainBranch, HostMethod.StatementList))
             return false;
 
-        if (!AddMethodEnsures(solver, aliasTable, method, ResultLocal, keepNormal: false))
+        if (!AddMethodEnsures(verificationContext, solver, keepNormal: false))
             return false;
 
         return true;
     }
 
-    private void AddMethodParameterStates(Solver solver, AliasTable aliasTable, Method method)
+    private void AddMethodParameterStates(VerificationContext verificationContext, Solver solver)
     {
-        foreach (KeyValuePair<ParameterName, Parameter> Entry in method.ParameterTable)
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterBlockName = CreateParameterBlockName(method, Parameter);
+            ParameterName ParameterBlockName = CreateParameterBlockName(HostMethod, Parameter);
             Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
 
-            aliasTable.AddOrIncrement(ParameterVariable);
+            AliasTable.AddOrIncrement(ParameterVariable);
 
-            VariableAlias ParameterBlockAlias = aliasTable.GetAlias(ParameterVariable);
+            VariableAlias ParameterBlockAlias = AliasTable.GetAlias(ParameterVariable);
 
             CreateVariableExpr(ParameterBlockAlias.ToString(), Parameter.Type);
         }
@@ -294,17 +330,22 @@ internal partial class Verifier : IDisposable
         return new ParameterName() { Text = ParameterBlockText };
     }
 
-    private void AddMethodLocalStates(Solver solver, AliasTable aliasTable, Method method)
+    private void AddMethodLocalStates(VerificationContext verificationContext, Solver solver)
     {
-        foreach (KeyValuePair<LocalName, Local> Entry in method.LocalTable)
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
         {
             Local Local = Entry.Value;
-            LocalName LocalBlockName = CreateLocalBlockName(method, Local);
+            LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
             Variable LocalVariable = new(LocalBlockName, Local.Type);
 
-            aliasTable.AddOrIncrement(LocalVariable);
+            AliasTable.AddOrIncrement(LocalVariable);
 
-            VariableAlias LocalBlockAlias = aliasTable.GetAlias(LocalVariable);
+            VariableAlias LocalBlockAlias = AliasTable.GetAlias(LocalVariable);
 
             Expr LocalExpr = CreateVariableExpr(LocalBlockAlias.ToString(), Local.Type);
             Expr InitializerExpr = CreateInitializerExpr(Local);
@@ -323,38 +364,48 @@ internal partial class Verifier : IDisposable
 
     // checkOpposite: false for a call outside the call (the call is assumed to fulfill the contract)
     //                true for a call from within the class (the call must fulfill the contract)
-    private bool AddMethodRequires(Solver solver, AliasTable aliasTable, Method method, bool checkOpposite)
+    private bool AddMethodRequires(VerificationContext verificationContext, Solver solver, bool checkOpposite)
     {
-        for (int i = 0; i < method.RequireList.Count; i++)
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        for (int i = 0; i < HostMethod.RequireList.Count; i++)
         {
-            Require Require = method.RequireList[i];
-            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultLocal: null, Require.BooleanExpression);
+            Require Require = HostMethod.RequireList[i];
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(verificationContext, Require.BooleanExpression);
             string AssertionType = "require";
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
-            if (checkOpposite && !AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
+            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, solver, AssertionExpr, i, AssertionType, ErrorType))
                 return false;
 
-            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal: true))
+            if (!AddMethodAssertionNormal(verificationContext, solver, AssertionExpr, i, AssertionType, ErrorType, keepNormal: true))
                 return false;
         }
 
         return true;
     }
 
-    private bool AddMethodEnsures(Solver solver, AliasTable aliasTable, Method method, Local? resultLocal, bool keepNormal)
+    private bool AddMethodEnsures(VerificationContext verificationContext, Solver solver, bool keepNormal)
     {
-        for (int i = 0; i < method.EnsureList.Count; i++)
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
+        AliasTable AliasTable = verificationContext.AliasTable;
+
+        for (int i = 0; i < HostMethod.EnsureList.Count; i++)
         {
-            Ensure Ensure = method.EnsureList[i];
-            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(aliasTable, method, resultLocal, Ensure.BooleanExpression);
+            Ensure Ensure = HostMethod.EnsureList[i];
+            BoolExpr AssertionExpr = BuildExpression<BoolExpr>(verificationContext, Ensure.BooleanExpression);
             string AssertionType = "ensure";
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 
-            if (!AddMethodAssertionNormal(solver, method, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
+            if (!AddMethodAssertionNormal(verificationContext, solver, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
                 return false;
 
-            if (!AddMethodAssertionOpposite(solver, method, AssertionExpr, i, AssertionType, ErrorType))
+            if (!AddMethodAssertionOpposite(verificationContext, solver, AssertionExpr, i, AssertionType, ErrorType))
                 return false;
         }
 
@@ -362,8 +413,11 @@ internal partial class Verifier : IDisposable
     }
 
     // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
-    private bool AddMethodAssertionNormal(Solver solver, Method method, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType, bool keepNormal)
+    private bool AddMethodAssertionNormal(VerificationContext verificationContext, Solver solver, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType, bool keepNormal)
     {
+        Debug.Assert(verificationContext.HostMethod is not null);
+
+        Method HostMethod = verificationContext.HostMethod!;
         bool Result = true;
 
         if (!keepNormal)
@@ -375,7 +429,7 @@ internal partial class Verifier : IDisposable
         if (solver.Check() != Status.SATISFIABLE)
         {
             Log($"Inconsistent {assertionType} state for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = index };
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index };
 
             Result = false;
         }
@@ -386,10 +440,12 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodAssertionOpposite(Solver solver, Method method, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType)
+    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, Solver solver, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType)
     {
-        bool Result = true;
+        Debug.Assert(verificationContext.HostMethod is not null);
 
+        Method HostMethod = verificationContext.HostMethod!;
+        bool Result = true;
         BoolExpr AssertionOppositeExpr = Context.MkNot(assertionExpr);
 
         solver.Push();
@@ -400,7 +456,7 @@ internal partial class Verifier : IDisposable
         if (solver.Check() == Status.SATISFIABLE)
         {
             Log($"Violation of {assertionType} for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = method.Name.Text, ErrorIndex = index };
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index };
 
             string ModelString = TextBuilder.Normalized(solver.Model.ToString());
             Log(ModelString);

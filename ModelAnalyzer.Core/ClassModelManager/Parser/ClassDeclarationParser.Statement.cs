@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -244,28 +245,34 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseReturnStatement(ParsingContext parsingContext, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
     {
+        Debug.Assert(parsingContext.HostMethod is not null);
+
+        Method HostMethod = parsingContext.HostMethod!;
         Statement? NewStatement = null;
 
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
-            LocationContext LocationContext = new(ResultExpression);
-            ParsingContext ReturnParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
-
-            Expression? ReturnExpression = ParseExpression(ReturnParsingContext, ResultExpression);
-
-            if (ReturnExpression is not null)
+            if (HostMethod.ReturnType != ExpressionType.Void)
             {
-                LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
-                bool IsResultInLocals = parsingContext.HostMethod!.LocalTable.ContainsItem(ResultName);
-                bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariableName.Text == ResultName.Text;
+                LocationContext LocationContext = new(ResultExpression);
+                ParsingContext ReturnParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
 
-                if (IsResultReturned || !IsResultInLocals)
+                Expression? ReturnExpression = ParseExpression(ReturnParsingContext, ResultExpression);
+
+                if (ReturnExpression is not null)
                 {
-                    NewStatement = new ReturnStatement { Expression = ReturnExpression };
+                    LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+                    bool IsResultInLocals = HostMethod.LocalTable.ContainsItem(ResultName);
+                    bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariableName.Text == ResultName.Text;
+
+                    if (IsResultReturned || !IsResultInLocals)
+                    {
+                        NewStatement = new ReturnStatement { Expression = ReturnExpression };
+                    }
                 }
+                else
+                    isErrorReported = true;
             }
-            else
-                isErrorReported = true;
         }
         else
             NewStatement = new ReturnStatement() { Expression = null };

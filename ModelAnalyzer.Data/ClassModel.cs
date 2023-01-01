@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Diagnostics;
 
 /// <summary>
 /// Represents the model of a class.

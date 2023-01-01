@@ -18,10 +18,10 @@ internal class VariableValueExpression : Expression
     {
         IVariable? Variable = null;
 
-        foreach (KeyValuePair<FieldName, Field> Entry in memberCollectionContext.FieldTable)
-            if (Entry.Key.Text == VariableName.Text)
+        foreach (Field Field in memberCollectionContext.GetFields())
+            if (Field.Name.Text == VariableName.Text)
             {
-                Variable = Entry.Value;
+                Variable = Field;
                 break;
             }
 
@@ -44,10 +44,10 @@ internal class VariableValueExpression : Expression
                     Variable = Entry.Value;
                     break;
                 }
-        }
 
-        if (Variable is null && memberCollectionContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName.Text)
-            Variable = ResultLocal;
+            if (Variable is null && memberCollectionContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName.Text)
+                Variable = ResultLocal;
+        }
 
         Debug.Assert(Variable is not null);
 

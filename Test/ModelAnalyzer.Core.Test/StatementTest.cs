@@ -843,4 +843,30 @@ class Program_CoreStatement_28
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_ReturnExpressionWhenVoid()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_29
+{
+    void Read()
+    {
+        int Result = 0;
+
+        return 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
 }

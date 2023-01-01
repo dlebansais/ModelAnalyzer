@@ -140,7 +140,7 @@ class Program_Verifier_MethodCallInteger7
 {
     int X;
 
-    public void Write1(int x)
+    public int Write1(int x)
     {
         Write2(1);
         return X;
@@ -161,7 +161,7 @@ class Program_Verifier_MethodCallInteger8
 {
     int X;
 
-    public void Write1(int x)
+    public int Write1(int x)
     {
         Write2(0);
         return X;
@@ -353,7 +353,7 @@ class Program_Verifier_MethodCallInteger12
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger_Success()
+    public void Verifier_MethodCallInteger8_Success()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger8, maxDepth: 1);
 

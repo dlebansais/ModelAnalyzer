@@ -315,14 +315,14 @@ public partial class VerifierTest
         TExpression Operand = new() { Value = operandValue };
         TExpression OperandResult = new() { Value = operandResult };
 
-        ParsingContext ParsingContext = new();
+        VerificationContext VerificationContext = new();
 
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ParsingContext),
+            Type = Zero.GetExpressionType(VerificationContext),
             Initializer = Zero,
         };
 
@@ -429,14 +429,14 @@ public partial class VerifierTest
         TExpression Zero = new() { Value = initializerValue };
         TExpression OperandResult = new() { Value = operandResult };
 
-        ParsingContext ParsingContext = new();
+        VerificationContext VerificationContext = new();
 
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ParsingContext),
+            Type = Zero.GetExpressionType(VerificationContext),
             Initializer = Zero,
         };
 

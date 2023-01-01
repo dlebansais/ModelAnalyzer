@@ -88,14 +88,14 @@ public partial class VerifierTest
     {
         TExpression Zero = new() { Value = invariantTestValue };
 
-        ParsingContext ParsingContext = new();
+        VerificationContext VerificationContext = new();
 
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ParsingContext),
+            Type = Zero.GetExpressionType(VerificationContext),
             Initializer = null,
         };
 

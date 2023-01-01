@@ -1,14 +1,16 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
+
 /// <summary>
 /// Provides information about collection of class members.
 /// </summary>
 internal interface IMemberCollectionContext
 {
     /// <summary>
-    /// Gets the table of class fields.
+    /// Gets the list of class fields.
     /// </summary>
-    FieldTable FieldTable { get; }
+    List<Field> GetFields();
 
     /// <summary>
     /// Gets the current method with parameters and locals.

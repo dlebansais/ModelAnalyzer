@@ -17,6 +17,17 @@ internal record ParsingContext : IMemberCollectionContext
     /// </summary>
     public FieldTable FieldTable { get; set; } = new();
 
+    /// <inheritdoc/>
+    List<Field> IMemberCollectionContext.GetFields()
+    {
+        List<Field> Result = new();
+
+        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
+            Result.Add(Entry.Value);
+
+        return Result;
+    }
+
     /// <summary>
     /// Gets or sets a value indicating whether the first pass of method parsing is done.
     /// </summary>

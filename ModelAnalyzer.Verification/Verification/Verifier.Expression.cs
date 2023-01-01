@@ -10,7 +10,7 @@ using Microsoft.Z3;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private T BuildExpression<T>(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, IExpression expression)
+    private T BuildExpression<T>(VerificationContext verificationContext, IExpression expression)
         where T : Expr
     {
         Expr Result = null!;
@@ -19,27 +19,27 @@ internal partial class Verifier : IDisposable
         switch (expression)
         {
             case BinaryArithmeticExpression BinaryArithmetic:
-                Result = BuildBinaryArithmeticExpression(aliasTable, hostMethod, resultLocal, BinaryArithmetic);
+                Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic);
                 IsAssigned = true;
                 break;
             case UnaryArithmeticExpression UnaryArithmetic:
-                Result = BuildUnaryArithmeticExpression(aliasTable, hostMethod, resultLocal, UnaryArithmetic);
+                Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic);
                 IsAssigned = true;
                 break;
             case BinaryLogicalExpression BinaryLogical:
-                Result = BuildBinaryLogicalExpression(aliasTable, hostMethod, resultLocal, BinaryLogical);
+                Result = BuildBinaryLogicalExpression(verificationContext, BinaryLogical);
                 IsAssigned = true;
                 break;
             case UnaryLogicalExpression UnaryLogical:
-                Result = BuildUnaryLogicalExpression(aliasTable, hostMethod, resultLocal, UnaryLogical);
+                Result = BuildUnaryLogicalExpression(verificationContext, UnaryLogical);
                 IsAssigned = true;
                 break;
             case EqualityExpression Equality:
-                Result = BuildEqualityExpression(aliasTable, hostMethod, resultLocal, Equality);
+                Result = BuildEqualityExpression(verificationContext, Equality);
                 IsAssigned = true;
                 break;
             case ComparisonExpression Comparison:
-                Result = BuildComparisonExpression(aliasTable, hostMethod, resultLocal, Comparison);
+                Result = BuildComparisonExpression(verificationContext, Comparison);
                 IsAssigned = true;
                 break;
             case LiteralBooleanValueExpression LiteralBooleanValue:
@@ -55,7 +55,7 @@ internal partial class Verifier : IDisposable
                 IsAssigned = true;
                 break;
             case VariableValueExpression VariableValue:
-                Result = BuildVariableValueExpression(aliasTable, hostMethod, resultLocal, VariableValue);
+                Result = BuildVariableValueExpression(verificationContext, VariableValue);
                 IsAssigned = true;
                 break;
         }
@@ -65,43 +65,43 @@ internal partial class Verifier : IDisposable
         return (T)Result;
     }
 
-    private ArithExpr BuildBinaryArithmeticExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, BinaryArithmeticExpression binaryArithmeticExpression)
+    private ArithExpr BuildBinaryArithmeticExpression(VerificationContext verificationContext, BinaryArithmeticExpression binaryArithmeticExpression)
     {
-        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultLocal, binaryArithmeticExpression.Left);
-        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultLocal, binaryArithmeticExpression.Right);
+        ArithExpr Left = BuildExpression<ArithExpr>(verificationContext, binaryArithmeticExpression.Left);
+        ArithExpr Right = BuildExpression<ArithExpr>(verificationContext, binaryArithmeticExpression.Right);
         return OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
     }
 
-    private ArithExpr BuildUnaryArithmeticExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, UnaryArithmeticExpression unaryArithmeticExpression)
+    private ArithExpr BuildUnaryArithmeticExpression(VerificationContext verificationContext, UnaryArithmeticExpression unaryArithmeticExpression)
     {
-        ArithExpr Operand = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultLocal, unaryArithmeticExpression.Operand);
+        ArithExpr Operand = BuildExpression<ArithExpr>(verificationContext, unaryArithmeticExpression.Operand);
         return OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
     }
 
-    private BoolExpr BuildBinaryLogicalExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, BinaryLogicalExpression binaryLogicalExpression)
+    private BoolExpr BuildBinaryLogicalExpression(VerificationContext verificationContext, BinaryLogicalExpression binaryLogicalExpression)
     {
-        BoolExpr Left = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultLocal, binaryLogicalExpression.Left);
-        BoolExpr Right = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultLocal, binaryLogicalExpression.Right);
+        BoolExpr Left = BuildExpression<BoolExpr>(verificationContext, binaryLogicalExpression.Left);
+        BoolExpr Right = BuildExpression<BoolExpr>(verificationContext, binaryLogicalExpression.Right);
         return OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildUnaryLogicalExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, UnaryLogicalExpression unaryLogicalExpression)
+    private BoolExpr BuildUnaryLogicalExpression(VerificationContext verificationContext, UnaryLogicalExpression unaryLogicalExpression)
     {
-        BoolExpr Operand = BuildExpression<BoolExpr>(aliasTable, hostMethod, resultLocal, unaryLogicalExpression.Operand);
+        BoolExpr Operand = BuildExpression<BoolExpr>(verificationContext, unaryLogicalExpression.Operand);
         return OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
     }
 
-    private BoolExpr BuildEqualityExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, EqualityExpression equalityExpression)
+    private BoolExpr BuildEqualityExpression(VerificationContext verificationContext, EqualityExpression equalityExpression)
     {
-        Expr Left = BuildExpression<Expr>(aliasTable, hostMethod, resultLocal, equalityExpression.Left);
-        Expr Right = BuildExpression<Expr>(aliasTable, hostMethod, resultLocal, equalityExpression.Right);
+        Expr Left = BuildExpression<Expr>(verificationContext, equalityExpression.Left);
+        Expr Right = BuildExpression<Expr>(verificationContext, equalityExpression.Right);
         return OperatorBuilder.Equality[equalityExpression.Operator](Context, Left, Right);
     }
 
-    private BoolExpr BuildComparisonExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, ComparisonExpression comparisonExpression)
+    private BoolExpr BuildComparisonExpression(VerificationContext verificationContext, ComparisonExpression comparisonExpression)
     {
-        ArithExpr Left = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultLocal, comparisonExpression.Left);
-        ArithExpr Right = BuildExpression<ArithExpr>(aliasTable, hostMethod, resultLocal, comparisonExpression.Right);
+        ArithExpr Left = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Left);
+        ArithExpr Right = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Right);
         return OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
     }
 
@@ -120,59 +120,59 @@ internal partial class Verifier : IDisposable
         return CreateFloatingPointExpr(literalFloatingPointValueExpression.Value);
     }
 
-    private Expr BuildVariableValueExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, VariableValueExpression variableValueExpression)
+    private Expr BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression)
     {
-        FieldTable TempFieldTable = new();
-        foreach (var Entry in FieldTable)
-            TempFieldTable.AddItem(Entry.Value);
-
-        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod, ResultLocal = resultLocal };
-
+        AliasTable AliasTable = verificationContext.AliasTable;
         string VariableName = variableValueExpression.VariableName.Text;
         string? VariableString = null;
-        ExpressionType VariableType = variableValueExpression.GetExpressionType(ParsingContext);
+        ExpressionType VariableType = variableValueExpression.GetExpressionType(verificationContext);
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Text == VariableName)
             {
                 Field Field = Entry.Value;
                 Variable FieldVariable = new(Field.Name, Field.Type);
-                VariableAlias FieldAlias = aliasTable.GetAlias(FieldVariable);
+                VariableAlias FieldAlias = AliasTable.GetAlias(FieldVariable);
                 VariableString = FieldAlias.ToString();
                 break;
             }
 
-        if (hostMethod is not null)
+        if (verificationContext.HostMethod is Method HostMethod)
         {
-            ReadOnlyParameterTable ParameterTable = hostMethod.ParameterTable;
+            ReadOnlyParameterTable ParameterTable = HostMethod.ParameterTable;
 
             foreach (KeyValuePair<ParameterName, Parameter> Entry in ParameterTable)
                 if (Entry.Key.Text == VariableName)
                 {
                     Parameter Parameter = Entry.Value;
-                    ParameterName ParameterBlockName = CreateParameterBlockName(hostMethod, Parameter);
+                    ParameterName ParameterBlockName = CreateParameterBlockName(HostMethod, Parameter);
                     Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
-                    VariableAlias ParameterAlias = aliasTable.GetAlias(ParameterVariable);
+                    VariableAlias ParameterAlias = AliasTable.GetAlias(ParameterVariable);
                     VariableString = ParameterAlias.ToString();
                     break;
                 }
 
-            ReadOnlyLocalTable LocalTable = hostMethod.LocalTable;
+            ReadOnlyLocalTable LocalTable = HostMethod.LocalTable;
 
             foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
                 if (Entry.Key.Text == VariableName)
                 {
                     Local Local = Entry.Value;
-                    LocalName LocalBlockName = CreateLocalBlockName(hostMethod, Local);
+                    LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
                     Variable LocalVariable = new(LocalBlockName, Local.Type);
-                    VariableAlias LocalAlias = aliasTable.GetAlias(LocalVariable);
+                    VariableAlias LocalAlias = AliasTable.GetAlias(LocalVariable);
                     VariableString = LocalAlias.ToString();
                     break;
                 }
-        }
 
-        if (VariableString is null && resultLocal is not null && resultLocal.Name.Text == VariableName)
-            VariableString = resultLocal.Name.Text;
+            if (VariableString is null && verificationContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName)
+            {
+                LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
+                Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
+                VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
+                VariableString = ResultLocalAlias.ToString();
+            }
+        }
 
         Debug.Assert(VariableString is not null);
         Debug.Assert(VariableType != ExpressionType.Other);
