@@ -115,6 +115,33 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bad field..
+        /// </summary>
+        internal static string BadFieldAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadFieldAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad field.
+        /// </summary>
+        internal static string BadFieldAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadFieldAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad field.
+        /// </summary>
+        internal static string BadFieldAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadFieldAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad invariant..
         /// </summary>
         internal static string BadInvariantAnalyzerDescription {
@@ -138,6 +165,60 @@ namespace ModelAnalyzer {
         internal static string BadInvariantAnalyzerTitle {
             get {
                 return ResourceManager.GetString("BadInvariantAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad local..
+        /// </summary>
+        internal static string BadLocalAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadLocalAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad local.
+        /// </summary>
+        internal static string BadLocalAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadLocalAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad local.
+        /// </summary>
+        internal static string BadLocalAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadLocalAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad method..
+        /// </summary>
+        internal static string BadMethodAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadMethodAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad method.
+        /// </summary>
+        internal static string BadMethodAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadMethodAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bad method.
+        /// </summary>
+        internal static string BadMethodAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadMethodAnalyzerTitle", resourceCulture);
             }
         }
         

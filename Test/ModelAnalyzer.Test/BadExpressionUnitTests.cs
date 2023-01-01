@@ -20,7 +20,7 @@ class Program_BadExpression_0
 
     void Write(int x)
     {
-        X = [|nameof(X).Length|]MA0002;
+        X = [|nameof(X).Length|]MA0009;
     }
 }
 ");
@@ -39,7 +39,7 @@ class Program_BadExpression_1
 
     void Write(int x)
     {
-        X = x [|%|]MA0002 x;
+        X = x [|%|]MA0009 x;
     }
 }
 ");
@@ -86,7 +86,7 @@ class Program_BadExpression_3
             X = x;
     }
 }
-// Invariant: X [|%|]MA0002 X
+// Invariant: X [|%|]MA0009 X
 ");
     }
 
@@ -112,7 +112,7 @@ class Program_BadExpression_4
             X = x;
     }
 }
-// Invariant: [|typeof(X)|]MA0002
+// Invariant: [|typeof(X)|]MA0009
 ");
     }
 
@@ -138,7 +138,7 @@ class Program_BadExpression_5
             X = x;
     }
 }
-// Invariant: X [|%|]MA0002 0
+// Invariant: X [|%|]MA0009 0
 ");
     }
 
@@ -164,7 +164,7 @@ class Program_BadExpression_6
             X = x;
     }
 }
-// Invariant: [|Y|]MA0002 >= 0
+// Invariant: [|Y|]MA0009 >= 0
 ");
     }
 }

@@ -79,7 +79,7 @@ class Program_BadRequire_3
     int X;
 
     void Write(int x)
-    // Require: [|typeof(x)|]MA0002
+    // Require: [|typeof(x)|]MA0009
     {
         X = x;
     }
@@ -99,7 +99,7 @@ class Program_BadRequire_4
     int X;
 
     void Write(int x)
-    // Require: [|Y|]MA0002 == 0
+    // Require: [|Y|]MA0009 == 0
     {
         X = x;
     }

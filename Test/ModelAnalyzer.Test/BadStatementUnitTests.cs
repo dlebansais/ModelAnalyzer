@@ -19,7 +19,7 @@ class Program_BadStatement_0
     int X;
     int Read()
     {
-        [|throw new NotImplementedException();|]MA0006
+        [|throw new NotImplementedException();|]MA0008
     }
 }
 ");
@@ -37,7 +37,7 @@ class Program_BadStatement_1
     int X;
     void Write(int x)
     {
-        [|x = 0;|]MA0006
+        [|x = 0;|]MA0008
     }
 }
 ");
@@ -75,7 +75,7 @@ class Program_BadStatement_3
 
     int Read()
     {
-        [|return X;|]MA0006
+        [|return X;|]MA0008
         X = 0;
     }
 }
@@ -96,9 +96,9 @@ class Program_BadStatement_4
     int Read()
     {
         if (X == 0)
-            [|return X;|]MA0006
+            [|return X;|]MA0008
         else
-            [|return X + 1;|]MA0006
+            [|return X + 1;|]MA0008
     }
 }
 ");
@@ -115,7 +115,7 @@ class Program_BadStatement_5
 {
     public void Write()
     {
-        [|Write|]MA0006();
+        [|Write|]MA0008();
     }
 }
 ");

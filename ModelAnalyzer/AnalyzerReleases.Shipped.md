@@ -7,13 +7,16 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|--------------------
-MA0001  | Design   | Warning  | BadEnsureAnalyzer
-MA0002  | Design   | Warning  | BadExpressionAnalyzer
-MA0003  | Design   | Warning  | ClassModelAnalyzer
-MA0004  | Design   | Warning  | BadParameterAnalyzer
-MA0005  | Design   | Warning  | BadRequireAnalyzer
-MA0006  | Design   | Warning  | BadStatementAnalyzer
-MA0007  | Design   | Warning  | ClassModelAnalyzer
-MA0008  | Design   | Error    | InvariantViolationAnalyzer
-MA0009  | Design   | Error    | RequireViolationAnalyzer
-MA0010  | Design   | Error    | EnsureViolationAnalyzer
+MA0001  | Design   | Warning  | ClassModelAnalyzer
+MA0002  | Design   | Warning  | InvalidElementAnalyzer
+MA0003  | Design   | Warning  | InvalidElementAnalyzer
+MA0004  | Design   | Warning  | InvalidElementAnalyzer
+MA0005  | Design   | Warning  | InvalidElementAnalyzer
+MA0006  | Design   | Warning  | InvalidElementAnalyzer
+MA0007  | Design   | Warning  | InvalidElementAnalyzer
+MA0008  | Design   | Warning  | InvalidElementAnalyzer
+MA0009  | Design   | Warning  | InvalidElementAnalyzer
+MA0010  | Design   | Warning  | BadInvariantAnalyzer
+MA0011  | Design   | Error    | RequireViolationAnalyzer
+MA0012  | Design   | Error    | EnsureViolationAnalyzer
+MA0013  | Design   | Error    | InvariantViolationAnalyzer

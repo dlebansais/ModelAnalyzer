@@ -59,7 +59,7 @@ class Program_BadEnsure_2
     {
         X = x;
     }
-    [|// Ensure: x $ 0|]MA0001
+    [|// Ensure: x $ 0|]MA0006
 }
 ");
     }
@@ -79,7 +79,7 @@ class Program_BadEnsure_3
     {
         X = x;
     }
-    [|// Ensure: x > 0; break;|]MA0001
+    [|// Ensure: x > 0; break;|]MA0006
 }
 ");
     }
@@ -99,7 +99,7 @@ class Program_BadEnsure_4
     {
         X = x;
     }
-    // Ensure: [|typeof(x)|]MA0002
+    // Ensure: [|typeof(x)|]MA0009
 }
 ");
     }
@@ -119,7 +119,7 @@ class Program_BadEnsure_5
     {
         X = x;
     }
-    // Ensure: [|Y|]MA0002 == 0
+    // Ensure: [|Y|]MA0009 == 0
 }
 ");
     }
@@ -134,13 +134,27 @@ using System;
 class Program_BadEnsure_6
 {
     int X;
-    [|// Ensure: X == 0|]MA0001
+    [|// Ensure: X == 0|]MA0006
 
-    string Read() => string.Empty;
-    [|// Ensure: X == 0|]MA0001
+    int Read() => 0;
+    // Ensure: X == 0
 
     int Y;
-    [|// Ensure: X == 0|]MA0001
+    [|// Ensure: X == 0|]MA0006
+}
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task InvalidReturnType_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadEnsure_7
+{
+    string [|Read|]MA0003() => string.Empty;
 }
 ");
     }

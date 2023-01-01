@@ -141,6 +141,18 @@
     <value>Bad expression</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="BadFieldAnalyzerDescription" xml:space="preserve">
+    <value>Bad field.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadFieldAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad field</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadFieldAnalyzerTitle" xml:space="preserve">
+    <value>Bad field</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="BadInvariantAnalyzerDescription" xml:space="preserve">
     <value>Bad invariant.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
@@ -151,6 +163,30 @@
   </data>
   <data name="BadInvariantAnalyzerTitle" xml:space="preserve">
     <value>Class invariant is invalid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="BadLocalAnalyzerDescription" xml:space="preserve">
+    <value>Bad local.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadLocalAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad local</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadLocalAnalyzerTitle" xml:space="preserve">
+    <value>Bad local</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="BadMethodAnalyzerDescription" xml:space="preserve">
+    <value>Bad method.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadMethodAnalyzerMessageFormat" xml:space="preserve">
+    <value>Bad method</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadMethodAnalyzerTitle" xml:space="preserve">
+    <value>Bad method</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadParameterAnalyzerDescription" xml:space="preserve">

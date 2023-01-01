@@ -123,13 +123,16 @@ public class Test
 
 | Code   | Diagnostic               |
 | ------ | ------------------------ |
-| [MA0001](doc/MA0001.md) | Invalid ensure clause    |
-| [MA0002](doc/MA0002.md) | Invalid expression       |
-| [MA0003](doc/MA0003.md) | Invalid invariant clause |
+| [MA0001](doc/MA0001.md) | Error in class model     |
+| [MA0002](doc/MA0002.md) | Invalid field            |
+| [MA0003](doc/MA0003.md) | Invalid method           |
 | [MA0004](doc/MA0004.md) | Invalid parameter        |
 | [MA0005](doc/MA0005.md) | Invalid require clause   |
-| [MA0006](doc/MA0006.md) | Invalid statement        |
-| [MA0007](doc/MA0007.md) | Error in class model     |
-| [MA0008](doc/MA0008.md) | Invariant violation      |
-| [MA0009](doc/MA0009.md) | Require clause violation |
-| [MA0010](doc/MA0010.md) | Ensure clause violation  |
+| [MA0006](doc/MA0006.md) | Invalid ensure clause    |
+| [MA0007](doc/MA0007.md) | Invalid local variable   |
+| [MA0008](doc/MA0008.md) | Invalid statement        |
+| [MA0009](doc/MA0009.md) | Invalid expression       |
+| [MA0010](doc/MA0010.md) | Invalid invariant clause |
+| [MA0011](doc/MA0011.md) | Require clause violation |
+| [MA0012](doc/MA0012.md) | Ensure clause violation  |
+| [MA0013](doc/MA0013.md) | Invariant violation      |
