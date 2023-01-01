@@ -22,51 +22,6 @@ internal partial record ClassModel : IClassModel
         return TextBuilder.Normalized(Builder.ToString());
     }
 
-    /// <summary>
-    /// Gets a variable from its name.
-    /// </summary>
-    /// <param name="parsingContext">The parsing context.</param>
-    /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ParsingContext parsingContext, IVariableName variableName)
-    {
-        IVariable? Result = null;
-
-        foreach (KeyValuePair<FieldName, Field> Entry in parsingContext.FieldTable)
-            if (Entry.Key.Text == variableName.Text)
-            {
-                Result = Entry.Value;
-                break;
-            }
-
-        if (parsingContext.HostMethod is not null)
-        {
-            foreach (KeyValuePair<ParameterName, Parameter> Entry in parsingContext.HostMethod.ParameterTable)
-                if (Entry.Key.Text == variableName.Text)
-                {
-                    Debug.Assert(Result is null);
-
-                    Result = Entry.Value;
-                    break;
-                }
-
-            foreach (KeyValuePair<LocalName, Local> Entry in parsingContext.HostMethod.LocalTable)
-                if (Entry.Key.Text == variableName.Text)
-                {
-                    Debug.Assert(Result is null);
-
-                    Result = Entry.Value;
-                    break;
-                }
-        }
-
-        if (Result is null && parsingContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == variableName.Text)
-            Result = ResultLocal;
-
-        Debug.Assert(Result is not null);
-
-        return Result!;
-    }
-
     private void AppendClassName(StringBuilder builder)
     {
         builder.AppendLine(Name);

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Represents the context to use when parsing a class.
 /// </summary>
-internal record ParsingContext
+internal record ParsingContext : IMemberCollectionContext
 {
     /// <summary>
     /// Gets the object collecting all unsupported elements found during parsing.

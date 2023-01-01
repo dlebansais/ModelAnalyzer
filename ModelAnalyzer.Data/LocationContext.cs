@@ -50,8 +50,8 @@ public class LocationContext
 
     private Location GetLocation(TextSpan textSpan)
     {
-        SyntaxTree SourceTree = null!;
-        TextSpan ContextSpan = default;
+        SyntaxTree SourceTree;
+        TextSpan ContextSpan;
         Location Result = null!;
 
         if (Header is not null)

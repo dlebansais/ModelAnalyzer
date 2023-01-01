@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -12,9 +14,44 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ParsingContext parsingContext)
+    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext)
     {
-        return ClassModel.GetVariable(parsingContext, VariableName).Type;
+        IVariable? Variable = null;
+
+        foreach (KeyValuePair<FieldName, Field> Entry in memberCollectionContext.FieldTable)
+            if (Entry.Key.Text == VariableName.Text)
+            {
+                Variable = Entry.Value;
+                break;
+            }
+
+        if (memberCollectionContext.HostMethod is Method HostMethod)
+        {
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
+                if (Entry.Key.Text == VariableName.Text)
+                {
+                    Debug.Assert(Variable is null);
+
+                    Variable = Entry.Value;
+                    break;
+                }
+
+            foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
+                if (Entry.Key.Text == VariableName.Text)
+                {
+                    Debug.Assert(Variable is null);
+
+                    Variable = Entry.Value;
+                    break;
+                }
+        }
+
+        if (Variable is null && memberCollectionContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName.Text)
+            Variable = ResultLocal;
+
+        Debug.Assert(Variable is not null);
+
+        return Variable!.Type;
     }
 
     /// <summary>
