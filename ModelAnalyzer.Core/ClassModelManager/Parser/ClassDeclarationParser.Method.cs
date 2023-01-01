@@ -77,7 +77,7 @@ internal partial class ClassDeclarationParser
                         StatementList = new List<Statement>(),
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod };
 
                     RequireList = ParseRequires(MethodParsingContext, methodDeclaration);
 
@@ -94,30 +94,25 @@ internal partial class ClassDeclarationParser
                         StatementList = new List<Statement>(),
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = true };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = true };
 
                     StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
 
-                    Local? ResultLocal = null;
-
-                    if (ReturnType != ExpressionType.Void)
+                    TemporaryMethod = new Method
                     {
-                        Debug.Assert(ReturnType != ExpressionType.Other);
+                        Name = MethodName,
+                        AccessModifier = AccessModifier,
+                        ParameterTable = ParameterTable,
+                        ReturnType = ReturnType,
+                        RequireList = RequireList,
+                        LocalTable = LocalTable,
+                        StatementList = StatementList,
+                        EnsureList = new List<Ensure>(),
+                    };
+                    Local? ResultLocal = ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalTable, ReturnType) : null;
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = false, ResultLocal = ResultLocal };
 
-                        LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
-
-                        foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
-                            if (Entry.Key == ResultName)
-                            {
-                                ResultLocal = Entry.Value;
-                                break;
-                            }
-
-                        if (ResultLocal is null)
-                            ResultLocal = new Local() { Name = ResultName, Type = ReturnType, Initializer = null };
-                    }
-
-                    EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration, ResultLocal);
+                    EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration);
                 }
                 else
                 {
@@ -297,5 +292,21 @@ internal partial class ClassDeclarationParser
             return false;
 
         return true;
+    }
+
+    private Local FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType)
+    {
+        Debug.Assert(returnType != ExpressionType.Other);
+        Debug.Assert(returnType != ExpressionType.Void);
+
+        LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+
+        foreach (KeyValuePair<LocalName, Local> Entry in localTable)
+            if (Entry.Key == ResultName)
+                return Entry.Value;
+
+        Local ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null };
+
+        return ResultLocal;
     }
 }

@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Ensure> ParseEnsures(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration, Local? resultLocal)
+    private List<Ensure> ParseEnsures(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
         List<Ensure> EnsureList;
 
@@ -18,14 +18,14 @@ internal partial class ClassDeclarationParser
         SyntaxToken NextToken = LastToken.GetNextToken();
 
         if (NextToken.HasLeadingTrivia)
-            EnsureList = ParseEnsures(parsingContext, NextToken.LeadingTrivia, resultLocal);
+            EnsureList = ParseEnsures(parsingContext, NextToken.LeadingTrivia);
         else
             EnsureList = new();
 
         return EnsureList;
     }
 
-    private List<Ensure> ParseEnsures(ParsingContext parsingContext, SyntaxTriviaList triviaList, Local? resultLocal)
+    private List<Ensure> ParseEnsures(ParsingContext parsingContext, SyntaxTriviaList triviaList)
     {
         List<Ensure> EnsureList = new();
 
@@ -36,13 +36,13 @@ internal partial class ClassDeclarationParser
                 string EnsureHeader = $"// {Modeling.Ensure}";
 
                 if (Comment.StartsWith(EnsureHeader))
-                    ParseEnsure(parsingContext, resultLocal, EnsureList, Trivia, Comment, EnsureHeader);
+                    ParseEnsure(parsingContext, EnsureList, Trivia, Comment, EnsureHeader);
             }
 
         return EnsureList;
     }
 
-    private void ParseEnsure(ParsingContext parsingContext, Local? resultLocal, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
+    private void ParseEnsure(ParsingContext parsingContext, List<Ensure> ensureList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
@@ -54,7 +54,7 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
             LocationContext LocationContext = new(trivia, header, Offset);
-            ParsingContext EnsureParsingContext = parsingContext with { IsLocalAllowed = false, ResultLocal = resultLocal, LocationContext = LocationContext };
+            ParsingContext EnsureParsingContext = parsingContext with { LocationContext = LocationContext };
 
             if (IsValidAssertionSyntaxTree(EnsureParsingContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
