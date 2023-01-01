@@ -25,24 +25,23 @@ internal partial record ClassModel : IClassModel
     /// <summary>
     /// Gets a variable from its name.
     /// </summary>
-    /// <param name="fieldTable">The table of fields.</param>
-    /// <param name="hostMethod">The host method, null in invariants.</param>
+    /// <param name="parsingContext">The parsing context.</param>
     /// <param name="resultLocal">The optional result local.</param>
     /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal, IVariableName variableName)
+    public static IVariable GetVariable(ParsingContext parsingContext, Local? resultLocal, IVariableName variableName)
     {
         IVariable? Result = null;
 
-        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
+        foreach (KeyValuePair<FieldName, Field> Entry in parsingContext.FieldTable)
             if (Entry.Key.Text == variableName.Text)
             {
                 Result = Entry.Value;
                 break;
             }
 
-        if (hostMethod is not null)
+        if (parsingContext.HostMethod is not null)
         {
-            foreach (KeyValuePair<ParameterName, Parameter> Entry in hostMethod.ParameterTable)
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in parsingContext.HostMethod.ParameterTable)
                 if (Entry.Key.Text == variableName.Text)
                 {
                     Debug.Assert(Result is null);
@@ -51,7 +50,7 @@ internal partial record ClassModel : IClassModel
                     break;
                 }
 
-            foreach (KeyValuePair<LocalName, Local> Entry in hostMethod.LocalTable)
+            foreach (KeyValuePair<LocalName, Local> Entry in parsingContext.HostMethod.LocalTable)
                 if (Entry.Key.Text == variableName.Text)
                 {
                     Debug.Assert(Result is null);

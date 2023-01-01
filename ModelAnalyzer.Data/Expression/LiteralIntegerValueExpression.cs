@@ -12,7 +12,7 @@ internal class LiteralIntegerValueExpression : Expression, ILiteralExpression<in
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ReadOnlyFieldTable fieldTable, Method? hostMethod, Local? resultLocal) => ExpressionType.Integer;
+    public override ExpressionType GetExpressionType(ParsingContext parsingContext, Local? resultLocal) => ExpressionType.Integer;
 
     /// <inheritdoc/>
     public int Value { get; set; }

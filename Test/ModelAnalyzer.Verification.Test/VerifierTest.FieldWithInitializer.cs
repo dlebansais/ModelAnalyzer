@@ -89,12 +89,14 @@ public partial class VerifierTest
         TExpression Initializer = new() { Value = initialValue };
         TExpression Zero = new() { Value = invariantTestValue };
 
+        ParsingContext ParsingContext = new();
+
         string ClassName = "Test";
         string FieldName = "X";
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultLocal: null),
+            Type = Zero.GetExpressionType(ParsingContext, resultLocal: null),
             Initializer = Initializer,
         };
 
@@ -207,6 +209,8 @@ public partial class VerifierTest
         TExpression Zero1 = new() { Value = invariantTestValue1 };
         TExpression Zero2 = new() { Value = invariantTestValue2 };
 
+        ParsingContext ParsingContext = new();
+
         string ClassName = "Test";
         string FieldName1 = "X";
         string FieldName2 = "Y";
@@ -214,14 +218,14 @@ public partial class VerifierTest
         Field TestField1 = new()
         {
             Name = new FieldName { Text = FieldName1 },
-            Type = Zero1.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultLocal: null),
+            Type = Zero1.GetExpressionType(ParsingContext, resultLocal: null),
             Initializer = Initializer,
         };
 
         Field TestField2 = new()
         {
             Name = new FieldName { Text = FieldName2 },
-            Type = Zero2.GetExpressionType(ReadOnlyFieldTable.Empty, null, resultLocal: null),
+            Type = Zero2.GetExpressionType(ParsingContext, resultLocal: null),
             Initializer = Initializer,
         };
 

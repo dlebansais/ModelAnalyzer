@@ -10,19 +10,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Require> ParseRequires(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported)
+    private List<Require> ParseRequires(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
         List<Require> RequireList;
 
         if (methodDeclaration.Body is BlockSyntax Block && Block.HasLeadingTrivia)
-            RequireList = ParseRequires(Block.GetLeadingTrivia(), fieldTable, hostMethod, unsupported);
+            RequireList = ParseRequires(parsingContext, Block.GetLeadingTrivia());
         else
             RequireList = new();
 
         return RequireList;
     }
 
-    private List<Require> ParseRequires(SyntaxTriviaList triviaList, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported)
+    private List<Require> ParseRequires(ParsingContext parsingContext, SyntaxTriviaList triviaList)
     {
         List<Require> RequireList = new();
 
@@ -34,15 +34,15 @@ internal partial class ClassDeclarationParser
                 string EnsureHeader = $"// {Modeling.Ensure}";
 
                 if (Comment.StartsWith(RequireHeader))
-                    ParseRequire(fieldTable, hostMethod, unsupported, RequireList, Trivia, Comment, RequireHeader);
+                    ParseRequire(parsingContext, RequireList, Trivia, Comment, RequireHeader);
                 else if (Comment.StartsWith(EnsureHeader))
-                    ReportUnsupportedEnsure(unsupported, Trivia, Comment, EnsureHeader);
+                    ReportUnsupportedEnsure(parsingContext, Trivia, Comment, EnsureHeader);
             }
 
         return RequireList;
     }
 
-    private void ParseRequire(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, List<Require> requireList, SyntaxTrivia trivia, string comment, string header)
+    private void ParseRequire(ParsingContext parsingContext, List<Require> requireList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
@@ -55,7 +55,7 @@ internal partial class ClassDeclarationParser
         {
             LocationContext LocationContext = new(trivia, header, Offset);
 
-            if (IsValidAssertionSyntaxTree(fieldTable, hostMethod, isLocalAllowed: false, resultLocal: null, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(parsingContext, isLocalAllowed: false, resultLocal: null, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewRequire = new Require { Text = Text, Location = trivia.GetLocation(), BooleanExpression = BooleanExpression };
             }
@@ -70,11 +70,11 @@ internal partial class ClassDeclarationParser
         else if (!IsErrorReported)
         {
             Location Location = trivia.GetLocation();
-            unsupported.AddUnsupportedRequire(Text, Location);
+            parsingContext.Unsupported.AddUnsupportedRequire(Text, Location);
         }
     }
 
-    private void ReportUnsupportedRequires(Unsupported unsupported, SyntaxTriviaList triviaList)
+    private void ReportUnsupportedRequires(ParsingContext parsingContext, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -83,17 +83,17 @@ internal partial class ClassDeclarationParser
                 string Header = $"// {Modeling.Require}";
 
                 if (Comment.StartsWith(Header))
-                    ReportUnsupportedRequire(unsupported, Trivia, Comment, Header);
+                    ReportUnsupportedRequire(parsingContext, Trivia, Comment, Header);
             }
     }
 
-    private void ReportUnsupportedRequire(Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
+    private void ReportUnsupportedRequire(ParsingContext parsingContext, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
         Log($"Require '{Text}' not supported at this location.");
 
         Location Location = trivia.GetLocation();
-        unsupported.AddUnsupportedRequire(Text, Location);
+        parsingContext.Unsupported.AddUnsupportedRequire(Text, Location);
     }
 }

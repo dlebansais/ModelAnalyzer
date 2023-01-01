@@ -122,9 +122,15 @@ internal partial class Verifier : IDisposable
 
     private Expr BuildVariableValueExpression(AliasTable aliasTable, Method? hostMethod, Local? resultLocal, VariableValueExpression variableValueExpression)
     {
+        FieldTable TempFieldTable = new();
+        foreach (var Entry in FieldTable)
+            TempFieldTable.AddItem(Entry.Value);
+
+        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+
         string VariableName = variableValueExpression.VariableName.Text;
         string? VariableString = null;
-        ExpressionType VariableType = variableValueExpression.GetExpressionType(FieldTable, hostMethod, resultLocal);
+        ExpressionType VariableType = variableValueExpression.GetExpressionType(ParsingContext, resultLocal);
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Text == VariableName)

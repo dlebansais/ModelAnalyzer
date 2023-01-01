@@ -58,7 +58,7 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets the invariant list.
     /// </summary>
-    required public List<Invariant> InvariantList { get; init; }
+    required public IReadOnlyList<Invariant> InvariantList { get; init; }
 
     /// <summary>
     /// Gets the logger.

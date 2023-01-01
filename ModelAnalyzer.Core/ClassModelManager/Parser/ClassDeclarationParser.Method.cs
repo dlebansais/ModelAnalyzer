@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private ReadOnlyMethodTable ParseMethods(ClassDeclarationSyntax classDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
+    private MethodTable ParseMethods(ParsingContext parsingContext, ClassDeclarationSyntax classDeclaration)
     {
         MethodTable MethodTable = new();
 
@@ -19,21 +19,19 @@ internal partial class ClassDeclarationParser
         {
             SyntaxTriviaList TriviaList;
 
-            if (TryFindLeadingTrivia(Member, out TriviaList))
-                ReportUnsupportedRequires(unsupported, TriviaList);
+            if (parsingContext.IsMethodParsingStarted && TryFindLeadingTrivia(Member, out TriviaList))
+                ReportUnsupportedRequires(parsingContext, TriviaList);
 
             if (Member is MethodDeclarationSyntax MethodDeclaration)
-                AddMethod(MethodDeclaration, fieldTable, MethodTable, unsupported);
-            else if (TryFindTrailingTrivia(Member, out TriviaList))
-                ReportUnsupportedEnsures(unsupported, TriviaList);
+                AddMethod(parsingContext, MethodTable, MethodDeclaration);
+            else if (parsingContext.IsMethodParsingStarted && TryFindTrailingTrivia(Member, out TriviaList))
+                ReportUnsupportedEnsures(parsingContext, TriviaList);
         }
 
-        ReportInvalidMethodCalls(MethodTable, unsupported);
-
-        return MethodTable.ToReadOnly();
+        return MethodTable;
     }
 
-    private void AddMethod(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, MethodTable methodTable, Unsupported unsupported)
+    private void AddMethod(ParsingContext parsingContext, MethodTable methodTable, MethodDeclarationSyntax methodDeclaration)
     {
         string Text = methodDeclaration.Identifier.ValueText;
         MethodName MethodName = new() { Text = Text };
@@ -44,58 +42,90 @@ internal partial class ClassDeclarationParser
             if (IsMethodDeclarationValid(methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
             {
                 Method TemporaryMethod;
-
-                ReadOnlyParameterTable ParameterTable = ParseParameters(methodDeclaration, fieldTable, unsupported);
+                ParsingContext MethodParsingContext;
 
                 TemporaryMethod = new Method
                 {
                     Name = MethodName,
                     AccessModifier = AccessModifier,
-                    ParameterTable = ParameterTable,
+                    ParameterTable = ReadOnlyParameterTable.Empty,
                     ReturnType = ReturnType,
                     RequireList = new List<Require>(),
                     LocalTable = ReadOnlyLocalTable.Empty,
                     StatementList = new List<Statement>(),
                     EnsureList = new List<Ensure>(),
                 };
+                MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
 
-                List<Require> RequireList = ParseRequires(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
-                ReadOnlyLocalTable LocalTable = ParseLocals(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
+                ReadOnlyParameterTable ParameterTable = ParseParameters(MethodParsingContext, methodDeclaration).ToReadOnly();
 
-                TemporaryMethod = new Method
+                List<Require> RequireList;
+                ReadOnlyLocalTable LocalTable;
+                List<Statement> StatementList;
+                List<Ensure> EnsureList;
+
+                if (parsingContext.IsMethodParsingStarted)
                 {
-                    Name = MethodName,
-                    AccessModifier = AccessModifier,
-                    ParameterTable = ParameterTable,
-                    ReturnType = ReturnType,
-                    RequireList = RequireList,
-                    LocalTable = LocalTable,
-                    StatementList = new List<Statement>(),
-                    EnsureList = new List<Ensure>(),
-                };
+                    TemporaryMethod = new Method
+                    {
+                        Name = MethodName,
+                        AccessModifier = AccessModifier,
+                        ParameterTable = ParameterTable,
+                        ReturnType = ReturnType,
+                        RequireList = new List<Require>(),
+                        LocalTable = ReadOnlyLocalTable.Empty,
+                        StatementList = new List<Statement>(),
+                        EnsureList = new List<Ensure>(),
+                    };
+                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
 
-                List<Statement> StatementList = ParseStatements(methodDeclaration, fieldTable, TemporaryMethod, unsupported);
+                    RequireList = ParseRequires(MethodParsingContext, methodDeclaration);
 
-                Local? ResultLocal = null;
+                    LocalTable = ParseLocals(MethodParsingContext, methodDeclaration).ToReadOnly();
 
-                if (ReturnType != ExpressionType.Void)
-                {
-                    Debug.Assert(ReturnType != ExpressionType.Other);
+                    TemporaryMethod = new Method
+                    {
+                        Name = MethodName,
+                        AccessModifier = AccessModifier,
+                        ParameterTable = ParameterTable,
+                        ReturnType = ReturnType,
+                        RequireList = RequireList,
+                        LocalTable = LocalTable,
+                        StatementList = new List<Statement>(),
+                        EnsureList = new List<Ensure>(),
+                    };
+                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
 
-                    LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+                    StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
 
-                    foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
-                        if (Entry.Key == ResultName)
-                        {
-                            ResultLocal = Entry.Value;
-                            break;
-                        }
+                    Local? ResultLocal = null;
 
-                    if (ResultLocal is null)
-                        ResultLocal = new Local() { Name = ResultName, Type = ReturnType, Initializer = null };
+                    if (ReturnType != ExpressionType.Void)
+                    {
+                        Debug.Assert(ReturnType != ExpressionType.Other);
+
+                        LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+
+                        foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
+                            if (Entry.Key == ResultName)
+                            {
+                                ResultLocal = Entry.Value;
+                                break;
+                            }
+
+                        if (ResultLocal is null)
+                            ResultLocal = new Local() { Name = ResultName, Type = ReturnType, Initializer = null };
+                    }
+
+                    EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration, ResultLocal);
                 }
-
-                List<Ensure> EnsureList = ParseEnsures(methodDeclaration, fieldTable, TemporaryMethod, ResultLocal, unsupported);
+                else
+                {
+                    RequireList = new List<Require>();
+                    LocalTable = ReadOnlyLocalTable.Empty;
+                    StatementList = new List<Statement>();
+                    EnsureList = new List<Ensure>();
+                }
 
                 Method NewMethod = new Method
                 {
@@ -111,13 +141,13 @@ internal partial class ClassDeclarationParser
 
                 methodTable.AddItem(NewMethod);
             }
-            else
+            else if (parsingContext.IsMethodParsingStarted)
             {
                 if (TryFindTrailingTrivia(methodDeclaration, out SyntaxTriviaList TriviaList))
-                    ReportUnsupportedEnsures(unsupported, TriviaList);
+                    ReportUnsupportedEnsures(parsingContext, TriviaList);
 
                 Location Location = methodDeclaration.Identifier.GetLocation();
-                unsupported.AddUnsupportedMethod(Location);
+                parsingContext.Unsupported.AddUnsupportedMethod(Location);
             }
         }
     }
@@ -165,26 +195,29 @@ internal partial class ClassDeclarationParser
         return IsMethodSupported;
     }
 
-    private void ReportInvalidMethodCalls(MethodTable methodTable, Unsupported unsupported)
+    private void ReportInvalidMethodCalls(ParsingContext parsingContext)
     {
         List<Method> VisitedMethodList = new();
 
-        foreach (KeyValuePair<MethodName, Method> Entry in methodTable)
-            ReportInvalidMethodCalls(methodTable, VisitedMethodList, unsupported, Entry.Value);
+        foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
+        {
+            ParsingContext MethodParsingContext = parsingContext with { HostMethod = Entry.Value };
+            ReportInvalidMethodCalls(MethodParsingContext, VisitedMethodList);
+        }
     }
 
-    private void ReportInvalidMethodCalls(MethodTable methodTable, List<Method> visitedMethodList, Unsupported unsupported, Method method)
+    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList)
     {
-        List<Statement> StatementList = method.StatementList;
+        List<Statement> StatementList = parsingContext.HostMethod!.StatementList;
         int i = 0;
 
         while (i < StatementList.Count)
         {
             if (StatementList[i] is MethodCallStatement MethodCall)
             {
-                if (!IsValidMethodCall(methodTable, visitedMethodList, unsupported, method, MethodCall, out Location Location))
+                if (!IsValidMethodCall(parsingContext, visitedMethodList, MethodCall, out Location Location))
                 {
-                    unsupported.AddUnsupportedStatement(Location);
+                    parsingContext.Unsupported.AddUnsupportedStatement(Location);
                     StatementList.RemoveAt(i);
                 }
                 else
@@ -195,16 +228,19 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsValidMethodCall(MethodTable methodTable, List<Method> visitedMethodList, Unsupported unsupported, Method methodHost, MethodCallStatement methodCall, out Location location)
+    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, MethodCallStatement methodCall, out Location location)
     {
+        MethodTable MethodTable = parsingContext.MethodTable;
+        Method HostMethod = parsingContext.HostMethod!;
+
         location = methodCall.NameLocation;
 
-        if (methodCall.MethodName == methodHost.Name)
+        if (methodCall.MethodName == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
 
-        foreach (var Entry in methodTable)
+        foreach (var Entry in MethodTable)
             if (Entry.Key == methodCall.MethodName)
             {
                 CalledMethod = Entry.Value;
@@ -230,7 +266,7 @@ internal partial class ClassDeclarationParser
             Argument Argument = methodCall.ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!IsValidMethodCallArgument(methodHost, Argument, Parameter))
+            if (!IsValidMethodCallArgument(parsingContext, Argument, Parameter))
             {
                 location = Argument.Location;
                 AllArgumentsValid = false;
@@ -245,15 +281,16 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.AddRange(visitedMethodList);
         NewVisitedMethodList.Add(CalledMethod);
 
-        ReportInvalidMethodCalls(methodTable, NewVisitedMethodList, unsupported, CalledMethod);
+        ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
+        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList);
 
         return true;
     }
 
-    private bool IsValidMethodCallArgument(Method hostMethod, Argument argument, Parameter parameter)
+    private bool IsValidMethodCallArgument(ParsingContext parsingContext, Argument argument, Parameter parameter)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
-        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(FieldTable, hostMethod, resultLocal: null);
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(parsingContext, resultLocal: null);
         ExpressionType ParameterType = parameter.Type;
 
         if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))

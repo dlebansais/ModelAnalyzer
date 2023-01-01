@@ -23,7 +23,7 @@ public partial class VerifierTest
             ClassName = ClassName,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
-            InvariantList = new(),
+            InvariantList = new List<Invariant>().AsReadOnly(),
             MaxDepth = 0,
         };
 
@@ -45,7 +45,7 @@ public partial class VerifierTest
             ClassName = ClassName,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
-            InvariantList = new(),
+            InvariantList = new List<Invariant>().AsReadOnly(),
             MaxDepth = 1,
         };
 

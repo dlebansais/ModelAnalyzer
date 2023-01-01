@@ -80,7 +80,14 @@ internal partial class Verifier : IDisposable
 
         aliasTable.IncrementAlias(destination);
         VariableAlias DestinationNameAlias = aliasTable.GetAlias(destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(FieldTable, hostMethod, resultLocal));
+
+        FieldTable TempFieldTable = new();
+        foreach (var Entry in FieldTable)
+            TempFieldTable.AddItem(Entry.Value);
+
+        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(ParsingContext, resultLocal));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
@@ -218,7 +225,14 @@ internal partial class Verifier : IDisposable
             if (resultLocal is null)
             {
                 LocalName ResultLocalName = new LocalName() { Text = Ensure.ResultKeyword };
-                ExpressionType ResultType = ReturnExpression.GetExpressionType(FieldTable, hostMethod, resultLocal: null);
+
+                FieldTable TempFieldTable = new();
+                foreach (var Entry in FieldTable)
+                    TempFieldTable.AddItem(Entry.Value);
+
+                ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+
+                ExpressionType ResultType = ReturnExpression.GetExpressionType(ParsingContext, resultLocal: null);
 
                 resultLocal = new Local() { Name = ResultLocalName, Type = ResultType, Initializer = null };
 

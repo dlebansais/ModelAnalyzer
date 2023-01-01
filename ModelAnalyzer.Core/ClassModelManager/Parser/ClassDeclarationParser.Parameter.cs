@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private ReadOnlyParameterTable ParseParameters(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
+    private ParameterTable ParseParameters(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
         ParameterTable ParameterTable = new();
 
@@ -20,23 +20,23 @@ internal partial class ClassDeclarationParser
             // Ignore duplicate names, the compiler will catch them.
             if (!ParameterTable.ContainsItem(ParameterName))
             {
-                if (IsParameterSupported(Parameter, fieldTable, out ExpressionType ParameterType))
+                if (IsParameterSupported(parsingContext, Parameter, out ExpressionType ParameterType))
                 {
                     Parameter NewParameter = new Parameter() { Name = ParameterName, Type = ParameterType };
                     ParameterTable.AddItem(NewParameter);
                 }
-                else
+                else if (!parsingContext.IsMethodParsingStarted)
                 {
                     Location Location = Parameter.GetLocation();
-                    unsupported.AddUnsupportedParameter(Location);
+                    parsingContext.Unsupported.AddUnsupportedParameter(Location);
                 }
             }
         }
 
-        return ParameterTable.ToReadOnly();
+        return ParameterTable;
     }
 
-    private bool IsParameterSupported(ParameterSyntax parameter, ReadOnlyFieldTable fieldTable, out ExpressionType parameterType)
+    private bool IsParameterSupported(ParsingContext parsingContext, ParameterSyntax parameter, out ExpressionType parameterType)
     {
         bool IsParameterSupported = true;
 
@@ -70,7 +70,7 @@ internal partial class ClassDeclarationParser
             IsParameterSupported = false;
         }
 
-        if (TryFindFieldByName(fieldTable, ParameterName, out _))
+        if (TryFindFieldByName(parsingContext, ParameterName, out _))
         {
             LogWarning($"Parameter '{ParameterName}' is already the name of a field.");
 
@@ -80,14 +80,17 @@ internal partial class ClassDeclarationParser
         return IsParameterSupported;
     }
 
-    private bool TryFindParameterByName(ReadOnlyParameterTable parameterTable, string parameterName, out IParameter parameter)
+    private bool TryFindParameterByName(ParsingContext parsingContext, string parameterName, out IParameter parameter)
     {
-        foreach (KeyValuePair<ParameterName, Parameter> Entry in parameterTable)
-            if (Entry.Value.Name.Text == parameterName)
-            {
-                parameter = Entry.Value;
-                return true;
-            }
+        if (parsingContext.HostMethod is not null)
+        {
+            foreach (KeyValuePair<ParameterName, Parameter> Entry in parsingContext.HostMethod.ParameterTable)
+                if (Entry.Value.Name.Text == parameterName)
+                {
+                    parameter = Entry.Value;
+                    return true;
+                }
+        }
 
         parameter = null!;
         return false;

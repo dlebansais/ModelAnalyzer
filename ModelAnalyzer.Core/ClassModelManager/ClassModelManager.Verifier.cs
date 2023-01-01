@@ -201,7 +201,7 @@ public partial class ClassModelManager : IDisposable
     {
         int ErrorIndex = verificationResult.ErrorIndex;
         List<IInvariantViolation> InvariantViolations = new();
-        List<Invariant> InvariantList = oldClassModel.InvariantList;
+        IReadOnlyList<Invariant> InvariantList = oldClassModel.InvariantList;
 
         Debug.Assert(ErrorIndex >= 0);
 

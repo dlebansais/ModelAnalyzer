@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
@@ -12,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private bool TryParseInitializerNode(Unsupported unsupported, EqualsValueClauseSyntax equalsValueClause, ExpressionType variableType, out ILiteralExpression? initializerExpression)
+    private bool TryParseInitializerNode(ParsingContext parsingContext, EqualsValueClauseSyntax equalsValueClause, ExpressionType variableType, out ILiteralExpression? initializerExpression)
     {
         ExpressionSyntax InitializerValue = equalsValueClause.Value;
 
@@ -37,7 +36,7 @@ internal partial class ClassDeclarationParser
         LogWarning("Unsupported variable initializer.");
 
         Location Location = InitializerValue.GetLocation();
-        unsupported.AddUnsupportedExpression(Location);
+        parsingContext.Unsupported.AddUnsupportedExpression(Location);
         initializerExpression = null;
         return false;
     }

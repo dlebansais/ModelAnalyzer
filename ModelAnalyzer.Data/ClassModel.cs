@@ -1,8 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 /// <summary>
 /// Represents the model of a class.
@@ -47,7 +45,7 @@ internal partial record ClassModel : IClassModel
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    required public List<Invariant> InvariantList { get; init; }
+    required public IReadOnlyList<Invariant> InvariantList { get; init; }
 
     /// <inheritdoc/>
     public IReadOnlyList<IInvariant> GetInvariants()

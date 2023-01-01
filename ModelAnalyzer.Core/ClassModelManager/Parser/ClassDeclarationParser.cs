@@ -33,22 +33,33 @@ internal partial class ClassDeclarationParser
 
         Log($"Parsing declaration of class '{ClassName}'");
 
-        Unsupported = new Unsupported();
+        ParsingContext ParsingContext = new();
 
         if (IsClassDeclarationSupported(ClassDeclaration))
         {
-            Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
-            FieldTable = ParseFields(ClassDeclaration, Unsupported);
-            MethodTable = ParseMethods(ClassDeclaration, FieldTable, Unsupported);
-            InvariantList = ParseInvariants(ClassDeclaration, FieldTable, Unsupported);
+            ParsingContext.Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
+
+            ParsingContext = ParsingContext with { FieldTable = ParseFields(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { IsMethodParsingStarted = true };
+            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { IsMethodParsingComplete = true };
+            ReportInvalidMethodCalls(ParsingContext);
+            ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
+
+            FieldTable = ParsingContext.FieldTable.ToReadOnly();
+            MethodTable = ParsingContext.MethodTable.ToReadOnly();
+            InvariantList = ParsingContext.InvariantList.AsReadOnly();
         }
         else
         {
-            Unsupported.InvalidDeclaration = true;
+            ParsingContext.Unsupported.InvalidDeclaration = true;
             FieldTable = ReadOnlyFieldTable.Empty;
             MethodTable = ReadOnlyMethodTable.Empty;
-            InvariantList = new List<Invariant>();
+            InvariantList = new List<Invariant>().AsReadOnly();
         }
+
+        Unsupported = ParsingContext.Unsupported;
     }
 
     /// <summary>
@@ -74,7 +85,7 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    public List<Invariant> InvariantList { get; private set; } = new();
+    public IReadOnlyList<Invariant> InvariantList { get; private set; } = new List<Invariant>().AsReadOnly();
 
     /// <summary>
     /// Gets unsupported elements.
@@ -210,7 +221,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidAssertionSyntaxTree(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Local? resultLocal, Unsupported unsupported, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionSyntaxTree(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -229,7 +240,7 @@ internal partial class ClassDeclarationParser
         AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
-        if (!IsValidAssertionExpression(fieldTable, hostMethod, isLocalAllowed, resultLocal, unsupported, locationContext, Expression, out booleanExpression, out isErrorReported))
+        if (!IsValidAssertionExpression(parsingContext, isLocalAllowed, resultLocal, locationContext, Expression, out booleanExpression, out isErrorReported))
             IsAssertionSupported = false;
         else
             isErrorReported = false;
@@ -237,15 +248,15 @@ internal partial class ClassDeclarationParser
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Local? resultLocal, Unsupported unsupported, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionExpression(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
         isErrorReported = false;
 
-        Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed, resultLocal, unsupported, locationContext, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, isLocalAllowed, resultLocal, locationContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
-            if (Expression.GetExpressionType(fieldTable, hostMethod, resultLocal) == ExpressionType.Boolean)
+            if (Expression.GetExpressionType(parsingContext, resultLocal) == ExpressionType.Boolean)
             {
                 booleanExpression = Expression;
                 return true;
@@ -259,26 +270,24 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryFindVariableByName(ReadOnlyFieldTable fieldTable, Method? hostMethod, bool isLocalAllowed, Local? resultLocal, string variableName, out IVariable variable)
+    private bool TryFindVariableByName(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, string variableName, out IVariable variable)
     {
-        if (TryFindFieldByName(fieldTable, variableName, out IField Field))
+        if (TryFindFieldByName(parsingContext, variableName, out IField Field))
         {
             variable = Field;
             return true;
         }
 
-        if (hostMethod is not null)
+        if (TryFindParameterByName(parsingContext, variableName, out IParameter Parameter))
         {
-            if (TryFindParameterByName(hostMethod.ParameterTable, variableName, out IParameter Parameter))
-            {
-                variable = Parameter;
-                return true;
-            }
-            else if (isLocalAllowed && TryFindLocalByName(hostMethod.LocalTable, variableName, out ILocal Local))
-            {
-                variable = Local;
-                return true;
-            }
+            variable = Parameter;
+            return true;
+        }
+
+        if (isLocalAllowed && TryFindLocalByName(parsingContext, variableName, out ILocal Local))
+        {
+            variable = Local;
+            return true;
         }
 
         if (resultLocal is not null && resultLocal.Name.Text == variableName)

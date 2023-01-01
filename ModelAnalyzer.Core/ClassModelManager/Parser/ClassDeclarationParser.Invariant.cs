@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Invariant> ParseInvariants(ClassDeclarationSyntax classDeclaration, ReadOnlyFieldTable fieldTable, Unsupported unsupported)
+    private List<Invariant> ParseInvariants(ParsingContext parsingContext, ClassDeclarationSyntax classDeclaration)
     {
         List<Invariant> InvariantList = new();
 
@@ -18,12 +18,12 @@ internal partial class ClassDeclarationParser
         var Location = LastToken.GetLocation();
 
         if (LastToken.HasLeadingTrivia)
-            ReportUnsupportedRequires(unsupported, LastToken.LeadingTrivia);
+            ReportUnsupportedRequires(parsingContext, LastToken.LeadingTrivia);
 
         if (LastToken.HasTrailingTrivia)
         {
             SyntaxTriviaList TrailingTrivia = LastToken.TrailingTrivia;
-            AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, TrailingTrivia);
+            AddInvariantsInTrivia(parsingContext, InvariantList, TrailingTrivia);
             Location = TrailingTrivia.Last().GetLocation();
         }
 
@@ -35,13 +35,13 @@ internal partial class ClassDeclarationParser
             var NextToken = Root.FindToken(EndPosition);
 
             if (NextToken.HasLeadingTrivia)
-                AddInvariantsInTrivia(InvariantList, fieldTable, unsupported, NextToken.LeadingTrivia);
+                AddInvariantsInTrivia(parsingContext, InvariantList, NextToken.LeadingTrivia);
         }
 
         return InvariantList;
     }
 
-    private void AddInvariantsInTrivia(List<Invariant> invariantList, ReadOnlyFieldTable fieldTable, Unsupported unsupported, SyntaxTriviaList triviaList)
+    private void AddInvariantsInTrivia(ParsingContext parsingContext, List<Invariant> invariantList, SyntaxTriviaList triviaList)
     {
         foreach (SyntaxTrivia Trivia in triviaList)
             if (Trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -50,11 +50,11 @@ internal partial class ClassDeclarationParser
                 string Header = $"// {Modeling.Invariant}";
 
                 if (Comment.StartsWith(Header))
-                    AddInvariantsInTrivia(invariantList, fieldTable, unsupported, Trivia, Comment, Header);
+                    AddInvariantsInTrivia(parsingContext, invariantList, Trivia, Comment, Header);
             }
     }
 
-    private void AddInvariantsInTrivia(List<Invariant> invariantList, ReadOnlyFieldTable fieldTable, Unsupported unsupported, SyntaxTrivia trivia, string comment, string header)
+    private void AddInvariantsInTrivia(ParsingContext parsingContext, List<Invariant> invariantList, SyntaxTrivia trivia, string comment, string header)
     {
         string Text = comment.Substring(header.Length);
 
@@ -67,7 +67,7 @@ internal partial class ClassDeclarationParser
         {
             LocationContext LocationContext = new(trivia, header, Offset);
 
-            if (IsValidAssertionSyntaxTree(fieldTable, hostMethod: null, isLocalAllowed: false, resultLocal: null, unsupported, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(parsingContext, isLocalAllowed: false, resultLocal: null, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewInvariant = new Invariant { Text = Text, Location = trivia.GetLocation(), BooleanExpression = BooleanExpression };
             }
@@ -82,7 +82,7 @@ internal partial class ClassDeclarationParser
         else if (!IsErrorReported)
         {
             Location Location = trivia.GetLocation();
-            unsupported.AddUnsupportedInvariant(Text, Location);
+            parsingContext.Unsupported.AddUnsupportedInvariant(Text, Location);
         }
     }
 }

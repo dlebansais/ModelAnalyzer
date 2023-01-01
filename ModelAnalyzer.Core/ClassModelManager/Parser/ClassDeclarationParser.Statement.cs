@@ -10,39 +10,39 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Statement> ParseStatements(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported)
+    private List<Statement> ParseStatements(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
         List<Statement> StatementList = new();
 
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
-            StatementList = ParseExpressionBodyStatements(fieldTable, hostMethod, unsupported, ArrowExpressionClause.Expression);
+            StatementList = ParseExpressionBodyStatements(parsingContext, ArrowExpressionClause.Expression);
 
         if (methodDeclaration.Body is BlockSyntax Block)
-            StatementList = ParseBlockStatements(fieldTable, hostMethod, unsupported, Block, isMainBlock: true);
+            StatementList = ParseBlockStatements(parsingContext, Block, isMainBlock: true);
 
         return StatementList;
     }
 
-    private List<Statement> ParseExpressionBodyStatements(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, ExpressionSyntax expressionBody)
+    private List<Statement> ParseExpressionBodyStatements(ParsingContext parsingContext, ExpressionSyntax expressionBody)
     {
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
 
-        Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultLocal: null, unsupported, LocationContext, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, expressionBody, isNested: false);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
         return Result;
     }
 
-    private List<Statement> ParseBlockStatements(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, BlockSyntax block, bool isMainBlock)
+    private List<Statement> ParseBlockStatements(ParsingContext parsingContext, BlockSyntax block, bool isMainBlock)
     {
         List<Statement> StatementList = new();
 
         foreach (StatementSyntax Item in block.Statements)
             if (Item is not LocalDeclarationStatementSyntax)
             {
-                Statement? NewStatement = ParseStatement(fieldTable, hostMethod, unsupported, Item, isMainBlock && Item == block.Statements.Last());
+                Statement? NewStatement = ParseStatement(parsingContext, Item, isMainBlock && Item == block.Statements.Last());
                 if (NewStatement is not null)
                     StatementList.Add(NewStatement);
             }
@@ -50,15 +50,15 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private List<Statement> ParseStatementOrBlock(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, StatementSyntax node)
+    private List<Statement> ParseStatementOrBlock(ParsingContext parsingContext, StatementSyntax node)
     {
         List<Statement> StatementList = new();
 
         if (node is BlockSyntax Block)
-            StatementList = ParseBlockStatements(fieldTable, hostMethod, unsupported, Block, isMainBlock: false);
+            StatementList = ParseBlockStatements(parsingContext, Block, isMainBlock: false);
         else
         {
-            Statement? NewStatement = ParseStatement(fieldTable, hostMethod, unsupported, node, isLastStatement: false);
+            Statement? NewStatement = ParseStatement(parsingContext, node, isLastStatement: false);
             if (NewStatement is not null)
                 StatementList.Add(NewStatement);
         }
@@ -66,17 +66,17 @@ internal partial class ClassDeclarationParser
         return StatementList;
     }
 
-    private Statement? ParseStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, StatementSyntax statementNode, bool isLastStatement)
+    private Statement? ParseStatement(ParsingContext parsingContext, StatementSyntax statementNode, bool isLastStatement)
     {
         Statement? NewStatement = null;
         bool IsErrorReported = false;
 
         if (statementNode is ExpressionStatementSyntax ExpressionStatement)
-            NewStatement = TryParseExpressionStatement(fieldTable, hostMethod, unsupported, ExpressionStatement, ref IsErrorReported);
+            NewStatement = TryParseExpressionStatement(parsingContext, ExpressionStatement, ref IsErrorReported);
         else if (statementNode is IfStatementSyntax IfStatement)
-            NewStatement = TryParseIfStatement(fieldTable, hostMethod, unsupported, IfStatement, ref IsErrorReported);
+            NewStatement = TryParseIfStatement(parsingContext, IfStatement, ref IsErrorReported);
         else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
-            NewStatement = TryParseReturnStatement(fieldTable, hostMethod, unsupported, ReturnStatement, ref IsErrorReported);
+            NewStatement = TryParseReturnStatement(parsingContext, ReturnStatement, ref IsErrorReported);
         else
             Log($"Unsupported statement type '{statementNode.GetType().Name}'.");
 
@@ -85,7 +85,7 @@ internal partial class ClassDeclarationParser
             if (!IsErrorReported)
             {
                 Location Location = statementNode.GetLocation();
-                unsupported.AddUnsupportedStatement(Location);
+                parsingContext.Unsupported.AddUnsupportedStatement(Location);
             }
         }
         else
@@ -94,14 +94,14 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseExpressionStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
+    private Statement? TryParseExpressionStatement(ParsingContext parsingContext, ExpressionStatementSyntax expressionStatement, ref bool isErrorReported)
     {
         ExpressionSyntax Expression = expressionStatement.Expression;
 
         if (Expression is AssignmentExpressionSyntax AssignmentExpression)
-            return TryParseAssignmentStatement(fieldTable, hostMethod, unsupported, AssignmentExpression, ref isErrorReported);
+            return TryParseAssignmentStatement(parsingContext, AssignmentExpression, ref isErrorReported);
         else if (Expression is InvocationExpressionSyntax InvocationExpression)
-            return TryParseMethodCallStatement(fieldTable, hostMethod, unsupported, InvocationExpression, ref isErrorReported);
+            return TryParseMethodCallStatement(parsingContext, InvocationExpression, ref isErrorReported);
         else
         {
             Log("Unsupported assignment statement source.");
@@ -110,7 +110,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private Statement? TryParseAssignmentStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, AssignmentExpressionSyntax assignmentExpression, ref bool isErrorReported)
+    private Statement? TryParseAssignmentStatement(ParsingContext parsingContext, AssignmentExpressionSyntax assignmentExpression, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -119,9 +119,9 @@ internal partial class ClassDeclarationParser
             string DestinationName = IdentifierName.Identifier.ValueText;
             IVariable? Destination = null;
 
-            if (TryFindFieldByName(fieldTable, DestinationName, out IField FieldDestination))
+            if (TryFindFieldByName(parsingContext, DestinationName, out IField FieldDestination))
                 Destination = FieldDestination;
-            else if (TryFindLocalByName(hostMethod.LocalTable, DestinationName, out ILocal LocalDestination))
+            else if (TryFindLocalByName(parsingContext, DestinationName, out ILocal LocalDestination))
                 Destination = LocalDestination;
 
             if (Destination is not null)
@@ -129,10 +129,10 @@ internal partial class ClassDeclarationParser
                 ExpressionSyntax SourceExpression = assignmentExpression.Right;
                 LocationContext LocationContext = new(SourceExpression);
 
-                Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultLocal: null, unsupported, LocationContext, SourceExpression, isNested: false);
+                Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, SourceExpression, isNested: false);
                 if (Expression is not null)
                 {
-                    if (IsSourceAndDestinationTypeCompatible(fieldTable, hostMethod, resultLocal: null, Destination, Expression))
+                    if (IsSourceAndDestinationTypeCompatible(parsingContext, resultLocal: null, Destination, Expression))
                         NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
                     else
                         Log("Source cannot be assigned to destination.");
@@ -149,10 +149,10 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(ReadOnlyFieldTable fieldTable, Method hostMethod, Local? resultLocal, IVariable destination, Expression source)
+    private bool IsSourceAndDestinationTypeCompatible(ParsingContext parsingContext, Local? resultLocal, IVariable destination, Expression source)
     {
         ExpressionType DestinationType = destination.Type;
-        ExpressionType SourceType = source.GetExpressionType(fieldTable, hostMethod, resultLocal);
+        ExpressionType SourceType = source.GetExpressionType(parsingContext, resultLocal);
 
         return IsSourceAndDestinationTypeCompatible(DestinationType, SourceType);
     }
@@ -167,7 +167,7 @@ internal partial class ClassDeclarationParser
             return false;
     }
 
-    private Statement? TryParseMethodCallStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
+    private Statement? TryParseMethodCallStatement(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
@@ -188,7 +188,7 @@ internal partial class ClassDeclarationParser
                     ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
                     LocationContext LocationContext = new(ArgumentExpression);
 
-                    Expression? Expression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultLocal: null, unsupported, LocationContext, ArgumentExpression, isNested: false);
+                    Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ArgumentExpression, isNested: false);
                     if (Expression is not null)
                     {
                         Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
@@ -206,20 +206,20 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseIfStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, IfStatementSyntax ifStatement, ref bool isErrorReported)
+    private Statement? TryParseIfStatement(ParsingContext parsingContext, IfStatementSyntax ifStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
 
-        Expression? Condition = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultLocal: null, unsupported, LocationContext, ConditionExpression, isNested: false);
+        Expression? Condition = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ConditionExpression, isNested: false);
         if (Condition is not null)
         {
-            List<Statement> WhenTrueStatementList = ParseStatementOrBlock(fieldTable, hostMethod, unsupported, ifStatement.Statement);
+            List<Statement> WhenTrueStatementList = ParseStatementOrBlock(parsingContext, ifStatement.Statement);
             List<Statement> WhenFalseStatementList;
 
             if (ifStatement.Else is ElseClauseSyntax ElseClause)
-                WhenFalseStatementList = ParseStatementOrBlock(fieldTable, hostMethod, unsupported, ElseClause.Statement);
+                WhenFalseStatementList = ParseStatementOrBlock(parsingContext, ElseClause.Statement);
             else
                 WhenFalseStatementList = new();
 
@@ -231,19 +231,19 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private Statement? TryParseReturnStatement(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
+    private Statement? TryParseReturnStatement(ParsingContext parsingContext, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
     {
         Statement? NewStatement = null;
 
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
             LocationContext LocationContext = new(ResultExpression);
-            Expression? ReturnExpression = ParseExpression(fieldTable, hostMethod, isLocalAllowed: true, resultLocal: null, unsupported, LocationContext, ResultExpression, isNested: false);
+            Expression? ReturnExpression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ResultExpression, isNested: false);
 
             if (ReturnExpression is not null)
             {
                 LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
-                bool IsResultInLocals = hostMethod.LocalTable.ContainsItem(ResultName);
+                bool IsResultInLocals = parsingContext.HostMethod!.LocalTable.ContainsItem(ResultName);
                 bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariableName.Text == ResultName.Text;
 
                 if (IsResultReturned || !IsResultInLocals)

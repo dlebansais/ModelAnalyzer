@@ -9,30 +9,30 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private ReadOnlyLocalTable ParseLocals(MethodDeclarationSyntax methodDeclaration, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported)
+    private LocalTable ParseLocals(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
         LocalTable LocalTable;
 
         if (methodDeclaration.Body is BlockSyntax Block)
-            LocalTable = ParseBlockLocals(fieldTable, hostMethod, unsupported, Block);
+            LocalTable = ParseBlockLocals(parsingContext, Block);
         else
             LocalTable = new();
 
-        return LocalTable.ToReadOnly();
+        return LocalTable;
     }
 
-    private LocalTable ParseBlockLocals(ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, BlockSyntax block)
+    private LocalTable ParseBlockLocals(ParsingContext parsingContext, BlockSyntax block)
     {
         LocalTable LocalTable = new();
 
         foreach (StatementSyntax Item in block.Statements)
             if (Item is LocalDeclarationStatementSyntax LocalDeclarationStatement)
-                AddLocal(LocalDeclarationStatement, LocalTable, fieldTable, hostMethod, unsupported);
+                AddLocal(parsingContext, LocalTable, LocalDeclarationStatement);
 
         return LocalTable;
     }
 
-    private void AddLocal(LocalDeclarationStatementSyntax localDeclarationStatement, LocalTable localTable, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported)
+    private void AddLocal(ParsingContext parsingContext, LocalTable localTable, LocalDeclarationStatementSyntax localDeclarationStatement)
     {
         VariableDeclarationSyntax Declaration = localDeclarationStatement.Declaration;
         bool IsLocalSupported = true;
@@ -59,10 +59,10 @@ internal partial class ClassDeclarationParser
         }
 
         foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-            AddLocal(Variable, localTable, fieldTable, hostMethod, unsupported, IsLocalSupported, LocalType);
+            AddLocal(parsingContext, localTable, Variable, IsLocalSupported, LocalType);
     }
 
-    private void AddLocal(VariableDeclaratorSyntax variable, LocalTable localTable, ReadOnlyFieldTable fieldTable, Method hostMethod, Unsupported unsupported, bool isLocalSupported, ExpressionType localType)
+    private void AddLocal(ParsingContext parsingContext, LocalTable localTable, VariableDeclaratorSyntax variable, bool isLocalSupported, ExpressionType localType)
     {
         string LocalName = variable.Identifier.ValueText;
         LocalName Name = new() { Text = LocalName };
@@ -76,20 +76,20 @@ internal partial class ClassDeclarationParser
 
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
-                if (!TryParseInitializerNode(unsupported, EqualsValueClause, localType, out Initializer))
+                if (!TryParseInitializerNode(parsingContext, EqualsValueClause, localType, out Initializer))
                 {
                     IsLocalSupported = false;
                     IsErrorReported = true;
                 }
             }
 
-            if (TryFindFieldByName(fieldTable, LocalName, out _))
+            if (TryFindFieldByName(parsingContext, LocalName, out _))
             {
                 LogWarning($"Local '{LocalName}' is already the name of a field.");
 
                 IsLocalSupported = false;
             }
-            else if (TryFindParameterByName(hostMethod.ParameterTable, LocalName, out _))
+            else if (TryFindParameterByName(parsingContext, LocalName, out _))
             {
                 LogWarning($"Local '{LocalName}' is already the name of a parameter.");
 
@@ -104,19 +104,22 @@ internal partial class ClassDeclarationParser
             else if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                unsupported.AddUnsupportedLocal(Location);
+                parsingContext.Unsupported.AddUnsupportedLocal(Location);
             }
         }
     }
 
-    private bool TryFindLocalByName(ReadOnlyLocalTable localTable, string localName, out ILocal local)
+    private bool TryFindLocalByName(ParsingContext parsingContext, string localName, out ILocal local)
     {
-        foreach (KeyValuePair<LocalName, Local> Entry in localTable)
-            if (Entry.Value.Name.Text == localName)
-            {
-                local = Entry.Value;
-                return true;
-            }
+        if (parsingContext.HostMethod is not null)
+        {
+            foreach (KeyValuePair<LocalName, Local> Entry in parsingContext.HostMethod.LocalTable)
+                if (Entry.Value.Name.Text == localName)
+                {
+                    local = Entry.Value;
+                    return true;
+                }
+        }
 
         local = null!;
         return false;

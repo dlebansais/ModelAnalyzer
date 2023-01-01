@@ -1,8 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,18 +10,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private ReadOnlyFieldTable ParseFields(ClassDeclarationSyntax classDeclaration, Unsupported unsupported)
+    private FieldTable ParseFields(ParsingContext parsingContext, ClassDeclarationSyntax classDeclaration)
     {
         FieldTable FieldTable = new();
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
             if (Member is FieldDeclarationSyntax FieldDeclaration)
-                AddField(FieldDeclaration, FieldTable, unsupported);
+                AddField(parsingContext, FieldTable, FieldDeclaration);
 
-        return FieldTable.ToReadOnly();
+        return FieldTable;
     }
 
-    private void AddField(FieldDeclarationSyntax fieldDeclaration, FieldTable fieldTable, Unsupported unsupported)
+    private void AddField(ParsingContext parsingContext, FieldTable fieldTable, FieldDeclarationSyntax fieldDeclaration)
     {
         VariableDeclarationSyntax Declaration = fieldDeclaration.Declaration;
         bool IsFieldSupported = true;
@@ -51,10 +49,10 @@ internal partial class ClassDeclarationParser
         }
 
         foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-            AddField(Variable, fieldTable, unsupported, IsFieldSupported, FieldType);
+            AddField(parsingContext, fieldTable, Variable, IsFieldSupported, FieldType);
     }
 
-    private void AddField(VariableDeclaratorSyntax variable, FieldTable fieldTable, Unsupported unsupported, bool isFieldSupported, ExpressionType fieldType)
+    private void AddField(ParsingContext parsingContext, FieldTable fieldTable, VariableDeclaratorSyntax variable, bool isFieldSupported, ExpressionType fieldType)
     {
         string FieldName = variable.Identifier.ValueText;
         FieldName Name = new() { Text = FieldName };
@@ -71,7 +69,7 @@ internal partial class ClassDeclarationParser
 
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {
-                if (!TryParseInitializerNode(unsupported, EqualsValueClause, fieldType, out Initializer))
+                if (!TryParseInitializerNode(parsingContext, EqualsValueClause, fieldType, out Initializer))
                 {
                     IsFieldSupported = false;
                     IsErrorReported = true;
@@ -86,14 +84,14 @@ internal partial class ClassDeclarationParser
             else if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                unsupported.AddUnsupportedField(Location);
+                parsingContext.Unsupported.AddUnsupportedField(Location);
             }
         }
     }
 
-    private bool TryFindFieldByName(ReadOnlyFieldTable fieldTable, string fieldName, out IField field)
+    private bool TryFindFieldByName(ParsingContext parsingContext, string fieldName, out IField field)
     {
-        foreach (KeyValuePair<FieldName, Field> Entry in fieldTable)
+        foreach (KeyValuePair<FieldName, Field> Entry in parsingContext.FieldTable)
             if (Entry.Value.Name.Text == fieldName)
             {
                 field = Entry.Value;
