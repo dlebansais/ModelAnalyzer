@@ -11,24 +11,26 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private Expression? ParseExpression(ParsingContext parsingContext, ExpressionSyntax expressionNode, bool isNested)
+    private Expression? ParseExpression(ParsingContext parsingContext, ExpressionSyntax expressionNode)
     {
         Debug.Assert(parsingContext.LocationContext is not null);
 
+        bool IsExpressionNested = parsingContext.IsExpressionNested;
         Expression? NewExpression = null;
         Location Location = parsingContext.LocationContext!.GetLocation(expressionNode);
+        ParsingContext NestedParsingContext = parsingContext with { IsExpressionNested = true };
         bool IsErrorReported = false;
 
         if (expressionNode is BinaryExpressionSyntax BinaryExpression)
-            NewExpression = TryParseBinaryExpression(parsingContext, BinaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParseBinaryExpression(NestedParsingContext, BinaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is PrefixUnaryExpressionSyntax PrefixUnaryExpression)
-            NewExpression = TryParsePrefixUnaryExpression(parsingContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
+            NewExpression = TryParsePrefixUnaryExpression(NestedParsingContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
-            NewExpression = TryParseVariableValueExpression(parsingContext, IdentifierName);
+            NewExpression = TryParseVariableValueExpression(NestedParsingContext, IdentifierName);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
-            NewExpression = TryParseParenthesizedExpression(parsingContext, ParenthesizedExpression, ref IsErrorReported);
+            NewExpression = TryParseParenthesizedExpression(NestedParsingContext, ParenthesizedExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -37,7 +39,7 @@ internal partial class ClassDeclarationParser
             if (!IsErrorReported)
                 parsingContext.Unsupported.AddUnsupportedExpression(Location);
         }
-        else if (!isNested) // Only log the top-level expression.
+        else if (!IsExpressionNested) // Only log the top-level expression.
             Log($"Expression analyzed: '{NewExpression}'.");
 
         return NewExpression;
@@ -46,8 +48,8 @@ internal partial class ClassDeclarationParser
     private Expression? TryParseBinaryExpression(ParsingContext parsingContext, BinaryExpressionSyntax binaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? LeftExpression = ParseExpression(parsingContext, binaryExpression.Left, isNested: true);
-        Expression? RightExpression = ParseExpression(parsingContext, binaryExpression.Right, isNested: true);
+        Expression? LeftExpression = ParseExpression(parsingContext, binaryExpression.Left);
+        Expression? RightExpression = ParseExpression(parsingContext, binaryExpression.Right);
 
         if (LeftExpression is Expression Left && RightExpression is Expression Right)
         {
@@ -79,7 +81,7 @@ internal partial class ClassDeclarationParser
     private Expression? TryParsePrefixUnaryExpression(ParsingContext parsingContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
     {
         Expression? NewExpression = null;
-        Expression? OperandExpression = ParseExpression(parsingContext, prefixUnaryExpression.Operand, isNested: true);
+        Expression? OperandExpression = ParseExpression(parsingContext, prefixUnaryExpression.Operand);
 
         if (OperandExpression is Expression Operand)
         {
@@ -223,7 +225,7 @@ internal partial class ClassDeclarationParser
     private Expression? TryParseParenthesizedExpression(ParsingContext parsingContext, ParenthesizedExpressionSyntax parenthesizedExpression, ref bool isErrorReported)
     {
         Expression? NewExpression = null;
-        Expression? NestedExpression = ParseExpression(parsingContext, parenthesizedExpression.Expression, isNested: true);
+        Expression? NestedExpression = ParseExpression(parsingContext, parenthesizedExpression.Expression);
 
         if (NestedExpression is not null)
             NewExpression = NestedExpression;

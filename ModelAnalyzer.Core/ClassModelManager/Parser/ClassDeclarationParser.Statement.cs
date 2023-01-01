@@ -29,7 +29,7 @@ internal partial class ClassDeclarationParser
         LocationContext LocationContext = new(expressionBody);
         ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext };
 
-        Expression? Expression = ParseExpression(ExpressionBodyContext, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(ExpressionBodyContext, expressionBody);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
@@ -134,9 +134,9 @@ internal partial class ClassDeclarationParser
             {
                 ExpressionSyntax SourceExpression = assignmentExpression.Right;
                 LocationContext LocationContext = new(SourceExpression);
-                ParsingContext AssignmentParsingContext = parsingContext with { LocationContext = LocationContext };
+                ParsingContext AssignmentParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
 
-                Expression? Expression = ParseExpression(AssignmentParsingContext, SourceExpression, isNested: false);
+                Expression? Expression = ParseExpression(AssignmentParsingContext, SourceExpression);
                 if (Expression is not null)
                 {
                     if (IsSourceAndDestinationTypeCompatible(parsingContext, Destination, Expression))
@@ -194,9 +194,9 @@ internal partial class ClassDeclarationParser
                 {
                     ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
                     LocationContext LocationContext = new(ArgumentExpression);
-                    ParsingContext MethodCallParsingContext = parsingContext with { LocationContext = LocationContext };
+                    ParsingContext MethodCallParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
 
-                    Expression? Expression = ParseExpression(MethodCallParsingContext, ArgumentExpression, isNested: false);
+                    Expression? Expression = ParseExpression(MethodCallParsingContext, ArgumentExpression);
                     if (Expression is not null)
                     {
                         Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
@@ -219,9 +219,9 @@ internal partial class ClassDeclarationParser
         Statement? NewStatement = null;
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
-        ParsingContext ConditionParsingContext = parsingContext with { LocationContext = LocationContext };
+        ParsingContext ConditionParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
 
-        Expression? Condition = ParseExpression(ConditionParsingContext, ConditionExpression, isNested: false);
+        Expression? Condition = ParseExpression(ConditionParsingContext, ConditionExpression);
         if (Condition is not null)
         {
             List<Statement> WhenTrueStatementList = ParseStatementOrBlock(parsingContext, ifStatement.Statement);
@@ -247,9 +247,9 @@ internal partial class ClassDeclarationParser
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
             LocationContext LocationContext = new(ResultExpression);
-            ParsingContext ReturnParsingContext = parsingContext with { LocationContext = LocationContext };
+            ParsingContext ReturnParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
 
-            Expression? ReturnExpression = ParseExpression(ReturnParsingContext, ResultExpression, isNested: false);
+            Expression? ReturnExpression = ParseExpression(ReturnParsingContext, ResultExpression);
 
             if (ReturnExpression is not null)
             {

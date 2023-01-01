@@ -253,7 +253,7 @@ internal partial class ClassDeclarationParser
         booleanExpression = null!;
         isErrorReported = false;
 
-        Expression? Expression = ParseExpression(parsingContext, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, expressionNode);
         if (Expression is not null)
         {
             if (Expression.GetExpressionType(parsingContext) == ExpressionType.Boolean)

@@ -17,4 +17,5 @@ internal record ParsingContext
     public bool IsLocalAllowed { get; set; }
     public Local? ResultLocal { get; set; }
     public LocationContext? LocationContext { get; set; }
+    public bool IsExpressionNested { get; set; }
 }
