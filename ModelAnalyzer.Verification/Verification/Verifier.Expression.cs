@@ -126,11 +126,11 @@ internal partial class Verifier : IDisposable
         foreach (var Entry in FieldTable)
             TempFieldTable.AddItem(Entry.Value);
 
-        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod, ResultLocal = resultLocal };
 
         string VariableName = variableValueExpression.VariableName.Text;
         string? VariableString = null;
-        ExpressionType VariableType = variableValueExpression.GetExpressionType(ParsingContext, resultLocal);
+        ExpressionType VariableType = variableValueExpression.GetExpressionType(ParsingContext);
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             if (Entry.Key.Text == VariableName)

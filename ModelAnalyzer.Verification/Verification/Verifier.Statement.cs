@@ -85,9 +85,9 @@ internal partial class Verifier : IDisposable
         foreach (var Entry in FieldTable)
             TempFieldTable.AddItem(Entry.Value);
 
-        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+        ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod, ResultLocal = resultLocal };
 
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(ParsingContext, resultLocal));
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(ParsingContext));
 
         AddToSolver(solver, branch, Context.MkEq(DestinationExpr, SourceExpr));
     }
@@ -230,9 +230,9 @@ internal partial class Verifier : IDisposable
                 foreach (var Entry in FieldTable)
                     TempFieldTable.AddItem(Entry.Value);
 
-                ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod };
+                ParsingContext ParsingContext = new() { FieldTable = TempFieldTable, HostMethod = hostMethod, ResultLocal = resultLocal };
 
-                ExpressionType ResultType = ReturnExpression.GetExpressionType(ParsingContext, resultLocal: null);
+                ExpressionType ResultType = ReturnExpression.GetExpressionType(ParsingContext);
 
                 resultLocal = new Local() { Name = ResultLocalName, Type = ResultType, Initializer = null };
 

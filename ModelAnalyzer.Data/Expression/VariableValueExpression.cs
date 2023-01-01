@@ -12,9 +12,9 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ParsingContext parsingContext, Local? resultLocal)
+    public override ExpressionType GetExpressionType(ParsingContext parsingContext)
     {
-        return ClassModel.GetVariable(parsingContext, resultLocal, VariableName).Type;
+        return ClassModel.GetVariable(parsingContext, VariableName).Type;
     }
 
     /// <summary>

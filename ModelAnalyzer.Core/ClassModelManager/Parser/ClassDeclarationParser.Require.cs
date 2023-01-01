@@ -54,8 +54,9 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
             LocationContext LocationContext = new(trivia, header, Offset);
+            ParsingContext EnsureParsingContext = parsingContext with { IsLocalAllowed = false, ResultLocal = null };
 
-            if (IsValidAssertionSyntaxTree(parsingContext, isLocalAllowed: false, resultLocal: null, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
+            if (IsValidAssertionSyntaxTree(EnsureParsingContext, LocationContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {
                 NewRequire = new Require { Text = Text, Location = trivia.GetLocation(), BooleanExpression = BooleanExpression };
             }

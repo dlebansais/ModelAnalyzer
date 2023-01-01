@@ -14,4 +14,6 @@ internal record ParsingContext
     public bool IsMethodParsingComplete { get; set; }
     public Method? HostMethod { get; set; }
     public List<Invariant> InvariantList { get; set; } = new();
+    public bool IsLocalAllowed { get; set; }
+    public Local? ResultLocal { get; set; }
 }

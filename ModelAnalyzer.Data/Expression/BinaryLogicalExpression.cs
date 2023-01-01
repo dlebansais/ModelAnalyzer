@@ -12,7 +12,7 @@ internal class BinaryLogicalExpression : Expression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ParsingContext parsingContext, Local? resultLocal) => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType(ParsingContext parsingContext) => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the left expression.

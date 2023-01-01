@@ -14,6 +14,5 @@ internal abstract class Expression : IExpression
     /// Gets the expression type.
     /// </summary>
     /// <param name="parsingContext">The parsing context.</param>
-    /// <param name="resultLocal">The optional result local.</param>
-    public abstract ExpressionType GetExpressionType(ParsingContext parsingContext, Local? resultLocal);
+    public abstract ExpressionType GetExpressionType(ParsingContext parsingContext);
 }

@@ -13,7 +13,7 @@ internal class LiteralFloatingPointValueExpression : Expression, ILiteralExpress
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(ParsingContext parsingContext, Local? resultLocal) => ExpressionType.FloatingPoint;
+    public override ExpressionType GetExpressionType(ParsingContext parsingContext) => ExpressionType.FloatingPoint;
 
     /// <inheritdoc/>
     public double Value { get; set; }

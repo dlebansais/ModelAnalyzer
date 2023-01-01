@@ -26,9 +26,8 @@ internal partial record ClassModel : IClassModel
     /// Gets a variable from its name.
     /// </summary>
     /// <param name="parsingContext">The parsing context.</param>
-    /// <param name="resultLocal">The optional result local.</param>
     /// <param name="variableName">The variable name.</param>
-    public static IVariable GetVariable(ParsingContext parsingContext, Local? resultLocal, IVariableName variableName)
+    public static IVariable GetVariable(ParsingContext parsingContext, IVariableName variableName)
     {
         IVariable? Result = null;
 
@@ -60,8 +59,8 @@ internal partial record ClassModel : IClassModel
                 }
         }
 
-        if (Result is null && resultLocal is not null && resultLocal.Name.Text == variableName.Text)
-            Result = resultLocal;
+        if (Result is null && parsingContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == variableName.Text)
+            Result = ResultLocal;
 
         Debug.Assert(Result is not null);
 

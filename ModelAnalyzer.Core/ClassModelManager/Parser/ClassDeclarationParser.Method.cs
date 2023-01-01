@@ -94,7 +94,7 @@ internal partial class ClassDeclarationParser
                         StatementList = new List<Statement>(),
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
+                    MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = true };
 
                     StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
 
@@ -290,7 +290,7 @@ internal partial class ClassDeclarationParser
     private bool IsValidMethodCallArgument(ParsingContext parsingContext, Argument argument, Parameter parameter)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
-        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(parsingContext, resultLocal: null);
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(parsingContext);
         ExpressionType ParameterType = parameter.Type;
 
         if (!IsSourceAndDestinationTypeCompatible(ParameterType, ArgumentType))

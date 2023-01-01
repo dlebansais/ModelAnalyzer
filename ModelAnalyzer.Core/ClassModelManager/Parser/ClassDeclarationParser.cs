@@ -221,7 +221,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidAssertionSyntaxTree(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionSyntaxTree(ParsingContext parsingContext, LocationContext locationContext, SyntaxTree syntaxTree, out Expression booleanExpression, out bool isErrorReported)
     {
         bool IsAssertionSupported = true;
 
@@ -240,7 +240,7 @@ internal partial class ClassDeclarationParser
         AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
         ExpressionSyntax Expression = AssignmentExpression.Right;
 
-        if (!IsValidAssertionExpression(parsingContext, isLocalAllowed, resultLocal, locationContext, Expression, out booleanExpression, out isErrorReported))
+        if (!IsValidAssertionExpression(parsingContext, locationContext, Expression, out booleanExpression, out isErrorReported))
             IsAssertionSupported = false;
         else
             isErrorReported = false;
@@ -248,15 +248,15 @@ internal partial class ClassDeclarationParser
         return IsAssertionSupported;
     }
 
-    private bool IsValidAssertionExpression(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
+    private bool IsValidAssertionExpression(ParsingContext parsingContext, LocationContext locationContext, ExpressionSyntax expressionNode, out Expression booleanExpression, out bool isErrorReported)
     {
         booleanExpression = null!;
         isErrorReported = false;
 
-        Expression? Expression = ParseExpression(parsingContext, isLocalAllowed, resultLocal, locationContext, expressionNode, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, locationContext, expressionNode, isNested: false);
         if (Expression is not null)
         {
-            if (Expression.GetExpressionType(parsingContext, resultLocal) == ExpressionType.Boolean)
+            if (Expression.GetExpressionType(parsingContext) == ExpressionType.Boolean)
             {
                 booleanExpression = Expression;
                 return true;
@@ -270,7 +270,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryFindVariableByName(ParsingContext parsingContext, bool isLocalAllowed, Local? resultLocal, string variableName, out IVariable variable)
+    private bool TryFindVariableByName(ParsingContext parsingContext, string variableName, out IVariable variable)
     {
         if (TryFindFieldByName(parsingContext, variableName, out IField Field))
         {
@@ -284,15 +284,15 @@ internal partial class ClassDeclarationParser
             return true;
         }
 
-        if (isLocalAllowed && TryFindLocalByName(parsingContext, variableName, out ILocal Local))
+        if (parsingContext.IsLocalAllowed && TryFindLocalByName(parsingContext, variableName, out ILocal Local))
         {
             variable = Local;
             return true;
         }
 
-        if (resultLocal is not null && resultLocal.Name.Text == variableName)
+        if (parsingContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == variableName)
         {
-            variable = resultLocal;
+            variable = ResultLocal;
             return true;
         }
 

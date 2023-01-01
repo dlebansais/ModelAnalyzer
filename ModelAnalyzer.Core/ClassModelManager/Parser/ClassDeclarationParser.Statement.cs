@@ -28,7 +28,7 @@ internal partial class ClassDeclarationParser
         List<Statement> Result = new();
         LocationContext LocationContext = new(expressionBody);
 
-        Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, expressionBody, isNested: false);
+        Expression? Expression = ParseExpression(parsingContext, LocationContext, expressionBody, isNested: false);
         if (Expression is not null)
             Result.Add(new ReturnStatement { Expression = Expression });
 
@@ -129,10 +129,10 @@ internal partial class ClassDeclarationParser
                 ExpressionSyntax SourceExpression = assignmentExpression.Right;
                 LocationContext LocationContext = new(SourceExpression);
 
-                Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, SourceExpression, isNested: false);
+                Expression? Expression = ParseExpression(parsingContext, LocationContext, SourceExpression, isNested: false);
                 if (Expression is not null)
                 {
-                    if (IsSourceAndDestinationTypeCompatible(parsingContext, resultLocal: null, Destination, Expression))
+                    if (IsSourceAndDestinationTypeCompatible(parsingContext, Destination, Expression))
                         NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
                     else
                         Log("Source cannot be assigned to destination.");
@@ -149,10 +149,10 @@ internal partial class ClassDeclarationParser
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(ParsingContext parsingContext, Local? resultLocal, IVariable destination, Expression source)
+    private bool IsSourceAndDestinationTypeCompatible(ParsingContext parsingContext, IVariable destination, Expression source)
     {
         ExpressionType DestinationType = destination.Type;
-        ExpressionType SourceType = source.GetExpressionType(parsingContext, resultLocal);
+        ExpressionType SourceType = source.GetExpressionType(parsingContext);
 
         return IsSourceAndDestinationTypeCompatible(DestinationType, SourceType);
     }
@@ -188,7 +188,7 @@ internal partial class ClassDeclarationParser
                     ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
                     LocationContext LocationContext = new(ArgumentExpression);
 
-                    Expression? Expression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ArgumentExpression, isNested: false);
+                    Expression? Expression = ParseExpression(parsingContext, LocationContext, ArgumentExpression, isNested: false);
                     if (Expression is not null)
                     {
                         Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
@@ -212,7 +212,7 @@ internal partial class ClassDeclarationParser
         ExpressionSyntax ConditionExpression = ifStatement.Condition;
         LocationContext LocationContext = new(ConditionExpression);
 
-        Expression? Condition = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ConditionExpression, isNested: false);
+        Expression? Condition = ParseExpression(parsingContext, LocationContext, ConditionExpression, isNested: false);
         if (Condition is not null)
         {
             List<Statement> WhenTrueStatementList = ParseStatementOrBlock(parsingContext, ifStatement.Statement);
@@ -238,7 +238,7 @@ internal partial class ClassDeclarationParser
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
         {
             LocationContext LocationContext = new(ResultExpression);
-            Expression? ReturnExpression = ParseExpression(parsingContext, isLocalAllowed: true, resultLocal: null, LocationContext, ResultExpression, isNested: false);
+            Expression? ReturnExpression = ParseExpression(parsingContext, LocationContext, ResultExpression, isNested: false);
 
             if (ReturnExpression is not null)
             {

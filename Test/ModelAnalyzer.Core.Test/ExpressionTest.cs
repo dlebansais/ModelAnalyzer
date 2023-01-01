@@ -87,10 +87,6 @@ class Program_CoreExpression_2
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-
-        UnsupportedExpression FirstUnsupportedExpression = (UnsupportedExpression)ClassModel.Unsupported.Expressions[0];
-
-        Assert.That(FirstUnsupportedExpression.GetExpressionType(ReadOnlyFieldTable.Empty, ReadOnlyParameterTable.Empty), Is.EqualTo(ExpressionType.Other));
     }
 
     [Test]

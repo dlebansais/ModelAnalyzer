@@ -95,7 +95,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(ParsingContext, resultLocal: null),
+            Type = Zero.GetExpressionType(ParsingContext),
             Initializer = null,
         };
 
