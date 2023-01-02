@@ -264,6 +264,60 @@ class Program_Verifier_FunctionCallInteger12
 }
 ";
 
+    private const string FunctionCallSourceCodeInteger13 = @"
+using System;
+
+class Program_Verifier_FunctionCallInteger13
+{
+    int X;
+
+    public void Write1(int x)
+    // Require: x == 0
+    {
+        X = Write2(Write3(x));
+    }
+
+    int Write2(int x)
+    // Require: x == 0
+    {
+        return Write3(x);
+    }
+
+    int Write3(int x)
+    // Require: x == 1
+    {
+        return x;
+    }
+}
+";
+
+    private const string FunctionCallSourceCodeInteger14 = @"
+using System;
+
+class Program_Verifier_FunctionCallInteger14
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        X = x;
+    }
+    // Ensure: Write2(x) == 0
+
+    int Write2(int x)
+    {
+        return 0;
+    }
+    // Ensure: Write3(x) == 0
+
+    int Write3(int x)
+    {
+        return x;
+    }
+    // Ensure: Result == 1
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_FunctionCallInteger1_Success()
@@ -408,6 +462,32 @@ class Program_Verifier_FunctionCallInteger12
     public void Verifier_FunctionCallInteger12_Error()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger12, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_FunctionCallInteger13_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger13, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_FunctionCallInteger14_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger14, maxDepth: 1);
 
         TestObject.Verify();
 

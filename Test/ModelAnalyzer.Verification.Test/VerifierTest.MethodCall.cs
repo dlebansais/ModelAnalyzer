@@ -263,6 +263,31 @@ class Program_Verifier_MethodCallInteger12
 }
 ";
 
+    private const string MethodCallSourceCodeInteger13 = @"
+using System;
+
+class Program_Verifier_MethodCallInteger13
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        Write2(Write3(x));
+    }
+
+    void Write2(int x)
+    {
+        X = x;
+    }
+
+    int Write3(int x)
+    // Require: x == 1
+    {
+        return x;
+    }
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MethodCallInteger1_Success()
@@ -413,5 +438,18 @@ class Program_Verifier_MethodCallInteger12
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MethodCallInteger13_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger13, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
     }
 }

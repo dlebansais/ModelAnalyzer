@@ -134,6 +134,83 @@ class Program_Verifier_MiscStatement5
 }
 ";
 
+    private const string MiscStatementSourceCode6 = @"
+using System;
+
+class Program_Verifier_MiscStatement6
+{
+    int X;
+
+    public void Write(int x)
+    {
+        if (Write2(x) == 1)
+            X = x;
+    }
+
+    int Write2(int x)
+    // Require: x == 0
+    {
+        return x;
+    }
+}
+";
+
+    private const string MiscStatementSourceCode7 = @"
+using System;
+
+class Program_Verifier_MiscStatement7
+{
+    int Write2(int x)
+    // Require: x == 1
+    {
+        return x;
+    }
+}
+// Invariant: Write2(0) == 1
+";
+
+    private const string MiscStatementSourceCode8 = @"
+using System;
+
+class Program_Verifier_MiscStatement8
+{
+    int X;
+
+    public void Write(int x)
+    // Require: Write2(0) == 0
+    {
+        X = x;
+    }
+
+    int Write2(int x)
+    {
+        return x;
+    }
+    // Ensure: Result == 1
+}
+";
+
+    private const string MiscStatementSourceCode9 = @"
+using System;
+
+class Program_Verifier_MiscStatement9
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: Write2(0) == 0
+
+    int Write2(int x)
+    {
+        return x;
+    }
+    // Ensure: Result == 1
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -257,5 +334,57 @@ class Program_Verifier_MiscStatement5
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements6_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode6, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements7_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode7, maxDepth: 0);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements8_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode8, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements9_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode9, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
 }
