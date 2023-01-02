@@ -208,7 +208,7 @@ internal partial class ClassDeclarationParser
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         syntaxTree = CSharpSyntaxTree.ParseText($"{AssignmentAssertionText}{text};", Options);
         var Diagnostics = syntaxTree.GetDiagnostics();
-        List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error && diagnostic.Id != "CS1029").ToList();
+        List<Diagnostic> ErrorList = Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToList();
         Log($"Parsed: '{text}' ErrorCount={ErrorList.Count}");
 
         if (ErrorList.Count > 0)

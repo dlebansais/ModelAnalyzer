@@ -49,6 +49,7 @@ class Program_CoreClass_1
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
     }
 
     [Test]
@@ -160,16 +161,37 @@ static class Program_CoreClass_6
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
     }
 
     [Test]
     [Category("Core")]
-    public void ClassModel_Base()
+    public void ClassModel_ClassBase()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_7 : IDisposable
+class Program_CoreClass_7 : System.Action
+{
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModel_InterfaceBase()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClass_8 : IDisposable
 {
     public void Dispose()
     {
@@ -182,6 +204,7 @@ class Program_CoreClass_7 : IDisposable
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
     }
 
     [Test]
@@ -191,7 +214,7 @@ class Program_CoreClass_7 : IDisposable
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_8<T>
+class Program_CoreClass_9<T>
 {
     T X;
 }
@@ -202,6 +225,7 @@ class Program_CoreClass_8<T>
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
     }
 
     [Test]
@@ -211,7 +235,7 @@ class Program_CoreClass_8<T>
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreClass_9<T>
+class Program_CoreClass_10<T>
     where T : class
 {
     T X;
@@ -223,5 +247,6 @@ class Program_CoreClass_9<T>
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
     }
 }

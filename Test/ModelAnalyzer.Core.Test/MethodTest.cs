@@ -377,4 +377,53 @@ class Program_CoreMethod_11
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Method_InvalidTypeParameter()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_12
+{
+    int Write<T>()
+    {
+        return 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Method_InvalidConstraint()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_13
+{
+    int Write<T>()
+        where T : class
+    {
+        return 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(1));
+    }
 }

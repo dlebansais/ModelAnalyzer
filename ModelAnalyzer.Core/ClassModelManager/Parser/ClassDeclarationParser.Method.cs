@@ -187,6 +187,20 @@ internal partial class ClassDeclarationParser
             }
         }
 
+        if (methodDeclaration.TypeParameterList is TypeParameterListSyntax TypeParameterList && TypeParameterList.Parameters.Count > 0)
+        {
+            LogWarning("Unsupported method type parameter(s).");
+
+            IsMethodSupported = false;
+        }
+
+        if (methodDeclaration.ConstraintClauses.Count > 0)
+        {
+            LogWarning("Unsupported method constraint(s).");
+
+            IsMethodSupported = false;
+        }
+
         return IsMethodSupported;
     }
 
