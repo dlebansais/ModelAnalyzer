@@ -221,6 +221,8 @@ class Program_Verifier_MiscStatement10
     public void Write(int x, int y)
     {
         X = x % y;
+        X = (x + 1) % (y + 1);
+        X = (x % y) + (x % y);
     }
 }
 ";
