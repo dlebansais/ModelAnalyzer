@@ -210,6 +210,7 @@ public partial class ClassModelManager : IDisposable
                         InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
                         RequireViolations = new List<IRequireViolation>().AsReadOnly(),
                         EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+                        AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
                     };
 
                     ClassModelExchange NewClassModelExchange = new()

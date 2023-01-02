@@ -142,3 +142,4 @@ public class Test
 | [MA0011](doc/MA0011.md) | Method require clause is violated |
 | [MA0012](doc/MA0012.md) | Method ensure clause is violated  |
 | [MA0013](doc/MA0013.md) | Class invariant is violated       |
+| [MA0014](doc/MA0014.md) | Flow check error detected         |

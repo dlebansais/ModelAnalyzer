@@ -74,4 +74,7 @@ internal partial record ClassModel : IClassModel
 
     /// <inheritdoc/>
     required public IReadOnlyList<IEnsureViolation> EnsureViolations { get; init; }
+
+    /// <inheritdoc/>
+    required public IReadOnlyList<IAssumeViolation> AssumeViolations { get; init; }
 }

@@ -376,17 +376,16 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < HostMethod.RequireList.Count; i++)
         {
             Require Require = HostMethod.RequireList[i];
-
-            if (!BuildExpression(verificationContext, Require.BooleanExpression, out BoolExpr AssertionExpr))
-                return false;
-
-            string AssertionType = "require";
+            IExpression AssertionExpression = Require.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
-            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionType, ErrorType))
+            if (!BuildExpression(verificationContext, AssertionExpression, out BoolExpr AssertionExpr))
                 return false;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionType, ErrorType, keepNormal: true))
+            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType))
+                return false;
+
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType, keepNormal: true))
                 return false;
         }
 
@@ -402,17 +401,16 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < HostMethod.EnsureList.Count; i++)
         {
             Ensure Ensure = HostMethod.EnsureList[i];
-
-            if (!BuildExpression(verificationContext, Ensure.BooleanExpression, out BoolExpr AssertionExpr))
-                return false;
-
-            string AssertionType = "ensure";
+            IExpression AssertionExpression = Ensure.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionType, ErrorType, keepNormal))
+            if (!BuildExpression(verificationContext, AssertionExpression, out BoolExpr AssertionExpr))
                 return false;
 
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionType, ErrorType))
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType, keepNormal))
+                return false;
+
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType))
                 return false;
         }
 
@@ -420,23 +418,24 @@ internal partial class Verifier : IDisposable
     }
 
     // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
-    private bool AddMethodAssertionNormal(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType, bool keepNormal)
+    private bool AddMethodAssertionNormal(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string text, VerificationErrorType errorType, bool keepNormal)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
         Method HostMethod = verificationContext.HostMethod!;
+        string AssertionType = VerificationErrorTypeToText(errorType);
         bool Result = true;
 
         if (!keepNormal)
             verificationContext.Solver.Push();
 
-        Log($"Adding {assertionType} {assertionExpr}");
+        Log($"Adding {AssertionType} {assertionExpr}");
         verificationContext.Solver.Assert(assertionExpr);
 
         if (verificationContext.Solver.Check() != Status.SATISFIABLE)
         {
-            Log($"Inconsistent {assertionType} state for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index };
+            Log($"Inconsistent {AssertionType} state for class {ClassName}");
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index, ErrorText = text };
 
             Result = false;
         }
@@ -447,23 +446,24 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string assertionType, VerificationErrorType errorType)
+    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string text, VerificationErrorType errorType)
     {
-        Debug.Assert(verificationContext.HostMethod is not null);
-
-        Method HostMethod = verificationContext.HostMethod!;
+        Method? HostMethod = verificationContext.HostMethod;
+        string AssertionType = VerificationErrorTypeToText(errorType);
         bool Result = true;
         BoolExpr AssertionOppositeExpr = Context.MkNot(assertionExpr);
 
         verificationContext.Solver.Push();
 
-        Log($"Adding {assertionType} opposite {AssertionOppositeExpr}");
+        Log($"Adding {AssertionType} opposite {AssertionOppositeExpr}");
         verificationContext.Solver.Assert(AssertionOppositeExpr);
 
         if (verificationContext.Solver.Check() == Status.SATISFIABLE)
         {
-            Log($"Violation of {assertionType} for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index };
+            Log($"Violation of {AssertionType} for class {ClassName}");
+
+            string MethodName = HostMethod is not null ? HostMethod.Name.Text : string.Empty;
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = MethodName, ErrorIndex = index, ErrorText = text };
 
             string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
             Log(ModelString);
@@ -474,6 +474,20 @@ internal partial class Verifier : IDisposable
         verificationContext.Solver.Pop();
 
         return Result;
+    }
+
+    private string VerificationErrorTypeToText(VerificationErrorType errorType)
+    {
+        Dictionary<VerificationErrorType, string> AssertionTypeTable = new()
+        {
+            { VerificationErrorType.RequireError, "require" },
+            { VerificationErrorType.EnsureError, "ensure" },
+            { VerificationErrorType.AssumeError, "assume" },
+        };
+
+        Debug.Assert(AssertionTypeTable.ContainsKey(errorType));
+
+        return AssertionTypeTable[errorType];
     }
 
     private void AddToSolver(VerificationContext verificationContext, BoolExpr boolExpr)

@@ -46,4 +46,9 @@ public interface IClassModel
     /// Gets the list of violated ensure clauses.
     /// </summary>
     IReadOnlyList<IEnsureViolation> EnsureViolations { get; }
+
+    /// <summary>
+    /// Gets the list of violated flow checks.
+    /// </summary>
+    IReadOnlyList<IAssumeViolation> AssumeViolations { get; }
 }

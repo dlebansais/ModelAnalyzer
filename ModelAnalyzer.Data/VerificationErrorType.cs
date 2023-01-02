@@ -34,4 +34,9 @@ internal enum VerificationErrorType
     /// Error in invariant clause.
     /// </summary>
     InvariantError,
+
+    /// <summary>
+    /// Error in assume clause.
+    /// </summary>
+    AssumeError,
 }

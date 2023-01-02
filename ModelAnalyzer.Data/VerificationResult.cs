@@ -16,6 +16,7 @@ internal record VerificationResult
         ClassName = string.Empty,
         MethodName = string.Empty,
         ErrorIndex = -1,
+        ErrorText = string.Empty,
     };
 
     /// <summary>
@@ -37,6 +38,11 @@ internal record VerificationResult
     /// Gets the index of the clause with error.
     /// </summary>
     required public int ErrorIndex { get; init; }
+
+    /// <summary>
+    /// Gets the text of the expression with error.
+    /// </summary>
+    required public string ErrorText { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the verification was successful.

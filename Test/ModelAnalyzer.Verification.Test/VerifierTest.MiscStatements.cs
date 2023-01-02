@@ -219,10 +219,39 @@ class Program_Verifier_MiscStatement10
     int X;
 
     public void Write(int x, int y)
+    // Require: y > 0
     {
         X = x % y;
         X = (x + 1) % (y + 1);
         X = (x % y) + (x % y);
+    }
+}
+";
+
+    private const string MiscStatementSourceCode11 = @"
+using System;
+
+class Program_Verifier_MiscStatement11
+{
+    int X;
+
+    public void Write(int x, int y)
+    {
+        X = x / y;
+    }
+}
+";
+
+    private const string MiscStatementSourceCode12 = @"
+using System;
+
+class Program_Verifier_MiscStatement12
+{
+    int X;
+
+    public void Write(int x, int y)
+    {
+        X = x % y;
     }
 }
 ";
@@ -414,5 +443,31 @@ class Program_Verifier_MiscStatement10
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements11_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode11, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements12_Error()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode12, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
     }
 }

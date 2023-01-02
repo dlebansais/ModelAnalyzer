@@ -79,6 +79,16 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out ArithExpr Left);
         bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out ArithExpr Right);
 
+        if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
+        {
+            BoolExpr AssertionExpr = Context.MkNot(Context.MkEq(Right, Zero));
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
+            {
+                resultExpr = Zero;
+                return false;
+            }
+        }
+
         resultExpr = OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
 
         return ResultLeft && ResultRight;
@@ -88,6 +98,13 @@ internal partial class Verifier : IDisposable
     {
         bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IntExpr Left);
         bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IntExpr Right);
+
+        BoolExpr AssertionExpr = Context.MkNot(Context.MkEq(Right, Zero));
+        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, remainderExpression.ToString(), VerificationErrorType.AssumeError))
+        {
+            resultExpr = Zero;
+            return false;
+        }
 
         resultExpr = Context.MkMod(Left, Right);
 

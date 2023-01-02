@@ -61,6 +61,33 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Flow check error detected..
+        /// </summary>
+        internal static string AssumeViolationAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("AssumeViolationAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Flow check error in &apos;{0}&apos; detected.
+        /// </summary>
+        internal static string AssumeViolationAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("AssumeViolationAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Flow check error detected.
+        /// </summary>
+        internal static string AssumeViolationAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("AssumeViolationAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ensure clause is invalid..
         /// </summary>
         internal static string BadEnsureAnalyzerDescription {
