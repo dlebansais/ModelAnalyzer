@@ -61,7 +61,7 @@ internal partial class ClassDeclarationParser
             if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
             else if (OperatorToken.IsKind(SyntaxKind.PercentToken))
-                NewExpression = new ModuloExpression { Left = Left, Right = Right };
+                NewExpression = TryParseRemainderExpression(parsingContext, Left, Right, OperatorToken, ref location);
             else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
                 NewExpression = new BinaryLogicalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
             else if (IsSupportedEqualityOperator(OperatorToken, out EqualityOperator EqualityOperator))
@@ -79,6 +79,32 @@ internal partial class ClassDeclarationParser
         }
         else
             isErrorReported = true;
+
+        return NewExpression;
+    }
+
+    private Expression? TryParseRemainderExpression(ParsingContext parsingContext, Expression left, Expression right, SyntaxToken operatorToken, ref Location location)
+    {
+        Debug.Assert(parsingContext.LocationContext is not null);
+
+        Expression? NewExpression = null;
+
+        if (left.GetExpressionType(parsingContext) != ExpressionType.Integer)
+        {
+            Log($"'{left}' must be an integer.");
+
+            location = parsingContext.LocationContext!.GetLocation(operatorToken);
+        }
+        else if (right.GetExpressionType(parsingContext) != ExpressionType.Integer)
+        {
+            Log($"'{right}' must be an integer.");
+
+            location = parsingContext.LocationContext!.GetLocation(operatorToken);
+        }
+        else
+        {
+            NewExpression = new RemainderExpression { Left = left, Right = right };
+        }
 
         return NewExpression;
     }

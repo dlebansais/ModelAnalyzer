@@ -58,7 +58,7 @@ The analyzer supports:
 + Invocation of a method - of the same class only - that has no return value.
 + A restricted subset of expressions:
   * The `+`, `-`, `*` and `/` binary operators.
-  * The modulo operator `%`.
+  * The modulo operator `%` for integers.
   * The `-` unary operator.
   * Parenthesis.
   * The `!`, `&&` and `||` logical operators.

@@ -3,9 +3,9 @@
 using Newtonsoft.Json;
 
 /// <summary>
-/// Represents a integer modulo expression.
+/// Represents a integer division remainder expression.
 /// </summary>
-internal class ModuloExpression : Expression
+internal class RemainderExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]

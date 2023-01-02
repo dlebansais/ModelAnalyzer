@@ -22,9 +22,9 @@ internal partial class Verifier : IDisposable
                 Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic, out ArithExpr BinaryArithmeticExpr);
                 ResultExpr = BinaryArithmeticExpr;
                 break;
-            case ModuloExpression Modulo:
-                Result = BuildModuloExpression(verificationContext, Modulo, out IntExpr ModuloExpr);
-                ResultExpr = ModuloExpr;
+            case RemainderExpression Remainder:
+                Result = BuildRemainderExpression(verificationContext, Remainder, out IntExpr RemainderExpr);
+                ResultExpr = RemainderExpr;
                 break;
             case UnaryArithmeticExpression UnaryArithmetic:
                 Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic, out ArithExpr UnaryArithmeticExpr);
@@ -84,10 +84,10 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildModuloExpression(VerificationContext verificationContext, ModuloExpression moduloExpression, out IntExpr resultExpr)
+    private bool BuildRemainderExpression(VerificationContext verificationContext, RemainderExpression remainderExpression, out IntExpr resultExpr)
     {
-        bool ResultLeft = BuildExpression(verificationContext, moduloExpression.Left, out IntExpr Left);
-        bool ResultRight = BuildExpression(verificationContext, moduloExpression.Right, out IntExpr Right);
+        bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IntExpr Left);
+        bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IntExpr Right);
 
         resultExpr = Context.MkMod(Left, Right);
 
