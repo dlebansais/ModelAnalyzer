@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 /// <summary>
 /// Represents the context to use when calculating a location.
 /// </summary>
-public class LocationContext
+internal class LocationContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LocationContext"/> class.
