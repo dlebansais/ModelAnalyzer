@@ -211,6 +211,20 @@ class Program_Verifier_MiscStatement9
 }
 ";
 
+    private const string MiscStatementSourceCode10 = @"
+using System;
+
+class Program_Verifier_MiscStatement10
+{
+    int X;
+
+    public void Write(int x, int y)
+    {
+        X = x % y;
+    }
+}
+";
+
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements1_Success()
@@ -386,5 +400,17 @@ class Program_Verifier_MiscStatement9
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_MiscStatements10_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode10, maxDepth: 1);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 }

@@ -390,9 +390,9 @@ using System;
 
 class Program_CoreStatement_12
 {
-    int Write(int x)
+    bool Write(int x)
     {
-        return x % 10;
+        return x is string;
     }
 }
 ");
@@ -414,8 +414,8 @@ using System;
 
 class Program_CoreStatement_13
 {
-    int X;
-    int Read() => X % 10;
+    bool X;
+    bool Read() => X is string;
 }
 ");
 

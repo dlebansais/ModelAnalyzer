@@ -60,6 +60,8 @@ internal partial class ClassDeclarationParser
 
             if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
                 NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
+            else if (OperatorToken.IsKind(SyntaxKind.PercentToken))
+                NewExpression = new ModuloExpression { Left = Left, Right = Right };
             else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
                 NewExpression = new BinaryLogicalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
             else if (IsSupportedEqualityOperator(OperatorToken, out EqualityOperator EqualityOperator))

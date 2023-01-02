@@ -35,11 +35,11 @@ using System;
 
 class Program_BadExpression_1
 {
-    int X;
+    bool X;
 
-    void Write(int x)
+    void Write(bool x)
     {
-        X = x [|%|]MA0009 x;
+        X = x [|^|]MA0009 x;
     }
 }
 ");
@@ -73,20 +73,20 @@ using System;
 
 class Program_BadExpression_3
 {
-    int X;
+    bool X;
 
-    int Read()
+    bool Read()
     {
         return X;
     }
 
-    void Write(int x)
+    void Write(bool x)
     {
-        if (x >= 0)
+        if (x != false)
             X = x;
     }
 }
-// Invariant: X [|%|]MA0009 X
+// Invariant: X [|^|]MA0009 X
 ");
     }
 
@@ -125,20 +125,20 @@ using System;
 
 class Program_BadExpression_5
 {
-    int X;
+    bool X;
 
-    int Read()
+    bool Read()
     {
         return X;
     }
 
-    void Write(int x)
+    void Write(bool x)
     {
-        if (x >= 0)
+        if (x != false)
             X = x;
     }
 }
-// Invariant: X [|%|]MA0009 0
+// Invariant: X [|^|]MA0009 false
 ");
     }
 
