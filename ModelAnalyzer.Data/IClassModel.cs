@@ -15,22 +15,22 @@ public interface IClassModel
     /// <summary>
     /// Gets the list of fields.
     /// </summary>
-    IReadOnlyList<IField> GetFields();
+    IList<IField> GetFields();
 
     /// <summary>
     /// Gets the list of methods.
     /// </summary>
-    IReadOnlyList<IMethod> GetMethods();
+    IList<IMethod> GetMethods();
 
     /// <summary>
     /// Gets the list of invariants.
     /// </summary>
-    IReadOnlyList<IInvariant> GetInvariants();
+    IList<IInvariant> GetInvariants();
 
     /// <summary>
     /// Gets unsupported class elements.
     /// </summary>
-    Unsupported Unsupported { get; }
+    IUnsupported Unsupported { get; }
 
     /// <summary>
     /// Gets the list of violated invariants.

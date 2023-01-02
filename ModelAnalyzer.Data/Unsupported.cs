@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents unsupported components in a class.
 /// </summary>
-public record Unsupported : IUnsupported
+internal record Unsupported : IUnsupported
 {
     /// <inheritdoc/>
     public bool IsEmpty => !InvalidDeclaration &&

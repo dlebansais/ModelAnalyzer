@@ -5,7 +5,7 @@ using System;
 /// <summary>
 /// Provides tools to normalize the new line sequence in logs and debug strings.
 /// </summary>
-public static class TextBuilder
+internal static class TextBuilder
 {
     /// <summary>
     /// Gets or sets the new line sequence to use in debug strings.

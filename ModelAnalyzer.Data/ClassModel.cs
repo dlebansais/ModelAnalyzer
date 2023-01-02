@@ -16,14 +16,14 @@ internal partial record ClassModel : IClassModel
     required public ReadOnlyFieldTable FieldTable { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IField> GetFields()
+    public IList<IField> GetFields()
     {
         List<IField> Result = new();
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             Result.Add(Entry.Value);
 
-        return Result.AsReadOnly();
+        return Result;
     }
 
     /// <summary>
@@ -32,14 +32,14 @@ internal partial record ClassModel : IClassModel
     required public ReadOnlyMethodTable MethodTable { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IMethod> GetMethods()
+    public IList<IMethod> GetMethods()
     {
         List<IMethod> Result = new();
 
         foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
             Result.Add(Entry.Value);
 
-        return Result.AsReadOnly();
+        return Result;
     }
 
     /// <summary>
@@ -48,18 +48,23 @@ internal partial record ClassModel : IClassModel
     required public IReadOnlyList<Invariant> InvariantList { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<IInvariant> GetInvariants()
+    public IList<IInvariant> GetInvariants()
     {
         List<IInvariant> Result = new();
 
         foreach (Invariant Item in InvariantList)
             Result.Add(Item);
 
-        return Result.AsReadOnly();
+        return Result;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets unsupported class elements.
+    /// </summary>
     required public Unsupported Unsupported { get; init; }
+
+    /// <inheritdoc/>
+    IUnsupported IClassModel.Unsupported { get => Unsupported; }
 
     /// <inheritdoc/>
     required public IReadOnlyList<IInvariantViolation> InvariantViolations { get; init; }

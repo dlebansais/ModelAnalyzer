@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported requirement.
 /// </summary>
-public class UnsupportedRequire : IUnsupportedRequire
+internal class UnsupportedRequire : IUnsupportedRequire
 {
     /// <inheritdoc/>
     required public string Text { get; init; }

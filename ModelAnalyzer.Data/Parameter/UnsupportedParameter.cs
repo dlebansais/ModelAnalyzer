@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported parameter.
 /// </summary>
-public class UnsupportedParameter : IUnsupportedParameter
+internal class UnsupportedParameter : IUnsupportedParameter
 {
     /// <inheritdoc/>
     public IVariableName Name => new ParameterName() { Text = "*" };

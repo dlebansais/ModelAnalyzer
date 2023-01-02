@@ -34,7 +34,7 @@ class Program_CoreLocal_0
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
-        IReadOnlyList<IMethod> Methods = ClassModel.GetMethods();
+        IList<IMethod> Methods = ClassModel.GetMethods();
 
         Assert.That(Methods.Count, Is.EqualTo(1));
 

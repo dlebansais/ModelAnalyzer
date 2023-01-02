@@ -35,7 +35,7 @@ class Program_CoreInvariant_0
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
-        IReadOnlyList<IInvariant> Invariants = ClassModel.GetInvariants();
+        IList<IInvariant> Invariants = ClassModel.GetInvariants();
 
         Assert.That(Invariants.Count, Is.EqualTo(1));
 

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported statement.
 /// </summary>
-public class UnsupportedStatement : IUnsupportedStatement
+internal class UnsupportedStatement : IUnsupportedStatement
 {
     /// <inheritdoc/>
     required public Location Location { get; init; }

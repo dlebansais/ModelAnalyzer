@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents a guarantee that is not supported.
 /// </summary>
-public class UnsupportedEnsure : IUnsupportedEnsure
+internal class UnsupportedEnsure : IUnsupportedEnsure
 {
     /// <inheritdoc/>
     required public string Text { get; init; }

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported invariant.
 /// </summary>
-public class UnsupportedInvariant : IUnsupportedInvariant
+internal class UnsupportedInvariant : IUnsupportedInvariant
 {
     /// <inheritdoc/>
     required public string Text { get; init; }

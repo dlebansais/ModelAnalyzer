@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 /// <summary>
 /// Represents an unsupported local variable.
 /// </summary>
-public class UnsupportedLocal : IUnsupportedLocal
+internal class UnsupportedLocal : IUnsupportedLocal
 {
     /// <inheritdoc/>
     public IVariableName Name => new LocalName() { Text = "*" };

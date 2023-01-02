@@ -31,7 +31,7 @@ class Program_CoreField_0
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
-        IReadOnlyList<IField> Fields = ClassModel.GetFields();
+        IList<IField> Fields = ClassModel.GetFields();
 
         Assert.That(Fields.Count, Is.EqualTo(3));
 
