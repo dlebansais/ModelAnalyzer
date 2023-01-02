@@ -248,7 +248,9 @@ internal partial class ClassDeclarationParser
                         int OwnerStatementIndex = Entry.OwnerStatementIndex;
                         List<Statement> ParentStatementList = Entry.ParentStatementList;
 
-                        if (OwnerStatementIndex >= 0 && OwnerStatementIndex < ParentStatementList.Count)
+                        Debug.Assert(OwnerStatementIndex >= 0);
+
+                        if (OwnerStatementIndex < ParentStatementList.Count)
                         {
                             Statement OwnerStatement = ParentStatementList[OwnerStatementIndex];
                             removedStatementTable.Add(OwnerStatement, ParentStatementList);

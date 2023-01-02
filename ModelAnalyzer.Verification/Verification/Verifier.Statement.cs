@@ -21,13 +21,13 @@ internal partial class Verifier : IDisposable
 
     private bool AddStatementExecution(VerificationContext verificationContext, Statement statement)
     {
-        bool Result = true;
+        bool Result = false;
         bool IsAdded = false;
 
         switch (statement)
         {
             case AssignmentStatement Assignment:
-                AddAssignmentExecution(verificationContext, Assignment);
+                Result = AddAssignmentExecution(verificationContext, Assignment);
                 IsAdded = true;
                 break;
             case ConditionalStatement Conditional:
@@ -39,7 +39,7 @@ internal partial class Verifier : IDisposable
                 IsAdded = true;
                 break;
             case ReturnStatement Return:
-                AddReturnExecution(verificationContext, Return);
+                Result = AddReturnExecution(verificationContext, Return);
                 IsAdded = true;
                 break;
         }

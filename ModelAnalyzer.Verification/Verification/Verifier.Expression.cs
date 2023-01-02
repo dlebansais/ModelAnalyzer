@@ -192,7 +192,7 @@ internal partial class Verifier : IDisposable
                     break;
                 }
 
-            if (VariableString is null && verificationContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName)
+            if (VariableString is null && verificationContext.ResultLocal is Local ResultLocal && VariableName == Ensure.ResultKeyword)
             {
                 LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
                 Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
@@ -270,6 +270,10 @@ internal partial class Verifier : IDisposable
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
+
+        VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
+        string ResultLocalString = ResultLocalAlias.ToString();
+        resultExpr = CreateVariableExpr(ResultLocalString, calledFunction.ReturnType);
 
         return true;
     }

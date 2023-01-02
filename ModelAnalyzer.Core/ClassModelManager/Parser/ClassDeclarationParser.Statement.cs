@@ -189,10 +189,10 @@ internal partial class ClassDeclarationParser
 
             if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
             {
-                NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+                Debug.Assert(parsingContext.HostMethod is not null);
 
-                if (parsingContext.HostMethod is Method HostMethod)
-                    parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = HostMethod, Statement = NewStatement, ParentStatementList = parsingContext.StatementList });
+                NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+                parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = parsingContext.HostMethod!, Statement = NewStatement, ParentStatementList = parsingContext.StatementList });
             }
         }
         else

@@ -45,7 +45,7 @@ internal class VariableValueExpression : Expression
                     break;
                 }
 
-            if (Variable is null && memberCollectionContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == VariableName.Text)
+            if (Variable is null && memberCollectionContext.ResultLocal is Local ResultLocal && VariableName.Text == Ensure.ResultKeyword)
                 Variable = ResultLocal;
         }
 

@@ -290,7 +290,7 @@ internal partial class ClassDeclarationParser
             return true;
         }
 
-        if (parsingContext.ResultLocal is Local ResultLocal && ResultLocal.Name.Text == variableName)
+        if (parsingContext.ResultLocal is Local ResultLocal && variableName == Ensure.ResultKeyword)
         {
             variable = ResultLocal;
             return true;
