@@ -64,6 +64,7 @@ The analyzer supports:
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
   * Variables, either fields, local variables or parameters. Local variables are not allowed in method contracts (see below).
+  * Invocation of a function, but of the same class only.
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.

@@ -40,6 +40,7 @@ class Program_CoreEnsure_0
         Assert.That(Methods.Count, Is.EqualTo(1));
 
         IMethod FirstMethod = Methods.First();
+        Assert.That(FirstMethod.Name.Text, Is.EqualTo("Write"));
 
         IList<IEnsure> Ensures = FirstMethod.GetEnsures();
 

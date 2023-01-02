@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 public class UnsupportedMethod : IUnsupportedMethod
 {
     /// <inheritdoc/>
-    public MethodName Name => new MethodName() { Text = "*" };
+    public IClassMemberName Name => new MethodName() { Text = "*" };
 
     /// <inheritdoc/>
     required public Location Location { get; init; }

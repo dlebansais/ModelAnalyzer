@@ -7,12 +7,15 @@ using System.Diagnostics;
 /// Represents a class method.
 /// </summary>
 [DebuggerDisplay("{Name.Text}()")]
-internal class Method : IMethod
+internal class Method : IMethod, INameable<MethodName>
 {
     /// <summary>
     /// Gets the method name.
     /// </summary>
     required public MethodName Name { get; init; }
+
+    /// <inheritdoc/>
+    IClassMemberName IMethod.Name { get => Name; }
 
     /// <summary>
     /// Gets the access modifier.

@@ -5,8 +5,13 @@ using System.Collections.Generic;
 /// <summary>
 /// Provides information about a method.
 /// </summary>
-public interface IMethod : INameable<MethodName>
+public interface IMethod
 {
+    /// <summary>
+    /// Gets the method name.
+    /// </summary>
+    IClassMemberName Name { get; }
+
     /// <summary>
     /// Gets the list of require clauses.
     /// </summary>
