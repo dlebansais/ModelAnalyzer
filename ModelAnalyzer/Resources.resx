@@ -118,47 +118,47 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BadEnsureAnalyzerDescription" xml:space="preserve">
-    <value>Bad assertion.</value>
+    <value>Ensure clause is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadEnsureAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad assertion</value>
+    <value>Ensure clause '{0}' is invalid</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadEnsureAnalyzerTitle" xml:space="preserve">
-    <value>Bad assertion</value>
+    <value>Ensure clause is invalid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadExpressionAnalyzerDescription" xml:space="preserve">
-    <value>Bad expression.</value>
+    <value>Expression is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadExpressionAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad expression</value>
+    <value>Expression is invalid</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadExpressionAnalyzerTitle" xml:space="preserve">
-    <value>Bad expression</value>
+    <value>Expression is invalid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadFieldAnalyzerDescription" xml:space="preserve">
-    <value>Bad field.</value>
+    <value>Field is not supported.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadFieldAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad field</value>
+    <value>Field '{0}' is not supported</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadFieldAnalyzerTitle" xml:space="preserve">
-    <value>Bad field</value>
+    <value>Field is not supported</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadInvariantAnalyzerDescription" xml:space="preserve">
-    <value>Bad invariant.</value>
+    <value>Class invariant is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadInvariantAnalyzerMessageFormat" xml:space="preserve">
-    <value>Invariant '{0}' is invalid</value>
+    <value>Class invariant '{0}' is invalid</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadInvariantAnalyzerTitle" xml:space="preserve">
@@ -166,55 +166,55 @@
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadLocalAnalyzerDescription" xml:space="preserve">
-    <value>Bad local.</value>
+    <value>Local variable is not supported.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadLocalAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad local</value>
+    <value>Local variable '{0}' is not supported</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadLocalAnalyzerTitle" xml:space="preserve">
-    <value>Bad local</value>
+    <value>Local variable is not supported</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadMethodAnalyzerDescription" xml:space="preserve">
-    <value>Bad method.</value>
+    <value>Method is not supported.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadMethodAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad method</value>
+    <value>Method '{0}' is not supported</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadMethodAnalyzerTitle" xml:space="preserve">
-    <value>Bad method</value>
+    <value>Method is not supported</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadParameterAnalyzerDescription" xml:space="preserve">
-    <value>Bad parameter.</value>
+    <value>Parameter is not supported.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadParameterAnalyzerMessageFormat" xml:space="preserve">
-    <value>Parameter '{0}' is invalid</value>
+    <value>Parameter '{0}' is not supported</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadParameterAnalyzerTitle" xml:space="preserve">
-    <value>Parameter is invalid</value>
+    <value>Parameter is not supported</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadRequireAnalyzerDescription" xml:space="preserve">
-    <value>Bad requirement.</value>
+    <value>Require clause is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadRequireAnalyzerMessageFormat" xml:space="preserve">
-    <value>Bad requirement</value>
+    <value>Require clause '{0}' is invalid</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="BadRequireAnalyzerTitle" xml:space="preserve">
-    <value>Bad requirement</value>
+    <value>Require clause is invalid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="BadStatementAnalyzerDescription" xml:space="preserve">
-    <value>Bad statement.</value>
+    <value>Statement is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="BadStatementAnalyzerMessageFormat" xml:space="preserve">
@@ -226,15 +226,15 @@
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="ClassModelAnalyzerDescription" xml:space="preserve">
-    <value>Class should support a model.</value>
+    <value>Error in class model.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="ClassModelAnalyzerMessageFormat" xml:space="preserve">
-    <value>Class '{0}' should support a model</value>
+    <value>Error in class '{0}' model</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="ClassModelAnalyzerTitle" xml:space="preserve">
-    <value>Class can be modeled</value>
+    <value>Error in class model</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="EnsureViolationAnalyzerDescription" xml:space="preserve">
@@ -259,18 +259,6 @@
   </data>
   <data name="InvariantViolationAnalyzerTitle" xml:space="preserve">
     <value>Class invariant is violated</value>
-    <comment>The title of the diagnostic.</comment>
-  </data>
-  <data name="MakeConstAnalyzerDescription" xml:space="preserve">
-    <value>Variables that are not modified should be made constants.</value>
-    <comment>An optional longer localizable description of the diagnostic.</comment>
-  </data>
-  <data name="MakeConstAnalyzerMessageFormat" xml:space="preserve">
-    <value>Variable '{0}' can be made constant</value>
-    <comment>The format-able message the diagnostic displays.</comment>
-  </data>
-  <data name="MakeConstAnalyzerTitle" xml:space="preserve">
-    <value>Variable can be made constant</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="RequireViolationAnalyzerDescription" xml:space="preserve">

@@ -61,7 +61,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad assertion..
+        ///   Looks up a localized string similar to Ensure clause is invalid..
         /// </summary>
         internal static string BadEnsureAnalyzerDescription {
             get {
@@ -70,7 +70,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad assertion.
+        ///   Looks up a localized string similar to Ensure clause &apos;{0}&apos; is invalid.
         /// </summary>
         internal static string BadEnsureAnalyzerMessageFormat {
             get {
@@ -79,7 +79,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad assertion.
+        ///   Looks up a localized string similar to Ensure clause is invalid.
         /// </summary>
         internal static string BadEnsureAnalyzerTitle {
             get {
@@ -88,7 +88,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad expression..
+        ///   Looks up a localized string similar to Expression is invalid..
         /// </summary>
         internal static string BadExpressionAnalyzerDescription {
             get {
@@ -97,7 +97,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad expression.
+        ///   Looks up a localized string similar to Expression is invalid.
         /// </summary>
         internal static string BadExpressionAnalyzerMessageFormat {
             get {
@@ -106,7 +106,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad expression.
+        ///   Looks up a localized string similar to Expression is invalid.
         /// </summary>
         internal static string BadExpressionAnalyzerTitle {
             get {
@@ -115,7 +115,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad field..
+        ///   Looks up a localized string similar to Field is not supported..
         /// </summary>
         internal static string BadFieldAnalyzerDescription {
             get {
@@ -124,7 +124,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad field.
+        ///   Looks up a localized string similar to Field &apos;{0}&apos; is not supported.
         /// </summary>
         internal static string BadFieldAnalyzerMessageFormat {
             get {
@@ -133,7 +133,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad field.
+        ///   Looks up a localized string similar to Field is not supported.
         /// </summary>
         internal static string BadFieldAnalyzerTitle {
             get {
@@ -142,7 +142,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad invariant..
+        ///   Looks up a localized string similar to Class invariant is invalid..
         /// </summary>
         internal static string BadInvariantAnalyzerDescription {
             get {
@@ -151,7 +151,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invariant &apos;{0}&apos; is invalid.
+        ///   Looks up a localized string similar to Class invariant &apos;{0}&apos; is invalid.
         /// </summary>
         internal static string BadInvariantAnalyzerMessageFormat {
             get {
@@ -169,7 +169,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad local..
+        ///   Looks up a localized string similar to Local variable is not supported..
         /// </summary>
         internal static string BadLocalAnalyzerDescription {
             get {
@@ -178,7 +178,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad local.
+        ///   Looks up a localized string similar to Local variable &apos;{0}&apos; is not supported.
         /// </summary>
         internal static string BadLocalAnalyzerMessageFormat {
             get {
@@ -187,7 +187,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad local.
+        ///   Looks up a localized string similar to Local variable is not supported.
         /// </summary>
         internal static string BadLocalAnalyzerTitle {
             get {
@@ -196,7 +196,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad method..
+        ///   Looks up a localized string similar to Method is not supported..
         /// </summary>
         internal static string BadMethodAnalyzerDescription {
             get {
@@ -205,7 +205,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad method.
+        ///   Looks up a localized string similar to Method &apos;{0}&apos; is not supported.
         /// </summary>
         internal static string BadMethodAnalyzerMessageFormat {
             get {
@@ -214,7 +214,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad method.
+        ///   Looks up a localized string similar to Method is not supported.
         /// </summary>
         internal static string BadMethodAnalyzerTitle {
             get {
@@ -223,7 +223,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad parameter..
+        ///   Looks up a localized string similar to Parameter is not supported..
         /// </summary>
         internal static string BadParameterAnalyzerDescription {
             get {
@@ -232,7 +232,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parameter &apos;{0}&apos; is invalid.
+        ///   Looks up a localized string similar to Parameter &apos;{0}&apos; is not supported.
         /// </summary>
         internal static string BadParameterAnalyzerMessageFormat {
             get {
@@ -241,7 +241,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parameter is invalid.
+        ///   Looks up a localized string similar to Parameter is not supported.
         /// </summary>
         internal static string BadParameterAnalyzerTitle {
             get {
@@ -250,7 +250,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad requirement..
+        ///   Looks up a localized string similar to Require clause is invalid..
         /// </summary>
         internal static string BadRequireAnalyzerDescription {
             get {
@@ -259,7 +259,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad requirement.
+        ///   Looks up a localized string similar to Require clause &apos;{0}&apos; is invalid.
         /// </summary>
         internal static string BadRequireAnalyzerMessageFormat {
             get {
@@ -268,7 +268,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad requirement.
+        ///   Looks up a localized string similar to Require clause is invalid.
         /// </summary>
         internal static string BadRequireAnalyzerTitle {
             get {
@@ -277,7 +277,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad statement..
+        ///   Looks up a localized string similar to Statement is invalid..
         /// </summary>
         internal static string BadStatementAnalyzerDescription {
             get {
@@ -304,7 +304,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class should support a model..
+        ///   Looks up a localized string similar to Error in class model..
         /// </summary>
         internal static string ClassModelAnalyzerDescription {
             get {
@@ -313,7 +313,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class &apos;{0}&apos; should support a model.
+        ///   Looks up a localized string similar to Error in class &apos;{0}&apos; model.
         /// </summary>
         internal static string ClassModelAnalyzerMessageFormat {
             get {
@@ -322,7 +322,7 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Class can be modeled.
+        ///   Looks up a localized string similar to Error in class model.
         /// </summary>
         internal static string ClassModelAnalyzerTitle {
             get {
@@ -381,33 +381,6 @@ namespace ModelAnalyzer {
         internal static string InvariantViolationAnalyzerTitle {
             get {
                 return ResourceManager.GetString("InvariantViolationAnalyzerTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Variables that are not modified should be made constants..
-        /// </summary>
-        internal static string MakeConstAnalyzerDescription {
-            get {
-                return ResourceManager.GetString("MakeConstAnalyzerDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Variable &apos;{0}&apos; can be made constant.
-        /// </summary>
-        internal static string MakeConstAnalyzerMessageFormat {
-            get {
-                return ResourceManager.GetString("MakeConstAnalyzerMessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Variable can be made constant.
-        /// </summary>
-        internal static string MakeConstAnalyzerTitle {
-            get {
-                return ResourceManager.GetString("MakeConstAnalyzerTitle", resourceCulture);
             }
         }
         

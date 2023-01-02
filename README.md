@@ -45,7 +45,7 @@ To help the analyzer, programmers can add contract clauses:
 
 The analyzer supports:
 
-+ `bool`, `int` and `double` types only.
++ A [limited set](#supported-types) of C# pre-defined types.
 + Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields.
@@ -68,6 +68,10 @@ The analyzer supports:
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.
+
+### Supported types
+
+The analyzer supports `bool`, `int` and `double` types only.
 
 ## Method contract
 
@@ -122,18 +126,18 @@ public class Test
 
 ## List of diagnostics
 
-| Code   | Diagnostic               |
-| ------ | ------------------------ |
-| [MA0001](doc/MA0001.md) | Error in class model     |
-| [MA0002](doc/MA0002.md) | Invalid field            |
-| [MA0003](doc/MA0003.md) | Invalid method           |
-| [MA0004](doc/MA0004.md) | Invalid parameter        |
-| [MA0005](doc/MA0005.md) | Invalid require clause   |
-| [MA0006](doc/MA0006.md) | Invalid ensure clause    |
-| [MA0007](doc/MA0007.md) | Invalid local variable   |
-| [MA0008](doc/MA0008.md) | Invalid statement        |
-| [MA0009](doc/MA0009.md) | Invalid expression       |
-| [MA0010](doc/MA0010.md) | Invalid invariant clause |
-| [MA0011](doc/MA0011.md) | Require clause violation |
-| [MA0012](doc/MA0012.md) | Ensure clause violation  |
-| [MA0013](doc/MA0013.md) | Invariant violation      |
+| Code   | Diagnostic                                         |
+| ------ | -------------------------------------------------- |
+| [MA0001](doc/MA0001.md) | Error in class model              |
+| [MA0002](doc/MA0002.md) | Field is not supported            |
+| [MA0003](doc/MA0003.md) | Method is not supported           |
+| [MA0004](doc/MA0004.md) | Parameter is not supported        |
+| [MA0005](doc/MA0005.md) | Require clause is invalid         |
+| [MA0006](doc/MA0006.md) | Ensure clause is invalid          |
+| [MA0007](doc/MA0007.md) | Local variable is not supported   |
+| [MA0008](doc/MA0008.md) | Statement is invalid              |
+| [MA0009](doc/MA0009.md) | Expression is invalid             |
+| [MA0010](doc/MA0010.md) | Class invariant is invalid        |
+| [MA0011](doc/MA0011.md) | Method require clause is violated |
+| [MA0012](doc/MA0012.md) | Method ensure clause is violated  |
+| [MA0013](doc/MA0013.md) | Class invariant is violated       |

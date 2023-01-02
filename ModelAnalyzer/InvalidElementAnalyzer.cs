@@ -168,38 +168,44 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
 
         foreach (IUnsupportedField Item in ClassModel.Unsupported.Fields)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid field.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location));
+            string FieldName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid field '{FieldName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
         }
 
         foreach (IUnsupportedMethod Item in ClassModel.Unsupported.Methods)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid method.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location));
+            string MethodName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid method '{MethodName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
         }
 
         foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, Item.Name.Text));
+            string ParameterName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter '{ParameterName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
         }
 
         foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
         {
+            string AssertionText = Tools.Truncate(Item.Text);
             Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid require.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
         }
 
         foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
         {
+            string AssertionText = Tools.Truncate(Item.Text);
             Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid ensure.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location));
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
         }
 
         foreach (IUnsupportedLocal Item in ClassModel.Unsupported.Locals)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid local variable.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location));
+            string LocalName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid local variable '{LocalName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
         }
 
         foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
