@@ -461,4 +461,25 @@ class Program_CoreProperty_18
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Properties.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Property_AccessorAttribute()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_19
+{
+    public int X { [System.Runtime.CompilerServices.CompilerGenerated]get; set; }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Properties.Count, Is.EqualTo(1));
+    }
 }

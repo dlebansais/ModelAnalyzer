@@ -17,6 +17,9 @@ using System;
 
 class Program_CoreClass_0
 {
+    public int X { get; set; }
+    double Y;
+    bool Z() => false;
 }
 ");
 
@@ -28,6 +31,14 @@ class Program_CoreClass_0
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreClass_0
+  public int X { get; set; }
+
+  double Y
+
+  bool Z()
+  {
+    return false;
+  }
 "));
     }
 

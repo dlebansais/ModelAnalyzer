@@ -336,4 +336,30 @@ class Program_CoreLocal_12
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Locals.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Local_NameCollisionWithProperty()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_13
+{
+    public int X { get; set; }
+
+    public void Write()
+    {
+        int X;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Locals.Count, Is.EqualTo(1));
+    }
 }

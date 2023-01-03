@@ -13,6 +13,7 @@ using System;
 class Program_Verifier_MiscStatement1
 {
     int X;
+    public int Y { get; set; }
 
     public void Write()
     {
