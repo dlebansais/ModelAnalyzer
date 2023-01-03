@@ -12,6 +12,7 @@ internal class VerifierExtended : Verifier, IDisposable
     {
         MaxDepth = 0;
         ClassName = string.Empty;
+        PropertyTable = new();
         FieldTable = new();
         MethodTable = new();
         InvariantList = new List<Invariant>().AsReadOnly();

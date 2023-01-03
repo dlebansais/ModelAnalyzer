@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 public class InvalidElementAnalyzer : DiagnosticAnalyzer
 {
     public const string Category = "Design";
+    public const string DiagnosticIdInvalidProperty = "MA0015";
     public const string DiagnosticIdInvalidField = "MA0002";
     public const string DiagnosticIdInvalidMethod = "MA0003";
     public const string DiagnosticIdInvalidParameter = "MA0004";
@@ -21,6 +22,18 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticIdInvalidLocal = "MA0007";
     public const string DiagnosticIdInvalidStatement = "MA0008";
     public const string DiagnosticIdInvalidExpression = "MA0009";
+
+    private static readonly LocalizableString TitleInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormatInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString DescriptionInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor RuleInvalidProperty = new DiagnosticDescriptor(DiagnosticIdInvalidProperty,
+                                                                                                TitleInvalidProperty,
+                                                                                                MessageFormatInvalidProperty,
+                                                                                                Category,
+                                                                                                DiagnosticSeverity.Warning,
+                                                                                                isEnabledByDefault: true,
+                                                                                                DescriptionInvalidProperty,
+                                                                                                GetHelpLink(DiagnosticIdInvalidProperty));
 
     private static readonly LocalizableString TitleInvalidField = new LocalizableResourceString(nameof(Resources.BadFieldAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidField = new LocalizableResourceString(nameof(Resources.BadFieldAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -120,7 +133,8 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
-        get => ImmutableArray.Create(RuleInvalidField,
+        get => ImmutableArray.Create(RuleInvalidProperty,
+                                     RuleInvalidField,
                                      RuleInvalidMethod,
                                      RuleInvalidParameter,
                                      RuleInvalidRequire,
@@ -165,6 +179,13 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: false);
         IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration);
+
+        foreach (IUnsupportedProperty Item in ClassModel.Unsupported.Properties)
+        {
+            string PropertyName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid property '{PropertyName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
+        }
 
         foreach (IUnsupportedField Item in ClassModel.Unsupported.Fields)
         {

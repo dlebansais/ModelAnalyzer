@@ -84,7 +84,13 @@ internal partial class ClassDeclarationParser
                 }
             }
 
-            if (TryFindFieldByName(parsingContext, LocalName, out _))
+            if (TryFindPropertyByName(parsingContext, LocalName, out _))
+            {
+                LogWarning($"Local '{LocalName}' is already the name of a property.");
+
+                IsLocalSupported = false;
+            }
+            else if (TryFindFieldByName(parsingContext, LocalName, out _))
             {
                 LogWarning($"Local '{LocalName}' is already the name of a field.");
 

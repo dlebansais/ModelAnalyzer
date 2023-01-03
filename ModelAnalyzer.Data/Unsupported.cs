@@ -12,6 +12,7 @@ internal record Unsupported : IUnsupported
     /// <inheritdoc/>
     public bool IsEmpty => !InvalidDeclaration &&
                            !HasUnsupporteMember &&
+                           InternalProperties.Count == 0 &&
                            InternalFields.Count == 0 &&
                            InternalMethods.Count == 0 &&
                            InternalParameters.Count == 0 &&
@@ -27,6 +28,20 @@ internal record Unsupported : IUnsupported
 
     /// <inheritdoc/>
     public bool HasUnsupporteMember { get; set; }
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public IReadOnlyList<IUnsupportedProperty> Properties => InternalProperties.AsReadOnly();
+
+    /// <summary>
+    /// Adds an unsupported property.
+    /// </summary>
+    /// <param name="location">The property location.</param>
+    public void AddUnsupportedProperty(Location location)
+    {
+        UnsupportedProperty NewItem = new UnsupportedProperty { Location = location };
+        InternalProperties.Add(NewItem);
+    }
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -158,6 +173,7 @@ internal record Unsupported : IUnsupported
     }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public List<UnsupportedProperty> InternalProperties { get; set; } = new();
     public List<UnsupportedField> InternalFields { get; set; } = new();
     public List<UnsupportedMethod> InternalMethods { get; set; } = new();
     public List<UnsupportedParameter> InternalParameters { get; set; } = new();

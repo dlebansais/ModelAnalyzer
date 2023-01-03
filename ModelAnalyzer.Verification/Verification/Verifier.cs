@@ -43,6 +43,11 @@ internal partial class Verifier : IDisposable
     required public string ClassName { get; init; }
 
     /// <summary>
+    /// Gets the property table.
+    /// </summary>
+    required public ReadOnlyPropertyTable PropertyTable { get; init; }
+
+    /// <summary>
     /// Gets the field table.
     /// </summary>
     required public ReadOnlyFieldTable FieldTable { get; init; }
@@ -103,7 +108,7 @@ internal partial class Verifier : IDisposable
     private void AddMethodCalls(CallSequence callSequence)
     {
         using Solver Solver = Context.MkSolver();
-        VerificationContext VerificationContext = new() { Solver = Solver, FieldTable = FieldTable, MethodTable = MethodTable };
+        VerificationContext VerificationContext = new() { Solver = Solver, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable };
 
         AddInitialState(VerificationContext);
 
@@ -128,6 +133,22 @@ internal partial class Verifier : IDisposable
         Log($"Initial state for class {ClassName}");
 
         AliasTable AliasTable = verificationContext.AliasTable;
+
+        foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
+        {
+            Property Property = Entry.Value;
+            Variable PropertyVariable = new(Property.Name, Property.Type);
+
+            AliasTable.AddVariable(PropertyVariable);
+
+            VariableAlias PropertyNameAlias = AliasTable.GetAlias(PropertyVariable);
+            Expr PropertyExpr = CreateVariableExpr(PropertyNameAlias.ToString(), Property.Type);
+            Expr InitializerExpr = CreateInitializerExpr(Property);
+            BoolExpr InitExpr = Context.MkEq(PropertyExpr, InitializerExpr);
+
+            Log($"Adding {InitExpr}");
+            verificationContext.Solver.Assert(InitExpr);
+        }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {

@@ -115,6 +115,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,

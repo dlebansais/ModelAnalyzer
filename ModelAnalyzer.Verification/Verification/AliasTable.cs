@@ -130,10 +130,10 @@ internal class AliasTable
     /// Merges two instances.
     /// </summary>
     /// <param name="other">The other instance.</param>
-    /// <param name="updatedFieldList">The list of variables for which the alias has been incremented as a result of the merge.</param>
-    public void Merge(AliasTable other, out List<Variable> updatedFieldList)
+    /// <param name="updatedVariableList">The list of variables for which the alias has been incremented as a result of the merge.</param>
+    public void Merge(AliasTable other, out List<Variable> updatedVariableList)
     {
-        updatedFieldList = new();
+        updatedVariableList = new();
         Dictionary<Variable, VariableAlias> UpdatedTable = new();
 
         foreach (KeyValuePair<Variable, VariableAlias> Entry in Table)
@@ -144,7 +144,7 @@ internal class AliasTable
 
             if (IsUpdated)
             {
-                updatedFieldList.Add(Variable);
+                updatedVariableList.Add(Variable);
                 UpdatedTable.Add(Variable, MergedAlias);
                 AllAliases.Add(MergedAlias);
             }

@@ -70,7 +70,13 @@ internal partial class ClassDeclarationParser
             IsParameterSupported = false;
         }
 
-        if (TryFindFieldByName(parsingContext, ParameterName, out _))
+        if (TryFindPropertyByName(parsingContext, ParameterName, out _))
+        {
+            LogWarning($"Parameter '{ParameterName}' is already the name of a property.");
+
+            IsParameterSupported = false;
+        }
+        else if (TryFindFieldByName(parsingContext, ParameterName, out _))
         {
             LogWarning($"Parameter '{ParameterName}' is already the name of a field.");
 

@@ -11,6 +11,22 @@ internal partial record ClassModel : IClassModel
     required public string Name { get; init; }
 
     /// <summary>
+    /// Gets the property table.
+    /// </summary>
+    required public ReadOnlyPropertyTable PropertyTable { get; init; }
+
+    /// <inheritdoc/>
+    public IList<IProperty> GetProperties()
+    {
+        List<IProperty> Result = new();
+
+        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
+            Result.Add(Entry.Value);
+
+        return Result;
+    }
+
+    /// <summary>
     /// Gets the field table.
     /// </summary>
     required public ReadOnlyFieldTable FieldTable { get; init; }

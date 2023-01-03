@@ -277,6 +277,33 @@ namespace ModelAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Property is not supported..
+        /// </summary>
+        internal static string BadPropertyAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("BadPropertyAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property &apos;{0}&apos; is not supported.
+        /// </summary>
+        internal static string BadPropertyAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("BadPropertyAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property is not supported.
+        /// </summary>
+        internal static string BadPropertyAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("BadPropertyAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Require clause is invalid..
         /// </summary>
         internal static string BadRequireAnalyzerDescription {

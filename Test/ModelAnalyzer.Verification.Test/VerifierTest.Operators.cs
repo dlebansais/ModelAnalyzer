@@ -364,6 +364,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
@@ -476,6 +477,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
@@ -840,6 +842,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
@@ -1014,6 +1017,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
@@ -1113,6 +1117,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
@@ -1277,6 +1282,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,

@@ -15,6 +15,7 @@ internal partial record ClassModel : IClassModel
         StringBuilder Builder = new();
 
         AppendClassName(Builder);
+        AppendProperties(Builder);
         AppendFields(Builder);
         AppendMethods(Builder);
         AppendInvariants(Builder);
@@ -27,8 +28,32 @@ internal partial record ClassModel : IClassModel
         builder.AppendLine(Name);
     }
 
+    private void AppendProperties(StringBuilder builder)
+    {
+        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
+            AppendProperty(builder, Entry.Value);
+    }
+
+    private void AppendProperty(StringBuilder builder, Property property)
+    {
+        string TypeString = ExpressionTypeToString(property.Type);
+
+        string InitializerString;
+        ILiteralExpression? Initializer = property.Initializer;
+
+        if (Initializer is not null)
+            InitializerString = $" = {Initializer}";
+        else
+            InitializerString = string.Empty;
+
+        builder.AppendLine($"  {TypeString} {property.Name.Text}{InitializerString}");
+    }
+
     private void AppendFields(StringBuilder builder)
     {
+        if (!PropertyTable.IsEmpty)
+            builder.AppendLine();
+
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
             AppendField(builder, Entry.Value);
     }
@@ -54,7 +79,7 @@ internal partial record ClassModel : IClassModel
 
         foreach (KeyValuePair<MethodName, Method> MethodEntry in MethodTable)
         {
-            if (!IsFirst || !FieldTable.IsEmpty)
+            if (!IsFirst || !PropertyTable.IsEmpty || !FieldTable.IsEmpty)
                 builder.AppendLine();
 
             MethodToString(builder, MethodEntry.Value);

@@ -128,7 +128,9 @@ internal partial class ClassDeclarationParser
             string DestinationName = IdentifierName.Identifier.ValueText;
             IVariable? Destination = null;
 
-            if (TryFindFieldByName(parsingContext, DestinationName, out IField FieldDestination))
+            if (TryFindPropertyByName(parsingContext, DestinationName, out IProperty PropertyDestination))
+                Destination = PropertyDestination;
+            else if (TryFindFieldByName(parsingContext, DestinationName, out IField FieldDestination))
                 Destination = FieldDestination;
             else if (TryFindLocalByName(parsingContext, DestinationName, out ILocal LocalDestination))
                 Destination = LocalDestination;

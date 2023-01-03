@@ -18,6 +18,13 @@ internal class VariableValueExpression : Expression
     {
         IVariable? Variable = null;
 
+        foreach (Property Property in memberCollectionContext.GetProperties())
+            if (Property.Name.Text == VariableName.Text)
+            {
+                Variable = Property;
+                break;
+            }
+
         foreach (Field Field in memberCollectionContext.GetFields())
             if (Field.Name.Text == VariableName.Text)
             {

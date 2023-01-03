@@ -65,7 +65,11 @@ internal partial class ClassDeclarationParser
             ILiteralExpression? Initializer = null;
 
             if (FieldName == Ensure.ResultKeyword)
+            {
+                LogWarning($"Unsupported field name {Ensure.ResultKeyword}.");
+
                 IsFieldSupported = false;
+            }
 
             if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
             {

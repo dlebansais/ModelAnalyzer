@@ -21,6 +21,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new List<Invariant>().AsReadOnly(),
@@ -43,6 +44,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new List<Invariant>().AsReadOnly(),
@@ -83,6 +85,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             ClassName = ClassModel.Name,
+            PropertyTable = ClassModel.PropertyTable,
             FieldTable = ClassModel.FieldTable,
             MethodTable = ClassModel.MethodTable,
             InvariantList = ClassModel.InvariantList,

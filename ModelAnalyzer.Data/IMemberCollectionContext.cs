@@ -8,6 +8,11 @@ using System.Collections.Generic;
 internal interface IMemberCollectionContext
 {
     /// <summary>
+    /// Gets the list of class properties.
+    /// </summary>
+    List<Property> GetProperties();
+
+    /// <summary>
     /// Gets the list of class fields.
     /// </summary>
     List<Field> GetFields();

@@ -13,6 +13,22 @@ internal record ParsingContext : IMemberCollectionContext
     public Unsupported Unsupported { get; } = new();
 
     /// <summary>
+    /// Gets or sets the table of class properties.
+    /// </summary>
+    public PropertyTable PropertyTable { get; set; } = new();
+
+    /// <inheritdoc/>
+    List<Property> IMemberCollectionContext.GetProperties()
+    {
+        List<Property> Result = new();
+
+        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
+            Result.Add(Entry.Value);
+
+        return Result;
+    }
+
+    /// <summary>
     /// Gets or sets the table of class fields.
     /// </summary>
     public FieldTable FieldTable { get; set; } = new();
@@ -55,7 +71,7 @@ internal record ParsingContext : IMemberCollectionContext
     public bool IsMethodParsingComplete { get; set; }
 
     /// <summary>
-    /// Gets or sets the method within which parsing is taking place. This is null when parsing fields or invariant clauses for instance.
+    /// Gets or sets the method within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.
     /// </summary>
     public Method? HostMethod { get; set; }
 

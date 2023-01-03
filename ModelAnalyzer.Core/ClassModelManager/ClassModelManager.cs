@@ -176,6 +176,7 @@ public partial class ClassModelManager : IDisposable
 
                     ClassModel NewClassModel = OldClassModel with
                     {
+                        PropertyTable = Parser.PropertyTable,
                         FieldTable = Parser.FieldTable,
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,
@@ -203,6 +204,7 @@ public partial class ClassModelManager : IDisposable
                     ClassModel NewClassModel = new ClassModel()
                     {
                         Name = ClassName,
+                        PropertyTable = Parser.PropertyTable,
                         FieldTable = Parser.FieldTable,
                         MethodTable = Parser.MethodTable,
                         InvariantList = Parser.InvariantList,

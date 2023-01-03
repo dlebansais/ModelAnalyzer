@@ -13,6 +13,11 @@ public interface IClassModel
     string Name { get; }
 
     /// <summary>
+    /// Gets the list of properties.
+    /// </summary>
+    IList<IProperty> GetProperties();
+
+    /// <summary>
     /// Gets the list of fields.
     /// </summary>
     IList<IField> GetFields();

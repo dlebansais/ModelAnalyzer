@@ -105,6 +105,7 @@ internal class Program
             {
                 MaxDepth = MaxDepth,
                 ClassName = ClassName,
+                PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
                 MethodTable = ClassModel.MethodTable,
                 InvariantList = ClassModel.InvariantList,

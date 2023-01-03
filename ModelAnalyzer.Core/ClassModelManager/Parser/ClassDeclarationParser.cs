@@ -39,6 +39,7 @@ internal partial class ClassDeclarationParser
         {
             ParsingContext.Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
 
+            ParsingContext = ParsingContext with { PropertyTable = ParseProperties(ParsingContext, ClassDeclaration) };
             ParsingContext = ParsingContext with { FieldTable = ParseFields(ParsingContext, ClassDeclaration) };
             ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
             ParsingContext = ParsingContext with { IsMethodParsingFirstPassDone = true };
@@ -47,6 +48,7 @@ internal partial class ClassDeclarationParser
             ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
             ReportInvalidMethodCalls(ParsingContext);
 
+            PropertyTable = ParsingContext.PropertyTable.AsReadOnly();
             FieldTable = ParsingContext.FieldTable.AsReadOnly();
             MethodTable = ParsingContext.MethodTable.AsReadOnly();
             InvariantList = ParsingContext.InvariantList.AsReadOnly();
@@ -54,6 +56,7 @@ internal partial class ClassDeclarationParser
         else
         {
             ParsingContext.Unsupported.InvalidDeclaration = true;
+            PropertyTable = ReadOnlyPropertyTable.Empty;
             FieldTable = ReadOnlyFieldTable.Empty;
             MethodTable = ReadOnlyMethodTable.Empty;
             InvariantList = new List<Invariant>().AsReadOnly();
@@ -71,6 +74,11 @@ internal partial class ClassDeclarationParser
     /// Gets the logger.
     /// </summary>
     public IAnalysisLogger Logger { get; init; } = new NullLogger();
+
+    /// <summary>
+    /// Gets the property table.
+    /// </summary>
+    public ReadOnlyPropertyTable PropertyTable { get; private set; } = ReadOnlyPropertyTable.Empty;
 
     /// <summary>
     /// Gets the field table.
@@ -140,7 +148,7 @@ internal partial class ClassDeclarationParser
         bool HasUnsupportedNode = false;
 
         foreach (MemberDeclarationSyntax Member in classDeclaration.Members)
-            if (Member is not FieldDeclarationSyntax && Member is not MethodDeclarationSyntax)
+            if (Member is not PropertyDeclarationSyntax && Member is not FieldDeclarationSyntax && Member is not MethodDeclarationSyntax)
             {
                 LogWarning($"Class member type not supported: {Member.GetType().Name}.");
 
@@ -272,6 +280,12 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindVariableByName(ParsingContext parsingContext, string variableName, out IVariable variable)
     {
+        if (TryFindPropertyByName(parsingContext, variableName, out IProperty Property))
+        {
+            variable = Property;
+            return true;
+        }
+
         if (TryFindFieldByName(parsingContext, variableName, out IField Field))
         {
             variable = Field;

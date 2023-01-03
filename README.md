@@ -47,12 +47,13 @@ The analyzer supports:
 
 + A [limited set](#supported-types) of C# pre-defined types.
 + Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
++ Public read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized but only with a literal constant value (ex: `public int X { get; set; } = 1;`).
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
-  * Parameters are not allowed to have the same name as fields.
+  * Parameters are not allowed to have the same name as fields or properties.
   * Parameters cannot be assigned, they are read-only.
-+ The `Result` name is reserved and cannot be used for fields or parameters. If `Result` is a local variable, then a return statement must be `return Result;`. 
-+ Local variables of a supported type. They are not allowed to have the same name as fields or parameters.
-+ Assignment of an expression to a field or local variable.
++ The `Result` name is reserved and cannot be used for fields, properties or parameters. If `Result` is a local variable, then a return statement must be `return Result;`. 
++ Local variables of a supported type. They are not allowed to have the same name as fields, properties or parameters.
++ Assignment of an expression to a field, property or local variable.
 + The `return` statement, but at the end of a method only.
 + The `if` `else` statement.
 + Invocation of a method - of the same class only - that has no return value.
@@ -64,7 +65,7 @@ The analyzer supports:
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
-  * Variables, either fields, local variables or parameters. Local variables are not allowed in method contracts (see below).
+  * Variables, either fields, properties, local variables or parameters. Fields and local variables are not allowed in method contracts (see below).
   * Invocation of a function, but of the same class only.
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
@@ -113,6 +114,8 @@ public class Test
 // Invariant: N == 0 || (N >= 32 && N <= 512)
 ````
 
+Invariants can use fields.
+
 ## Suppressing warnings
 
 If the code includes unsupported features, this is reported as one or more warnings. To remove these warnings and turn off analysis for a class, put a line starting with `// No model` before the class declaration. For example:
@@ -143,3 +146,4 @@ public class Test
 | [MA0012](doc/MA0012.md) | Method ensure clause is violated  |
 | [MA0013](doc/MA0013.md) | Class invariant is violated       |
 | [MA0014](doc/MA0014.md) | Flow check error detected         |
+| [MA0015](doc/MA0015.md) | Property is not supported         |

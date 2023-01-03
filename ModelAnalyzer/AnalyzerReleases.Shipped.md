@@ -21,3 +21,4 @@ MA0011  | Design   | Error    | RequireViolationAnalyzer
 MA0012  | Design   | Error    | EnsureViolationAnalyzer
 MA0013  | Design   | Error    | InvariantViolationAnalyzer
 MA0014  | Design   | Error    | AssumeViolationAnalyzer
+MA0015  | Design   | Warning  | InvalidElementAnalyzer

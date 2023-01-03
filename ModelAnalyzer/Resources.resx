@@ -213,6 +213,18 @@
     <value>Parameter is not supported</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="BadPropertyAnalyzerDescription" xml:space="preserve">
+    <value>Property is not supported.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="BadPropertyAnalyzerMessageFormat" xml:space="preserve">
+    <value>Property '{0}' is not supported</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="BadPropertyAnalyzerTitle" xml:space="preserve">
+    <value>Property is not supported</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="BadRequireAnalyzerDescription" xml:space="preserve">
     <value>Require clause is invalid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
