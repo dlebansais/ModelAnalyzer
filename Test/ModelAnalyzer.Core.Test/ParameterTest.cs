@@ -166,12 +166,38 @@ class Program_CoreParameter_6
 
     [Test]
     [Category("Core")]
-    public void Parameter_InvalidParameterTestedAsSource()
+    public void Parameter_NameCollisionWithProperty()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreParameter_7
+{
+    public int X { get; set; }
+
+    void Write(int X)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Methods.Count, Is.EqualTo(0));
+        Assert.That(ClassModel.Unsupported.Parameters.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Parameter_InvalidParameterTestedAsSource()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreParameter_8
 {
     int Y;
 
@@ -196,7 +222,7 @@ class Program_CoreParameter_7
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreParameter_8
+class Program_CoreParameter_9
 {
     void Write(int Result)
     {

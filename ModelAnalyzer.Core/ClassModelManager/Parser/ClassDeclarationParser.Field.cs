@@ -88,7 +88,7 @@ internal partial class ClassDeclarationParser
             else if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                parsingContext.Unsupported.AddUnsupportedField(Location);
+                parsingContext.Unsupported.AddUnsupportedField(Name, Location);
             }
         }
     }

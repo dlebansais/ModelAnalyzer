@@ -41,7 +41,7 @@ using System;
 
 class Program_Verifier_MiscStatement2
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1()
     {

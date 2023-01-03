@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 internal class UnsupportedField : IUnsupportedField
 {
     /// <inheritdoc/>
-    public IVariableName Name => new FieldName() { Text = "*" };
+    required public IVariableName Name { get; init; }
 
     /// <inheritdoc/>
     required public Location Location { get; init; }

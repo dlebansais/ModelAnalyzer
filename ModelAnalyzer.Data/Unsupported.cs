@@ -50,10 +50,11 @@ internal record Unsupported : IUnsupported
     /// <summary>
     /// Adds an unsupported field.
     /// </summary>
+    /// <param name="name">The field name.</param>
     /// <param name="location">The field location.</param>
-    public void AddUnsupportedField(Location location)
+    public void AddUnsupportedField(FieldName name, Location location)
     {
-        UnsupportedField NewItem = new UnsupportedField { Location = location };
+        UnsupportedField NewItem = new UnsupportedField { Name = name, Location = location };
         InternalFields.Add(NewItem);
     }
 

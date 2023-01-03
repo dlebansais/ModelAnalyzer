@@ -268,4 +268,26 @@ class Program_CoreField_9
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Field_NameCollisionWithProperty()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_10
+{
+    public int X { get; protected set; }
+    int X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Properties.Count, Is.EqualTo(1));
+    }
 }

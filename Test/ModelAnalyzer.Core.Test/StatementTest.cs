@@ -43,11 +43,13 @@ using System;
 class Program_CoreStatement_1
 {
     int X, Y;
+    public int Z { get; set; }
 
     void Write(int x)
     {
         X = x + 1;
         Y = X;
+        Z = x;
     }
 }
 ");
