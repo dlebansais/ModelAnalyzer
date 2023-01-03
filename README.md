@@ -141,9 +141,9 @@ public class Test
 | [MA0007](doc/MA0007.md) | Local variable is not supported   |
 | [MA0008](doc/MA0008.md) | Statement is invalid              |
 | [MA0009](doc/MA0009.md) | Expression is invalid             |
-| [MA0010](doc/MA0010.md) | Class invariant is invalid        |
-| [MA0011](doc/MA0011.md) | Method require clause is violated |
-| [MA0012](doc/MA0012.md) | Method ensure clause is violated  |
-| [MA0013](doc/MA0013.md) | Class invariant is violated       |
-| [MA0014](doc/MA0014.md) | Flow check error detected         |
-| [MA0015](doc/MA0015.md) | Property is not supported         |
+| [MA0010](doc/MA0010.md) | Property is not supported         |
+| [MA0011](doc/MA0011.md) | Class invariant is invalid        |
+| [MA0012](doc/MA0012.md) | Method require clause is violated |
+| [MA0013](doc/MA0013.md) | Method ensure clause is violated  |
+| [MA0014](doc/MA0014.md) | Class invariant is violated       |
+| [MA0015](doc/MA0015.md) | Flow check error detected         |

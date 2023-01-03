@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 public class InvalidElementAnalyzer : DiagnosticAnalyzer
 {
     public const string Category = "Design";
-    public const string DiagnosticIdInvalidProperty = "MA0015";
     public const string DiagnosticIdInvalidField = "MA0002";
     public const string DiagnosticIdInvalidMethod = "MA0003";
     public const string DiagnosticIdInvalidParameter = "MA0004";
@@ -22,6 +21,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticIdInvalidLocal = "MA0007";
     public const string DiagnosticIdInvalidStatement = "MA0008";
     public const string DiagnosticIdInvalidExpression = "MA0009";
+    public const string DiagnosticIdInvalidProperty = "MA0010";
 
     private static readonly LocalizableString TitleInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));

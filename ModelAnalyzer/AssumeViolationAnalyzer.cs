@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AssumeViolationAnalyzer : Analyzer
 {
-    public const string DiagnosticId = "MA0014";
+    public const string DiagnosticId = "MA0015";
 
     private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.AssumeViolationAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.AssumeViolationAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));

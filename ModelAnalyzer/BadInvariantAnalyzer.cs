@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BadInvariantAnalyzer : Analyzer
 {
-    public const string DiagnosticId = "MA0010";
+    public const string DiagnosticId = "MA0011";
 
     private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));

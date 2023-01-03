@@ -16,9 +16,9 @@ MA0006  | Design   | Warning  | InvalidElementAnalyzer
 MA0007  | Design   | Warning  | InvalidElementAnalyzer
 MA0008  | Design   | Warning  | InvalidElementAnalyzer
 MA0009  | Design   | Warning  | InvalidElementAnalyzer
-MA0010  | Design   | Warning  | BadInvariantAnalyzer
-MA0011  | Design   | Error    | RequireViolationAnalyzer
-MA0012  | Design   | Error    | EnsureViolationAnalyzer
-MA0013  | Design   | Error    | InvariantViolationAnalyzer
-MA0014  | Design   | Error    | AssumeViolationAnalyzer
-MA0015  | Design   | Warning  | InvalidElementAnalyzer
+MA0010  | Design   | Warning  | InvalidElementAnalyzer
+MA0011  | Design   | Warning  | BadInvariantAnalyzer
+MA0012  | Design   | Error    | RequireViolationAnalyzer
+MA0013  | Design   | Error    | EnsureViolationAnalyzer
+MA0014  | Design   | Error    | InvariantViolationAnalyzer
+MA0015  | Design   | Error    | AssumeViolationAnalyzer
