@@ -50,7 +50,7 @@ internal partial class ClassDeclarationParser
         bool IsPublic = false;
 
         foreach (SyntaxToken Modifier in propertyDeclaration.Modifiers)
-            if (!Modifier.IsKind(SyntaxKind.PublicKeyword))
+            if (!Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword))
             {
                 LogWarning($"Unsupported '{Modifier.ValueText}' property modifier.");
 

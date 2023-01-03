@@ -46,12 +46,12 @@ internal partial record ClassModel : IClassModel
         else
             InitializerString = string.Empty;
 
-        builder.AppendLine($"  {TypeString} {property.Name.Text}{InitializerString}");
+        builder.AppendLine($"  public {TypeString} {property.Name.Text} {{ get; set; }}{InitializerString}");
     }
 
     private void AppendFields(StringBuilder builder)
     {
-        if (!PropertyTable.IsEmpty)
+        if (!PropertyTable.IsEmpty && !FieldTable.IsEmpty)
             builder.AppendLine();
 
         foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)

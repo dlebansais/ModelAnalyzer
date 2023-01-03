@@ -316,7 +316,7 @@ class Program_CoreRequire_7
         X = x;
     }
 
-    int Getter { get; }
+    public delegate void Event();
     // Require: X >= 0
 }
 ");

@@ -47,7 +47,7 @@ The analyzer supports:
 
 + A [limited set](#supported-types) of C# pre-defined types.
 + Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
-+ Public read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized but only with a literal constant value (ex: `public int X { get; set; } = 1;`).
++ Public (or internal) read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized but only with a literal constant value (ex: `public int X { get; set; } = 1;`).
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields or properties.
   * Parameters cannot be assigned, they are read-only.

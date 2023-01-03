@@ -291,7 +291,7 @@ class Program_CoreEnsure_7
     }
     // Ensure: X == x
 
-    int Getter { get; }
+    public delegate void Event();
     // Ensure: X == x
 }
 ");

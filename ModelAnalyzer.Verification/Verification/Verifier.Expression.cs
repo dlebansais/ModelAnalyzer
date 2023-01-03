@@ -179,13 +179,12 @@ internal partial class Verifier : IDisposable
 
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out Expr resultExpr)
     {
-        ReadOnlyPropertyTable PropertyTable = verificationContext.PropertyTable;
         AliasTable AliasTable = verificationContext.AliasTable;
         string VariableName = variableValueExpression.VariableName.Text;
         string? VariableString = null;
         ExpressionType VariableType = variableValueExpression.GetExpressionType(verificationContext);
 
-        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
+        foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
             if (Entry.Key.Text == VariableName)
             {
                 Property Property = Entry.Value;
@@ -195,13 +194,13 @@ internal partial class Verifier : IDisposable
                 break;
             }
 
-        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
+        foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
             if (Entry.Key.Text == VariableName)
             {
-                Property Property = Entry.Value;
-                Variable PropertyVariable = new(Property.Name, Property.Type);
-                VariableAlias PropertyAlias = AliasTable.GetAlias(PropertyVariable);
-                VariableString = PropertyAlias.ToString();
+                Field Field = Entry.Value;
+                Variable FieldVariable = new(Field.Name, Field.Type);
+                VariableAlias FieldAlias = AliasTable.GetAlias(FieldVariable);
+                VariableString = FieldAlias.ToString();
                 break;
             }
 
@@ -283,9 +282,9 @@ internal partial class Verifier : IDisposable
             Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
 
             AliasTable.AddOrIncrement(ParameterVariable);
-            VariableAlias PropertyNameAlias = AliasTable.GetAlias(ParameterVariable);
+            VariableAlias ParameterNameAlias = AliasTable.GetAlias(ParameterVariable);
 
-            Expr TemporaryLocalExpr = CreateVariableExpr(PropertyNameAlias.ToString(), Parameter.Type);
+            Expr TemporaryLocalExpr = CreateVariableExpr(ParameterNameAlias.ToString(), Parameter.Type);
 
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
