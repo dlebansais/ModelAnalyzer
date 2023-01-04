@@ -446,4 +446,31 @@ class Program_CoreRequire_10
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Require_FieldNotAllowed()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_11
+{
+    int X;
+
+    public void Write(int x)
+    // Require: X == 0
+    {
+        X = x;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }
