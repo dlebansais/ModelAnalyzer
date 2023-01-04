@@ -109,7 +109,7 @@ using System;
 
 class Program_CoreRequire_2
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     // Require: 0
@@ -138,7 +138,7 @@ class Program_CoreRequire_2
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_2
-  int X
+  public int X { get; set; }
 
   public void Write(int x)
   {
@@ -193,7 +193,7 @@ using System;
 
 class Program_CoreRequire_4
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     // Require: X == 0; break;
@@ -308,7 +308,7 @@ using System;
 
 class Program_CoreRequire_7
 {
-    int X;
+    public int X { get; set; }
 
     void Write(int x)
     // Require: x >= 0
@@ -331,7 +331,7 @@ class Program_CoreRequire_7
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreRequire_7
-  int X
+  public int X { get; set; }
 
   void Write(int x)
   # require x >= 0
