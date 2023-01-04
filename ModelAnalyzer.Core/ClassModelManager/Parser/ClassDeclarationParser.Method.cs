@@ -94,7 +94,7 @@ internal partial class ClassDeclarationParser
                         StatementList = new List<Statement>(),
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = true };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsFieldAllowed = true, IsLocalAllowed = true };
 
                     StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
 
@@ -110,7 +110,7 @@ internal partial class ClassDeclarationParser
                         EnsureList = new List<Ensure>(),
                     };
                     Local? ResultLocal = ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalTable, ReturnType) : null;
-                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsLocalAllowed = false, ResultLocal = ResultLocal };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, ResultLocal = ResultLocal };
 
                     EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration);
                 }

@@ -286,7 +286,7 @@ internal partial class ClassDeclarationParser
             return true;
         }
 
-        if (TryFindFieldByName(parsingContext, variableName, out IField Field))
+        if (parsingContext.IsFieldAllowed && TryFindFieldByName(parsingContext, variableName, out IField Field))
         {
             variable = Field;
             return true;

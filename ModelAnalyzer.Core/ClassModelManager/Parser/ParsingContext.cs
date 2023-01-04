@@ -81,6 +81,11 @@ internal record ParsingContext : IMemberCollectionContext
     public List<Invariant> InvariantList { get; set; } = new();
 
     /// <summary>
+    /// Gets or sets a value indicating whether fields are allowed when parsing expressions. This is false when parsing require or ensure clauses for instance.
+    /// </summary>
+    public bool IsFieldAllowed { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether local variables are allowed when parsing expressions. This is false when parsing assertion clauses for instance.
     /// </summary>
     public bool IsLocalAllowed { get; set; }
