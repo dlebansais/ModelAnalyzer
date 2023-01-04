@@ -184,7 +184,7 @@ using System;
 
 class Program_CoreMethod_5
 {
-    int X;
+    public int X { get; set; }
 
     string Write()
     {

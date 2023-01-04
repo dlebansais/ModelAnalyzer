@@ -569,7 +569,7 @@ using System;
 
 class Program_CoreClassModelManager_23
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {
@@ -622,7 +622,7 @@ using System;
 
 class Program_CoreClassModelManager_24
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {

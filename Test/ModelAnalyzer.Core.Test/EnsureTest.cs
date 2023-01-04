@@ -19,7 +19,7 @@ using System;
 
 class Program_CoreEnsure_0
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {
@@ -53,7 +53,7 @@ class Program_CoreEnsure_0
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_0
-  int X
+  public int X { get; set; }
 
   public void Write(int x)
   {
@@ -72,7 +72,7 @@ using System;
 
 class Program_CoreEnsure_1
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {
@@ -128,7 +128,7 @@ using System;
 
 class Program_CoreEnsure_3
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {
@@ -150,7 +150,7 @@ class Program_CoreEnsure_3
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_3
-  int X
+  public int X { get; set; }
 
   public void Write(int x)
   {
@@ -234,7 +234,7 @@ using System;
 
 class Program_CoreEnsure_6
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1(int x)
     {
@@ -258,7 +258,7 @@ class Program_CoreEnsure_6
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_6
-  int X
+  public int X { get; set; }
 
   public void Write1(int x)
   {
@@ -283,7 +283,7 @@ using System;
 
 class Program_CoreEnsure_7
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     {
@@ -306,7 +306,7 @@ class Program_CoreEnsure_7
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreEnsure_7
-  int X
+  public int X { get; set; }
 
   public void Write(int x)
   {

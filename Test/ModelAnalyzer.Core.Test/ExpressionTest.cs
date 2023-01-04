@@ -232,7 +232,7 @@ using System;
 
 class Program_CoreExpression_8
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     // Require: x >= 0
@@ -257,7 +257,7 @@ class Program_CoreExpression_8
 
         string? ClassModelString = ClassModel.ToString();
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_8
-  int X
+  public int X { get; set; }
 
   public void Write(int x)
   # require x >= 0

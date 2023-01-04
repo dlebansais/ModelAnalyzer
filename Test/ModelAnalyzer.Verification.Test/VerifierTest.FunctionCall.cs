@@ -116,7 +116,7 @@ using System;
 
 class Program_Verifier_FunctionCallInteger6
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1(int x)
     {
@@ -138,7 +138,7 @@ using System;
 
 class Program_Verifier_FunctionCallInteger7
 {
-    int X;
+    public int X { get; set; }
 
     public int Write1(int x)
     {
@@ -159,7 +159,7 @@ using System;
 
 class Program_Verifier_FunctionCallInteger8
 {
-    int X;
+    public int X { get; set; }
 
     public int Write1(int x)
     {
@@ -206,7 +206,7 @@ using System;
 
 class Program_Verifier_FunctionCallInteger10
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1(int x)
     {
@@ -249,7 +249,7 @@ using System;
 
 class Program_Verifier_FunctionCallInteger12
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1(int x)
     {

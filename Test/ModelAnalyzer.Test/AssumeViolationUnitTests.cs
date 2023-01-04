@@ -18,7 +18,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Integer_0
 {{
-    int X;
+    public int X {{ get; set; }}
 
     public void Remainder(int x, int y)
     // Require: x > 0
@@ -59,7 +59,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Integer_2
 {{
-    int X;
+    public int X {{ get; set; }}
 
     public void Remainder(int x, int y)
     // Require: x > 0

@@ -18,7 +18,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Boolean_0
 {{
-    bool X;
+    public bool X {{ get; set; }}
 
     public void Write(bool x)
     // Require: x == false
@@ -40,7 +40,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Boolean_1
 {{
-    bool X;
+    public bool X {{ get; set; }}
 
     public void Write(bool x)
     {{
@@ -60,7 +60,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Integer_0
 {{
-    int X;
+    public int X {{ get; set; }}
 
     public void Write(int x)
     // Require: x == 0
@@ -82,7 +82,7 @@ using System;
 
 class {ForSynchronousTestOnly}_Integer_1
 {{
-    int X;
+    public int X {{ get; set; }}
 
     public void Write(int x)
     {{
@@ -102,7 +102,7 @@ using System;
 
 class {ForSynchronousTestOnly}_FloatingPoint_0
 {{
-    double X;
+    public double X {{ get; set; }}
 
     public void Write(double x)
     // Require: x == 0.0
@@ -124,7 +124,7 @@ using System;
 
 class {ForSynchronousTestOnly}_FloatingPoint_1
 {{
-    double X;
+    public double X {{ get; set; }}
 
     public void Write(double x)
     {{

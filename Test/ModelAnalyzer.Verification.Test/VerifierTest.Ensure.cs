@@ -12,7 +12,7 @@ using System;
 
 class Program_Verifier_EnsureBoolean1
 {
-    bool X;
+    public bool X { get; set; }
 
     public void Write1(bool x)
     {
@@ -46,7 +46,7 @@ using System;
 
 class Program_Verifier_EnsureBoolean3
 {
-    bool X;
+    public bool X { get; set; }
 
     public void Write(bool x)
     // Require: x == false || x == true
@@ -62,7 +62,7 @@ using System;
 
 class Program_Verifier_EnsureBoolean4
 {
-    bool X;
+    public bool X { get; set; }
 
     public void Write(bool x)
     // Require: x == false
@@ -79,8 +79,8 @@ using System;
 
 class Program_Verifier_EnsureBoolean5
 {
-    bool X;
-    bool Y;
+    public bool X { get; set; }
+    public bool Y { get; set; }
 
     public void Write(bool x, bool y)
     // Require: x == false
@@ -98,8 +98,8 @@ using System;
 
 class Program_Verifier_EnsureBoolean6
 {
-    bool X;
-    bool Y;
+    public bool X { get; set; }
+    public bool Y { get; set; }
 
     public void Write(bool x, bool y)
     // Require: y == false
@@ -117,8 +117,8 @@ using System;
 
 class Program_Verifier_EnsureBoolean7
 {
-    bool X;
-    bool Y;
+    public bool X { get; set; }
+    public bool Y { get; set; }
 
     public void Write(bool x, bool y)
     // Require: x == false
@@ -237,7 +237,7 @@ using System;
 
 class Program_Verifier_EnsureInteger1
 {
-    int X;
+    public int X { get; set; }
 
     public void Write1(int x)
     {
@@ -271,7 +271,7 @@ using System;
 
 class Program_Verifier_EnsureInteger3
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     // Require: x == 0
@@ -287,7 +287,7 @@ using System;
 
 class Program_Verifier_EnsureInteger4
 {
-    int X;
+    public int X { get; set; }
 
     public void Write(int x)
     // Require: x == 0
@@ -304,8 +304,8 @@ using System;
 
 class Program_Verifier_EnsureInteger5
 {
-    int X;
-    int Y;
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public void Write(int x, int y)
     // Require: x == 0
@@ -323,8 +323,8 @@ using System;
 
 class Program_Verifier_EnsureInteger6
 {
-    int X;
-    int Y;
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public void Write(int x, int y)
     // Require: y == 0
@@ -342,8 +342,8 @@ using System;
 
 class Program_Verifier_EnsureInteger7
 {
-    int X;
-    int Y;
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public void Write(int x, int y)
     // Require: x == 0
@@ -461,7 +461,7 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint1
 {
-    double X;
+    public double X { get; set; }
 
     public void Write1(double x)
     {
@@ -495,7 +495,7 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint3
 {
-    double X;
+    public double X { get; set; }
 
     public void Write(double x)
     // Require: x == 0
@@ -511,7 +511,7 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint4
 {
-    double X;
+    public double X { get; set; }
 
     public void Write(double x)
     // Require: x == 0
@@ -528,8 +528,8 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint5
 {
-    double X;
-    double Y;
+    public double X { get; set; }
+    public double Y { get; set; }
 
     public void Write(double x, double y)
     // Require: x == 0
@@ -547,8 +547,8 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint6
 {
-    double X;
-    double Y;
+    public double X { get; set; }
+    public double Y { get; set; }
 
     public void Write(double x, double y)
     // Require: y == 0
@@ -566,8 +566,8 @@ using System;
 
 class Program_Verifier_EnsureFloatingPoint7
 {
-    double X;
-    double Y;
+    public double X { get; set; }
+    public double Y { get; set; }
 
     public void Write(double x, double y)
     // Require: x == 0

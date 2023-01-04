@@ -67,8 +67,8 @@ using System;
 
 class Program_Verifier_ReturnBoolean1
 {
-    bool X = true;
-    bool Y = false;
+    public bool X { get; set; } = true;
+    public bool Y { get; set; } = false;
 
     public bool Read()
     {
@@ -83,7 +83,7 @@ using System;
 
 class Program_Verifier_ReturnBoolean1
 {
-    bool X;
+    public bool X { get; set; }
 
     public void Read()
     {
@@ -226,8 +226,8 @@ using System;
 
 class Program_Verifier_ReturnInteger1
 {
-    int X = 1;
-    int Y = 0;
+    public int X { get; set; } = 1;
+    public int Y { get; set; } = 0;
 
     public int Read()
     {
@@ -242,7 +242,7 @@ using System;
 
 class Program_Verifier_ReturnInteger1
 {
-    int X;
+    public int X { get; set; }
 
     public void Read()
     {
@@ -385,8 +385,8 @@ using System;
 
 class Program_Verifier_ReturnFloatingPoint1
 {
-    double X = 1.0;
-    double Y = 0.0;
+    public double X { get; set; } = 1.0;
+    public double Y { get; set; } = 0.0;
 
     public double Read()
     {
@@ -401,7 +401,7 @@ using System;
 
 class Program_Verifier_ReturnInteger1
 {
-    double X;
+    public double X { get; set; }
 
     public void Read()
     {

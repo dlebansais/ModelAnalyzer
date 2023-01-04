@@ -16,7 +16,7 @@ using System;
 
 class Program_BadEnsure_0
 {
-    int X;
+    public int X { get; set; }
 
     void Write(int x)
     {
@@ -36,7 +36,7 @@ using System;
 
 class Program_BadEnsure_1
 {
-    int X;
+    public int X { get; set; }
 
     int Read() => X;
     // Ensure: X == 0
@@ -133,7 +133,7 @@ using System;
 
 class Program_BadEnsure_6
 {
-    int X;
+    public int X { get; set; }
     [|// Ensure: X == 0|]MA0006
 
     int Read() => 0;
