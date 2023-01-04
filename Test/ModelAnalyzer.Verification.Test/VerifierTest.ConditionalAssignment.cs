@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
@@ -8,6 +9,8 @@ using NUnit.Framework;
 /// </summary>
 public partial class VerifierTest
 {
+    private static readonly TimeSpan MaxDuration = TimeSpan.MaxValue;
+
     [Test]
     [Category("Verification")]
     public void Verifier_ConditionalAssignment_OneBooleanFieldSuccess()
@@ -215,12 +218,13 @@ public partial class VerifierTest
 
         Verifier TestObject = new()
         {
+            MaxDepth = maxDepth,
+            MaxDuration = MaxDuration,
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
             InvariantList = InvariantList,
-            MaxDepth = maxDepth,
         };
 
         return TestObject;

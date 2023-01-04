@@ -140,7 +140,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 0);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 0, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -152,7 +152,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean1, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -165,7 +165,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean2, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean2, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -177,7 +177,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean3, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean3, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -190,7 +190,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean4, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean4, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -202,7 +202,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean5, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean5, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -215,7 +215,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean6, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean6, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -228,7 +228,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean7, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean7, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -240,7 +240,7 @@ class Program_Verifier_RequireBoolean8
     [Category("Verification")]
     public void Verifier_RequireBoolean8_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean8, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeBoolean8, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -382,7 +382,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 0);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 0, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -394,7 +394,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger1, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -407,7 +407,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger2, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger2, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -419,7 +419,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger3, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger3, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -432,7 +432,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger4, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger4, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -444,7 +444,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger5, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger5, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -457,7 +457,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger6, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger6, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -470,7 +470,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger7, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger7, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -482,7 +482,7 @@ class Program_Verifier_RequireInteger8
     [Category("Verification")]
     public void Verifier_RequireInteger8_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger8, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeInteger8, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -624,7 +624,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint1, maxDepth: 0);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint1, maxDepth: 0, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -636,7 +636,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint1, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint1, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -649,7 +649,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint2, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint2, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -661,7 +661,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint3, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint3, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -674,7 +674,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint4, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint4, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -686,7 +686,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint5, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint5, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -699,7 +699,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint6, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint6, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -712,7 +712,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint7, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint7, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -724,7 +724,7 @@ class Program_Verifier_RequireFloatingPoint8
     [Category("Verification")]
     public void Verifier_RequireFloatingPoint8_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint8, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(RequireSourceCodeFloatingPoint8, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 

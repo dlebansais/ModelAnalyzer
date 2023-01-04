@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Verification.Test;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,12 +21,13 @@ public partial class VerifierTest
         string ClassName = "Test";
         Verifier TestObject = new()
         {
+            MaxDepth = 0,
+            MaxDuration = MaxDuration,
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new List<Invariant>().AsReadOnly(),
-            MaxDepth = 0,
         };
 
         Assert.That(TestObject.ClassName, Is.EqualTo(ClassName));
@@ -43,12 +45,13 @@ public partial class VerifierTest
         string ClassName = "Test";
         Verifier TestObject = new()
         {
+            MaxDepth = 1,
+            MaxDuration = MaxDuration,
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = new List<Invariant>().AsReadOnly(),
-            MaxDepth = 1,
         };
 
         Assert.That(TestObject.ClassName, Is.EqualTo(ClassName));
@@ -59,7 +62,31 @@ public partial class VerifierTest
         Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 
-    private Verifier CreateVerifierFromSourceCode(string sourceCode, int maxDepth)
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ZeroDuration()
+    {
+        string SimpleClass = @"
+using System;
+
+class Program_Verifier_ZeroDuration
+{
+    public void Write()
+    {
+    }
+}
+";
+
+        Verifier TestObject = CreateVerifierFromSourceCode(SimpleClass, maxDepth: 10, maxDuration: TimeSpan.Zero);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.Timeout));
+    }
+
+    private Verifier CreateVerifierFromSourceCode(string sourceCode, int maxDepth, TimeSpan maxDuration)
     {
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText(sourceCode, Options);
@@ -84,12 +111,13 @@ public partial class VerifierTest
 
         Verifier TestObject = new()
         {
+            MaxDepth = maxDepth,
+            MaxDuration = maxDuration,
             ClassName = ClassModel.Name,
             PropertyTable = ClassModel.PropertyTable,
             FieldTable = ClassModel.FieldTable,
             MethodTable = ClassModel.MethodTable,
             InvariantList = ClassModel.InvariantList,
-            MaxDepth = maxDepth,
         };
 
         return TestObject;

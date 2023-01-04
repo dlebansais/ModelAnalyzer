@@ -21,6 +21,11 @@ internal enum VerificationErrorType
     Exception,
 
     /// <summary>
+    /// Timeout during analysis.
+    /// </summary>
+    Timeout,
+
+    /// <summary>
     /// Error in require clause.
     /// </summary>
     RequireError,

@@ -322,7 +322,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger1, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger1, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -334,7 +334,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger2_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger2, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger2, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -347,7 +347,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger3, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger3, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -360,7 +360,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger4_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger4, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger4, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -373,7 +373,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger5_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger5, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger5, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -385,7 +385,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger6_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger6, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger6, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -397,7 +397,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger7_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger7, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger7, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -410,7 +410,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger8_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger8, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger8, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -422,7 +422,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger9_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger9, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger9, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -435,7 +435,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger10_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger10, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger10, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -448,7 +448,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger11_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger11, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger11, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -461,7 +461,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger12_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger12, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger12, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -474,7 +474,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger13_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger13, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger13, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
@@ -487,7 +487,7 @@ class Program_Verifier_FunctionCallInteger14
     [Category("Verification")]
     public void Verifier_FunctionCallInteger14_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger14, maxDepth: 1);
+        Verifier TestObject = CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger14, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 

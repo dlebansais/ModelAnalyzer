@@ -29,6 +29,8 @@ internal partial class Verifier : IDisposable
     /// </summary>
     public void Verify()
     {
+        VerificationWatch.Restart();
+
         Verify(depth: 0);
     }
 
@@ -36,6 +38,11 @@ internal partial class Verifier : IDisposable
     /// Gets the max depth.
     /// </summary>
     required public int MaxDepth { get; init; }
+
+    /// <summary>
+    /// Gets the max duration.
+    /// </summary>
+    required public TimeSpan MaxDuration { get; init; }
 
     /// <summary>
     /// Gets the class name.
@@ -74,8 +81,8 @@ internal partial class Verifier : IDisposable
 
     private void Verify(int depth)
     {
-        // Stop analysing recursively if a violation has already been detected.
-        if (VerificationResult != VerificationResult.Default && VerificationResult.IsError)
+        // Stop analysing recursively if interrupted.
+        if (IsAnalysisInterrupted())
             return;
 
         CallSequence CallSequence = new();
@@ -98,14 +105,39 @@ internal partial class Verifier : IDisposable
                     CallSequence NewCallSequence = callSequence.WithAddedCall(Method);
 
                     CallMethods(depth - 1, NewCallSequence);
+
+                    // Stop analysing more sequences if interrupted.
+                    if (IsAnalysisInterrupted())
+                        return;
                 }
             }
         }
         else
-            AddMethodCalls(callSequence);
+            AnalyzeCallSequence(callSequence);
     }
 
-    private void AddMethodCalls(CallSequence callSequence)
+    private bool IsAnalysisInterrupted()
+    {
+        // Stop analysing if a violation has already been detected.
+        if (VerificationResult != VerificationResult.Default && VerificationResult.IsError)
+            return true;
+
+        // Stop analysing if this is taking too much time.
+        if (VerificationWatch.Elapsed >= MaxDuration)
+        {
+            if (VerificationResult == VerificationResult.Default)
+            {
+                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Timeout };
+                Log($"Timeout");
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void AnalyzeCallSequence(CallSequence callSequence)
     {
         using Solver Solver = Context.MkSolver();
         VerificationContext VerificationContext = new() { Solver = Solver, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable };
@@ -549,4 +581,5 @@ internal partial class Verifier : IDisposable
     private IntExpr Zero;
     private BoolExpr False;
     private BoolExpr True;
+    private Stopwatch VerificationWatch = new Stopwatch();
 }

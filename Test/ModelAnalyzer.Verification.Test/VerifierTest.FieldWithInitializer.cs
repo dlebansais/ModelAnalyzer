@@ -115,12 +115,13 @@ public partial class VerifierTest
 
         Verifier TestObject = new()
         {
+            MaxDepth = 0,
+            MaxDuration = MaxDuration,
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
-            MaxDepth = 0,
         };
 
         return TestObject;
@@ -248,12 +249,13 @@ public partial class VerifierTest
 
         Verifier TestObject = new()
         {
+            MaxDepth = 0,
+            MaxDuration = MaxDuration,
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
             InvariantList = InvariantList,
-            MaxDepth = 0,
         };
 
         return TestObject;

@@ -14,6 +14,7 @@ using ProcessCommunication;
 internal class Program
 {
     private const int MaxDepth = 2;
+    private static readonly TimeSpan MaxDuration = TimeSpan.MaxValue;
 
 #if DEBUG
     private static IAnalysisLogger Logger = new FileLogger((EnvironmentVariable)"MODEL_VERIFIER_LOG_PATH", "verifier.txt");
@@ -104,6 +105,7 @@ internal class Program
             using Verifier Verifier = new()
             {
                 MaxDepth = MaxDepth,
+                MaxDuration = MaxDuration,
                 ClassName = ClassName,
                 PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
