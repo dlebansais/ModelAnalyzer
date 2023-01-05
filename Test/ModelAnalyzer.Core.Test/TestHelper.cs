@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Z3;
 
 internal class TestHelper
 {
@@ -75,10 +76,11 @@ internal class TestHelper
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? VerificationProcessStartMode.Manual : VerificationProcessStartMode.Auto };
 
         List<IClassModel> ClassModelList = new();
+        MadeUpSemanticModel SemanticModel = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null));
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel));
         }
 
         if (managerHandler is not null)
@@ -118,13 +120,14 @@ internal class TestHelper
 
         ClassDeclarationSyntax? PreviousClassDeclaration = null;
         List<IClassModel> ClassModelList = new();
+        MadeUpSemanticModel SemanticModel = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
             if (PreviousClassDeclaration != ClassDeclaration)
                 CompilationContext = CompilationContext.GetAnother();
 
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration, semanticModel: null));
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration, SemanticModel));
 
             PreviousClassDeclaration = ClassDeclaration;
         }

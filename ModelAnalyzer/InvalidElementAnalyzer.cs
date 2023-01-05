@@ -178,7 +178,8 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
             return;
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: false);
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, context.SemanticModel);
+        AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, SemanticModel);
 
         foreach (IUnsupportedProperty Item in ClassModel.Unsupported.Properties)
         {

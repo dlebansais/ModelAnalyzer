@@ -95,6 +95,7 @@ class Program_Verifier_ZeroDuration
         Debug.Assert(ErrorList.Count == 0);
 
         CompilationUnitSyntax Root = SyntaxTree.GetCompilationUnitRoot();
+        MadeUpSemanticModel SemanticModel = new();
 
         Debug.Assert(Root.Members.Count == 1);
 
@@ -105,7 +106,7 @@ class Program_Verifier_ZeroDuration
             ClassDeclaration = (ClassDeclarationSyntax)((NamespaceDeclarationSyntax)Root.Members[0]).Members[0];
 
         using ClassModelManager Manager = new() { StartMode = VerificationProcessStartMode.Manual };
-        ClassModel ClassModel = (ClassModel)Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
+        ClassModel ClassModel = (ClassModel)Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
 
         Debug.Assert(ClassModel.Unsupported.IsEmpty);
 

@@ -102,7 +102,8 @@ public abstract class Analyzer : DiagnosticAnalyzer
             return;
 
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: IsAsyncRunRequested);
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, context.SemanticModel);
+        AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, SemanticModel);
 
         ReportDiagnostic(context, classDeclaration, ClassModel);
     }
