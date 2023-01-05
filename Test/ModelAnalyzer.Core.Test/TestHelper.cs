@@ -77,7 +77,9 @@ internal class TestHelper
         List<IClassModel> ClassModelList = new();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration));
+        {
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null));
+        }
 
         if (managerHandler is not null)
             managerHandler(Manager);
@@ -122,7 +124,7 @@ internal class TestHelper
             if (PreviousClassDeclaration != ClassDeclaration)
                 CompilationContext = CompilationContext.GetAnother();
 
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration));
+            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration, semanticModel: null));
 
             PreviousClassDeclaration = ClassDeclaration;
         }

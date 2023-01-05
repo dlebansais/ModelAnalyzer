@@ -18,9 +18,11 @@ internal partial class ClassDeclarationParser
     /// Initializes a new instance of the <see cref="ClassDeclarationParser"/> class.
     /// </summary>
     /// <param name="classDeclaration">The class declaration.</param>
-    public ClassDeclarationParser(ClassDeclarationSyntax classDeclaration)
+    /// <param name="semanticModel">The semantic model.</param>
+    public ClassDeclarationParser(ClassDeclarationSyntax classDeclaration, SemanticModel? semanticModel)
     {
         ClassDeclaration = classDeclaration;
+        SemanticModel = semanticModel;
     }
 
     /// <summary>
@@ -69,6 +71,11 @@ internal partial class ClassDeclarationParser
     /// Gets the class declaration to be parsed.
     /// </summary>
     public ClassDeclarationSyntax ClassDeclaration { get; }
+
+    /// <summary>
+    /// Gets the semantic model.
+    /// </summary>
+    public SemanticModel? SemanticModel { get; }
 
     /// <summary>
     /// Gets the logger.
@@ -121,9 +128,26 @@ internal partial class ClassDeclarationParser
 
         if (classDeclaration.BaseList is BaseListSyntax BaseList && BaseList.Types.Count > 0)
         {
-            LogWarning("Unsupported class base list.");
+            bool HasBaseType = false;
 
-            IsSupported = false;
+            // If SemanticModel is null, we only tolerate base types that start with a 'I', indicating a probable interface.
+            // Only test classes need this, real world classes will have a semantic model available, but it helps with tests.
+            foreach (BaseTypeSyntax Item in BaseList.Types)
+                if (Item is not SimpleBaseTypeSyntax SimpleBaseType || SimpleBaseType.Type is not SimpleNameSyntax SimpleName || !SimpleName.Identifier.ValueText.StartsWith("I"))
+                    HasBaseType = true;
+
+            INamedTypeSymbol? TypeSymbol = SemanticModel?.GetDeclaredSymbol(classDeclaration);
+            INamedTypeSymbol? BaseType = TypeSymbol?.BaseType;
+
+            // If SemanticModel is null, BaseType is null (leaving HasBaseType unchanged), otherwise it is null only if the base is 'object', meaning there is no base.
+            HasBaseType |= BaseType?.BaseType is not null;
+
+            if (HasBaseType)
+            {
+                LogWarning("Unsupported class base.");
+
+                IsSupported = false;
+            }
         }
 
         if (classDeclaration.TypeParameterList is TypeParameterListSyntax TypeParameterList && TypeParameterList.Parameters.Count > 0)

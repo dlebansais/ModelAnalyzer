@@ -650,8 +650,8 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Manager.GetVerifiedModel(ClassModel);
     }
@@ -663,7 +663,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
 
@@ -677,7 +677,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -696,7 +696,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new(ServerToClientGuid) { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -715,7 +715,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -730,7 +730,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -786,7 +786,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -812,9 +812,9 @@ isClassNameRepeated: true);
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
 
         CompilationContext CompilationContext = CompilationContext.GetAnother();
-        ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0);
+        ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0, semanticModel: null);
         Manager.RemoveMissingClasses(new List<string>());
-        ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1);
+        ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1, semanticModel: null);
 
         Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout);
 
@@ -838,7 +838,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -856,7 +856,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
@@ -869,7 +869,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration);
+        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, semanticModel: null);
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
@@ -941,7 +941,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0);
+        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0, semanticModel: null);
         Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
 
         if (isVerificationSlow)
@@ -956,7 +956,7 @@ isClassNameRepeated: true);
             Thread.Sleep(TimeSpan.FromSeconds(2));
         }
 
-        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1);
+        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1, semanticModel: null);
         Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
 
         GetClassModelTask0.Wait();

@@ -83,8 +83,9 @@ public partial class ClassModelManager : IDisposable
     /// </summary>
     /// <param name="compilationContext">The compilation context.</param>
     /// <param name="classDeclaration">The class declaration.</param>
+    /// <param name="semanticModel">The semantic model.</param>
     /// <exception cref="ArgumentException">Class name empty.</exception>
-    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
+    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, SemanticModel? semanticModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
         if (ClassName == string.Empty)
@@ -95,7 +96,7 @@ public partial class ClassModelManager : IDisposable
 
         Log($"Getting model for class '{ClassName}'.");
 
-        return GetClassModelInternal(compilationContext, classDeclaration);
+        return GetClassModelInternal(compilationContext, classDeclaration, semanticModel);
     }
 
     /// <summary>
@@ -148,7 +149,7 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration)
+    private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, SemanticModel? semanticModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
@@ -165,7 +166,7 @@ public partial class ClassModelManager : IDisposable
 
             if (IsNewCompilationContext || !ClassModelAlreadyExists)
             {
-                ClassDeclarationParser Parser = new(classDeclaration) { Logger = Logger };
+                ClassDeclarationParser Parser = new(classDeclaration, semanticModel) { Logger = Logger };
                 Parser.Parse();
 
                 if (ClassModelAlreadyExists)

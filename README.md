@@ -45,6 +45,7 @@ To help the analyzer, programmers can add contract clauses:
 
 The analyzer supports:
 
++ Inheriting from interfaces, but not from a base class.
 + A [limited set](#supported-types) of C# pre-defined types.
 + Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
 + Public (or internal) read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized but only with a literal constant value (ex: `public int X { get; set; } = 1;`).

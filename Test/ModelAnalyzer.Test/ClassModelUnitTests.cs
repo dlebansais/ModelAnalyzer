@@ -215,21 +215,15 @@ static class Program_ClassModel_10
         await VerifyCS.VerifyCodeFixAsync(@"
 using System;
 
-class [|Program_ClassModel_11|] : IDisposable
+class [|Program_ClassModel_11|] : System.Collections.Generic.List<int>
 {
-    public void Dispose()
-    {
-    }
 }
 ", @"
 using System;
 
 // No model
-class Program_ClassModel_11 : IDisposable
+class Program_ClassModel_11 : System.Collections.Generic.List<int>
 {
-    public void Dispose()
-    {
-    }
 }
 ");
     }
@@ -704,6 +698,22 @@ using System;
 class Program_ClassModel_33
 {
     int Result;
+}
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task ClassWithInterface_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_ClassModel_34 : IDisposable
+{
+    public void Dispose()
+    {
+    }
 }
 ");
     }
