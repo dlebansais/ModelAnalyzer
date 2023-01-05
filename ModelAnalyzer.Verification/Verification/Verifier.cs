@@ -125,11 +125,8 @@ internal partial class Verifier : IDisposable
         // Stop analysing if this is taking too much time.
         if (VerificationWatch.Elapsed >= MaxDuration)
         {
-            if (VerificationResult == VerificationResult.Default)
-            {
-                VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Timeout };
-                Log($"Timeout");
-            }
+            VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Timeout };
+            Log($"Timeout");
 
             return true;
         }
