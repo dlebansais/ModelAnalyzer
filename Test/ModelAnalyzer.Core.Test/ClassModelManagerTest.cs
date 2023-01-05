@@ -839,9 +839,6 @@ isClassNameRepeated: true);
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
-        // Wait to be sure the verifier process exited. Otherwise, the different capacity will break the channel.
-        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(10));
-
         int OldCapacity = Channel.Capacity;
         Channel.Capacity = sizeof(int);
 
@@ -850,6 +847,9 @@ isClassNameRepeated: true);
         ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        // Wait to be sure the verifier process exited. Otherwise, the different capacity will break the channel.
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + TimeSpan.FromSeconds(10));
 
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 

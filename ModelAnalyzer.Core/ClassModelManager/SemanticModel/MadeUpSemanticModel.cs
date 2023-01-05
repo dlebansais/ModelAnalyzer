@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
@@ -24,8 +25,13 @@ public class MadeUpSemanticModel : IModel
             // We only tolerate base types that start with a 'I', indicating a probable interface.
             // Only test classes need this, real world classes will have a semantic model available, but it helps with tests.
             foreach (BaseTypeSyntax Item in BaseList.Types)
-                if (Item is not SimpleBaseTypeSyntax SimpleBaseType || SimpleBaseType.Type is not SimpleNameSyntax SimpleName || !SimpleName.Identifier.ValueText.StartsWith("I"))
+            {
+                SimpleBaseTypeSyntax? SimpleBaseType = Item as SimpleBaseTypeSyntax;
+                SimpleNameSyntax? SimpleName = SimpleBaseType?.Type as SimpleNameSyntax;
+
+                if (SimpleName?.Identifier is not SyntaxToken Identifier || !Identifier.ValueText.StartsWith("I"))
                     Result = true;
+            }
         }
 
         return Result;
