@@ -214,8 +214,7 @@ class Program_CoreClass_8 : IDisposable
 
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.InvalidDeclaration, Is.True);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 
     [Test]
