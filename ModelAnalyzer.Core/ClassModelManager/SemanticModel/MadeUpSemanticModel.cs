@@ -26,8 +26,8 @@ public class MadeUpSemanticModel : IModel
             // Only test classes need this, real world classes will have a semantic model available, but it helps with tests.
             foreach (BaseTypeSyntax Item in BaseList.Types)
             {
-                SimpleBaseTypeSyntax? SimpleBaseType = Item as SimpleBaseTypeSyntax;
-                SimpleNameSyntax? SimpleName = SimpleBaseType?.Type as SimpleNameSyntax;
+                SimpleBaseTypeSyntax SimpleBaseType = (SimpleBaseTypeSyntax)Item;
+                SimpleNameSyntax? SimpleName = SimpleBaseType.Type as SimpleNameSyntax;
 
                 if (SimpleName?.Identifier is not SyntaxToken Identifier || !Identifier.ValueText.StartsWith("I"))
                     Result = true;
