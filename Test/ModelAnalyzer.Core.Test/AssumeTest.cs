@@ -60,14 +60,6 @@ class Program_CoreAssume_0
     [Category("Core")]
     public void Assume_WithError()
     {
-        ExpressionType Item = ExpressionType.Void;
-
-        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
-
-        // Settings.Converters.Add(new ExpressionTypeJsonConverter());
-        string JsonString = JsonConvert.SerializeObject(Item, Settings);
-        ExpressionType? ItemResult = JsonConvert.DeserializeObject<ExpressionType>(JsonString, Settings);
-
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
