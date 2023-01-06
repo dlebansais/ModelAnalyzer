@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 /// <summary>
@@ -59,6 +60,14 @@ class Program_CoreAssume_0
     [Category("Core")]
     public void Assume_WithError()
     {
+        ExpressionType Item = ExpressionType.Void;
+
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+
+        // Settings.Converters.Add(new ExpressionTypeJsonConverter());
+        string JsonString = JsonConvert.SerializeObject(Item, Settings);
+        ExpressionType? ItemResult = JsonConvert.DeserializeObject<ExpressionType>(JsonString, Settings);
+
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 

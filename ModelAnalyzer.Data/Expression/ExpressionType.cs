@@ -1,32 +1,49 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
+
 /// <summary>
-/// Type of an expression.
+/// Represents the type of an expression.
 /// </summary>
-public enum ExpressionType
+[DebuggerDisplay("{Name}")]
+public record ExpressionType
 {
     /// <summary>
-    /// Unknown type.
+    /// Gets the 'Other' type.
     /// </summary>
-    Other,
+    public static ExpressionType Other { get; } = new(string.Empty);
 
     /// <summary>
-    /// No type.
+    /// Gets the 'Void' type.
     /// </summary>
-    Void,
+    public static ExpressionType Void { get; } = new("void");
 
     /// <summary>
-    /// bool type.
+    /// Gets the 'Boolean' type.
     /// </summary>
-    Boolean,
+    public static ExpressionType Boolean { get; } = new("bool");
 
     /// <summary>
-    /// int type.
+    /// Gets the 'Integer' type.
     /// </summary>
-    Integer,
+    public static ExpressionType Integer { get; } = new("int");
 
     /// <summary>
-    /// double type.
+    /// Gets the 'FloatingPoint' type.
     /// </summary>
-    FloatingPoint,
+    public static ExpressionType FloatingPoint { get; } = new("double");
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExpressionType"/> class.
+    /// </summary>
+    /// <param name="name">the type name.</param>
+    public ExpressionType(string name)
+    {
+        Name = name;
+    }
+
+    /// <summary>
+    /// Gets the friendly type name.
+    /// </summary>
+    public string Name { get; }
 }
