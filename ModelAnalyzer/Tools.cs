@@ -6,4 +6,9 @@ public static class Tools
     {
         return value.Length <= maxChars ? value : value.Substring(0, maxChars) + (char)0x2026;
     }
+
+    public static string GetHelpLink(string diagnosticId)
+    {
+        return $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{diagnosticId}.md";
+    }
 }

@@ -36,16 +36,6 @@ internal class SynchronizedVerificationContext
         ClassModelTable.Remove(className);
     }
 
-    private void RemoveClass(List<ClassModel> classModelList, string className)
-    {
-        foreach (ClassModel ClassModel in classModelList)
-            if (ClassModel.Name == className)
-            {
-                classModelList.Remove(ClassModel);
-                break;
-            }
-    }
-
     /// <summary>
     /// Gets the table of class models.
     /// </summary>

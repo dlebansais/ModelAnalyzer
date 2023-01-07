@@ -35,7 +35,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                 DiagnosticSeverity.Warning,
                                                                                                 isEnabledByDefault: true,
                                                                                                 DescriptionInvalidProperty,
-                                                                                                GetHelpLink(DiagnosticIdInvalidProperty));
+                                                                                                Tools.GetHelpLink(DiagnosticIdInvalidProperty));
 
     private static readonly LocalizableString TitleInvalidField = new LocalizableResourceString(nameof(Resources.BadFieldAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidField = new LocalizableResourceString(nameof(Resources.BadFieldAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -47,7 +47,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                              DiagnosticSeverity.Warning,
                                                                                              isEnabledByDefault: true,
                                                                                              DescriptionInvalidField,
-                                                                                             GetHelpLink(DiagnosticIdInvalidField));
+                                                                                             Tools.GetHelpLink(DiagnosticIdInvalidField));
 
     private static readonly LocalizableString TitleInvalidMethod = new LocalizableResourceString(nameof(Resources.BadMethodAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidMethod = new LocalizableResourceString(nameof(Resources.BadMethodAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -59,7 +59,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                               DiagnosticSeverity.Warning,
                                                                                               isEnabledByDefault: true,
                                                                                               DescriptionInvalidMethod,
-                                                                                              GetHelpLink(DiagnosticIdInvalidMethod));
+                                                                                              Tools.GetHelpLink(DiagnosticIdInvalidMethod));
 
     private static readonly LocalizableString TitleInvalidParameter = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidParameter = new LocalizableResourceString(nameof(Resources.BadParameterAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -71,7 +71,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                  DiagnosticSeverity.Warning,
                                                                                                  isEnabledByDefault: true,
                                                                                                  DescriptionInvalidParameter,
-                                                                                                 GetHelpLink(DiagnosticIdInvalidParameter));
+                                                                                                 Tools.GetHelpLink(DiagnosticIdInvalidParameter));
 
     private static readonly LocalizableString TitleInvalidRequire = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidRequire = new LocalizableResourceString(nameof(Resources.BadRequireAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -83,7 +83,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                DiagnosticSeverity.Warning,
                                                                                                isEnabledByDefault: true,
                                                                                                DescriptionInvalidRequire,
-                                                                                               GetHelpLink(DiagnosticIdInvalidRequire));
+                                                                                               Tools.GetHelpLink(DiagnosticIdInvalidRequire));
 
     private static readonly LocalizableString TitleInvalidEnsure = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidEnsure = new LocalizableResourceString(nameof(Resources.BadEnsureAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -95,7 +95,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                               DiagnosticSeverity.Warning,
                                                                                               isEnabledByDefault: true,
                                                                                               DescriptionInvalidEnsure,
-                                                                                              GetHelpLink(DiagnosticIdInvalidEnsure));
+                                                                                              Tools.GetHelpLink(DiagnosticIdInvalidEnsure));
 
     private static readonly LocalizableString TitleInvalidLocal = new LocalizableResourceString(nameof(Resources.BadLocalAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidLocal = new LocalizableResourceString(nameof(Resources.BadLocalAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -107,7 +107,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                              DiagnosticSeverity.Warning,
                                                                                              isEnabledByDefault: true,
                                                                                              DescriptionInvalidLocal,
-                                                                                             GetHelpLink(DiagnosticIdInvalidLocal));
+                                                                                             Tools.GetHelpLink(DiagnosticIdInvalidLocal));
 
     private static readonly LocalizableString TitleInvalidStatement = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidStatement = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -119,7 +119,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                  DiagnosticSeverity.Warning,
                                                                                                  isEnabledByDefault: true,
                                                                                                  DescriptionInvalidStatement,
-                                                                                                 GetHelpLink(DiagnosticIdInvalidStatement));
+                                                                                                 Tools.GetHelpLink(DiagnosticIdInvalidStatement));
 
     private static readonly LocalizableString TitleInvalidExpression = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidExpression = new LocalizableResourceString(nameof(Resources.BadExpressionAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -131,7 +131,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                   DiagnosticSeverity.Warning,
                                                                                                   isEnabledByDefault: true,
                                                                                                   DescriptionInvalidExpression,
-                                                                                                  GetHelpLink(DiagnosticIdInvalidExpression));
+                                                                                                  Tools.GetHelpLink(DiagnosticIdInvalidExpression));
 
     private static readonly LocalizableString TitleInvalidInvariant = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidInvariant = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -143,7 +143,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                  DiagnosticSeverity.Warning,
                                                                                                  isEnabledByDefault: true,
                                                                                                  DescriptionInvalidInvariant,
-                                                                                                 GetHelpLink(DiagnosticIdInvalidInvariant));
+                                                                                                 Tools.GetHelpLink(DiagnosticIdInvalidInvariant));
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
@@ -293,10 +293,5 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
             Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting bad invariant.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidInvariant, Item.Location, Item.Text));
         }
-    }
-
-    private static string GetHelpLink(string diagnosticId)
-    {
-        return $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{diagnosticId}.md";
     }
 }
