@@ -51,8 +51,11 @@ namespace ModelAnalyzer.Test
         /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.VerifyCodeFixAsync(string, DiagnosticResult[], string)"/>
         public static async Task VerifyCodeFixAsync(string source, DiagnosticResult[] expected, string fixedSource)
         {
+            source = CSharpVerifierHelper.ExtractDiagnosticId(source, out string DiagnosticId);
+
             var test = new Test
             {
+                ExpectedDiagnosticId = DiagnosticId,
                 TestCode = source,
                 FixedCode = fixedSource,
             };

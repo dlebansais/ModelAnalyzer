@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,6 +23,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticIdInvalidStatement = "MA0008";
     public const string DiagnosticIdInvalidExpression = "MA0009";
     public const string DiagnosticIdInvalidProperty = "MA0010";
+    public const string DiagnosticIdInvalidInvariant = "MA0011";
 
     private static readonly LocalizableString TitleInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidProperty = new LocalizableResourceString(nameof(Resources.BadPropertyAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -101,13 +101,13 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
     private static readonly LocalizableString MessageFormatInvalidLocal = new LocalizableResourceString(nameof(Resources.BadLocalAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString DescriptionInvalidLocal = new LocalizableResourceString(nameof(Resources.BadLocalAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
     private static readonly DiagnosticDescriptor RuleInvalidLocal = new DiagnosticDescriptor(DiagnosticIdInvalidLocal,
-                                                                                              TitleInvalidLocal,
-                                                                                              MessageFormatInvalidLocal,
-                                                                                              Category,
-                                                                                              DiagnosticSeverity.Warning,
-                                                                                              isEnabledByDefault: true,
-                                                                                              DescriptionInvalidLocal,
-                                                                                              GetHelpLink(DiagnosticIdInvalidLocal));
+                                                                                             TitleInvalidLocal,
+                                                                                             MessageFormatInvalidLocal,
+                                                                                             Category,
+                                                                                             DiagnosticSeverity.Warning,
+                                                                                             isEnabledByDefault: true,
+                                                                                             DescriptionInvalidLocal,
+                                                                                             GetHelpLink(DiagnosticIdInvalidLocal));
 
     private static readonly LocalizableString TitleInvalidStatement = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
     private static readonly LocalizableString MessageFormatInvalidStatement = new LocalizableResourceString(nameof(Resources.BadStatementAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
@@ -133,6 +133,18 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                                                                                   DescriptionInvalidExpression,
                                                                                                   GetHelpLink(DiagnosticIdInvalidExpression));
 
+    private static readonly LocalizableString TitleInvalidInvariant = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString MessageFormatInvalidInvariant = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+    private static readonly LocalizableString DescriptionInvalidInvariant = new LocalizableResourceString(nameof(Resources.BadInvariantAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+    private static readonly DiagnosticDescriptor RuleInvalidInvariant = new DiagnosticDescriptor(DiagnosticIdInvalidInvariant,
+                                                                                                 TitleInvalidInvariant,
+                                                                                                 MessageFormatInvalidInvariant,
+                                                                                                 Category,
+                                                                                                 DiagnosticSeverity.Warning,
+                                                                                                 isEnabledByDefault: true,
+                                                                                                 DescriptionInvalidInvariant,
+                                                                                                 GetHelpLink(DiagnosticIdInvalidInvariant));
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
     {
         get => ImmutableArray.Create(RuleInvalidProperty,
@@ -143,7 +155,8 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                                      RuleInvalidEnsure,
                                      RuleInvalidLocal,
                                      RuleInvalidStatement,
-                                     RuleInvalidExpression);
+                                     RuleInvalidExpression,
+                                     RuleInvalidInvariant);
     }
 
     private IAnalysisLogger Logger { get; } = Initialization.Logger;
@@ -153,15 +166,28 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeCompilationUnit, SyntaxKind.CompilationUnit);
     }
 
-    private void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
+    private void AnalyzeCompilationUnit(SyntaxNodeAnalysisContext context)
     {
         try
         {
-            var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
-            AnalyzeClass(context, ClassDeclaration);
+            CompilationUnitSyntax CompilationUnit = (CompilationUnitSyntax)context.Node;
+            List<string> ExistingClassList = new();
+            List<ClassDeclarationSyntax> ClassDeclarationList = new();
+
+            foreach (MemberDeclarationSyntax Member in CompilationUnit.Members)
+                if (Member is FileScopedNamespaceDeclarationSyntax FileScopedNamespaceDeclaration)
+                    AnalyzeNamespaceMembers(context, FileScopedNamespaceDeclaration.Members, ExistingClassList, ClassDeclarationList);
+                else if (Member is NamespaceDeclarationSyntax NamespaceDeclaration)
+                    AnalyzeNamespaceMembers(context, NamespaceDeclaration.Members, ExistingClassList, ClassDeclarationList);
+                else if (Member is ClassDeclarationSyntax ClassDeclaration)
+                    AddClassDeclaration(ExistingClassList, ClassDeclarationList, ClassDeclaration);
+
+            AnalyzeClasses(context, CompilationUnit, ClassDeclarationList);
+
+            Manager.RemoveMissingClasses(ExistingClassList);
         }
         catch (OperationCanceledException)
         {
@@ -173,84 +199,99 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members, List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList)
     {
+        foreach (MemberDeclarationSyntax NamespaceMember in members)
+            if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
+                AddClassDeclaration(existingClassList, classDeclarationList, ClassDeclaration);
+    }
+
+    private void AddClassDeclaration(List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration)
+    {
+        existingClassList.Add(classDeclaration.Identifier.ValueText);
+
         // Ignore diagnostic for classes not modeled.
-        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
-            return;
+        if (!ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
+            classDeclarationList.Add(classDeclaration);
+    }
 
-        CompilationUnitSyntax CompilationUnit = classDeclaration.AncestorsAndSelf().OfType<CompilationUnitSyntax>().First();
-        List<ClassDeclarationSyntax> ClassDeclarationList = new();
-        ClassDeclarationList.Add(classDeclaration);
-
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(CompilationUnit, isAsyncRunRequested: false);
+    private void AnalyzeClasses(SyntaxNodeAnalysisContext context, CompilationUnitSyntax compilationUnit, List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(compilationUnit, isAsyncRunRequested: false);
         AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
-        IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, ClassDeclarationList, SemanticModel);
+        IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, classDeclarationList, SemanticModel);
 
         foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModelTable)
+            ReportDiagnostic(context, Entry.Key, Entry.Value);
+    }
+
+    protected void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
+    {
+        foreach (IUnsupportedProperty Item in classModel.Unsupported.Properties)
         {
-            IClassModel ClassModel = Entry.Value;
+            string PropertyName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid property '{PropertyName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
+        }
 
-            foreach (IUnsupportedProperty Item in ClassModel.Unsupported.Properties)
-            {
-                string PropertyName = Tools.Truncate(Item.Name.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid property '{PropertyName}'.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
-            }
+        foreach (IUnsupportedField Item in classModel.Unsupported.Fields)
+        {
+            string FieldName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid field '{FieldName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
+        }
 
-            foreach (IUnsupportedField Item in ClassModel.Unsupported.Fields)
-            {
-                string FieldName = Tools.Truncate(Item.Name.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid field '{FieldName}'.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
-            }
+        foreach (IUnsupportedMethod Item in classModel.Unsupported.Methods)
+        {
+            string MethodName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid method '{MethodName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
+        }
 
-            foreach (IUnsupportedMethod Item in ClassModel.Unsupported.Methods)
-            {
-                string MethodName = Tools.Truncate(Item.Name.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid method '{MethodName}'.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
-            }
+        foreach (IUnsupportedParameter Item in classModel.Unsupported.Parameters)
+        {
+            string ParameterName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid parameter '{ParameterName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
+        }
 
-            foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
-            {
-                string ParameterName = Tools.Truncate(Item.Name.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter '{ParameterName}'.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
-            }
+        foreach (IUnsupportedRequire Item in classModel.Unsupported.Requires)
+        {
+            string AssertionText = Tools.Truncate(Item.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid require.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
+        }
 
-            foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
-            {
-                string AssertionText = Tools.Truncate(Item.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid require.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
-            }
+        foreach (IUnsupportedEnsure Item in classModel.Unsupported.Ensures)
+        {
+            string AssertionText = Tools.Truncate(Item.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid ensure.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
+        }
 
-            foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
-            {
-                string AssertionText = Tools.Truncate(Item.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid ensure.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
-            }
+        foreach (IUnsupportedLocal Item in classModel.Unsupported.Locals)
+        {
+            string LocalName = Tools.Truncate(Item.Name.Text);
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid local variable '{LocalName}'.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
+        }
 
-            foreach (IUnsupportedLocal Item in ClassModel.Unsupported.Locals)
-            {
-                string LocalName = Tools.Truncate(Item.Name.Text);
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid local variable '{LocalName}'.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
-            }
+        foreach (IUnsupportedStatement Item in classModel.Unsupported.Statements)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid statement.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidStatement, Item.Location));
+        }
 
-            foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
-            {
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid statement.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidStatement, Item.Location));
-            }
+        foreach (IUnsupportedExpression Item in classModel.Unsupported.Expressions)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid expression.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
+        }
 
-            foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
-            {
-                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid expression.");
-                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
-            }
+        foreach (IUnsupportedInvariant Item in classModel.Unsupported.Invariants)
+        {
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting bad invariant.");
+            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidInvariant, Item.Location, Item.Text));
         }
     }
 

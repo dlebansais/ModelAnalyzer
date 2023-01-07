@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using NUnit.Framework;
-using VerifyCS = CSharpAnalyzerVerifier<BadInvariantAnalyzer>;
+using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 
 [TestFixture]
 public class BadInvarianttUnitTests
@@ -80,7 +80,7 @@ class Program_BadInvariant_2
             X = x;
     }
 }
-[|// Invariant: X $ 0|]
+[|// Invariant: X $ 0|]MA0011
 ");
     }
 
@@ -106,7 +106,7 @@ class Program_BadInvariant_3
             X = x;
     }
 }
-[|// Invariant: X >= 0; break;|]
+[|// Invariant: X >= 0; break;|]MA0011
 ");
     }
 
