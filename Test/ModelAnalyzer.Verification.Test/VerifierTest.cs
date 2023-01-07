@@ -106,7 +106,7 @@ class Program_Verifier_ZeroDuration
             ClassDeclaration = (ClassDeclarationSyntax)((NamespaceDeclarationSyntax)Root.Members[0]).Members[0];
 
         using ClassModelManager Manager = new() { StartMode = VerificationProcessStartMode.Manual };
-        ClassModel ClassModel = (ClassModel)Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel ClassModel = (ClassModel)Manager.GetClassModels(CompilationContext.GetAnother(), new List<ClassDeclarationSyntax>() { ClassDeclaration }, SemanticModel).First().Value;
 
         Debug.Assert(ClassModel.Unsupported.IsEmpty);
 

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -645,14 +646,13 @@ isClassNameRepeated: true);
 
     private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Manager.GetVerifiedModel(ClassModel);
     }
@@ -665,7 +665,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
 
@@ -674,13 +674,12 @@ isClassNameRepeated: true);
 
     private void UpdateWithAutoStart(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -689,7 +688,6 @@ isClassNameRepeated: true);
 
     private void UpdateWithBlockedClientChannel(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
@@ -700,7 +698,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new(ServerToClientGuid) { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -709,7 +707,6 @@ isClassNameRepeated: true);
 
     private void UpdateWithBlockedServerChannel(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
@@ -720,7 +717,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -729,14 +726,13 @@ isClassNameRepeated: true);
 
     private void UpdateWithBlockedServerProcess(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         MadeUpSemanticModel SemanticModel = new();
 
         BlockServerProcess(out string ExtractPath);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        IClassModel ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -787,13 +783,12 @@ isClassNameRepeated: true);
 
     private void UpdateWithCorruptedResult(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -811,8 +806,8 @@ isClassNameRepeated: true);
 
     private void UpdateWithClassDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
-        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        List<ClassDeclarationSyntax> ClassDeclarationList0 = new() { classDeclarationList[0] };
+        List<ClassDeclarationSyntax> ClassDeclarationList1 = new() { classDeclarationList[1] };
         IClassModel ClassModel0;
         IClassModel ClassModel1;
         MadeUpSemanticModel SemanticModel = new();
@@ -820,9 +815,9 @@ isClassNameRepeated: true);
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
 
         CompilationContext CompilationContext = CompilationContext.GetAnother();
-        ClassModel0 = Manager.GetClassModel(CompilationContext, ClassDeclaration0, SemanticModel);
+        ClassModel0 = Manager.GetClassModels(CompilationContext, ClassDeclarationList0, SemanticModel).First().Value;
         Manager.RemoveMissingClasses(new List<string>());
-        ClassModel1 = Manager.GetClassModel(CompilationContext, ClassDeclaration1, SemanticModel);
+        ClassModel1 = Manager.GetClassModels(CompilationContext, ClassDeclarationList1, SemanticModel).First().Value;
 
         Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout);
 
@@ -835,7 +830,6 @@ isClassNameRepeated: true);
 
     private void UpdateWithLittleCapacity(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
@@ -844,7 +838,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -860,13 +854,12 @@ isClassNameRepeated: true);
 
     private void VerificationWithResult(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
@@ -880,7 +873,7 @@ isClassNameRepeated: true);
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel);
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
@@ -945,21 +938,21 @@ isClassNameRepeated: true);
         if (isVerificationSlow)
             ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
 
-        ClassDeclarationSyntax ClassDeclaration0 = classDeclarationList[0];
-        ClassDeclarationSyntax ClassDeclaration1 = classDeclarationList[1];
+        List<ClassDeclarationSyntax> ClassDeclarationList0 = new() { classDeclarationList[0] };
+        List<ClassDeclarationSyntax> ClassDeclarationList1 = new() { classDeclarationList[1] };
         IClassModel ClassModel0;
         IClassModel ClassModel1;
         MadeUpSemanticModel SemanticModel = new();
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
 
-        ClassModel0 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration0, SemanticModel);
+        ClassModel0 = Manager.GetClassModels(CompilationContext.GetAnother(), ClassDeclarationList0, SemanticModel).First().Value;
         Task<IClassModel> GetClassModelTask0 = Manager.GetVerifiedModelAsync(ClassModel0);
 
         if (isVerificationSlow)
         {
             SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
-            while (!VerificationContext.ClassModelTable[ClassModel0.Name].IsVerificationRequestSent)
+            while (!VerificationContext.VerificationState.IsVerificationRequestSent)
                 GetClassModelTask0.Wait(TimeSpan.FromMilliseconds(10));
         }
         else
@@ -968,7 +961,7 @@ isClassNameRepeated: true);
             Thread.Sleep(TimeSpan.FromSeconds(2));
         }
 
-        ClassModel1 = Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration1, SemanticModel);
+        ClassModel1 = Manager.GetClassModels(CompilationContext.GetAnother(), ClassDeclarationList1, SemanticModel).First().Value;
         Task<IClassModel> GetClassModelTask1 = Manager.GetVerifiedModelAsync(ClassModel1);
 
         GetClassModelTask0.Wait();

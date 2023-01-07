@@ -8,7 +8,7 @@ internal partial record VerificationState
     /// <summary>
     /// Gets the class model exchanged.
     /// </summary>
-    required public ClassModelExchange ClassModelExchange { get; init; }
+    required public ModelExchange ModelExchange { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether a request to verify the model has been sent.

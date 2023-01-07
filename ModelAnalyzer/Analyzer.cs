@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,8 +45,14 @@ public abstract class Analyzer : DiagnosticAnalyzer
     {
         try
         {
-            var ClassDeclaration = (ClassDeclarationSyntax)context.Node;
-            AnalyzeClass(context, ClassDeclaration);
+            List<string> ExistingClassList = new();
+            List<ClassDeclarationSyntax> ClassDeclarationList = new();
+
+            ClassDeclarationSyntax ClassDeclaration = (ClassDeclarationSyntax)context.Node;
+            AddClassDeclaration(ExistingClassList, ClassDeclarationList, ClassDeclaration);
+
+            CompilationUnitSyntax CompilationUnit = ClassDeclaration.AncestorsAndSelf().OfType<CompilationUnitSyntax>().First();
+            AnalyzeClasses(context, CompilationUnit, ClassDeclarationList);
         }
         catch (OperationCanceledException)
         {
@@ -61,15 +68,21 @@ public abstract class Analyzer : DiagnosticAnalyzer
     {
         try
         {
-            var CompilationUnit = (CompilationUnitSyntax)context.Node;
+            CompilationUnitSyntax CompilationUnit = (CompilationUnitSyntax)context.Node;
+            List<string> ExistingClassList = new();
+            List<ClassDeclarationSyntax> ClassDeclarationList = new();
 
             foreach (MemberDeclarationSyntax Member in CompilationUnit.Members)
                 if (Member is FileScopedNamespaceDeclarationSyntax FileScopedNamespaceDeclaration)
-                    AnalyzeNamespaceMembers(context, FileScopedNamespaceDeclaration.Members);
+                    AnalyzeNamespaceMembers(context, FileScopedNamespaceDeclaration.Members, ExistingClassList, ClassDeclarationList);
                 else if (Member is NamespaceDeclarationSyntax NamespaceDeclaration)
-                    AnalyzeNamespaceMembers(context, NamespaceDeclaration.Members);
+                    AnalyzeNamespaceMembers(context, NamespaceDeclaration.Members, ExistingClassList, ClassDeclarationList);
                 else if (Member is ClassDeclarationSyntax ClassDeclaration)
-                    AnalyzeClass(context, ClassDeclaration);
+                    AddClassDeclaration(ExistingClassList, ClassDeclarationList, ClassDeclaration);
+
+            AnalyzeClasses(context, CompilationUnit, ClassDeclarationList);
+
+            Manager.RemoveMissingClasses(ExistingClassList);
         }
         catch (OperationCanceledException)
         {
@@ -81,31 +94,30 @@ public abstract class Analyzer : DiagnosticAnalyzer
         }
     }
 
-    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members)
+    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members, List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList)
     {
-        List<string> ExistingClassList = new();
-
         foreach (MemberDeclarationSyntax NamespaceMember in members)
             if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
-            {
-                ExistingClassList.Add(ClassDeclaration.Identifier.ValueText);
-                AnalyzeClass(context, ClassDeclaration);
-            }
-
-        Manager.RemoveMissingClasses(ExistingClassList);
+                AddClassDeclaration(existingClassList, classDeclarationList, ClassDeclaration);
     }
 
-    private void AnalyzeClass(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    private void AddClassDeclaration(List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration)
     {
+        existingClassList.Add(classDeclaration.Identifier.ValueText);
+
         // Ignore diagnostic for classes not modeled.
-        if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
-            return;
+        if (!ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
+            classDeclarationList.Add(classDeclaration);
+    }
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: IsAsyncRunRequested);
+    private void AnalyzeClasses(SyntaxNodeAnalysisContext context, CompilationUnitSyntax compilationUnit, List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(compilationUnit, isAsyncRunRequested: IsAsyncRunRequested);
         AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, SemanticModel);
+        IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, classDeclarationList, SemanticModel);
 
-        ReportDiagnostic(context, classDeclaration, ClassModel);
+        foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModelTable)
+            ReportDiagnostic(context, Entry.Key, Entry.Value);
     }
 
     protected abstract void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel);

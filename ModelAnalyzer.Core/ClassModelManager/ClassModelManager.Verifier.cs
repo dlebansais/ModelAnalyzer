@@ -94,18 +94,21 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            if (Context.ClassModelTable.ContainsKey(className))
+            Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+
+            if (ClassModelTable.ContainsKey(className))
             {
+                ClassModel ClassModel = ClassModelTable[className];
                 isFound = true;
 
-                VerificationState VerificationState = Context.ClassModelTable[className];
+                VerificationState VerificationState = Context.VerificationState;
                 isVerified = VerificationState.VerificationResult != VerificationResult.Default;
                 if (isVerified)
                 {
-                    invariantViolations = VerificationState.ClassModelExchange.ClassModel.InvariantViolations;
-                    requireViolations = VerificationState.ClassModelExchange.ClassModel.RequireViolations;
-                    ensureViolations = VerificationState.ClassModelExchange.ClassModel.EnsureViolations;
-                    assumeViolations = VerificationState.ClassModelExchange.ClassModel.AssumeViolations;
+                    invariantViolations = ClassModel.InvariantViolations;
+                    requireViolations = ClassModel.RequireViolations;
+                    ensureViolations = ClassModel.EnsureViolations;
+                    assumeViolations = ClassModel.AssumeViolations;
                 }
             }
             else
@@ -149,32 +152,26 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
-            {
-                VerificationState VerificationState = Entry.Value;
+            Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
 
-                if (VerificationState.ClassModelExchange.ClassModel.Name == ClassName)
-                {
-                    UpdateVerificationEventForClass(verificationResult, VerificationState);
-                    return;
-                }
+            if (ClassModelTable.ContainsKey(ClassName))
+            {
+                UpdateVerificationEventForClass(ClassName, verificationResult);
+                return;
             }
         }
 
         Log($"Class '{ClassName}' no longer in the list of models, verification result lost.");
     }
 
-    private void UpdateVerificationEventForClass(VerificationResult verificationResult, VerificationState verificationState)
+    private void UpdateVerificationEventForClass(string className, VerificationResult verificationResult)
     {
-        string ClassName = verificationResult.ClassName;
-
-        ClassModel OldClassModel = verificationState.ClassModelExchange.ClassModel;
+        Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+        ClassModel OldClassModel = ClassModelTable[className];
         ClassModel NewClassModel = WithFilledViolationLists(OldClassModel, verificationResult);
+        ClassModelTable[className] = NewClassModel;
 
-        ClassModelExchange OldClassModelExchange = verificationState.ClassModelExchange;
-        ClassModelExchange NewClassModelExchange = OldClassModelExchange with { ClassModel = NewClassModel };
-
-        Context.ClassModelTable[ClassName] = verificationState with { ClassModelExchange = NewClassModelExchange, VerificationResult = verificationResult };
+        Context.VerificationState = Context.VerificationState with { VerificationResult = verificationResult };
     }
 
     private static ClassModel WithFilledViolationLists(ClassModel oldClassModel, VerificationResult verificationResult)
@@ -308,15 +305,14 @@ public partial class ClassModelManager : IDisposable
 
     private void SendClassModelDataForVerification(Channel channel)
     {
-        List<VerificationState> ToVerifyList = new();
-
         lock (Context.Lock)
         {
-            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
+            VerificationState VerificationState = Context.VerificationState;
+
+            foreach (KeyValuePair<string, ClassModel> Entry in VerificationState.ModelExchange.ClassModelTable)
             {
-                VerificationState VerificationState = Entry.Value;
-                ClassModel ClassModel = VerificationState.ClassModelExchange.ClassModel;
-                string ClassName = ClassModel.Name;
+                string ClassName = Entry.Key;
+                ClassModel ClassModel = Entry.Value;
 
                 if (!ClassModel.Unsupported.IsEmpty)
                     Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
@@ -324,32 +320,27 @@ public partial class ClassModelManager : IDisposable
                     Log($"Skipping complete verification for class '{ClassName}', it's being done.");
                 else
                 {
-                    VerificationState = VerificationState with { IsVerificationRequestSent = true };
-                    ToVerifyList.Add(VerificationState);
+                    Context.VerificationState = VerificationState with { IsVerificationRequestSent = true };
+                    break;
                 }
             }
-
-            foreach (VerificationState VerificationState in ToVerifyList)
-                Context.ClassModelTable[VerificationState.ClassModelExchange.ClassModel.Name] = VerificationState;
         }
 
-        foreach (VerificationState VerificationState in ToVerifyList)
+        if (Context.VerificationState.IsVerificationRequestSent)
         {
-            ClassModelExchange ClassModelExchange = VerificationState.ClassModelExchange;
-            ClassModel ClassModel = ClassModelExchange.ClassModel;
-            string ClassName = ClassModel.Name;
+            ModelExchange ModelExchange = Context.VerificationState.ModelExchange;
 
-            string JSonString = JsonConvert.SerializeObject(ClassModelExchange, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            string JSonString = JsonConvert.SerializeObject(ModelExchange, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             byte[] EncodedString = Converter.EncodeString(JSonString);
 
             if (EncodedString.Length <= channel.GetFreeLength())
             {
                 channel.Write(EncodedString);
 
-                Log($"Data send {EncodedString.Length} bytes for class '{ClassName}'.");
+                Log($"Data send {EncodedString.Length} bytes.");
             }
             else
-                Log($"Unable to send data for class '{ClassName}', buffer full.");
+                Log($"Unable to send data, buffer full.");
         }
     }
 

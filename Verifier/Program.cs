@@ -1,6 +1,7 @@
 ﻿namespace Verifier;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -85,19 +86,36 @@ internal class Program
         int Offset = 0;
         while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
         {
-            ClassModelExchange? ClassModelExchange = JsonConvert.DeserializeObject<ClassModelExchange>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
-            if (ClassModelExchange is not null)
+            ModelExchange? ModelExchange = JsonConvert.DeserializeObject<ModelExchange>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
+            if (ModelExchange is not null)
             {
-                Log($"Class model decoded\n{ClassModelExchange.ClassModel}");
-                ProcessClassModel(ClassModelExchange);
+                Log($"Class model list decoded");
+                ProcessModel(ModelExchange);
             }
         }
     }
 
-    private static void ProcessClassModel(ClassModelExchange classModelExchange)
+    private static void ProcessModel(ModelExchange modelExchange)
     {
-        ClassModel ClassModel = classModelExchange.ClassModel;
-        string ClassName = ClassModel.Name;
+        VerificationResult VerificationResult = VerificationResult.Default;
+
+        foreach (KeyValuePair<string, ClassModel> Entry in modelExchange.ClassModelTable)
+        {
+            ClassModel ClassModel = Entry.Value;
+
+            Log(ClassModel.ToString());
+            VerificationResult = ProcessClassModel(ClassModel);
+
+            if (VerificationResult != VerificationResult.Default)
+                break;
+        }
+
+        SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
+    }
+
+    private static VerificationResult ProcessClassModel(ClassModel classModel)
+    {
+        string ClassName = classModel.Name;
         VerificationResult VerificationResult;
 
         try
@@ -107,10 +125,10 @@ internal class Program
                 MaxDepth = MaxDepth,
                 MaxDuration = MaxDuration,
                 ClassName = ClassName,
-                PropertyTable = ClassModel.PropertyTable,
-                FieldTable = ClassModel.FieldTable,
-                MethodTable = ClassModel.MethodTable,
-                InvariantList = ClassModel.InvariantList,
+                PropertyTable = classModel.PropertyTable,
+                FieldTable = classModel.FieldTable,
+                MethodTable = classModel.MethodTable,
+                InvariantList = classModel.InvariantList,
                 Logger = Logger,
             };
 
@@ -125,14 +143,19 @@ internal class Program
             VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
         }
 
-        Channel ToClientChannel = new(classModelExchange.ReceiveChannelGuid, Mode.Send);
+        return VerificationResult;
+    }
+
+    private static void SendResult(Guid receiveChannelGuid, VerificationResult verificationResult)
+    {
+        Channel ToClientChannel = new(receiveChannelGuid, Mode.Send);
         ToClientChannel.Open();
 
         if (ToClientChannel.IsOpen)
         {
             Log($"Client channel opened");
 
-            string JsonString = JsonConvert.SerializeObject(VerificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            string JsonString = JsonConvert.SerializeObject(verificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             byte[] EncodedString = Converter.EncodeString(JsonString);
 
             if (EncodedString.Length <= ToClientChannel.GetFreeLength())

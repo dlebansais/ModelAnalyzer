@@ -1,16 +1,17 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Represents data exchanged between the class model manager and the verifier.
 /// </summary>
-internal partial record ClassModelExchange
+internal partial record ModelExchange
 {
     /// <summary>
-    /// Gets the class model.
+    /// Gets the class models.
     /// </summary>
-    required public ClassModel ClassModel { get; init; }
+    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
 
     /// <summary>
     /// Gets the recive channel guid.

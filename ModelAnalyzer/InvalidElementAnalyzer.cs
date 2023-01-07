@@ -1,7 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -177,69 +179,78 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         if (ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
             return;
 
-        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(classDeclaration, isAsyncRunRequested: false);
+        CompilationUnitSyntax CompilationUnit = classDeclaration.AncestorsAndSelf().OfType<CompilationUnitSyntax>().First();
+        List<ClassDeclarationSyntax> ClassDeclarationList = new();
+        ClassDeclarationList.Add(classDeclaration);
+
+        CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(CompilationUnit, isAsyncRunRequested: false);
         AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
-        IClassModel ClassModel = Manager.GetClassModel(CompilationContext, classDeclaration, SemanticModel);
+        IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, ClassDeclarationList, SemanticModel);
 
-        foreach (IUnsupportedProperty Item in ClassModel.Unsupported.Properties)
+        foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModelTable)
         {
-            string PropertyName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid property '{PropertyName}'.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
-        }
+            IClassModel ClassModel = Entry.Value;
 
-        foreach (IUnsupportedField Item in ClassModel.Unsupported.Fields)
-        {
-            string FieldName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid field '{FieldName}'.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
-        }
+            foreach (IUnsupportedProperty Item in ClassModel.Unsupported.Properties)
+            {
+                string PropertyName = Tools.Truncate(Item.Name.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid property '{PropertyName}'.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
+            }
 
-        foreach (IUnsupportedMethod Item in ClassModel.Unsupported.Methods)
-        {
-            string MethodName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid method '{MethodName}'.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
-        }
+            foreach (IUnsupportedField Item in ClassModel.Unsupported.Fields)
+            {
+                string FieldName = Tools.Truncate(Item.Name.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid field '{FieldName}'.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
+            }
 
-        foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
-        {
-            string ParameterName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter '{ParameterName}'.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
-        }
+            foreach (IUnsupportedMethod Item in ClassModel.Unsupported.Methods)
+            {
+                string MethodName = Tools.Truncate(Item.Name.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid method '{MethodName}'.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
+            }
 
-        foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
-        {
-            string AssertionText = Tools.Truncate(Item.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid require.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
-        }
+            foreach (IUnsupportedParameter Item in ClassModel.Unsupported.Parameters)
+            {
+                string ParameterName = Tools.Truncate(Item.Name.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid parameter '{ParameterName}'.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
+            }
 
-        foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
-        {
-            string AssertionText = Tools.Truncate(Item.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid ensure.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
-        }
+            foreach (IUnsupportedRequire Item in ClassModel.Unsupported.Requires)
+            {
+                string AssertionText = Tools.Truncate(Item.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid require.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
+            }
 
-        foreach (IUnsupportedLocal Item in ClassModel.Unsupported.Locals)
-        {
-            string LocalName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid local variable '{LocalName}'.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
-        }
+            foreach (IUnsupportedEnsure Item in ClassModel.Unsupported.Ensures)
+            {
+                string AssertionText = Tools.Truncate(Item.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid ensure.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
+            }
 
-        foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
-        {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid statement.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidStatement, Item.Location));
-        }
+            foreach (IUnsupportedLocal Item in ClassModel.Unsupported.Locals)
+            {
+                string LocalName = Tools.Truncate(Item.Name.Text);
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid local variable '{LocalName}'.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
+            }
 
-        foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
-        {
-            Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid expression.");
-            context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
+            foreach (IUnsupportedStatement Item in ClassModel.Unsupported.Statements)
+            {
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid statement.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidStatement, Item.Location));
+            }
+
+            foreach (IUnsupportedExpression Item in ClassModel.Unsupported.Expressions)
+            {
+                Logger.Log(LogLevel.Warning, $"Class '{ClassModel.Name}': reporting invalid expression.");
+                context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
+            }
         }
     }
 

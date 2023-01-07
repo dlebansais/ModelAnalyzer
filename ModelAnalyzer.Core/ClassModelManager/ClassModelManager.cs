@@ -32,7 +32,14 @@ public partial class ClassModelManager : IDisposable
         ReceiveChannelGuid = receiveChannelGuid;
 
         Extractor.Extract();
-        Context = new SynchronizedVerificationContext();
+        VerificationState VerificationState = new()
+        {
+            ModelExchange = new ModelExchange() { ClassModelTable = new Dictionary<string, ClassModel>(), ReceiveChannelGuid = receiveChannelGuid },
+            IsVerificationRequestSent = false,
+            VerificationResult = VerificationResult.Default,
+        };
+
+        Context = new SynchronizedVerificationContext() { VerificationState = VerificationState };
         FromServerChannel = InitChannel();
     }
 
@@ -79,24 +86,34 @@ public partial class ClassModelManager : IDisposable
     }
 
     /// <summary>
-    /// Gets the model of a class.
+    /// Gets models of a classes.
     /// </summary>
     /// <param name="compilationContext">The compilation context.</param>
-    /// <param name="classDeclaration">The class declaration.</param>
+    /// <param name="classDeclarationList">The list of class declaration.</param>
     /// <param name="semanticModel">The semantic model.</param>
-    /// <exception cref="ArgumentException">Class name empty.</exception>
-    public IClassModel GetClassModel(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    /// <exception cref="ArgumentException">Empty class name.</exception>
+    public IDictionary<ClassDeclarationSyntax, IClassModel> GetClassModels(CompilationContext compilationContext, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
-        string ClassName = classDeclaration.Identifier.ValueText;
-        if (ClassName == string.Empty)
-            throw new ArgumentException("Class name must not be empty.");
+        string ClassNames = string.Empty;
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+        {
+            string ClassName = ClassDeclaration.Identifier.ValueText;
+            if (ClassName == string.Empty)
+                throw new ArgumentException("Class name must not be empty.");
+
+            if (ClassNames != string.Empty)
+                ClassNames += ", ";
+
+            ClassNames += ClassName;
+        }
 
         // We clear logs only after the constructor has exited.
         ClearLogs();
 
-        Log($"Getting model for class '{ClassName}'.");
+        Log($"Getting model for class '{ClassNames}'.");
 
-        return GetClassModelInternal(compilationContext, classDeclaration, semanticModel);
+        return GetClassModelListInternal(compilationContext, classDeclarationList, semanticModel);
     }
 
     /// <summary>
@@ -132,29 +149,22 @@ public partial class ClassModelManager : IDisposable
         {
             List<string> ToRemoveClassList = new();
 
-            foreach (KeyValuePair<string, VerificationState> Entry in Context.ClassModelTable)
-            {
-                string ClassName = Entry.Key;
-
+            foreach (string ClassName in Context.GetClassModelNameList())
                 if (!existingClassList.Contains(ClassName))
                     ToRemoveClassList.Add(ClassName);
-            }
 
             foreach (string ClassName in ToRemoveClassList)
             {
                 Log($"Removing class '{ClassName}'.");
 
-                Context.ClassModelTable.Remove(ClassName);
+                Context.RemoveClass(ClassName);
             }
         }
     }
 
-    private ClassModel GetClassModelInternal(CompilationContext compilationContext, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    private IDictionary<ClassDeclarationSyntax, IClassModel> GetClassModelListInternal(CompilationContext compilationContext, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
-        string ClassName = classDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
-
-        VerificationState NewVerificationState;
+        Dictionary<ClassDeclarationSyntax, IClassModel> Result = new();
 
         lock (Context.Lock)
         {
@@ -162,88 +172,99 @@ public partial class ClassModelManager : IDisposable
 
             // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
             bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
-            bool ClassModelAlreadyExists = Context.ClassModelTable.ContainsKey(ClassName);
+            bool ClassModelAlreadyExistForAll = classDeclarationList.TrueForAll(classDeclaration => Context.ContainsClass(classDeclaration.Identifier.ValueText));
 
-            if (IsNewCompilationContext || !ClassModelAlreadyExists)
+            if (IsNewCompilationContext || !ClassModelAlreadyExistForAll)
             {
-                ClassDeclarationParser Parser = new(classDeclaration, semanticModel) { Logger = Logger };
-                Parser.Parse();
+                VerificationState OldVerificationState = Context.VerificationState;
+                ModelExchange OldClassModelExchange = OldVerificationState.ModelExchange;
+                Dictionary<string, ClassModel> OldClassModelTable = OldClassModelExchange.ClassModelTable;
+                Dictionary<string, ClassModel> NewClassModelTable = new();
 
-                if (ClassModelAlreadyExists)
+                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                 {
-                    VerificationState OldVerificationState = Context.ClassModelTable[ClassName];
-                    ClassModelExchange OldClassModelExchange = OldVerificationState.ClassModelExchange;
-                    ClassModel OldClassModel = OldClassModelExchange.ClassModel;
+                    string ClassName = ClassDeclaration.Identifier.ValueText;
+                    Debug.Assert(ClassName != string.Empty);
 
-                    ClassModel NewClassModel = OldClassModel with
+                    ClassDeclarationParser Parser = new(ClassDeclaration, semanticModel) { Logger = Logger };
+                    Parser.Parse();
+
+                    ClassModel NewClassModel;
+
+                    if (OldClassModelTable.ContainsKey(ClassName))
                     {
-                        PropertyTable = Parser.PropertyTable,
-                        FieldTable = Parser.FieldTable,
-                        MethodTable = Parser.MethodTable,
-                        InvariantList = Parser.InvariantList,
-                        Unsupported = Parser.Unsupported,
-                    };
+                        Log($"Updating model for class '{ClassName}'.");
 
-                    ClassModelExchange NewClassModelExchange = OldClassModelExchange with
+                        ClassModel OldClassModel = OldClassModelTable[ClassName];
+
+                        NewClassModel = OldClassModel with
+                        {
+                            PropertyTable = Parser.PropertyTable,
+                            FieldTable = Parser.FieldTable,
+                            MethodTable = Parser.MethodTable,
+                            InvariantList = Parser.InvariantList,
+                            Unsupported = Parser.Unsupported,
+                        };
+                    }
+                    else
                     {
-                        ClassModel = NewClassModel,
-                    };
+                        Log($"Adding new model for class '{ClassName}'.");
 
-                    NewVerificationState = OldVerificationState with
-                    {
-                        ClassModelExchange = NewClassModelExchange,
-                        IsVerificationRequestSent = false,
-                        VerificationResult = VerificationResult.Default,
-                    };
+                        NewClassModel = new ClassModel()
+                        {
+                            Name = ClassName,
+                            PropertyTable = Parser.PropertyTable,
+                            FieldTable = Parser.FieldTable,
+                            MethodTable = Parser.MethodTable,
+                            InvariantList = Parser.InvariantList,
+                            Unsupported = Parser.Unsupported,
+                            InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+                            RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+                            EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+                            AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
+                        };
+                    }
 
-                    Context.UpdateClassModel(NewVerificationState);
-
-                    Log($"Updated model for class '{ClassName}'.");
+                    NewClassModelTable.Add(ClassName, NewClassModel);
+                    Result.Add(ClassDeclaration, NewClassModel);
                 }
-                else
+
+                ModelExchange NewClassModelExchange = OldClassModelExchange with
                 {
-                    ClassModel NewClassModel = new ClassModel()
-                    {
-                        Name = ClassName,
-                        PropertyTable = Parser.PropertyTable,
-                        FieldTable = Parser.FieldTable,
-                        MethodTable = Parser.MethodTable,
-                        InvariantList = Parser.InvariantList,
-                        Unsupported = Parser.Unsupported,
-                        InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
-                        RequireViolations = new List<IRequireViolation>().AsReadOnly(),
-                        EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
-                        AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
-                    };
+                    ClassModelTable = NewClassModelTable,
+                };
 
-                    ClassModelExchange NewClassModelExchange = new()
-                    {
-                        ClassModel = NewClassModel,
-                        ReceiveChannelGuid = ReceiveChannelGuid,
-                    };
+                VerificationState NewVerificationState = OldVerificationState with
+                {
+                    ModelExchange = NewClassModelExchange,
+                    IsVerificationRequestSent = false,
+                    VerificationResult = VerificationResult.Default,
+                };
 
-                    NewVerificationState = new VerificationState()
-                    {
-                        ClassModelExchange = NewClassModelExchange,
-                        IsVerificationRequestSent = false,
-                        VerificationResult = VerificationResult.Default,
-                    };
-
-                    Context.AddClassModel(NewVerificationState);
-
-                    Log($"Class model for '{ClassName}' is new and has been added.");
-                }
+                Context.VerificationState = NewVerificationState;
 
                 if (StartMode == VerificationProcessStartMode.Auto)
                     ScheduleAsynchronousVerification();
             }
             else
-                NewVerificationState = Context.ClassModelTable[ClassName];
+            {
+                Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+
+                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+                {
+                    string ClassName = ClassDeclaration.Identifier.ValueText;
+
+                    Debug.Assert(ClassName != string.Empty);
+                    Debug.Assert(ClassModelTable.ContainsKey(ClassName));
+
+                    Result.Add(ClassDeclaration, ClassModelTable[ClassName]);
+                }
+            }
 
             Context.LastCompilationContext = compilationContext;
         }
 
-        return NewVerificationState.ClassModelExchange.ClassModel;
+        return Result;
     }
 
     private void Log(string message)
@@ -255,7 +276,7 @@ public partial class ClassModelManager : IDisposable
     {
         lock (Context.Lock)
         {
-            if (Context.ClassModelTable.Count == 0)
+            if (Context.VerificationState.ModelExchange.ClassModelTable.Count == 0)
                 Logger.Clear();
         }
     }

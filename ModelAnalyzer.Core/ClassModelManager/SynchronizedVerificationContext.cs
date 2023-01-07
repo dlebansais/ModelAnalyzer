@@ -12,38 +12,52 @@ internal class SynchronizedVerificationContext
     /// <summary>
     /// Gets the synchronization lock.
     /// </summary>
-    public object Lock => ((ICollection)ClassModelTable).SyncRoot;
+    public object Lock => ((ICollection)VerificationState.ModelExchange.ClassModelTable).SyncRoot;
 
     /// <summary>
-    /// Adds a class model.
+    /// Checks whether the context contains the name of a class.
     /// </summary>
-    /// <param name="verificationState">The class model.</param>
-    public void AddClassModel(VerificationState verificationState)
+    /// <param name="className">The class name.</param>
+    public bool ContainsClass(string className)
     {
-        string ClassName = verificationState.ClassModelExchange.ClassModel.Name;
-
-        Debug.Assert(!ClassModelTable.ContainsKey(ClassName));
-
-        ClassModelTable.Add(ClassName, verificationState);
+        return VerificationState.ModelExchange.ClassModelTable.ContainsKey(className);
     }
 
     /// <summary>
-    /// Updates an existing class model.
+    /// Removes a class by its name to clean up the list of classes that have been seen.
     /// </summary>
-    /// <param name="verificationState">The class model.</param>
-    public void UpdateClassModel(VerificationState verificationState)
+    /// <param name="className">The class name.</param>
+    public void RemoveClass(string className)
     {
-        string ClassName = verificationState.ClassModelExchange.ClassModel.Name;
+        Dictionary<string, ClassModel> ClassModelTable = VerificationState.ModelExchange.ClassModelTable;
 
-        Debug.Assert(ClassModelTable.ContainsKey(ClassName));
+        Debug.Assert(ClassModelTable.ContainsKey(className));
 
-        ClassModelTable[ClassName] = verificationState;
+        ClassModelTable.Remove(className);
+    }
+
+    private void RemoveClass(List<ClassModel> classModelList, string className)
+    {
+        foreach (ClassModel ClassModel in classModelList)
+            if (ClassModel.Name == className)
+            {
+                classModelList.Remove(ClassModel);
+                break;
+            }
     }
 
     /// <summary>
     /// Gets the table of class models.
     /// </summary>
-    public Dictionary<string, VerificationState> ClassModelTable { get; } = new();
+    public ICollection<string> GetClassModelNameList()
+    {
+        return VerificationState.ModelExchange.ClassModelTable.Keys;
+    }
+
+    /// <summary>
+    /// Gets or sets the verification state.
+    /// </summary>
+    required public VerificationState VerificationState { get; set; }
 
     /// <summary>
     /// Gets or sets the last compilation context.

@@ -75,13 +75,11 @@ internal class TestHelper
 
         using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = classDeclarationList.Count > 1 ? VerificationProcessStartMode.Manual : VerificationProcessStartMode.Auto };
 
-        List<IClassModel> ClassModelList = new();
         MadeUpSemanticModel SemanticModel = new();
 
-        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-        {
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext.GetAnother(), ClassDeclaration, SemanticModel));
-        }
+        var Result = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel);
+
+        List<IClassModel> ClassModelList = new(Result.Values);
 
         if (managerHandler is not null)
             managerHandler(Manager);
@@ -127,7 +125,7 @@ internal class TestHelper
             if (PreviousClassDeclaration != ClassDeclaration)
                 CompilationContext = CompilationContext.GetAnother();
 
-            ClassModelList.Add(Manager.GetClassModel(CompilationContext, ClassDeclaration, SemanticModel));
+            ClassModelList.Add(Manager.GetClassModels(CompilationContext, new List<ClassDeclarationSyntax>() { ClassDeclaration }, SemanticModel).First().Value);
 
             PreviousClassDeclaration = ClassDeclaration;
         }
