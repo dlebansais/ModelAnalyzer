@@ -183,49 +183,7 @@ public partial class ClassModelManager : IDisposable
 
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                 {
-                    string ClassName = ClassDeclaration.Identifier.ValueText;
-                    Debug.Assert(ClassName != string.Empty);
-
-                    ClassDeclarationParser Parser = new(ClassDeclaration, semanticModel) { Logger = Logger };
-                    Parser.Parse();
-
-                    ClassModel NewClassModel;
-
-                    if (OldClassModelTable.ContainsKey(ClassName))
-                    {
-                        Log($"Updating model for class '{ClassName}'.");
-
-                        ClassModel OldClassModel = OldClassModelTable[ClassName];
-
-                        NewClassModel = OldClassModel with
-                        {
-                            PropertyTable = Parser.PropertyTable,
-                            FieldTable = Parser.FieldTable,
-                            MethodTable = Parser.MethodTable,
-                            InvariantList = Parser.InvariantList,
-                            Unsupported = Parser.Unsupported,
-                        };
-                    }
-                    else
-                    {
-                        Log($"Adding new model for class '{ClassName}'.");
-
-                        NewClassModel = new ClassModel()
-                        {
-                            Name = ClassName,
-                            PropertyTable = Parser.PropertyTable,
-                            FieldTable = Parser.FieldTable,
-                            MethodTable = Parser.MethodTable,
-                            InvariantList = Parser.InvariantList,
-                            Unsupported = Parser.Unsupported,
-                            InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
-                            RequireViolations = new List<IRequireViolation>().AsReadOnly(),
-                            EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
-                            AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
-                        };
-                    }
-
-                    NewClassModelTable.Add(ClassName, NewClassModel);
+                    ClassModel NewClassModel = AddOrUpdateClassModel(OldClassModelTable, NewClassModelTable, ClassDeclaration, semanticModel);
                     Result.Add(ClassDeclaration, NewClassModel);
                 }
 
@@ -265,6 +223,55 @@ public partial class ClassModelManager : IDisposable
         }
 
         return Result;
+    }
+
+    private ClassModel AddOrUpdateClassModel(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    {
+        string ClassName = classDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
+
+        ClassDeclarationParser Parser = new(classDeclaration, semanticModel) { Logger = Logger };
+        Parser.Parse();
+
+        ClassModel NewClassModel;
+
+        if (oldClassModelTable.ContainsKey(ClassName))
+        {
+            Log($"Updating model for class '{ClassName}'.");
+
+            ClassModel OldClassModel = oldClassModelTable[ClassName];
+
+            NewClassModel = OldClassModel with
+            {
+                PropertyTable = Parser.PropertyTable,
+                FieldTable = Parser.FieldTable,
+                MethodTable = Parser.MethodTable,
+                InvariantList = Parser.InvariantList,
+                Unsupported = Parser.Unsupported,
+            };
+        }
+        else
+        {
+            Log($"Adding new model for class '{ClassName}'.");
+
+            NewClassModel = new ClassModel()
+            {
+                Name = ClassName,
+                PropertyTable = Parser.PropertyTable,
+                FieldTable = Parser.FieldTable,
+                MethodTable = Parser.MethodTable,
+                InvariantList = Parser.InvariantList,
+                Unsupported = Parser.Unsupported,
+                InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+                RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+                EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+                AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
+            };
+        }
+
+        newClassModelTable.Add(ClassName, NewClassModel);
+
+        return NewClassModel;
     }
 
     private void Log(string message)
