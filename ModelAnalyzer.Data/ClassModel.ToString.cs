@@ -252,6 +252,9 @@ internal partial record ClassModel : IClassModel
     {
         Debug.Assert(expressionType != ExpressionType.Other);
 
-        return expressionType.Name;
+        string NameString = expressionType.Name;
+        string NullableString = expressionType.IsNullable ? "?" : string.Empty;
+
+        return $"{NameString}{NullableString}";
     }
 }

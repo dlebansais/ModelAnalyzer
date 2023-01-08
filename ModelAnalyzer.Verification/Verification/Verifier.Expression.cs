@@ -66,6 +66,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildFunctionCallExpression(verificationContext, FunctionCall, out Expr FunctionCallExpr);
                 ResultExpr = FunctionCallExpr;
                 break;
+            case NewObjectExpression NewObject:
+                Result = BuildNewObjectExpression(verificationContext, NewObject, out Expr NewObjectExpr);
+                ResultExpr = NewObjectExpr;
+                break;
         }
 
         Debug.Assert(ResultExpr is not null);
@@ -322,6 +326,17 @@ internal partial class Verifier : IDisposable
     {
         string Result = $"temp_{TemporaryResultIndex}";
         TemporaryResultIndex++;
+
+        return Result;
+    }
+
+    private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out Expr resultExpr)
+    {
+        bool Result = false;
+        resultExpr = null!;
+
+        // TODO
+        Debug.Assert(resultExpr is not null);
 
         return Result;
     }

@@ -243,6 +243,8 @@ internal partial class ClassDeclarationParser
             NewExpression = new LiteralBooleanValueExpression { Value = true };
         else if (LiteralValue == "false")
             NewExpression = new LiteralBooleanValueExpression { Value = false };
+        else if (LiteralValue == "null")
+            NewExpression = new LiteralNullExpression();
         else if (int.TryParse(LiteralValue, out int IntegerValue))
             NewExpression = new LiteralIntegerValueExpression { Value = IntegerValue };
         else if (double.TryParse(LiteralValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double FloatingPointValue))
@@ -288,5 +290,10 @@ internal partial class ClassDeclarationParser
         }
 
         return NewExpression;
+    }
+
+    private Expression? TryParseNewObjectExpression(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
+    {
+        return null;
     }
 }

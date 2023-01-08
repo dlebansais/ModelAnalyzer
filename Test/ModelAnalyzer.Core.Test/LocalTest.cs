@@ -362,4 +362,208 @@ class Program_CoreLocal_13
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Locals.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Local_WithClassType()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_14
+{
+}
+
+class Program_CoreLocal_15
+{
+    public void Write()
+    {
+        Program_CoreLocal_14 X;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        foreach (IClassModel ClassModel in ClassModelList)
+            Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Local_WithClassTypeNullInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_16
+{
+}
+
+class Program_CoreLocal_17
+{
+    public void Write()
+    {
+        Program_CoreLocal_16 X = null;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Local_NullableWithClassTypeInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_18
+{
+}
+
+class Program_CoreLocal_19
+{
+    public void Write()
+    {
+        Program_CoreLocal_18? X = null;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Local_WithClassTypeObjectInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_20
+{
+}
+
+class Program_CoreLocal_21
+{
+    public void Write()
+    {
+        Program_CoreLocal_20 X = new();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        IList<IMethod> Methods = ClassModel1.GetMethods();
+        Assert.That(Methods.Count, Is.EqualTo(1));
+
+        IMethod FirstMethod = Methods[0];
+
+        IList<ILocal> Locals = FirstMethod.GetLocals();
+
+        Assert.That(Locals.Count, Is.EqualTo(1));
+
+        ILocal FirstLocal = Locals.First();
+
+        Assert.That(FirstLocal.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstLocal.Type.Name, Is.EqualTo("Program_CoreLocal_20"));
+        Assert.That(FirstLocal.Type.IsNullable, Is.False);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreLocal_21
+  public void Write()
+  {
+    Program_CoreLocal_20 X = new Program_CoreLocal_20()
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Local_NullableWithClassTypeObjectInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_22
+{
+}
+
+class Program_CoreLocal_23
+{
+    public void Write()
+    {
+        Program_CoreLocal_22? X = new();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        IList<IMethod> Methods = ClassModel1.GetMethods();
+        Assert.That(Methods.Count, Is.EqualTo(1));
+
+        IMethod FirstMethod = Methods[0];
+
+        IList<ILocal> Locals = FirstMethod.GetLocals();
+
+        Assert.That(Locals.Count, Is.EqualTo(1));
+
+        ILocal FirstLocal = Locals.First();
+
+        Assert.That(FirstLocal.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstLocal.Type.Name, Is.EqualTo("Program_CoreLocal_22"));
+        Assert.That(FirstLocal.Type.IsNullable, Is.True);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreLocal_23
+  public void Write()
+  {
+    Program_CoreLocal_22? X = new Program_CoreLocal_22()
+  }
+"));
+    }
 }

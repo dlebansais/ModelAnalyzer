@@ -34,7 +34,7 @@ public class AnalyzerSemanticModel : IModel
     }
 
     /// <inheritdoc/>
-    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, out ExpressionType classType)
+    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType)
     {
         SymbolInfo SymbolInfo = SemanticModel.GetSymbolInfo(identifierName);
 
@@ -47,7 +47,7 @@ public class AnalyzerSemanticModel : IModel
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                     if (ClassDeclaration.Identifier.ValueText == ClassName)
                     {
-                        classType = new ExpressionType(ClassName);
+                        classType = new ExpressionType(ClassName, isNullable);
                         return true;
                     }
             }

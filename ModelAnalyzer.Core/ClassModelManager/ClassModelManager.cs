@@ -335,7 +335,7 @@ public partial class ClassModelManager : IDisposable
 
     private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, List<string> visitedClasses, ClassModel classModel, ExpressionType variableType)
     {
-        if (!ClassDeclarationParser.IsSimpleExpressionType(variableType))
+        if (!variableType.IsSimple)
         {
             string VisitedClassName = variableType.Name;
             if (visitedClasses.Contains(VisitedClassName))

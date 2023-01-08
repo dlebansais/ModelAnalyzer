@@ -175,6 +175,10 @@ internal partial class ClassDeclarationParser
             return true;
         else if (destinationType == ExpressionType.FloatingPoint && sourceType == ExpressionType.Integer)
             return true;
+        else if (destinationType.IsNullable && sourceType == ExpressionType.Null)
+            return true;
+        else if ((destinationType.IsNullable || !sourceType.IsNullable) && destinationType.Name == sourceType.Name)
+            return true;
         else
             return false;
     }

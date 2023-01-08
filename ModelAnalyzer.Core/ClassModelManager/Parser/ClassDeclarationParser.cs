@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using AnalysisLogger;
@@ -203,8 +204,10 @@ internal partial class ClassDeclarationParser
     {
         if (type is PredefinedTypeSyntax PredefinedType)
             return IsPredefinedTypeSupported(PredefinedType, out variableType);
+        else if (type is NullableTypeSyntax NullableType)
+            return IsNullableClassTypeKnown(parsingContext, NullableType, out variableType);
         else if (type is IdentifierNameSyntax IdentifierName)
-            return IsClassTypeKnown(parsingContext, IdentifierName, out variableType);
+            return IsClassTypeKnown(parsingContext, IdentifierName, isNullable: false, out variableType);
         else
         {
             variableType = ExpressionType.Other;
@@ -233,23 +236,19 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    public static bool IsSimpleExpressionType(ExpressionType variableType)
+    private bool IsNullableClassTypeKnown(ParsingContext parsingContext, NullableTypeSyntax nullableType, out ExpressionType variableType)
     {
-        List<ExpressionType> SimpleExpressionTypeList = new()
-        {
-            ExpressionType.Void,
-            ExpressionType.Boolean,
-            ExpressionType.Integer,
-            ExpressionType.FloatingPoint,
-        };
+        if (nullableType.ElementType is IdentifierNameSyntax IdentifierName)
+            return IsClassTypeKnown(parsingContext, IdentifierName, isNullable: true, out variableType);
 
-        return SimpleExpressionTypeList.Contains(variableType);
+        variableType = ExpressionType.Other;
+        return false;
     }
 
-    private bool IsClassTypeKnown(ParsingContext parsingContext, IdentifierNameSyntax identifierName, out ExpressionType variableType)
+    private bool IsClassTypeKnown(ParsingContext parsingContext, IdentifierNameSyntax identifierName, bool isNullable, out ExpressionType variableType)
     {
         IModel SemanticModel = parsingContext.SemanticModel;
-        if (SemanticModel.GetClassType(identifierName, parsingContext.ClassDeclarationList, out ExpressionType ClassType))
+        if (SemanticModel.GetClassType(identifierName, parsingContext.ClassDeclarationList, isNullable, out ExpressionType ClassType))
         {
             variableType = ClassType;
             return true;

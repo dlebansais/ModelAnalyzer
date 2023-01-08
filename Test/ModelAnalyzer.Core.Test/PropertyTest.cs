@@ -482,4 +482,177 @@ class Program_CoreProperty_19
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Properties.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Property_WithClassType()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_20
+{
+}
+
+class Program_CoreProperty_21
+{
+    public Program_CoreProperty_20 X { get; set; }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        foreach (IClassModel ClassModel in ClassModelList)
+            Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Property_WithClassTypeNullInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_22
+{
+}
+
+class Program_CoreProperty_23
+{
+    public Program_CoreProperty_22 X { get; set; } = null;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Property_NullableWithClassTypeNullInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_24
+{
+}
+
+class Program_CoreProperty_25
+{
+    public Program_CoreProperty_24? X { get; set; } = null;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Property_WithClassTypeObjectInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_26
+{
+}
+
+class Program_CoreProperty_27
+{
+    public Program_CoreProperty_26 X { get; set; } = new();
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        IList<IProperty> Properties = ClassModel1.GetProperties();
+
+        Assert.That(Properties.Count, Is.EqualTo(1));
+
+        IProperty FirstProperty = Properties.First();
+
+        Assert.That(FirstProperty.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstProperty.Type.Name, Is.EqualTo("Program_CoreProperty_26"));
+        Assert.That(FirstProperty.Type.IsNullable, Is.False);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreProperty_27
+  public Program_CoreProperty_26 X { get; set; } = new Program_CoreProperty_26()
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Property_NullableWithClassTypeObjectInitializer()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreProperty_28
+{
+}
+
+class Program_CoreProperty_29
+{
+    public Program_CoreProperty_28? X { get; set; } = new();
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        IList<IProperty> Properties = ClassModel1.GetProperties();
+
+        Assert.That(Properties.Count, Is.EqualTo(1));
+
+        IProperty FirstProperty = Properties.First();
+
+        Assert.That(FirstProperty.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstProperty.Type.Name, Is.EqualTo("Program_CoreProperty_28"));
+        Assert.That(FirstProperty.Type.IsNullable, Is.True);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreProperty_29
+  public Program_CoreProperty_28? X { get; set; } = new Program_CoreProperty_28()
+"));
+    }
 }

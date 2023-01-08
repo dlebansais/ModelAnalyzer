@@ -19,6 +19,7 @@ public interface IModel
     /// </summary>
     /// <param name="identifierName">The name.</param>
     /// <param name="classDeclarationList">The list of class declarations.</param>
+    /// <param name="isNullable">True if the type is nullable.</param>
     /// <param name="classType">The type upon return if a type with that name exists.</param>
-    bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, out ExpressionType classType);
+    bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType);
 }

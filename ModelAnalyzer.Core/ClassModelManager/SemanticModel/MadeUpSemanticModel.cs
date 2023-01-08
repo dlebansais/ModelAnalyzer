@@ -39,14 +39,14 @@ public class MadeUpSemanticModel : IModel
     }
 
     /// <inheritdoc/>
-    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, out ExpressionType classType)
+    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType)
     {
         string ClassName = identifierName.Identifier.ValueText;
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
             if (ClassDeclaration.Identifier.ValueText == ClassName)
             {
-                classType = new ExpressionType(ClassName);
+                classType = new ExpressionType(ClassName, isNullable);
                 return true;
             }
 
