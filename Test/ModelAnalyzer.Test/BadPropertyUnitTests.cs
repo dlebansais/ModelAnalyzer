@@ -7,7 +7,6 @@ using VerifyCS = CSharpAnalyzerVerifier<InvalidElementAnalyzer>;
 [TestFixture]
 public class BadPropertyUnitTests
 {
-
     [Test]
     [Category("Analyzer")]
     public async Task PropertyShouldNotHaveAttribute_Diagnostic()

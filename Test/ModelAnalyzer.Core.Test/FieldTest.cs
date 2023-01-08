@@ -374,6 +374,21 @@ class Program_CoreField_16
 
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        IList<IField> Fields = ClassModel1.GetFields();
+
+        Assert.That(Fields.Count, Is.EqualTo(1));
+
+        IField FirstField = Fields.First();
+
+        Assert.That(FirstField.Name.Text, Is.EqualTo("X"));
+        Assert.That(FirstField.Type.Name, Is.EqualTo("Program_CoreField_15"));
+        Assert.That(FirstField.Type.IsNullable, Is.True);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_16
+  Program_CoreField_15? X = null
+"));
     }
 
     [Test]
@@ -462,5 +477,147 @@ class Program_CoreField_20
         Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreField_20
   Program_CoreField_19? X = new Program_CoreField_19()
 "));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_InvalidObjectInitializerWithArgument()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_21
+{
+}
+
+class Program_CoreField_22
+{
+    Program_CoreField_21 X = new(0);
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_InvalidObjectInitializerWithInitializers()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_23
+{
+    public int X { get; set; }
+}
+
+class Program_CoreField_24
+{
+    Program_CoreField_23 X = new() { X = 0 };
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_Cycle()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_25
+{
+    Program_CoreField_26 X;
+}
+
+class Program_CoreField_26
+{
+    Program_CoreField_25 X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty && ClassModel1.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_UnknownReference()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_27
+{
+}
+
+class Program_CoreField_28
+{
+    Foo X = new();
+    Foo? Y = new();
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Fields.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_NullablePredefinedType()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_29
+{
+    int? X;
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
     }
 }

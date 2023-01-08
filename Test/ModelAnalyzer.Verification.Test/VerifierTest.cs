@@ -129,30 +129,51 @@ class Program_Verifier_ZeroDuration
         CompilationUnitSyntax Root = SyntaxTree.GetCompilationUnitRoot();
         MadeUpSemanticModel SemanticModel = new();
 
-        Debug.Assert(Root.Members.Count == 1);
-
-        ClassDeclarationSyntax ClassDeclaration;
+        List<ClassDeclarationSyntax> ClassDeclarationList = new();
         if (Root.Members[0] is ClassDeclarationSyntax AsClassDeclaration)
-            ClassDeclaration = AsClassDeclaration;
+        {
+            foreach (ClassDeclarationSyntax ClassDeclaration in Root.Members)
+                ClassDeclarationList.Add(ClassDeclaration);
+        }
         else
-            ClassDeclaration = (ClassDeclarationSyntax)((NamespaceDeclarationSyntax)Root.Members[0]).Members[0];
+        {
+            foreach (ClassDeclarationSyntax ClassDeclaration in ((NamespaceDeclarationSyntax)Root.Members[0]).Members)
+                ClassDeclarationList.Add(ClassDeclaration);
+        }
 
         using ClassModelManager Manager = new() { StartMode = VerificationProcessStartMode.Manual };
-        ClassModel ClassModel = (ClassModel)Manager.GetClassModels(CompilationContext.GetAnother(), new List<ClassDeclarationSyntax>() { ClassDeclaration }, SemanticModel).First().Value;
+        IDictionary<ClassDeclarationSyntax, IClassModel> ClassModels = Manager.GetClassModels(CompilationContext.GetAnother(), ClassDeclarationList, SemanticModel);
 
-        Debug.Assert(ClassModel.Unsupported.IsEmpty);
+        Debug.Assert(ClassModels.Count > 0);
 
-        Verifier TestObject = new()
+        Dictionary<string, ClassModel> ClassModelTable = new();
+
+        foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModels)
         {
-            MaxDepth = maxDepth,
-            MaxDuration = maxDuration,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassModel.Name, ClassModel } },
-            ClassName = ClassModel.Name,
-            PropertyTable = ClassModel.PropertyTable,
-            FieldTable = ClassModel.FieldTable,
-            MethodTable = ClassModel.MethodTable,
-            InvariantList = ClassModel.InvariantList,
-        };
+            ClassModel ClassModel = (ClassModel)Entry.Value;
+
+            Debug.Assert(ClassModel.Unsupported.IsEmpty);
+            ClassModelTable.Add(ClassModel.Name, ClassModel);
+        }
+
+        Verifier TestObject = null!;
+
+        foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModels)
+        {
+            ClassModel ClassModel = (ClassModel)Entry.Value;
+
+            TestObject = new()
+            {
+                MaxDepth = maxDepth,
+                MaxDuration = maxDuration,
+                ClassModelTable = ClassModelTable,
+                ClassName = ClassModel.Name,
+                PropertyTable = ClassModel.PropertyTable,
+                FieldTable = ClassModel.FieldTable,
+                MethodTable = ClassModel.MethodTable,
+                InvariantList = ClassModel.InvariantList,
+            };
+        }
 
         return TestObject;
     }

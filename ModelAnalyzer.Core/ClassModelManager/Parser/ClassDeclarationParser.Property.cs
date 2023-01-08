@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,56 +34,12 @@ internal partial class ClassDeclarationParser
         if (propertyTable.ContainsItem(Name))
             return;
 
-        if (PropertyName == Ensure.ResultKeyword)
-        {
-            LogWarning($"Unsupported property name {Ensure.ResultKeyword}.");
-
+        if (!IsPropertyDeclarationSupported(propertyDeclaration))
             IsPropertySupported = false;
-        }
-
-        if (propertyDeclaration.AttributeLists.Count > 0)
-        {
-            LogWarning($"Unsupported {propertyDeclaration.AttributeLists.Count} property attribute(s).");
-
-            IsPropertySupported = false;
-        }
-
-        bool IsPublic = false;
-
-        foreach (SyntaxToken Modifier in propertyDeclaration.Modifiers)
-            if (!Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword))
-            {
-                LogWarning($"Unsupported '{Modifier.ValueText}' property modifier.");
-
-                IsPropertySupported = false;
-            }
-            else
-                IsPublic = true;
-
-        if (!IsPublic)
-        {
-            LogWarning($"Unsupported non-public property.");
-
-            IsPropertySupported = false;
-        }
 
         if (!IsTypeSupported(parsingContext, propertyDeclaration.Type, out ExpressionType PropertyType))
         {
             LogWarning($"Unsupported property type.");
-
-            IsPropertySupported = false;
-        }
-
-        if (propertyDeclaration.ExplicitInterfaceSpecifier is not null)
-        {
-            LogWarning($"Unsupported property interface.");
-
-            IsPropertySupported = false;
-        }
-
-        if (propertyDeclaration.ExpressionBody is not null)
-        {
-            LogWarning($"Unsupported property expression body.");
 
             IsPropertySupported = false;
         }
@@ -137,6 +94,60 @@ internal partial class ClassDeclarationParser
             Location Location = propertyDeclaration.Identifier.GetLocation();
             parsingContext.Unsupported.AddUnsupportedProperty(Location);
         }
+    }
+
+    private bool IsPropertyDeclarationSupported(PropertyDeclarationSyntax propertyDeclaration)
+    {
+        string PropertyName = propertyDeclaration.Identifier.ValueText;
+
+        if (PropertyName == Ensure.ResultKeyword)
+        {
+            LogWarning($"Unsupported property name {Ensure.ResultKeyword}.");
+
+            return false;
+        }
+
+        if (propertyDeclaration.AttributeLists.Count > 0)
+        {
+            LogWarning($"Unsupported {propertyDeclaration.AttributeLists.Count} property attribute(s).");
+
+            return false;
+        }
+
+        bool IsPublic = false;
+
+        foreach (SyntaxToken Modifier in propertyDeclaration.Modifiers)
+            if (!Modifier.IsKind(SyntaxKind.PublicKeyword) && !Modifier.IsKind(SyntaxKind.InternalKeyword))
+            {
+                LogWarning($"Unsupported '{Modifier.ValueText}' property modifier.");
+
+                return false;
+            }
+            else
+                IsPublic = true;
+
+        if (!IsPublic)
+        {
+            LogWarning($"Unsupported non-public property.");
+
+            return false;
+        }
+
+        if (propertyDeclaration.ExplicitInterfaceSpecifier is not null)
+        {
+            LogWarning($"Unsupported property interface.");
+
+            return false;
+        }
+
+        if (propertyDeclaration.ExpressionBody is not null)
+        {
+            LogWarning($"Unsupported property expression body.");
+
+            return false;
+        }
+
+        return true;
     }
 
     private bool IsValidAccessor(AccessorDeclarationSyntax accessor, SyntaxKind expectedKeyword)

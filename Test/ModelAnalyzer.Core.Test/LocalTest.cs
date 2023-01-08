@@ -566,4 +566,39 @@ class Program_CoreLocal_23
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Local_Cycle()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreLocal_24
+{
+    public void Write()
+    {
+        Program_CoreLocal_25 X = new();
+    }
+}
+
+class Program_CoreLocal_25
+{
+    public void Write()
+    {
+        Program_CoreLocal_24 X = new();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty && ClassModel1.Unsupported.IsEmpty, Is.False);
+    }
 }

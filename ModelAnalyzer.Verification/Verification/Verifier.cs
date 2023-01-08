@@ -265,8 +265,14 @@ internal partial class Verifier : IDisposable
             { ExpressionType.FloatingPoint, CreateFloatingPointInitializer },
         };
 
-        Debug.Assert(SwitchTable.ContainsKey(VariableType));
-        Expr Result = SwitchTable[VariableType](variable);
+        Expr Result;
+
+        if (SwitchTable.ContainsKey(VariableType))
+            Result = SwitchTable[VariableType](variable);
+        else if (variable.Initializer is LiteralNullExpression LiteralNull)
+            return Zero; // TODO
+        else
+            Result = CreateObjectInitializer(VariableType);
 
         return Result;
     }
@@ -293,6 +299,12 @@ internal partial class Verifier : IDisposable
             return LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
         else
             return Zero;
+    }
+
+    private Expr CreateObjectInitializer(ExpressionType expressionType)
+    {
+        // TODO
+        return Zero;
     }
 
     private Expr GetDefaultExpr(ExpressionType variableType)

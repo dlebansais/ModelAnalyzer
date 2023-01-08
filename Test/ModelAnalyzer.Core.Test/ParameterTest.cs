@@ -304,4 +304,37 @@ class Program_CoreParameter_13
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Parameter_Cycle()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreParameter_14
+{
+    void Write(Program_CoreParameter_15 x)
+    {
+    }
+}
+
+class Program_CoreParameter_15
+{
+    void Write(Program_CoreParameter_14 x)
+    {
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty && ClassModel1.Unsupported.IsEmpty, Is.False);
+    }
 }

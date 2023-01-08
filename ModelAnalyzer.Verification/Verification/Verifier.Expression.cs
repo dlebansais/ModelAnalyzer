@@ -333,10 +333,7 @@ internal partial class Verifier : IDisposable
     private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out Expr resultExpr)
     {
         bool Result = false;
-        resultExpr = null!;
-
-        // TODO
-        Debug.Assert(resultExpr is not null);
+        resultExpr = Zero; // TODO
 
         return Result;
     }

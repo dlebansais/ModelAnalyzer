@@ -34,6 +34,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParseParenthesizedExpression(NestedParsingContext, ParenthesizedExpression, ref IsErrorReported);
         else if (expressionNode is InvocationExpressionSyntax InvocationExpression)
             NewExpression = TryParseFunctionCallExpression(NestedParsingContext, InvocationExpression, ref IsErrorReported);
+        else if (expressionNode is ObjectCreationExpressionSyntax ObjectCreationExpression)
+            NewExpression = TryParseObjectCreationExpression(NestedParsingContext, ObjectCreationExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -292,8 +294,18 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private Expression? TryParseNewObjectExpression(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
+    private Expression? TryParseObjectCreationExpression(ParsingContext parsingContext, ObjectCreationExpressionSyntax objectCreationExpression, ref bool isErrorReported)
     {
-        return null;
+        NewObjectExpression? NewExpression = null;
+
+        if (objectCreationExpression.ArgumentList is ArgumentListSyntax ArgumentList && ArgumentList.Arguments.Count == 0 && objectCreationExpression.Initializer is null)
+        {
+            if (IsTypeSupported(parsingContext, objectCreationExpression.Type, out ExpressionType ObjectType))
+            {
+                NewExpression = new NewObjectExpression() { ObjectType = ObjectType };
+            }
+        }
+
+        return NewExpression;
     }
 }
