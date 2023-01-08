@@ -45,6 +45,11 @@ internal partial class Verifier : IDisposable
     required public TimeSpan MaxDuration { get; init; }
 
     /// <summary>
+    /// Gets the class models.
+    /// </summary>
+    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+
+    /// <summary>
     /// Gets the class name.
     /// </summary>
     required public string ClassName { get; init; }
@@ -137,7 +142,7 @@ internal partial class Verifier : IDisposable
     private void AnalyzeCallSequence(CallSequence callSequence)
     {
         using Solver Solver = Context.MkSolver();
-        VerificationContext VerificationContext = new() { Solver = Solver, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable };
+        VerificationContext VerificationContext = new() { Solver = Solver, ClassModelTable = ClassModelTable, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable };
 
         AddInitialState(VerificationContext);
 
@@ -171,7 +176,7 @@ internal partial class Verifier : IDisposable
             AliasTable.AddVariable(PropertyVariable);
 
             VariableAlias PropertyNameAlias = AliasTable.GetAlias(PropertyVariable);
-            Expr PropertyExpr = CreateVariableExpr(PropertyNameAlias.ToString(), Property.Type);
+            Expr PropertyExpr = CreateVariableExpr(verificationContext, PropertyNameAlias.ToString(), Property.Type);
             Expr InitializerExpr = CreateInitializerExpr(Property);
             BoolExpr InitExpr = Context.MkEq(PropertyExpr, InitializerExpr);
 
@@ -187,7 +192,7 @@ internal partial class Verifier : IDisposable
             AliasTable.AddVariable(FieldVariable);
 
             VariableAlias FieldNameAlias = AliasTable.GetAlias(FieldVariable);
-            Expr FieldExpr = CreateVariableExpr(FieldNameAlias.ToString(), Field.Type);
+            Expr FieldExpr = CreateVariableExpr(verificationContext, FieldNameAlias.ToString(), Field.Type);
             Expr InitializerExpr = CreateInitializerExpr(Field);
             BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
 
@@ -217,8 +222,12 @@ internal partial class Verifier : IDisposable
         return ResultLocal;
     }
 
-    private Expr CreateVariableExpr(string aliasString, ExpressionType variableType)
+    private Expr CreateVariableExpr(VerificationContext verificationContext, string aliasString, ExpressionType variableType)
     {
+        Debug.Assert(variableType != ExpressionType.Other);
+
+        Expr Result;
+
         Dictionary<ExpressionType, Func<string, Expr>> SwitchTable = new()
         {
             { ExpressionType.Boolean, Context.MkBoolConst },
@@ -226,8 +235,22 @@ internal partial class Verifier : IDisposable
             { ExpressionType.FloatingPoint, Context.MkRealConst },
         };
 
-        Debug.Assert(SwitchTable.ContainsKey(variableType));
-        Expr Result = SwitchTable[variableType](aliasString);
+        if (SwitchTable.ContainsKey(variableType))
+            Result = SwitchTable[variableType](aliasString);
+        else
+        {
+            string ClassName = variableType.Name;
+
+            Debug.Assert(verificationContext.ClassModelTable.ContainsKey(ClassName));
+
+            ClassModel TypeClassModel = verificationContext.ClassModelTable[ClassName];
+            Result = Context.MkIntConst(aliasString);
+
+            foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
+            {
+                // TODO: properties
+            }
+        }
 
         return Result;
     }
@@ -373,7 +396,7 @@ internal partial class Verifier : IDisposable
 
             VariableAlias ParameterBlockAlias = AliasTable.GetAlias(ParameterVariable);
 
-            CreateVariableExpr(ParameterBlockAlias.ToString(), Parameter.Type);
+            CreateVariableExpr(verificationContext, ParameterBlockAlias.ToString(), Parameter.Type);
         }
     }
 
@@ -400,7 +423,7 @@ internal partial class Verifier : IDisposable
 
             VariableAlias LocalBlockAlias = AliasTable.GetAlias(LocalVariable);
 
-            Expr LocalExpr = CreateVariableExpr(LocalBlockAlias.ToString(), Local.Type);
+            Expr LocalExpr = CreateVariableExpr(verificationContext, LocalBlockAlias.ToString(), Local.Type);
             Expr InitializerExpr = CreateInitializerExpr(Local);
             BoolExpr InitExpr = Context.MkEq(LocalExpr, InitializerExpr);
 

@@ -26,7 +26,7 @@ class Program_CoreLocal_0
         double Z;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -74,7 +74,7 @@ class Program_CoreLocal_1
         string X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -111,7 +111,7 @@ class Program_CoreLocal_2
         int X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -135,7 +135,7 @@ class Program_CoreLocal_3
         const int X = 0;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -160,7 +160,7 @@ class Program_CoreLocal_5
         int X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -186,7 +186,7 @@ class Program_CoreLocal_6
         double K = 1;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -223,7 +223,7 @@ class Program_CoreLocal_7
         double K = false;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -250,7 +250,7 @@ class Program_CoreLocal_8
         Y = y;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -278,7 +278,7 @@ class Program_CoreLocal_9
         Y = Z;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -303,7 +303,7 @@ class Program_CoreLocal_11
         int X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -327,7 +327,7 @@ class Program_CoreLocal_12
         int x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -353,7 +353,7 @@ class Program_CoreLocal_13
         int X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -23,7 +24,7 @@ class Program_CoreParser_0
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

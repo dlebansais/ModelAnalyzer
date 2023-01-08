@@ -19,10 +19,26 @@ public partial class VerifierTest
     public void Verifier_BasicTest()
     {
         string ClassName = "Test";
+
+        ClassModel ClassModel = new ClassModel()
+        {
+            Name = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
+            FieldTable = ReadOnlyFieldTable.Empty,
+            MethodTable = ReadOnlyMethodTable.Empty,
+            InvariantList = new List<Invariant>().AsReadOnly(),
+            Unsupported = new Unsupported(),
+            InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+            RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+            EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+            AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
+        };
+
         Verifier TestObject = new()
         {
             MaxDepth = 0,
             MaxDuration = MaxDuration,
+            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
@@ -43,10 +59,26 @@ public partial class VerifierTest
     public void Verifier_EmptyDepth1()
     {
         string ClassName = "Test";
+
+        ClassModel ClassModel = new ClassModel()
+        {
+            Name = ClassName,
+            PropertyTable = ReadOnlyPropertyTable.Empty,
+            FieldTable = ReadOnlyFieldTable.Empty,
+            MethodTable = ReadOnlyMethodTable.Empty,
+            InvariantList = new List<Invariant>().AsReadOnly(),
+            Unsupported = new Unsupported(),
+            InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+            RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+            EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+            AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
+        };
+
         Verifier TestObject = new()
         {
             MaxDepth = 1,
             MaxDuration = MaxDuration,
+            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
@@ -114,6 +146,7 @@ class Program_Verifier_ZeroDuration
         {
             MaxDepth = maxDepth,
             MaxDuration = maxDuration,
+            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassModel.Name, ClassModel } },
             ClassName = ClassModel.Name,
             PropertyTable = ClassModel.PropertyTable,
             FieldTable = ClassModel.FieldTable,

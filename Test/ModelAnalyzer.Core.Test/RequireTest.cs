@@ -28,7 +28,7 @@ class Program_CoreRequire_0
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -80,7 +80,7 @@ class Program_CoreRequire_1
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -120,7 +120,7 @@ class Program_CoreRequire_2
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -172,7 +172,7 @@ class Program_CoreRequire_3
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -201,7 +201,7 @@ class Program_CoreRequire_4
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -231,7 +231,7 @@ class Program_CoreRequire_5
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -273,7 +273,7 @@ class Program_CoreRequire_6
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -319,7 +319,7 @@ class Program_CoreRequire_7
     public delegate void Event();
     // Require: X >= 0
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -354,7 +354,7 @@ class Program_CoreRequire_8
 
     int Read() => X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -390,7 +390,7 @@ class Program_CoreRequire_9
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -427,7 +427,7 @@ class Program_CoreRequire_10
     }
     // Require: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -464,7 +464,7 @@ class Program_CoreRequire_11
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

@@ -54,7 +54,7 @@ internal partial class ClassDeclarationParser
             IsParameterSupported = false;
         }
 
-        if (!IsTypeSupported(parameter.Type, out parameterType))
+        if (!IsTypeSupported(parsingContext, parameter.Type, out parameterType))
         {
             LogWarning($"Unsupported parameter type.");
 

@@ -97,7 +97,7 @@ internal partial class Verifier : IDisposable
 
         AliasTable.IncrementAlias(destination);
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias.ToString(), source.GetExpressionType(verificationContext));
+        Expr DestinationExpr = CreateVariableExpr(verificationContext, DestinationNameAlias.ToString(), source.GetExpressionType(verificationContext));
 
         AddToSolver(verificationContext, Context.MkEq(DestinationExpr, SourceExpr));
         return true;
@@ -150,14 +150,14 @@ internal partial class Verifier : IDisposable
             ExpressionType VariableType = Variable.Type;
 
             VariableAlias NameAlias = AliasTable.GetAlias(Variable);
-            Expr DestinationExpr = CreateVariableExpr(NameAlias.ToString(), VariableType);
+            Expr DestinationExpr = CreateVariableExpr(verificationContext, NameAlias.ToString(), VariableType);
 
             VariableAlias WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
-            Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias.ToString(), VariableType);
+            Expr WhenTrueSourceExpr = CreateVariableExpr(verificationContext, WhenTrueNameAlias.ToString(), VariableType);
             BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
 
             VariableAlias WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
-            Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias.ToString(), VariableType);
+            Expr WhenFalseSourceExpr = CreateVariableExpr(verificationContext, WhenFalseNameAlias.ToString(), VariableType);
             BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
 
             AddToSolver(TrueBranchVerificationContext, WhenTrueInitExpr);
@@ -174,7 +174,7 @@ internal partial class Verifier : IDisposable
             Variable Variable = Alias.Variable;
             ExpressionType VariableType = Variable.Type;
 
-            Expr VariableExpr = CreateVariableExpr(Alias.ToString(), VariableType);
+            Expr VariableExpr = CreateVariableExpr(verificationContext, Alias.ToString(), VariableType);
             Expr InitializerExpr = GetDefaultExpr(VariableType);
             BoolExpr InitExpr = Context.MkEq(VariableExpr, InitializerExpr);
 
@@ -217,7 +217,7 @@ internal partial class Verifier : IDisposable
             AliasTable.AddOrIncrement(ParameterVariable);
             VariableAlias ParameterNameAlias = AliasTable.GetAlias(ParameterVariable);
 
-            Expr TemporaryLocalExpr = CreateVariableExpr(ParameterNameAlias.ToString(), Parameter.Type);
+            Expr TemporaryLocalExpr = CreateVariableExpr(verificationContext, ParameterNameAlias.ToString(), Parameter.Type);
 
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
@@ -262,7 +262,7 @@ internal partial class Verifier : IDisposable
 
             AliasTable.IncrementAlias(ResultLocalVariable);
             VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
-            Expr ResultLocalExpr = CreateVariableExpr(ResultLocalAlias.ToString(), ResultLocal.Type);
+            Expr ResultLocalExpr = CreateVariableExpr(verificationContext, ResultLocalAlias.ToString(), ResultLocal.Type);
 
             AddToSolver(verificationContext, Context.MkEq(ResultLocalExpr, ResultInitializerExpr));
         }

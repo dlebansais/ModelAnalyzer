@@ -14,6 +14,11 @@ internal record VerificationContext : IMemberCollectionContext
     required public Solver Solver { get; init; }
 
     /// <summary>
+    /// Gets the class models.
+    /// </summary>
+    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+
+    /// <summary>
     /// Gets or sets the table of class properties.
     /// </summary>
     public ReadOnlyPropertyTable PropertyTable { get; set; } = new();

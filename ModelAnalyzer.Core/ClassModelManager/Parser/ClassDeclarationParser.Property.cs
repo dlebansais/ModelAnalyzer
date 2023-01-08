@@ -66,7 +66,7 @@ internal partial class ClassDeclarationParser
             IsPropertySupported = false;
         }
 
-        if (!IsTypeSupported(propertyDeclaration.Type, out ExpressionType PropertyType))
+        if (!IsTypeSupported(parsingContext, propertyDeclaration.Type, out ExpressionType PropertyType))
         {
             LogWarning($"Unsupported property type.");
 

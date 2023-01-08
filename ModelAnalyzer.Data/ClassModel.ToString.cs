@@ -250,16 +250,8 @@ internal partial record ClassModel : IClassModel
 
     private string ExpressionTypeToString(ExpressionType expressionType)
     {
-        Dictionary<ExpressionType, string> ExpressionTypeToStringTable = new()
-        {
-            { ExpressionType.Void, "void" },
-            { ExpressionType.Boolean, "bool" },
-            { ExpressionType.Integer, "int" },
-            { ExpressionType.FloatingPoint, "double" },
-        };
+        Debug.Assert(expressionType != ExpressionType.Other);
 
-        Debug.Assert(ExpressionTypeToStringTable.ContainsKey(expressionType));
-
-        return ExpressionTypeToStringTable[expressionType];
+        return expressionType.Name;
     }
 }

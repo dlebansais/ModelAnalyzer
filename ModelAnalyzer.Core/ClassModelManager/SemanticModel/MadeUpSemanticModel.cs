@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -35,5 +36,21 @@ public class MadeUpSemanticModel : IModel
         }
 
         return Result;
+    }
+
+    /// <inheritdoc/>
+    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, out ExpressionType classType)
+    {
+        string ClassName = identifierName.Identifier.ValueText;
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+            if (ClassDeclaration.Identifier.ValueText == ClassName)
+            {
+                classType = new ExpressionType(ClassName);
+                return true;
+            }
+
+        classType = ExpressionType.Other;
+        return false;
     }
 }

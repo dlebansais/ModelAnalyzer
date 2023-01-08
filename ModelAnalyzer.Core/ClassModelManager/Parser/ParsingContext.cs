@@ -1,12 +1,23 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
 /// Represents the context to use when parsing a class.
 /// </summary>
 internal record ParsingContext : IMemberCollectionContext
 {
+    /// <summary>
+    /// Gets the list of class declarations.
+    /// </summary>
+    required public List<ClassDeclarationSyntax> ClassDeclarationList { get; init; }
+
+    /// <summary>
+    /// Gets the semantic model.
+    /// </summary>
+    required public IModel SemanticModel { get; init; }
+
     /// <summary>
     /// Gets the object collecting all unsupported elements found during parsing.
     /// </summary>

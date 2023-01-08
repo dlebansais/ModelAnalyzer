@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -24,7 +25,7 @@ class Program_CoreStatement_0
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -52,7 +53,7 @@ class Program_CoreStatement_1
         Z = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -75,7 +76,7 @@ class Program_CoreStatement_2
         x = x + 1;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -106,7 +107,7 @@ class Program_CoreStatement_3
         }
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -155,7 +156,7 @@ class Program_CoreStatement_4
         }
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -198,7 +199,7 @@ class Program_CoreStatement_5
         return X;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -232,7 +233,7 @@ class Program_CoreStatement_6
         return;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -261,7 +262,7 @@ class Program_CoreStatement_7
     int X;
     int Read() => X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -296,7 +297,7 @@ class Program_CoreStatement_8
         }
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -321,7 +322,7 @@ class Program_CoreStatement_9
             break;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -347,7 +348,7 @@ class Program_CoreStatement_10
         x = y;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -373,7 +374,7 @@ class Program_CoreStatement_11
 
     int[] X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -397,7 +398,7 @@ class Program_CoreStatement_12
         return x is string;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -419,7 +420,7 @@ class Program_CoreStatement_13
     bool X;
     bool Read() => X is string;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -443,7 +444,7 @@ class Program_CoreStatement_14
         x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -471,7 +472,7 @@ class Program_CoreStatement_15
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -506,7 +507,7 @@ class Program_CoreStatement_16
         x[0]();
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -534,7 +535,7 @@ class Program_CoreStatement_17
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -562,7 +563,7 @@ class Program_CoreStatement_18
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -590,7 +591,7 @@ class Program_CoreStatement_19
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -614,7 +615,7 @@ class Program_CoreStatement_20
         x++;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -638,7 +639,7 @@ class Program_CoreStatement_21
         Write2(x);
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -662,7 +663,7 @@ class Program_CoreStatement_22
         Write1(x);
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -690,7 +691,7 @@ class Program_CoreStatement_23
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -721,7 +722,7 @@ class Program_CoreStatement_24
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -751,7 +752,7 @@ class Program_CoreStatement_25
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -778,7 +779,7 @@ class Program_CoreStatement_26
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -807,7 +808,7 @@ class Program_CoreStatement_27
         Write1();
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -837,7 +838,7 @@ class Program_CoreStatement_28
         Write1();
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -863,7 +864,7 @@ class Program_CoreStatement_29
         return Result;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -897,7 +898,7 @@ class Program_CoreStatement_30
         return 0;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -923,7 +924,7 @@ class Program_CoreStatement_31
         return 0;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -956,7 +957,7 @@ class Program_CoreStatement_32
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

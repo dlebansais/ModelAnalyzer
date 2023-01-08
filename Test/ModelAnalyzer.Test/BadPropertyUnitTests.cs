@@ -60,7 +60,7 @@ using System;
 
 class Program_BadProperty_3
 {
-    public Program_BadProperty_3 [|X|]MA0010 { get; set; }
+    public Action [|X|]MA0010 { get; set; }
 }
 ");
     }

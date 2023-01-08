@@ -244,7 +244,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableString is not null);
         Debug.Assert(VariableType != ExpressionType.Other);
 
-        resultExpr = CreateVariableExpr(VariableString!, VariableType);
+        resultExpr = CreateVariableExpr(verificationContext, VariableString!, VariableType);
 
         return true;
     }
@@ -284,7 +284,7 @@ internal partial class Verifier : IDisposable
             AliasTable.AddOrIncrement(ParameterVariable);
             VariableAlias ParameterNameAlias = AliasTable.GetAlias(ParameterVariable);
 
-            Expr TemporaryLocalExpr = CreateVariableExpr(ParameterNameAlias.ToString(), Parameter.Type);
+            Expr TemporaryLocalExpr = CreateVariableExpr(verificationContext, ParameterNameAlias.ToString(), Parameter.Type);
 
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
@@ -313,7 +313,7 @@ internal partial class Verifier : IDisposable
 
         VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
         string ResultLocalString = ResultLocalAlias.ToString();
-        resultExpr = CreateVariableExpr(ResultLocalString, calledFunction.ReturnType);
+        resultExpr = CreateVariableExpr(verificationContext, ResultLocalString, calledFunction.ReturnType);
 
         return true;
     }

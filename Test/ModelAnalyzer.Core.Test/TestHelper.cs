@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Z3;
 
 internal class TestHelper
 {
     private static List<string> ClassNameList = new();
 
-    public static ClassDeclarationSyntax FromSourceCode(string sourceCode, bool isClassNameRepeated = false)
+    public static List<ClassDeclarationSyntax> FromSourceCode(string sourceCode, bool isClassNameRepeated = false)
     {
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText(sourceCode, Options);
@@ -28,21 +27,30 @@ internal class TestHelper
         Debug.Assert(ErrorList.Count == 0);
 
         CompilationUnitSyntax Root = SyntaxTree.GetCompilationUnitRoot();
+        Debug.Assert(Root.Members.Count > 0);
 
-        Debug.Assert(Root.Members.Count == 1);
+        List<ClassDeclarationSyntax> ClassDeclarationList = new();
 
-        ClassDeclarationSyntax ClassDeclaration;
-        if (Root.Members[0] is ClassDeclarationSyntax AsClassDeclaration)
-            ClassDeclaration = AsClassDeclaration;
+        if (Root.Members[0] is ClassDeclarationSyntax)
+        {
+            foreach (ClassDeclarationSyntax ClassDeclaration in Root.Members)
+                ClassDeclarationList.Add(ClassDeclaration);
+        }
         else
-            ClassDeclaration = (ClassDeclarationSyntax)((NamespaceDeclarationSyntax)Root.Members[0]).Members[0];
+        {
+            foreach (ClassDeclarationSyntax ClassDeclaration in ((NamespaceDeclarationSyntax)Root.Members[0]).Members)
+                ClassDeclarationList.Add(ClassDeclaration);
+        }
 
-        string ClassName = ClassDeclaration.Identifier.ValueText;
+        foreach (ClassDeclarationSyntax ClassDeclaration in ClassDeclarationList)
+        {
+            string ClassName = ClassDeclaration.Identifier.ValueText;
 
-        Debug.Assert(!ClassNameList.Contains(ClassName) || isClassNameRepeated);
-        ClassNameList.Add(ClassName);
+            Debug.Assert(!ClassNameList.Contains(ClassName) || isClassNameRepeated);
+            ClassNameList.Add(ClassName);
+        }
 
-        return ClassDeclaration;
+        return ClassDeclarationList;
     }
 
     public static TokenReplacement BeginReplaceToken(ClassDeclarationSyntax classDeclaration)

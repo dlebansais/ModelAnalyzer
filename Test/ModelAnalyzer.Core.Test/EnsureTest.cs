@@ -27,7 +27,7 @@ class Program_CoreEnsure_0
     }
     // Ensure: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -80,7 +80,7 @@ class Program_CoreEnsure_1
     }
     // Ensure: X == x || X != (x + 1) || (X + 1) != x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -106,7 +106,7 @@ class Program_CoreEnsure_2
     }
     // Ensure: 0
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -136,7 +136,7 @@ class Program_CoreEnsure_3
     }
     // Ensure: X == 0; break;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -176,7 +176,7 @@ class Program_CoreEnsure_4
     }
     // Ensure
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -212,7 +212,7 @@ class Program_CoreEnsure_5
     }
     // Ensure: *
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -248,7 +248,7 @@ class Program_CoreEnsure_6
     }
     // Ensure: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -294,7 +294,7 @@ class Program_CoreEnsure_7
     public delegate void Event();
     // Ensure: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -333,7 +333,7 @@ class Program_CoreEnsure_8
     }
     // Ensure: Y == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -370,7 +370,7 @@ class Program_CoreEnsure_9
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -407,7 +407,7 @@ class Program_CoreEnsure_10
     }
     // Ensure: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -443,7 +443,7 @@ class Program_CoreEnsure_11
     }
     // Ensure: X == x
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

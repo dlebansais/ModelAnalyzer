@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ class Program_CoreClass_0
     double Y;
     bool Z() => false;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -53,7 +54,7 @@ using System;
 class Program_CoreClass_1
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -73,7 +74,7 @@ using System;
 public class Program_CoreClass_2
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -96,7 +97,7 @@ using System;
 private class Program_CoreClass_3
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -119,7 +120,7 @@ using System;
 internal class Program_CoreClass_4
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -142,7 +143,7 @@ using System;
 partial class Program_CoreClass_5
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -165,7 +166,7 @@ using System;
 static class Program_CoreClass_6
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -185,7 +186,7 @@ using System;
 class Program_CoreClass_7 : System.Action
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -208,7 +209,7 @@ class Program_CoreClass_8 : IDisposable
     {
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -228,7 +229,7 @@ class Program_CoreClass_9<T>
 {
     T X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -250,7 +251,7 @@ class Program_CoreClass_10<T>
 {
     T X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -270,7 +271,7 @@ using System;
 class Program_CoreClass_11 : System.Action<int>
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -290,7 +291,7 @@ using System;
 class Program_CoreClass_12 : Action
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

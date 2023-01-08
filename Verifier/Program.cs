@@ -104,7 +104,7 @@ internal class Program
             ClassModel ClassModel = Entry.Value;
 
             Log(ClassModel.ToString());
-            VerificationResult = ProcessClassModel(ClassModel);
+            VerificationResult = ProcessClassModel(modelExchange.ClassModelTable, ClassModel);
 
             if (VerificationResult != VerificationResult.Default)
                 break;
@@ -113,7 +113,7 @@ internal class Program
         SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
     }
 
-    private static VerificationResult ProcessClassModel(ClassModel classModel)
+    private static VerificationResult ProcessClassModel(Dictionary<string, ClassModel> classModelTable, ClassModel classModel)
     {
         string ClassName = classModel.Name;
         VerificationResult VerificationResult;
@@ -124,6 +124,7 @@ internal class Program
             {
                 MaxDepth = MaxDepth,
                 MaxDuration = MaxDuration,
+                ClassModelTable = classModelTable,
                 ClassName = ClassName,
                 PropertyTable = classModel.PropertyTable,
                 FieldTable = classModel.FieldTable,

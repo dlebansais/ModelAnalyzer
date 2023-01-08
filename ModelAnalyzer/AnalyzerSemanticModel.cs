@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -30,5 +31,29 @@ public class AnalyzerSemanticModel : IModel
 
         // BaseType is null only if the base is 'object', meaning there is no base.
         return BaseType?.BaseType is not null;
+    }
+
+    /// <inheritdoc/>
+    public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, out ExpressionType classType)
+    {
+        SymbolInfo SymbolInfo = SemanticModel.GetSymbolInfo(identifierName);
+
+        if (SymbolInfo.Symbol is INamedTypeSymbol NamedTypeSymbol)
+        {
+            if (NamedTypeSymbol.TypeKind == TypeKind.Class)
+            {
+                string ClassName = NamedTypeSymbol.Name;
+
+                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+                    if (ClassDeclaration.Identifier.ValueText == ClassName)
+                    {
+                        classType = new ExpressionType(ClassName);
+                        return true;
+                    }
+            }
+        }
+
+        classType = ExpressionType.Other;
+        return false;
     }
 }

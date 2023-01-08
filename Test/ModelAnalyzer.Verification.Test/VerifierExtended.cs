@@ -11,6 +11,7 @@ internal class VerifierExtended : Verifier, IDisposable
         : base()
     {
         MaxDepth = 0;
+        ClassModelTable = new Dictionary<string, ClassModel>();
         ClassName = string.Empty;
         PropertyTable = new();
         FieldTable = new();

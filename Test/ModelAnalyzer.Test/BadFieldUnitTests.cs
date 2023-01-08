@@ -60,7 +60,43 @@ using System;
 
 class Program_BadField_3
 {
-    Program_BadField_3 [|X|]MA0002;
+    Action [|X|]MA0002;
+}
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task FieldValidClasType_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadField_4
+{
+}
+
+class Program_BadField_5
+{
+    Program_BadField_4 X;
+}
+");
+    }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task FieldInvalidClasType_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+struct Program_BadField_4
+{
+}
+
+class Program_BadField_5
+{
+    Program_BadField_4 [|X|]MA0002;
 }
 ");
     }

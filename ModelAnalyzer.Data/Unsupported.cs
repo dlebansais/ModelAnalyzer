@@ -12,6 +12,7 @@ internal record Unsupported : IUnsupported
     /// <inheritdoc/>
     public bool IsEmpty => !InvalidDeclaration &&
                            !HasUnsupporteMember &&
+                           !IsPartOfCycle &&
                            InternalProperties.Count == 0 &&
                            InternalFields.Count == 0 &&
                            InternalMethods.Count == 0 &&
@@ -28,6 +29,9 @@ internal record Unsupported : IUnsupported
 
     /// <inheritdoc/>
     public bool HasUnsupporteMember { get; set; }
+
+    /// <inheritdoc/>
+    public bool IsPartOfCycle { get; set; }
 
     /// <inheritdoc/>
     [JsonIgnore]

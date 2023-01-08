@@ -17,55 +17,20 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassDeclarationParser"/> class.
     /// </summary>
+    /// <param name="classDeclarationList">The list of class declarations containing <paramref name="classDeclaration"/>.</param>
     /// <param name="classDeclaration">The class declaration.</param>
     /// <param name="semanticModel">The semantic model.</param>
-    public ClassDeclarationParser(ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    public ClassDeclarationParser(List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
     {
+        ClassDeclarationList = classDeclarationList;
         ClassDeclaration = classDeclaration;
         SemanticModel = semanticModel;
     }
 
     /// <summary>
-    /// Parses the class declaration.
+    /// Gets the list of class declarations containing <see cref="ClassDeclaration"/>.
     /// </summary>
-    public void Parse()
-    {
-        string ClassName = ClassDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
-
-        Log($"Parsing declaration of class '{ClassName}'");
-
-        ParsingContext ParsingContext = new();
-
-        if (IsClassDeclarationSupported(ClassDeclaration))
-        {
-            ParsingContext.Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
-
-            ParsingContext = ParsingContext with { PropertyTable = ParseProperties(ParsingContext, ClassDeclaration) };
-            ParsingContext = ParsingContext with { FieldTable = ParseFields(ParsingContext, ClassDeclaration) };
-            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
-            ParsingContext = ParsingContext with { IsMethodParsingFirstPassDone = true };
-            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
-            ParsingContext = ParsingContext with { IsMethodParsingComplete = true };
-            ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
-            ReportInvalidMethodCalls(ParsingContext);
-
-            PropertyTable = ParsingContext.PropertyTable.AsReadOnly();
-            FieldTable = ParsingContext.FieldTable.AsReadOnly();
-            MethodTable = ParsingContext.MethodTable.AsReadOnly();
-            InvariantList = ParsingContext.InvariantList.AsReadOnly();
-        }
-        else
-        {
-            ParsingContext.Unsupported.InvalidDeclaration = true;
-            PropertyTable = ReadOnlyPropertyTable.Empty;
-            FieldTable = ReadOnlyFieldTable.Empty;
-            MethodTable = ReadOnlyMethodTable.Empty;
-            InvariantList = new List<Invariant>().AsReadOnly();
-        }
-
-        Unsupported = ParsingContext.Unsupported;
-    }
+    public List<ClassDeclarationSyntax> ClassDeclarationList { get; }
 
     /// <summary>
     /// Gets the class declaration to be parsed.
@@ -106,6 +71,48 @@ internal partial class ClassDeclarationParser
     /// Gets unsupported elements.
     /// </summary>
     public Unsupported Unsupported { get; private set; } = new();
+
+    /// <summary>
+    /// Parses the class declaration.
+    /// </summary>
+    public void Parse()
+    {
+        string ClassName = ClassDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
+
+        Log($"Parsing declaration of class '{ClassName}'");
+
+        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, SemanticModel = SemanticModel };
+
+        if (IsClassDeclarationSupported(ClassDeclaration))
+        {
+            ParsingContext.Unsupported.HasUnsupporteMember = CheckUnsupportedMembers(ClassDeclaration);
+
+            ParsingContext = ParsingContext with { PropertyTable = ParseProperties(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { FieldTable = ParseFields(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { IsMethodParsingFirstPassDone = true };
+            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { IsMethodParsingComplete = true };
+            ParsingContext = ParsingContext with { InvariantList = ParseInvariants(ParsingContext, ClassDeclaration) };
+            ReportInvalidMethodCalls(ParsingContext);
+
+            PropertyTable = ParsingContext.PropertyTable.AsReadOnly();
+            FieldTable = ParsingContext.FieldTable.AsReadOnly();
+            MethodTable = ParsingContext.MethodTable.AsReadOnly();
+            InvariantList = ParsingContext.InvariantList.AsReadOnly();
+        }
+        else
+        {
+            ParsingContext.Unsupported.InvalidDeclaration = true;
+            PropertyTable = ReadOnlyPropertyTable.Empty;
+            FieldTable = ReadOnlyFieldTable.Empty;
+            MethodTable = ReadOnlyMethodTable.Empty;
+            InvariantList = new List<Invariant>().AsReadOnly();
+        }
+
+        Unsupported = ParsingContext.Unsupported;
+    }
 
     private bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)
     {
@@ -192,14 +199,22 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsTypeSupported(TypeSyntax? type, out ExpressionType variableType)
+    private bool IsTypeSupported(ParsingContext parsingContext, TypeSyntax? type, out ExpressionType variableType)
     {
-        variableType = ExpressionType.Other;
-
-        if (type is not PredefinedTypeSyntax PredefinedType)
+        if (type is PredefinedTypeSyntax PredefinedType)
+            return IsPredefinedTypeSupported(PredefinedType, out variableType);
+        else if (type is IdentifierNameSyntax IdentifierName)
+            return IsClassTypeKnown(parsingContext, IdentifierName, out variableType);
+        else
+        {
+            variableType = ExpressionType.Other;
             return false;
+        }
+    }
 
-        SyntaxKind TypeKind = PredefinedType.Keyword.Kind();
+    private bool IsPredefinedTypeSupported(PredefinedTypeSyntax predefinedType, out ExpressionType variableType)
+    {
+        SyntaxKind TypeKind = predefinedType.Keyword.Kind();
         Dictionary<SyntaxKind, ExpressionType> SupportedSyntaxKind = new()
         {
             { SyntaxKind.VoidKeyword, ExpressionType.Void },
@@ -208,11 +223,40 @@ internal partial class ClassDeclarationParser
             { SyntaxKind.DoubleKeyword, ExpressionType.FloatingPoint },
         };
 
-        if (!SupportedSyntaxKind.ContainsKey(TypeKind))
-            return false;
+        if (SupportedSyntaxKind.ContainsKey(TypeKind))
+        {
+            variableType = SupportedSyntaxKind[TypeKind];
+            return true;
+        }
 
-        variableType = SupportedSyntaxKind[TypeKind];
-        return true;
+        variableType = ExpressionType.Other;
+        return false;
+    }
+
+    public static bool IsSimpleExpressionType(ExpressionType variableType)
+    {
+        List<ExpressionType> SimpleExpressionTypeList = new()
+        {
+            ExpressionType.Void,
+            ExpressionType.Boolean,
+            ExpressionType.Integer,
+            ExpressionType.FloatingPoint,
+        };
+
+        return SimpleExpressionTypeList.Contains(variableType);
+    }
+
+    private bool IsClassTypeKnown(ParsingContext parsingContext, IdentifierNameSyntax identifierName, out ExpressionType variableType)
+    {
+        IModel SemanticModel = parsingContext.SemanticModel;
+        if (SemanticModel.GetClassType(identifierName, parsingContext.ClassDeclarationList, out ExpressionType ClassType))
+        {
+            variableType = ClassType;
+            return true;
+        }
+
+        variableType = ExpressionType.Other;
+        return false;
     }
 
     private bool TryParseAssertionTextInTrivia(string text, out SyntaxTree syntaxTree, out int offset)

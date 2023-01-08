@@ -28,7 +28,7 @@ class Program_CoreAssume_0
         X = x / y;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -72,7 +72,7 @@ class Program_CoreAssume_1
         X = x / y;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -110,7 +110,7 @@ class Program_CoreAssume_2
     }
 }
 // Invariant: X / Y >= 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

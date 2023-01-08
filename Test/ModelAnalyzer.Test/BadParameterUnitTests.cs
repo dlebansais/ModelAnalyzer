@@ -64,7 +64,7 @@ using System;
 
 class Program_BadParameter_3
 {
-    void Write([|Program_BadParameter_3 p|]MA0004)
+    void Write([|Action p|]MA0004)
     {
     }
 }

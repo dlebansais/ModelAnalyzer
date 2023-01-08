@@ -183,9 +183,11 @@ public partial class ClassModelManager : IDisposable
 
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                 {
-                    ClassModel NewClassModel = AddOrUpdateClassModel(OldClassModelTable, NewClassModelTable, ClassDeclaration, semanticModel);
+                    ClassModel NewClassModel = AddOrUpdateClassModel(OldClassModelTable, NewClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
                     Result.Add(ClassDeclaration, NewClassModel);
                 }
+
+                ReportCyclicReferences(NewClassModelTable);
 
                 ModelExchange NewClassModelExchange = OldClassModelExchange with
                 {
@@ -225,12 +227,12 @@ public partial class ClassModelManager : IDisposable
         return Result;
     }
 
-    private ClassModel AddOrUpdateClassModel(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    private ClassModel AddOrUpdateClassModel(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
 
-        ClassDeclarationParser Parser = new(classDeclaration, semanticModel) { Logger = Logger };
+        ClassDeclarationParser Parser = new(classDeclarationList, classDeclaration, semanticModel) { Logger = Logger };
         Parser.Parse();
 
         ClassModel NewClassModel;
@@ -272,6 +274,88 @@ public partial class ClassModelManager : IDisposable
         newClassModelTable.Add(ClassName, NewClassModel);
 
         return NewClassModel;
+    }
+
+    private void ReportCyclicReferences(Dictionary<string, ClassModel> classModelTable)
+    {
+        foreach (KeyValuePair<string, ClassModel> Entry in classModelTable)
+            if (IsCycleDetected(classModelTable, Entry.Value))
+                break;
+    }
+
+    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, ClassModel classModel)
+    {
+        List<string> VisitedClasses = new() { classModel.Name };
+
+        return IsCycleDetected(classModelTable, VisitedClasses, classModel);
+    }
+
+    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, List<string> visitedClasses, ClassModel classModel)
+    {
+        if (!classModel.Unsupported.IsEmpty)
+            return false;
+
+        foreach (KeyValuePair<PropertyName, Property> Entry in classModel.PropertyTable)
+        {
+            Property Property = Entry.Value;
+            if (IsCycleDetected(classModelTable, visitedClasses, classModel, Property.Type))
+                return true;
+        }
+
+        foreach (KeyValuePair<FieldName, Field> Entry in classModel.FieldTable)
+        {
+            Field Field = Entry.Value;
+            if (IsCycleDetected(classModelTable, visitedClasses, classModel, Field.Type))
+                return true;
+        }
+
+        foreach (KeyValuePair<MethodName, Method> Entry in classModel.MethodTable)
+        {
+            Method Method = Entry.Value;
+            if (IsCycleDetected(classModelTable, visitedClasses, classModel, Method.ReturnType))
+                return true;
+
+            foreach (KeyValuePair<ParameterName, Parameter> ParameterEntry in Method.ParameterTable)
+            {
+                Parameter Parameter = ParameterEntry.Value;
+                if (IsCycleDetected(classModelTable, visitedClasses, classModel, Parameter.Type))
+                    return true;
+            }
+
+            foreach (KeyValuePair<LocalName, Local> LocalEntry in Method.LocalTable)
+            {
+                Local Local = LocalEntry.Value;
+                if (IsCycleDetected(classModelTable, visitedClasses, classModel, Local.Type))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, List<string> visitedClasses, ClassModel classModel, ExpressionType variableType)
+    {
+        if (!ClassDeclarationParser.IsSimpleExpressionType(variableType))
+        {
+            string VisitedClassName = variableType.Name;
+            if (visitedClasses.Contains(VisitedClassName))
+            {
+                classModel.Unsupported.IsPartOfCycle = true;
+                return true;
+            }
+
+            Debug.Assert(classModelTable.ContainsKey(VisitedClassName));
+
+            ClassModel VisitedClassModel = classModelTable[VisitedClassName];
+            List<string> NewVisitedClasses = new();
+            NewVisitedClasses.AddRange(visitedClasses);
+            NewVisitedClasses.Add(VisitedClassName);
+
+            if (IsCycleDetected(classModelTable, NewVisitedClasses, VisitedClassModel))
+                return true;
+        }
+
+        return false;
     }
 
     private void Log(string message)

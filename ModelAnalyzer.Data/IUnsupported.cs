@@ -23,6 +23,11 @@ public interface IUnsupported
     bool HasUnsupporteMember { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the class refers to itself in a cycle of references.
+    /// </summary>
+    bool IsPartOfCycle { get; }
+
+    /// <summary>
     /// Gets the list of unsupported properties.
     /// </summary>
     IReadOnlyList<IUnsupportedProperty> Properties { get; }

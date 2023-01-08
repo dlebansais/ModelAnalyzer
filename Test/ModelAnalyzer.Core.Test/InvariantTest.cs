@@ -27,7 +27,7 @@ class Program_CoreInvariant_0
     }
 }
 // Invariant: X >= 0 || X < 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -73,7 +73,7 @@ class Program_CoreInvariant_1
     }
 }
 // Invariant: 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -103,7 +103,7 @@ class Program_CoreInvariant_2
     }
 }
 // Invariant: *
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -133,7 +133,7 @@ class Program_CoreInvariant_3
     }
 }
 // Invariant: X == 0; break;
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -161,7 +161,7 @@ class Program_CoreInvariant_4
     {
         X = x;
     }
-}");
+}").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -189,7 +189,7 @@ namespace Invariant
         }
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -215,7 +215,7 @@ class Program_CoreInvariant_6
     }
 }
 // Invariant
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -241,7 +241,7 @@ class Program_CoreInvariant_7
     }
 }
 // Invariant: Y == 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

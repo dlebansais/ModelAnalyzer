@@ -39,7 +39,7 @@ internal partial class ClassDeclarationParser
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
         {
-            if (IsMethodDeclarationValid(methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
+            if (IsMethodDeclarationValid(parsingContext, methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
             {
                 Method TemporaryMethod;
                 ParsingContext MethodParsingContext;
@@ -147,7 +147,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsMethodDeclarationValid(MethodDeclarationSyntax methodDeclaration, out AccessModifier accessModifier, out ExpressionType returnType)
+    private bool IsMethodDeclarationValid(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration, out AccessModifier accessModifier, out ExpressionType returnType)
     {
         bool IsMethodSupported = true;
 
@@ -158,7 +158,7 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
 
-        if (!IsTypeSupported(methodDeclaration.ReturnType, out returnType))
+        if (!IsTypeSupported(parsingContext, methodDeclaration.ReturnType, out returnType))
         {
             LogWarning($"Unsupported method return type.");
 

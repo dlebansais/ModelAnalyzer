@@ -26,11 +26,12 @@ internal partial class ClassDeclarationParser
                 { ExpressionType.FloatingPoint, FloatingPointInitializer },
             };
 
-            Debug.Assert(InitializerTable.ContainsKey(variableType));
-
-            initializerExpression = InitializerTable[variableType](ParsedExpression);
-            if (initializerExpression is not null)
-                return true;
+            if (InitializerTable.ContainsKey(variableType))
+            {
+                initializerExpression = InitializerTable[variableType](ParsedExpression);
+                if (initializerExpression is not null)
+                    return true;
+            }
         }
 
         LogWarning("Unsupported variable initializer.");

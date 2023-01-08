@@ -23,7 +23,7 @@ class Program_CoreField_0
     int Y;
     double Z;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -59,7 +59,7 @@ class Program_CoreField_1
 {
     string X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -90,7 +90,7 @@ class Program_CoreField_2
     [Serializable]
     int X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -111,7 +111,7 @@ class Program_CoreField_3
 {
     public int X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -132,7 +132,7 @@ class Program_CoreField_4
 {
     private int X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -158,7 +158,7 @@ class Program_CoreField_5
     int X;
     int X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -181,7 +181,7 @@ class Program_CoreField_6
     double Z = 1.1;
     double K = 1;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -212,7 +212,7 @@ class Program_CoreField_7
     bool Z = 0;
     double K = false;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -239,7 +239,7 @@ class Program_CoreField_8
         Y = y;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -259,7 +259,7 @@ class Program_CoreField_9
 {
     int Result;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -281,7 +281,7 @@ class Program_CoreField_10
     public int X { get; protected set; }
     int X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -289,5 +289,30 @@ class Program_CoreField_10
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Properties.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Field_WithClassType()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreField_11
+{
+}
+
+class Program_CoreField_12
+{
+    Program_CoreField_11 X;
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        foreach (IClassModel ClassModel in ClassModelList)
+            Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
 }

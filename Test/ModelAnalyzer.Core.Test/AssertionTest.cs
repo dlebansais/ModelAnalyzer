@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
 
@@ -20,7 +21,7 @@ class Program_CoreAssertion_0
     int X;
 }
 // Invariant: X == 0; break;
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -42,7 +43,7 @@ class Program_CoreAssertion_1
     int X;
 }
 // Invariant: typeof(int)
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 

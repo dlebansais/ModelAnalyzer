@@ -28,7 +28,7 @@ using System;
 class Program_CoreClassModelManager_0
 {
 }
-");
+").First();
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
@@ -56,7 +56,7 @@ using System;
 class Program_CoreClassModelManager_1
 {
 }
-");
+").First();
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
@@ -74,7 +74,7 @@ using System;
 class Program_CoreClassModelManager_2
 {
 }
-");
+").First();
 
         bool IsIgnored = ClassModelManager.IsClassIgnoredForModeling(ClassDeclaration);
 
@@ -91,7 +91,7 @@ using System;
 class Program_CoreClassModelManager_3
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -114,7 +114,7 @@ using System;
 class Program_CoreClassModelManager_4
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -137,7 +137,7 @@ using System;
 class Program_CoreClassModelManager_5
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -186,7 +186,7 @@ using System;
 class Program_CoreClassModelManager_6
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -209,7 +209,7 @@ using System;
 class Program_CoreClassModelManager_7
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -227,7 +227,7 @@ class Program_CoreClassModelManager_8
 {
     string X;
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -244,7 +244,7 @@ using System;
 class Program_CoreClassModelManager_9
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -261,7 +261,7 @@ using System;
 class Program_CoreClassModelManager_10
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -278,7 +278,7 @@ using System;
 class Program_CoreClassModelManager_11
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -295,7 +295,7 @@ using System;
 class Program_CoreClassModelManager_12
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -312,7 +312,7 @@ using System;
 class Program_CoreClassModelManager_13
 {
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -331,7 +331,7 @@ class Program_CoreClassModelManager_14
     int X;
 }
 // Invariant: X > 0
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -341,7 +341,7 @@ class Program_CoreClassModelManager_15
     int X;
 }
 // Invariant: X > 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -360,7 +360,7 @@ class Program_CoreClassModelManager_16
     int X;
 }
 // Invariant: X > 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -386,7 +386,7 @@ class Program_CoreClassModelManager_17
     // Ensure: Result == 0
 }
 // Invariant: X == 0
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -416,7 +416,7 @@ class Program_CoreClassModelManager_18
         X = x;
     }
 }
-");
+").First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
@@ -435,7 +435,7 @@ class Program_CoreClassModelManager_19
     int X;
 }
 // Invariant: X > 0
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -445,7 +445,7 @@ class Program_CoreClassModelManager_19
     int X;
 }
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -463,7 +463,7 @@ class Program_CoreClassModelManager_20
 {
     int X;
 }
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -474,7 +474,7 @@ class Program_CoreClassModelManager_20
 }
 // Invariant: X > 0
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -499,7 +499,7 @@ class Program_CoreClassModelManager_21
         X = x;
     }
 }
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -514,7 +514,7 @@ class Program_CoreClassModelManager_21
     }
 }
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -537,7 +537,7 @@ class Program_CoreClassModelManager_22
         X = x;
     }
 }
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -554,7 +554,7 @@ class Program_CoreClassModelManager_22
     }
 }
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -578,7 +578,7 @@ class Program_CoreClassModelManager_23
     }
     // Ensure: X == 0
 }
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -593,7 +593,7 @@ class Program_CoreClassModelManager_23
     }
 }
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
@@ -616,7 +616,7 @@ class Program_CoreClassModelManager_24
         X = x;
     }
 }
-");
+").First();
 
         ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
 using System;
@@ -632,7 +632,7 @@ class Program_CoreClassModelManager_24
     // Ensure: X == 0
 }
 ",
-isClassNameRepeated: true);
+isClassNameRepeated: true).First();
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
 
