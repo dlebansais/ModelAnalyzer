@@ -91,22 +91,17 @@ internal partial class Verifier : IDisposable
 
     private bool AddAssignmentExecution(VerificationContext verificationContext, Variable destination, Expression source)
     {
-        AliasTable AliasTable = verificationContext.AliasTable;
         if (!BuildExpression(verificationContext, source, out Expr SourceExpr))
             return false;
 
-        AliasTable.IncrementAlias(destination);
-        VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
-        Expr DestinationExpr = CreateVariableExpr(verificationContext, DestinationNameAlias.ToString(), source.GetExpressionType(verificationContext));
+        ExpressionType SourceType = source.GetExpressionType(verificationContext);
+        verificationContext.ObjectManager.Assign(verificationContext.Branch, destination, SourceType, SourceExpr);
 
-        AddToSolver(verificationContext, Context.MkEq(DestinationExpr, SourceExpr));
         return true;
     }
 
     private bool AddConditionalExecution(VerificationContext verificationContext, ConditionalStatement conditionalStatement)
     {
-        AliasTable AliasTable = verificationContext.AliasTable;
-
         if (!BuildExpression(verificationContext, conditionalStatement.Condition, out BoolExpr ConditionExpr))
             return false;
 
@@ -124,62 +119,23 @@ internal partial class Verifier : IDisposable
             FalseBranchExpr = Context.MkNot(ConditionExpr);
         }
 
-        AliasTable BeforeWhenTrue = AliasTable.Clone();
+        verificationContext.ObjectManager.BeginBranch(out AliasTable BeforeWhenTrue);
+
         VerificationContext TrueBranchVerificationContext = verificationContext with { Branch = TrueBranchExpr };
         bool TrueBranchResult = AddStatementListExecution(TrueBranchVerificationContext, conditionalStatement.WhenTrueStatementList);
-        List<VariableAlias> AliasesOnlyWhenTrue = AliasTable.GetAliasDifference(BeforeWhenTrue);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
-        AliasTable WhenTrueAliasTable = AliasTable.Clone();
+        verificationContext.ObjectManager.EndBranch(BeforeWhenTrue, out List<VariableAlias> AliasesOnlyWhenTrue, out AliasTable WhenTrueAliasTable);
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
         VerificationContext FalseBranchVerificationContext = verificationContext with { Branch = FalseBranchExpr };
         bool FalseBranchResult = AddStatementListExecution(FalseBranchVerificationContext, conditionalStatement.WhenFalseStatementList);
-        List<VariableAlias> AliasesOnlyWhenFalse = AliasTable.GetAliasDifference(BeforeWhenFalse);
 
-        AliasTable WhenFalseAliasTable = AliasTable.Clone();
+        verificationContext.ObjectManager.EndBranch(BeforeWhenFalse, out List<VariableAlias> AliasesOnlyWhenFalse, out AliasTable WhenFalseAliasTable);
 
-        // Merge aliases from the if branch (the table currently contains the end of the end branch).
-        AliasTable.Merge(WhenTrueAliasTable, out List<Variable> UpdatedNameList);
-
-        AddConditionalAliases(TrueBranchVerificationContext, AliasesOnlyWhenFalse);
-        AddConditionalAliases(FalseBranchVerificationContext, AliasesOnlyWhenTrue);
-
-        foreach (Variable Variable in UpdatedNameList)
-        {
-            ExpressionType VariableType = Variable.Type;
-
-            VariableAlias NameAlias = AliasTable.GetAlias(Variable);
-            Expr DestinationExpr = CreateVariableExpr(verificationContext, NameAlias.ToString(), VariableType);
-
-            VariableAlias WhenTrueNameAlias = WhenTrueAliasTable.GetAlias(Variable);
-            Expr WhenTrueSourceExpr = CreateVariableExpr(verificationContext, WhenTrueNameAlias.ToString(), VariableType);
-            BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
-
-            VariableAlias WhenFalseNameAlias = WhenFalseAliasTable.GetAlias(Variable);
-            Expr WhenFalseSourceExpr = CreateVariableExpr(verificationContext, WhenFalseNameAlias.ToString(), VariableType);
-            BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
-
-            AddToSolver(TrueBranchVerificationContext, WhenTrueInitExpr);
-            AddToSolver(FalseBranchVerificationContext, WhenFalseInitExpr);
-        }
+        verificationContext.ObjectManager.MergeBranches(WhenTrueAliasTable, TrueBranchExpr, AliasesOnlyWhenTrue, WhenFalseAliasTable, FalseBranchExpr, AliasesOnlyWhenFalse);
 
         return TrueBranchResult && FalseBranchResult;
-    }
-
-    private void AddConditionalAliases(VerificationContext verificationContext, List<VariableAlias> aliasList)
-    {
-        foreach (VariableAlias Alias in aliasList)
-        {
-            Variable Variable = Alias.Variable;
-            ExpressionType VariableType = Variable.Type;
-
-            Expr VariableExpr = CreateVariableExpr(verificationContext, Alias.ToString(), VariableType);
-            Expr InitializerExpr = GetDefaultExpr(VariableType);
-            BoolExpr InitExpr = Context.MkEq(VariableExpr, InitializerExpr);
-
-            AddToSolver(verificationContext, InitExpr);
-        }
     }
 
     private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement)
@@ -203,7 +159,6 @@ internal partial class Verifier : IDisposable
 
     private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement, Method calledMethod)
     {
-        AliasTable AliasTable = verificationContext.AliasTable;
         List<Argument> ArgumentList = methodCallStatement.ArgumentList;
 
         int Index = 0;
@@ -211,20 +166,11 @@ internal partial class Verifier : IDisposable
         {
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterBlockName = CreateParameterBlockName(calledMethod, Parameter);
-            Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
-
-            AliasTable.AddOrIncrement(ParameterVariable);
-            VariableAlias ParameterNameAlias = AliasTable.GetAlias(ParameterVariable);
-
-            Expr TemporaryLocalExpr = CreateVariableExpr(verificationContext, ParameterNameAlias.ToString(), Parameter.Type);
 
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
 
-            BoolExpr InitExpr = Context.MkEq(TemporaryLocalExpr, InitializerExpr);
-
-            AddToSolver(verificationContext, InitExpr);
+            verificationContext.ObjectManager.CreateVariable(calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, ResultLocal = null };
@@ -252,7 +198,6 @@ internal partial class Verifier : IDisposable
 
             Method HostMethod = verificationContext.HostMethod!;
             Local ResultLocal = verificationContext.ResultLocal!;
-            AliasTable AliasTable = verificationContext.AliasTable;
 
             if (!BuildExpression(verificationContext, ReturnExpression, out Expr ResultInitializerExpr))
                 return false;
@@ -260,11 +205,8 @@ internal partial class Verifier : IDisposable
             LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
             Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
 
-            AliasTable.IncrementAlias(ResultLocalVariable);
-            VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
-            Expr ResultLocalExpr = CreateVariableExpr(verificationContext, ResultLocalAlias.ToString(), ResultLocal.Type);
-
-            AddToSolver(verificationContext, Context.MkEq(ResultLocalExpr, ResultInitializerExpr));
+            ExpressionType SourceType = ReturnExpression.GetExpressionType(verificationContext);
+            verificationContext.ObjectManager.Assign(verificationContext.Branch, ResultLocalVariable, SourceType, ResultInitializerExpr);
         }
 
         return true;

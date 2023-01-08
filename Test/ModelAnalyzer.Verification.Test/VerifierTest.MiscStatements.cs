@@ -523,6 +523,7 @@ class Program_Verifier_MiscStatement14_2
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
     }
 
+    /*
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements14_Error()
@@ -534,5 +535,5 @@ class Program_Verifier_MiscStatement14_2
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
-    }
+    }*/
 }

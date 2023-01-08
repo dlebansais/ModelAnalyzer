@@ -77,9 +77,9 @@ internal record VerificationContext : IMemberCollectionContext
     public Local? ResultLocal { get; set; }
 
     /// <summary>
-    /// Gets or sets the table of aliases.
+    /// Gets the object manager.
     /// </summary>
-    public AliasTable AliasTable { get; set; } = new();
+    required public ObjectManager ObjectManager { get; init; }
 
     /// <summary>
     /// Gets or sets the execution branch. Null if not within some conditional statement.

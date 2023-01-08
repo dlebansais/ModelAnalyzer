@@ -239,7 +239,7 @@ internal partial class ClassDeclarationParser
     private Expression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
     {
         Expression? NewExpression = null;
-        string LiteralValue = literalExpression.Token.ValueText;
+        string LiteralValue = literalExpression.Token.Text;
 
         if (LiteralValue == "true")
             NewExpression = new LiteralBooleanValueExpression { Value = true };

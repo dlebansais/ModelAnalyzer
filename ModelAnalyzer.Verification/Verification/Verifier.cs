@@ -142,7 +142,8 @@ internal partial class Verifier : IDisposable
     private void AnalyzeCallSequence(CallSequence callSequence)
     {
         using Solver Solver = Context.MkSolver();
-        VerificationContext VerificationContext = new() { Solver = Solver, ClassModelTable = ClassModelTable, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable };
+        ObjectManager ObjectManager = new(Context) { Solver = Solver, Logger = Logger, ClassModelTable = ClassModelTable };
+        VerificationContext VerificationContext = new() { Solver = Solver, ClassModelTable = ClassModelTable, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable, ObjectManager = ObjectManager };
 
         AddInitialState(VerificationContext);
 
@@ -166,38 +167,16 @@ internal partial class Verifier : IDisposable
     {
         Log($"Initial state for class {ClassName}");
 
-        AliasTable AliasTable = verificationContext.AliasTable;
-
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            Variable PropertyVariable = new(Property.Name, Property.Type);
-
-            AliasTable.AddVariable(PropertyVariable);
-
-            VariableAlias PropertyNameAlias = AliasTable.GetAlias(PropertyVariable);
-            Expr PropertyExpr = CreateVariableExpr(verificationContext, PropertyNameAlias.ToString(), Property.Type);
-            Expr InitializerExpr = CreateInitializerExpr(Property);
-            BoolExpr InitExpr = Context.MkEq(PropertyExpr, InitializerExpr);
-
-            Log($"Adding {InitExpr}");
-            verificationContext.Solver.Assert(InitExpr);
+            verificationContext.ObjectManager.CreateVariable(hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            Variable FieldVariable = new(Field.Name, Field.Type);
-
-            AliasTable.AddVariable(FieldVariable);
-
-            VariableAlias FieldNameAlias = AliasTable.GetAlias(FieldVariable);
-            Expr FieldExpr = CreateVariableExpr(verificationContext, FieldNameAlias.ToString(), Field.Type);
-            Expr InitializerExpr = CreateInitializerExpr(Field);
-            BoolExpr InitExpr = Context.MkEq(FieldExpr, InitializerExpr);
-
-            Log($"Adding {InitExpr}");
-            verificationContext.Solver.Assert(InitExpr);
+            verificationContext.ObjectManager.CreateVariable(hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -206,18 +185,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(verificationContext.HostMethod is not null);
 
         Method HostMethod = verificationContext.HostMethod!;
-        AliasTable AliasTable = verificationContext.AliasTable;
-
-        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
-            if (Entry.Key.Text == Ensure.ResultKeyword)
-                return Entry.Value;
-
-        LocalName ResultLocalName = new LocalName() { Text = Ensure.ResultKeyword };
-        Local ResultLocal = new Local() { Name = ResultLocalName, Type = returnType, Initializer = null };
-        LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
-        Variable ResultLocalVariable = new(ResultLocalBlockName, returnType);
-
-        AliasTable.AddOrIncrement(ResultLocalVariable);
+        Local ResultLocal = verificationContext.ObjectManager.FindOrCreateResultLocal(HostMethod, returnType);
 
         return ResultLocal;
     }
@@ -396,19 +364,11 @@ internal partial class Verifier : IDisposable
         Debug.Assert(verificationContext.HostMethod is not null);
 
         Method HostMethod = verificationContext.HostMethod!;
-        AliasTable AliasTable = verificationContext.AliasTable;
 
         foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterBlockName = CreateParameterBlockName(HostMethod, Parameter);
-            Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
-
-            AliasTable.AddOrIncrement(ParameterVariable);
-
-            VariableAlias ParameterBlockAlias = AliasTable.GetAlias(ParameterVariable);
-
-            CreateVariableExpr(verificationContext, ParameterBlockAlias.ToString(), Parameter.Type);
+            verificationContext.ObjectManager.CreateVariable(HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
         }
     }
 
@@ -423,24 +383,11 @@ internal partial class Verifier : IDisposable
         Debug.Assert(verificationContext.HostMethod is not null);
 
         Method HostMethod = verificationContext.HostMethod!;
-        AliasTable AliasTable = verificationContext.AliasTable;
 
         foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
         {
             Local Local = Entry.Value;
-            LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
-            Variable LocalVariable = new(LocalBlockName, Local.Type);
-
-            AliasTable.AddOrIncrement(LocalVariable);
-
-            VariableAlias LocalBlockAlias = AliasTable.GetAlias(LocalVariable);
-
-            Expr LocalExpr = CreateVariableExpr(verificationContext, LocalBlockAlias.ToString(), Local.Type);
-            Expr InitializerExpr = CreateInitializerExpr(Local);
-            BoolExpr InitExpr = Context.MkEq(LocalExpr, InitializerExpr);
-
-            Log($"Adding {InitExpr}");
-            verificationContext.Solver.Assert(InitExpr);
+            verificationContext.ObjectManager.CreateVariable(HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
         }
     }
 

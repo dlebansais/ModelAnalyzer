@@ -183,18 +183,16 @@ internal partial class Verifier : IDisposable
 
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out Expr resultExpr)
     {
-        AliasTable AliasTable = verificationContext.AliasTable;
+        resultExpr = null!;
+
         string VariableName = variableValueExpression.VariableName.Text;
-        string? VariableString = null;
-        ExpressionType VariableType = variableValueExpression.GetExpressionType(verificationContext);
+        VariableAlias? VariableAlias = null;
 
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
             if (Entry.Key.Text == VariableName)
             {
                 Property Property = Entry.Value;
-                Variable PropertyVariable = new(Property.Name, Property.Type);
-                VariableAlias PropertyAlias = AliasTable.GetAlias(PropertyVariable);
-                VariableString = PropertyAlias.ToString();
+                resultExpr = verificationContext.ObjectManager.CreateValueExpr(hostMethod: null, Property.Name, Property.Type);
                 break;
             }
 
@@ -202,9 +200,7 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == VariableName)
             {
                 Field Field = Entry.Value;
-                Variable FieldVariable = new(Field.Name, Field.Type);
-                VariableAlias FieldAlias = AliasTable.GetAlias(FieldVariable);
-                VariableString = FieldAlias.ToString();
+                resultExpr = verificationContext.ObjectManager.CreateValueExpr(hostMethod: null, Field.Name, Field.Type);
                 break;
             }
 
@@ -216,10 +212,7 @@ internal partial class Verifier : IDisposable
                 if (Entry.Key.Text == VariableName)
                 {
                     Parameter Parameter = Entry.Value;
-                    ParameterName ParameterBlockName = CreateParameterBlockName(HostMethod, Parameter);
-                    Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
-                    VariableAlias ParameterAlias = AliasTable.GetAlias(ParameterVariable);
-                    VariableString = ParameterAlias.ToString();
+                    resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, Parameter.Name, Parameter.Type);
                     break;
                 }
 
@@ -229,26 +222,15 @@ internal partial class Verifier : IDisposable
                 if (Entry.Key.Text == VariableName)
                 {
                     Local Local = Entry.Value;
-                    LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
-                    Variable LocalVariable = new(LocalBlockName, Local.Type);
-                    VariableAlias LocalAlias = AliasTable.GetAlias(LocalVariable);
-                    VariableString = LocalAlias.ToString();
+                    resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, Local.Name, Local.Type);
                     break;
                 }
 
-            if (VariableString is null && verificationContext.ResultLocal is Local ResultLocal && VariableName == Ensure.ResultKeyword)
-            {
-                LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
-                Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
-                VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
-                VariableString = ResultLocalAlias.ToString();
-            }
+            if (VariableAlias is null && verificationContext.ResultLocal is Local ResultLocal && VariableName == Ensure.ResultKeyword)
+                resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, ResultLocal.Name, ResultLocal.Type);
         }
 
-        Debug.Assert(VariableString is not null);
-        Debug.Assert(VariableType != ExpressionType.Other);
-
-        resultExpr = CreateVariableExpr(verificationContext, VariableString!, VariableType);
+        Debug.Assert(resultExpr is not null);
 
         return true;
     }
@@ -274,7 +256,6 @@ internal partial class Verifier : IDisposable
     private bool BuildFunctionCallExpression(VerificationContext verificationContext, FunctionCallExpression functionCallExpression, Method calledFunction, out Expr resultExpr)
     {
         resultExpr = GetDefaultExpr(calledFunction.ReturnType);
-        AliasTable AliasTable = verificationContext.AliasTable;
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
 
         int Index = 0;
@@ -282,27 +263,16 @@ internal partial class Verifier : IDisposable
         {
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
-            ParameterName ParameterBlockName = CreateParameterBlockName(calledFunction, Parameter);
-            Variable ParameterVariable = new(ParameterBlockName, Parameter.Type);
-
-            AliasTable.AddOrIncrement(ParameterVariable);
-            VariableAlias ParameterNameAlias = AliasTable.GetAlias(ParameterVariable);
-
-            Expr TemporaryLocalExpr = CreateVariableExpr(verificationContext, ParameterNameAlias.ToString(), Parameter.Type);
 
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
 
-            BoolExpr InitExpr = Context.MkEq(TemporaryLocalExpr, InitializerExpr);
-
-            AddToSolver(verificationContext, InitExpr);
+            verificationContext.ObjectManager.CreateVariable(calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         LocalName ResultLocalName = new LocalName() { Text = CreateTemporaryResultLocal() };
         Local ResultLocal = new Local() { Name = ResultLocalName, Type = calledFunction.ReturnType, Initializer = null };
-        LocalName ResultLocalBlockName = CreateLocalBlockName(calledFunction, ResultLocal);
-        Variable ResultLocalVariable = new(ResultLocalBlockName, calledFunction.ReturnType);
-        AliasTable.AddVariable(ResultLocalVariable);
+        verificationContext.ObjectManager.CreateVariable(calledFunction, ResultLocal.Name, ResultLocal.Type, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = ResultLocal };
 
@@ -315,9 +285,7 @@ internal partial class Verifier : IDisposable
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        VariableAlias ResultLocalAlias = AliasTable.GetAlias(ResultLocalVariable);
-        string ResultLocalString = ResultLocalAlias.ToString();
-        resultExpr = CreateVariableExpr(verificationContext, ResultLocalString, calledFunction.ReturnType);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(calledFunction, ResultLocal.Name, ResultLocal.Type);
 
         return true;
     }
