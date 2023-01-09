@@ -6,7 +6,7 @@ using Microsoft.Z3;
 /// <summary>
 /// Represents the context to use when verifying a class.
 /// </summary>
-internal record VerificationContext : IMemberCollectionContext
+internal record VerificationContext
 {
     /// <summary>
     /// Gets the solver.
@@ -23,48 +23,15 @@ internal record VerificationContext : IMemberCollectionContext
     /// </summary>
     public ReadOnlyPropertyTable PropertyTable { get; set; } = new();
 
-    /// <inheritdoc/>
-    List<Property> IMemberCollectionContext.GetProperties()
-    {
-        List<Property> Result = new();
-
-        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
-
     /// <summary>
     /// Gets or sets the table of class fields.
     /// </summary>
     public ReadOnlyFieldTable FieldTable { get; set; } = new();
 
-    /// <inheritdoc/>
-    List<Field> IMemberCollectionContext.GetFields()
-    {
-        List<Field> Result = new();
-
-        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
-
     /// <summary>
     /// Gets or sets the table of class methods.
     /// </summary>
     public ReadOnlyMethodTable MethodTable { get; set; } = new();
-
-    /// <inheritdoc/>
-    List<Method> IMemberCollectionContext.GetMethods()
-    {
-        List<Method> Result = new();
-
-        foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
 
     /// <summary>
     /// Gets or sets the method within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.

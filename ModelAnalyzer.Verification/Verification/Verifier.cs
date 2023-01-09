@@ -190,91 +190,6 @@ internal partial class Verifier : IDisposable
         return ResultLocal;
     }
 
-    private Expr CreateVariableExpr(VerificationContext verificationContext, string aliasString, ExpressionType variableType)
-    {
-        Debug.Assert(variableType != ExpressionType.Other);
-
-        Expr Result;
-
-        Dictionary<ExpressionType, Func<string, Expr>> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, Context.MkBoolConst },
-            { ExpressionType.Integer, Context.MkIntConst },
-            { ExpressionType.FloatingPoint, Context.MkRealConst },
-        };
-
-        if (SwitchTable.ContainsKey(variableType))
-            Result = SwitchTable[variableType](aliasString);
-        else
-        {
-            string ClassName = variableType.Name;
-
-            Debug.Assert(verificationContext.ClassModelTable.ContainsKey(ClassName));
-
-            ClassModel TypeClassModel = verificationContext.ClassModelTable[ClassName];
-            Result = Context.MkIntConst(aliasString);
-
-            foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
-            {
-                // TODO: properties
-            }
-        }
-
-        return Result;
-    }
-
-    private Expr CreateInitializerExpr(IVariableWithInitializer variable)
-    {
-        ExpressionType VariableType = variable.Type;
-        Dictionary<ExpressionType, Func<IVariableWithInitializer, Expr>> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, CreateBooleanInitializer },
-            { ExpressionType.Integer, CreateIntegerInitializer },
-            { ExpressionType.FloatingPoint, CreateFloatingPointInitializer },
-        };
-
-        Expr Result;
-
-        if (SwitchTable.ContainsKey(VariableType))
-            Result = SwitchTable[VariableType](variable);
-        else if (variable.Initializer is LiteralNullExpression LiteralNull)
-            return Zero; // TODO
-        else
-            Result = CreateObjectInitializer(VariableType);
-
-        return Result;
-    }
-
-    private Expr CreateBooleanInitializer(IVariableWithInitializer variable)
-    {
-        if (variable.Initializer is LiteralBooleanValueExpression LiteralBoolean)
-            return LiteralBoolean.Value == true ? True : False;
-        else
-            return False;
-    }
-
-    private Expr CreateIntegerInitializer(IVariableWithInitializer variable)
-    {
-        if (variable.Initializer is LiteralIntegerValueExpression LiteralInteger)
-            return LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
-        else
-            return Zero;
-    }
-
-    private Expr CreateFloatingPointInitializer(IVariableWithInitializer variable)
-    {
-        if (variable.Initializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
-            return LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
-        else
-            return Zero;
-    }
-
-    private Expr CreateObjectInitializer(ExpressionType expressionType)
-    {
-        // TODO
-        return Zero;
-    }
-
     private Expr GetDefaultExpr(ExpressionType variableType)
     {
         Dictionary<ExpressionType, Expr> SwitchTable = new()
@@ -370,12 +285,6 @@ internal partial class Verifier : IDisposable
             Parameter Parameter = Entry.Value;
             verificationContext.ObjectManager.CreateVariable(HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
         }
-    }
-
-    private static ParameterName CreateParameterBlockName(Method method, Parameter parameter)
-    {
-        string ParameterBlockText = $"{method.Name.Text}${parameter.Name.Text}";
-        return new ParameterName() { Text = ParameterBlockText };
     }
 
     private void AddMethodLocalStates(VerificationContext verificationContext)
@@ -520,20 +429,6 @@ internal partial class Verifier : IDisposable
         Debug.Assert(AssertionTypeTable.ContainsKey(errorType));
 
         return AssertionTypeTable[errorType];
-    }
-
-    private void AddToSolver(VerificationContext verificationContext, BoolExpr boolExpr)
-    {
-        if (verificationContext.Branch is BoolExpr Branch)
-        {
-            verificationContext.Solver.Assert(Context.MkImplies(Branch, boolExpr));
-            Log($"Adding {Branch} => {boolExpr}");
-        }
-        else
-        {
-            verificationContext.Solver.Assert(boolExpr);
-            Log($"Adding {boolExpr}");
-        }
     }
 
     private BoolExpr CreateBooleanExpr(bool value)
