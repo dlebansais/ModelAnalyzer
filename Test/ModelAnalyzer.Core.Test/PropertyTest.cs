@@ -345,7 +345,7 @@ using System;
 
 class Program_CoreProperty_13
 {
-    public int Result { get; set; } => 0;
+    public int X { get; set; } => 0;
 }
 ").First();
 
@@ -366,7 +366,7 @@ using System;
 
 class Program_CoreProperty_14
 {
-    public int Result { get => 0; set; }
+    public int X { get => 0; set; }
 }
 ").First();
 
@@ -387,7 +387,7 @@ using System;
 
 class Program_CoreProperty_15
 {
-    public int Result { get; }
+    public int X { get; }
 }
 ").First();
 
@@ -408,7 +408,7 @@ using System;
 
 class Program_CoreProperty_16
 {
-    public int Result { set; get; }
+    public int X { set; get; }
 }
 ").First();
 
@@ -429,7 +429,7 @@ using System;
 
 class Program_CoreProperty_17
 {
-    public int Result => 0;
+    public int X => 0;
 }
 ").First();
 
@@ -450,7 +450,7 @@ using System;
 
 class Program_CoreProperty_18
 {
-    public int Result { get; protected set; }
+    public int X { get; protected set; }
 }
 ").First();
 

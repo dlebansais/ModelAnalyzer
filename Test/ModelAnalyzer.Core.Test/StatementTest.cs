@@ -1034,4 +1034,46 @@ class Program_CoreStatement_34
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentIncompatibleNullable()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_35
+{
+}
+
+class Program_CoreStatement_36
+{
+}
+
+class Program_CoreStatement_37
+{
+    Program_CoreStatement_35? X = new();
+    Program_CoreStatement_36? Y = new();
+
+    public void Write()
+    {
+        X = Y;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
 }

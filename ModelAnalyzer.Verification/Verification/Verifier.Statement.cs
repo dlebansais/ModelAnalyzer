@@ -94,8 +94,7 @@ internal partial class Verifier : IDisposable
         if (!BuildExpression(verificationContext, source, out Expr SourceExpr))
             return false;
 
-        ExpressionType SourceType = source.GetExpressionType(verificationContext);
-        verificationContext.ObjectManager.Assign(verificationContext.Branch, destination, SourceType, SourceExpr);
+        verificationContext.ObjectManager.Assign(verificationContext.Branch, destination, SourceExpr);
 
         return true;
     }
@@ -205,8 +204,7 @@ internal partial class Verifier : IDisposable
             LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
             Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
 
-            ExpressionType SourceType = ReturnExpression.GetExpressionType(verificationContext);
-            verificationContext.ObjectManager.Assign(verificationContext.Branch, ResultLocalVariable, SourceType, ResultInitializerExpr);
+            verificationContext.ObjectManager.Assign(verificationContext.Branch, ResultLocalVariable, ResultInitializerExpr);
         }
 
         return true;

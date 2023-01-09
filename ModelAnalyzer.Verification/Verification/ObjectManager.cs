@@ -97,12 +97,12 @@ internal class ObjectManager
         return ResultExpr;
     }
 
-    public void Assign(BoolExpr? branch, Variable destination, ExpressionType sourceType, Expr sourceExpr)
+    public void Assign(BoolExpr? branch, Variable destination, Expr sourceExpr)
     {
         AliasTable.IncrementAlias(destination);
 
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
-        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, sourceType);
+        Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
 
         AddToSolver(branch, Context.MkEq(DestinationExpr, sourceExpr));
     }

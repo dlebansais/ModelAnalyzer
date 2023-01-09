@@ -114,6 +114,13 @@ internal partial class ClassDeclarationParser
             return false;
         }
 
+        if (propertyDeclaration.ExplicitInterfaceSpecifier is not null)
+        {
+            LogWarning($"Unsupported property interface.");
+
+            return false;
+        }
+
         bool IsPublic = false;
 
         foreach (SyntaxToken Modifier in propertyDeclaration.Modifiers)
@@ -129,13 +136,6 @@ internal partial class ClassDeclarationParser
         if (!IsPublic)
         {
             LogWarning($"Unsupported non-public property.");
-
-            return false;
-        }
-
-        if (propertyDeclaration.ExplicitInterfaceSpecifier is not null)
-        {
-            LogWarning($"Unsupported property interface.");
 
             return false;
         }
