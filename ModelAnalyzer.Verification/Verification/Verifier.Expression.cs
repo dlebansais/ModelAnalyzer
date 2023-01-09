@@ -58,6 +58,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue, out ArithExpr LiteralFloatingPointValueExpr);
                 ResultExpr = LiteralFloatingPointValueExpr;
                 break;
+            case LiteralNullExpression LiteralNull:
+                Result = BuildLiteralNullExpression(LiteralNull, out Expr LiteralNullExpr);
+                ResultExpr = LiteralNullExpr;
+                break;
             case VariableValueExpression VariableValue:
                 Result = BuildVariableValueExpression(verificationContext, VariableValue, out Expr VariableValueExpr);
                 ResultExpr = VariableValueExpr;
@@ -181,6 +185,12 @@ internal partial class Verifier : IDisposable
         return true;
     }
 
+    private bool BuildLiteralNullExpression(LiteralNullExpression literalNullExpression, out Expr resultExpr)
+    {
+        resultExpr = Zero; // TODO
+        return true;
+    }
+
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out Expr resultExpr)
     {
         resultExpr = null!;
@@ -300,7 +310,7 @@ internal partial class Verifier : IDisposable
 
     private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out Expr resultExpr)
     {
-        bool Result = false;
+        bool Result = true;
         resultExpr = Zero; // TODO
 
         return Result;

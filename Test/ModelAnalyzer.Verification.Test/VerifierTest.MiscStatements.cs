@@ -292,6 +292,16 @@ class Program_Verifier_MiscStatement14_2
     public void Write()
     {
         X = new Program_Verifier_MiscStatement14_1();
+        int Z = 0;
+
+        if (Z == 0)
+        {
+            X = new Program_Verifier_MiscStatement14_1();
+        }
+        else
+        {
+            Y = new Program_Verifier_MiscStatement14_1();
+        }
     }
     // Ensure: X == null
 }
@@ -529,7 +539,7 @@ class Program_Verifier_MiscStatement14_2
     [Category("Verification")]
     public void Verifier_MiscStatements14_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode14, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode14, maxDepth: 2, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
