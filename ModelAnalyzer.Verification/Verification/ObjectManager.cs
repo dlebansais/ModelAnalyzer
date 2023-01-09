@@ -246,11 +246,6 @@ internal class ObjectManager
         return Zero;
     }
 
-    private BoolExpr CreateBooleanExpr(bool value)
-    {
-        return Context.MkBool(value);
-    }
-
     private IntExpr CreateIntegerExpr(int value)
     {
         return Context.MkInt(value);

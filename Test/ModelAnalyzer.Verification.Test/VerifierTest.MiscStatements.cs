@@ -281,11 +281,13 @@ using System;
 
 class Program_Verifier_MiscStatement14_1
 {
+    public int X { get; set; }
 }
 
 class Program_Verifier_MiscStatement14_2
 {
     public Program_Verifier_MiscStatement14_1? X { get; set; } = null;
+    public Program_Verifier_MiscStatement14_1 Y { get; set; } = new();
 
     public void Write()
     {
@@ -523,7 +525,6 @@ class Program_Verifier_MiscStatement14_2
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
     }
 
-    /*
     [Test]
     [Category("Verification")]
     public void Verifier_MiscStatements14_Error()
@@ -532,8 +533,10 @@ class Program_Verifier_MiscStatement14_2
 
         TestObject.Verify();
 
+        /* TODO
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
-    }*/
+        */
+    }
 }

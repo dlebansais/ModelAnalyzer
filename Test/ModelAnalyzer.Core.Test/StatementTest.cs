@@ -1076,4 +1076,38 @@ class Program_CoreStatement_37
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel2.Unsupported.Statements.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentOfNewObjectNoArgument()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_38
+{
+}
+
+class Program_CoreStatement_39
+{
+    public void Write(int x)
+    {
+        Program_CoreStatement_38? Y;
+
+        Y = new Program_CoreStatement_38 { };
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+    }
 }
