@@ -452,4 +452,28 @@ class Program_CoreEnsure_11
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Ensure_DirectResult()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_12
+{
+    public bool Write()
+    {
+        return true;
+    }
+    // Ensure: Result
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
 }

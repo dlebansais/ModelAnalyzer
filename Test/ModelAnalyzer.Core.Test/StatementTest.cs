@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer.Core.Test;
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
@@ -979,6 +980,57 @@ class Program_CoreStatement_32
 
   void Write3(int x)
   {
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentOfNewObject()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_33
+{
+}
+
+class Program_CoreStatement_34
+{
+    Program_CoreStatement_33 X = new();
+
+    public void Write(int x)
+    {
+        Program_CoreStatement_33 Y;
+        bool Z;
+
+        Y = X;
+        Z = Y == new Program_CoreStatement_33();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_34
+  Program_CoreStatement_33 X = new Program_CoreStatement_33()
+
+  public void Write(int x)
+  {
+    Program_CoreStatement_33 Y
+    bool Z
+    Y = X;
+    Z = Y == new Program_CoreStatement_33();
   }
 "));
     }

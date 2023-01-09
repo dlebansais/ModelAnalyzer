@@ -24,7 +24,7 @@ class Program_Verifier_ReturnBoolean1
     private const string ReturnSourceCodeBoolean2 = @"
 using System;
 
-class Program_Verifier_ReturnBoolean1
+class Program_Verifier_ReturnBoolean2
 {
     bool X;
 
@@ -39,7 +39,7 @@ class Program_Verifier_ReturnBoolean1
     private const string ReturnSourceCodeBoolean3 = @"
 using System;
 
-class Program_Verifier_ReturnBoolean1
+class Program_Verifier_ReturnBoolean3
 {
     public bool Read()
     {
@@ -52,7 +52,7 @@ class Program_Verifier_ReturnBoolean1
     private const string ReturnSourceCodeBoolean4 = @"
 using System;
 
-class Program_Verifier_ReturnBoolean1
+class Program_Verifier_ReturnBoolean4
 {
     public bool Read()
     {
@@ -65,7 +65,7 @@ class Program_Verifier_ReturnBoolean1
     private const string ReturnSourceCodeBoolean5 = @"
 using System;
 
-class Program_Verifier_ReturnBoolean1
+class Program_Verifier_ReturnBoolean5
 {
     public bool X { get; set; } = true;
     public bool Y { get; set; } = false;
@@ -81,7 +81,7 @@ class Program_Verifier_ReturnBoolean1
     private const string ReturnSourceCodeBoolean6 = @"
 using System;
 
-class Program_Verifier_ReturnBoolean1
+class Program_Verifier_ReturnBoolean6
 {
     public bool X { get; set; }
 
@@ -183,7 +183,7 @@ class Program_Verifier_ReturnInteger1
     private const string ReturnSourceCodeInteger2 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnInteger2
 {
     int X;
 
@@ -198,7 +198,7 @@ class Program_Verifier_ReturnInteger1
     private const string ReturnSourceCodeInteger3 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnInteger3
 {
     public int Read()
     {
@@ -211,7 +211,7 @@ class Program_Verifier_ReturnInteger1
     private const string ReturnSourceCodeInteger4 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnInteger4
 {
     public int Read()
     {
@@ -224,7 +224,7 @@ class Program_Verifier_ReturnInteger1
     private const string ReturnSourceCodeInteger5 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnInteger5
 {
     public int X { get; set; } = 1;
     public int Y { get; set; } = 0;
@@ -240,7 +240,7 @@ class Program_Verifier_ReturnInteger1
     private const string ReturnSourceCodeInteger6 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnInteger6
 {
     public int X { get; set; }
 
@@ -342,7 +342,7 @@ class Program_Verifier_ReturnFloatingPoint1
     private const string ReturnSourceCodeFloatingPoint2 = @"
 using System;
 
-class Program_Verifier_ReturnFloatingPoint1
+class Program_Verifier_ReturnFloatingPoint2
 {
     double X;
 
@@ -357,7 +357,7 @@ class Program_Verifier_ReturnFloatingPoint1
     private const string ReturnSourceCodeFloatingPoint3 = @"
 using System;
 
-class Program_Verifier_ReturnFloatingPoint1
+class Program_Verifier_ReturnFloatingPoint3
 {
     public double Read()
     {
@@ -370,7 +370,7 @@ class Program_Verifier_ReturnFloatingPoint1
     private const string ReturnSourceCodeFloatingPoint4 = @"
 using System;
 
-class Program_Verifier_ReturnFloatingPoint1
+class Program_Verifier_ReturnFloatingPoint4
 {
     public double Read()
     {
@@ -383,7 +383,7 @@ class Program_Verifier_ReturnFloatingPoint1
     private const string ReturnSourceCodeFloatingPoint5 = @"
 using System;
 
-class Program_Verifier_ReturnFloatingPoint1
+class Program_Verifier_ReturnFloatingPoint5
 {
     public double X { get; set; } = 1.0;
     public double Y { get; set; } = 0.0;
@@ -399,7 +399,7 @@ class Program_Verifier_ReturnFloatingPoint1
     private const string ReturnSourceCodeFloatingPoint6 = @"
 using System;
 
-class Program_Verifier_ReturnInteger1
+class Program_Verifier_ReturnFloatingPoint6
 {
     public double X { get; set; }
 
@@ -408,6 +408,32 @@ class Program_Verifier_ReturnInteger1
         return;
     }
     // Ensure: X == 0.0
+}
+";
+
+    private const string ReturnSourceCodeFloatingPoint7 = @"
+using System;
+
+class Program_Verifier_ReturnFloatingPoint7
+{
+    public double Read()
+    {
+        return 0;
+    }
+    // Ensure: Result == 0.0
+}
+";
+
+    private const string ReturnSourceCodeFloatingPoint8 = @"
+using System;
+
+class Program_Verifier_ReturnFloatingPoint7
+{
+    public double Read()
+    {
+        return 0.0;
+    }
+    // Ensure: Result == 0
 }
 ";
 
@@ -477,6 +503,30 @@ class Program_Verifier_ReturnInteger1
     public void Verifier_ReturnFloatingPoint6_Success()
     {
         Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeFloatingPoint6, maxDepth: 1, maxDuration: MaxDuration);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ReturnFloatingPoint7_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeFloatingPoint7, maxDepth: 1, maxDuration: MaxDuration);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ReturnFloatingPoint8_Success()
+    {
+        Verifier TestObject = CreateVerifierFromSourceCode(ReturnSourceCodeFloatingPoint8, maxDepth: 1, maxDuration: MaxDuration);
 
         TestObject.Verify();
 
