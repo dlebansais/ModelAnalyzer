@@ -24,6 +24,8 @@ internal class ObjectManager
         Zero = Context.MkInt(0);
         False = Context.MkBool(false);
         True = Context.MkBool(true);
+        Null = Context.MkInt(0);
+        ObjectIndex = 1;
     }
 
     /// <summary>
@@ -206,12 +208,15 @@ internal class ObjectManager
 
         Expr Result;
 
-        if (SwitchTable.ContainsKey(variableType))
-            Result = SwitchTable[variableType](variableInitializer);
+        if (variableInitializer is NewObjectExpression NewObject)
+            Result = CreateObjectInitializer(NewObject);
         else if (variableInitializer is LiteralNullExpression LiteralNull)
-            return Zero; // TODO
+            return Null;
         else
-            Result = CreateObjectInitializer(variableType);
+        {
+            Debug.Assert(SwitchTable.ContainsKey(variableType));
+            Result = SwitchTable[variableType](variableInitializer);
+        }
 
         return Result;
     }
@@ -240,10 +245,24 @@ internal class ObjectManager
             return Zero;
     }
 
-    private Expr CreateObjectInitializer(ExpressionType expressionType)
+    private Expr CreateObjectInitializer(NewObjectExpression newObjectExpression)
     {
-        // TODO
-        return Zero;
+        string ClassName = newObjectExpression.ObjectType.Name;
+
+        Debug.Assert(ClassModelTable.ContainsKey(ClassName));
+
+        ClassModel TypeClassModel = ClassModelTable[ClassName];
+
+        Expr Result = Context.MkInt(ObjectIndex);
+
+        foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
+        {
+            // TODO: properties
+        }
+
+        ObjectIndex++;
+
+        return Result;
     }
 
     private IntExpr CreateIntegerExpr(int value)
@@ -324,4 +343,6 @@ internal class ObjectManager
     private IntExpr Zero;
     private BoolExpr False;
     private BoolExpr True;
+    private IntExpr Null;
+    private int ObjectIndex;
 }
