@@ -187,7 +187,7 @@ internal partial class Verifier : IDisposable
 
     private bool BuildLiteralNullExpression(LiteralNullExpression literalNullExpression, out Expr resultExpr)
     {
-        resultExpr = Zero; // TODO
+        resultExpr = Null;
         return true;
     }
 
@@ -311,7 +311,7 @@ internal partial class Verifier : IDisposable
     private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out Expr resultExpr)
     {
         bool Result = true;
-        resultExpr = Zero; // TODO
+        resultExpr = verificationContext.ObjectManager.CreateObjectInitializer(newObjectExpression);
 
         return Result;
     }

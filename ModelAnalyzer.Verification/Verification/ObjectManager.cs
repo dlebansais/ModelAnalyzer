@@ -177,22 +177,13 @@ internal class ObjectManager
             { ExpressionType.FloatingPoint, Context.MkRealConst },
         };
 
-        if (SwitchTable.ContainsKey(variableType))
-            Result = SwitchTable[variableType](AliasString);
-        else
+        if (variableType.IsSimple)
         {
-            string ClassName = variableType.Name;
-
-            Debug.Assert(ClassModelTable.ContainsKey(ClassName));
-
-            ClassModel TypeClassModel = ClassModelTable[ClassName];
-            Result = Context.MkIntConst(AliasString);
-
-            foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
-            {
-                // TODO: properties
-            }
+            Debug.Assert(SwitchTable.ContainsKey(variableType));
+            Result = SwitchTable[variableType](AliasString);
         }
+        else
+            Result = Context.MkIntConst(AliasString);
 
         return Result;
     }
@@ -245,7 +236,7 @@ internal class ObjectManager
             return Zero;
     }
 
-    private Expr CreateObjectInitializer(NewObjectExpression newObjectExpression)
+    public Expr CreateObjectInitializer(NewObjectExpression newObjectExpression)
     {
         string ClassName = newObjectExpression.ObjectType.Name;
 
@@ -313,10 +304,13 @@ internal class ObjectManager
 
         Expr Result;
 
-        if (SwitchTable.ContainsKey(variableType))
+        if (variableType.IsSimple)
+        {
+            Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType];
+        }
         else
-            Result = Zero; // TODO
+            Result = Null;
 
         return Result;
     }

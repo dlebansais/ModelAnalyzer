@@ -543,10 +543,8 @@ class Program_Verifier_MiscStatement14_2
 
         TestObject.Verify();
 
-        /* TODO
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
-        */
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
 }

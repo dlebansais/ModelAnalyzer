@@ -22,6 +22,7 @@ internal partial class Verifier : IDisposable
         Zero = Context.MkInt(0);
         False = Context.MkBool(false);
         True = Context.MkBool(true);
+        Null = Context.MkInt(0);
     }
 
     /// <summary>
@@ -455,5 +456,6 @@ internal partial class Verifier : IDisposable
     private IntExpr Zero;
     private BoolExpr False;
     private BoolExpr True;
+    private IntExpr Null;
     private Stopwatch VerificationWatch = new Stopwatch();
 }
