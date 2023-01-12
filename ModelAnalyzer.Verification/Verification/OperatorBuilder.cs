@@ -12,56 +12,56 @@ internal static class OperatorBuilder
     /// <summary>
     /// Gets the expression builder associated to a binary arithmetic operator.
     /// </summary>
-    public static Dictionary<BinaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr, ArithExpr>> BinaryArithmetic { get; } = new()
+    public static Dictionary<BinaryArithmeticOperator, Func<SolverContext, ArithExpr, ArithExpr, ArithExpr>> BinaryArithmetic { get; } = new()
     {
-        { BinaryArithmeticOperator.Add, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkAdd(left, right) },
-        { BinaryArithmeticOperator.Subtract, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkSub(left, right) },
-        { BinaryArithmeticOperator.Multiply, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkMul(left, right) },
-        { BinaryArithmeticOperator.Divide, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkDiv(left, right) },
+        { BinaryArithmeticOperator.Add, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateAddExpr(left, right) },
+        { BinaryArithmeticOperator.Subtract, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateSubtractExpr(left, right) },
+        { BinaryArithmeticOperator.Multiply, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateMultiplyExpr(left, right) },
+        { BinaryArithmeticOperator.Divide, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateDivideExpr(left, right) },
     };
 
     /// <summary>
     /// Gets the expression builder associated to a unary arithmetic operator.
     /// </summary>
-    public static Dictionary<UnaryArithmeticOperator, Func<Context, ArithExpr, ArithExpr>> UnaryArithmetic { get; } = new()
+    public static Dictionary<UnaryArithmeticOperator, Func<SolverContext, ArithExpr, ArithExpr>> UnaryArithmetic { get; } = new()
     {
-        { UnaryArithmeticOperator.Minus, (Context ctx, ArithExpr operand) => ctx.MkUnaryMinus(operand) },
+        { UnaryArithmeticOperator.Minus, (SolverContext context, ArithExpr operand) => context.CreateNegateExpr(operand) },
     };
 
     /// <summary>
     /// Gets the expression builder associated to a binary logical operator.
     /// </summary>
-    public static Dictionary<BinaryLogicalOperator, Func<Context, BoolExpr, BoolExpr, BoolExpr>> BinaryLogical { get; } = new()
+    public static Dictionary<BinaryLogicalOperator, Func<SolverContext, BoolExpr, BoolExpr, BoolExpr>> BinaryLogical { get; } = new()
     {
-        { BinaryLogicalOperator.Or, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkOr(left, right) },
-        { BinaryLogicalOperator.And, (Context ctx, BoolExpr left, BoolExpr right) => ctx.MkAnd(left, right) },
+        { BinaryLogicalOperator.Or, (SolverContext context, BoolExpr left, BoolExpr right) => context.CreateOrExpr(left, right) },
+        { BinaryLogicalOperator.And, (SolverContext context, BoolExpr left, BoolExpr right) => context.CreateAndExpr(left, right) },
     };
 
     /// <summary>
     /// Gets the expression builder associated to a unary logical operator.
     /// </summary>
-    public static Dictionary<UnaryLogicalOperator, Func<Context, BoolExpr, BoolExpr>> UnaryLogical { get; } = new()
+    public static Dictionary<UnaryLogicalOperator, Func<SolverContext, BoolExpr, BoolExpr>> UnaryLogical { get; } = new()
     {
-        { UnaryLogicalOperator.Not, (Context ctx, BoolExpr operand) => ctx.MkNot(operand) },
+        { UnaryLogicalOperator.Not, (SolverContext context, BoolExpr operand) => context.CreateNotExpr(operand) },
     };
 
     /// <summary>
     /// Gets the expression builder associated to an equality operator.
     /// </summary>
-    public static Dictionary<EqualityOperator, Func<Context, Expr, Expr, BoolExpr>> Equality { get; } = new()
+    public static Dictionary<EqualityOperator, Func<SolverContext, Expr, Expr, BoolExpr>> Equality { get; } = new()
     {
-        { EqualityOperator.Equal, (Context ctx, Expr left, Expr right) => ctx.MkEq(left, right) },
-        { EqualityOperator.NotEqual, (Context ctx, Expr left, Expr right) => ctx.MkNot(ctx.MkEq(left, right)) },
+        { EqualityOperator.Equal, (SolverContext context, Expr left, Expr right) => context.CreateEqualExpr(left, right) },
+        { EqualityOperator.NotEqual, (SolverContext context, Expr left, Expr right) => context.CreateNotEqualExpr(left, right) },
     };
 
     /// <summary>
     /// Gets the expression builder associated to a comparison operator.
     /// </summary>
-    public static Dictionary<ComparisonOperator, Func<Context, ArithExpr, ArithExpr, BoolExpr>> Comparison { get; } = new()
+    public static Dictionary<ComparisonOperator, Func<SolverContext, ArithExpr, ArithExpr, BoolExpr>> Comparison { get; } = new()
     {
-        { ComparisonOperator.GreaterThan, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGt(left, right) },
-        { ComparisonOperator.GreaterThanOrEqual, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkGe(left, right) },
-        { ComparisonOperator.LessThan, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLt(left, right) },
-        { ComparisonOperator.LessThanOrEqual, (Context ctx, ArithExpr left, ArithExpr right) => ctx.MkLe(left, right) },
+        { ComparisonOperator.GreaterThan, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateGreaterThanExpr(left, right) },
+        { ComparisonOperator.GreaterThanOrEqual, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateGreaterThanEqualToExpr(left, right) },
+        { ComparisonOperator.LessThan, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateLesserThanExpr(left, right) },
+        { ComparisonOperator.LessThanOrEqual, (SolverContext context, ArithExpr left, ArithExpr right) => context.CreateLesserThanEqualToExpr(left, right) },
     };
 }

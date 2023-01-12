@@ -3,9 +3,9 @@
 using System;
 
 /// <summary>
-/// Represents a code verifier.
+/// Represents context for Z3 solver.
 /// </summary>
-internal partial class Verifier : IDisposable
+internal partial class SolverContext : IDisposable
 {
     /// <summary>
     /// Called when an object should release its resources.
@@ -30,9 +30,9 @@ internal partial class Verifier : IDisposable
     }
 
     /// <summary>
-    /// Finalizes an instance of the <see cref="Verifier"/> class.
+    /// Finalizes an instance of the <see cref="SolverContext"/> class.
     /// </summary>
-    ~Verifier()
+    ~SolverContext()
     {
         Dispose(false);
     }
@@ -48,6 +48,22 @@ internal partial class Verifier : IDisposable
     private void DisposeNow()
     {
         using (Context)
+        {
+        }
+
+        using (Zero)
+        {
+        }
+
+        using (False)
+        {
+        }
+
+        using (True)
+        {
+        }
+
+        using (Null)
         {
         }
     }

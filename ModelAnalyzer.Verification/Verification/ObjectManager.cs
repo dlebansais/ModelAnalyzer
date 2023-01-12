@@ -16,32 +16,21 @@ internal class ObjectManager
     /// Initializes a new instance of the <see cref="ObjectManager"/> class.
     /// </summary>
     /// <param name="context">The context.</param>
-    public ObjectManager(Context context)
+    public ObjectManager(SolverContext context)
     {
         Context = context;
-
-        // Need model generation turned on.
-        Zero = Context.MkInt(0);
-        False = Context.MkBool(false);
-        True = Context.MkBool(true);
-        Null = Context.MkInt(0);
         ObjectIndex = 1;
     }
 
     /// <summary>
     /// Gets the solver.
     /// </summary>
-    public Context Context { get; }
+    public SolverContext Context { get; }
 
     /// <summary>
     /// Gets the solver.
     /// </summary>
     required public Solver Solver { get; init; }
-
-    /// <summary>
-    /// Gets the logger.
-    /// </summary>
-    required public IAnalysisLogger Logger { get; init; }
 
     /// <summary>
     /// Gets the class models.
@@ -82,8 +71,8 @@ internal class ObjectManager
 
         if (initializerExpr is not null)
         {
-            BoolExpr InitExpr = Context.MkEq(VariableExpr, initializerExpr);
-            AddToSolver(branch, InitExpr);
+            BoolExpr InitExpr = Context.CreateEqualExpr(VariableExpr, initializerExpr);
+            Context.AddToSolver(Solver, branch, InitExpr);
         }
 
         return VariableExpr;
@@ -106,7 +95,7 @@ internal class ObjectManager
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
         Expr DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
 
-        AddToSolver(branch, Context.MkEq(DestinationExpr, sourceExpr));
+        Context.AddToSolver(Solver, branch, Context.CreateEqualExpr(DestinationExpr, sourceExpr));
     }
 
     public void BeginBranch(out AliasTable beginAliasTable)
@@ -137,14 +126,14 @@ internal class ObjectManager
 
             VariableAlias WhenTrueNameAlias = whenTrueAliasTable.GetAlias(Variable);
             Expr WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, VariableType);
-            BoolExpr WhenTrueInitExpr = Context.MkEq(DestinationExpr, WhenTrueSourceExpr);
+            BoolExpr WhenTrueInitExpr = Context.CreateEqualExpr(DestinationExpr, WhenTrueSourceExpr);
 
             VariableAlias WhenFalseNameAlias = whenFalseAliasTable.GetAlias(Variable);
             Expr WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, VariableType);
-            BoolExpr WhenFalseInitExpr = Context.MkEq(DestinationExpr, WhenFalseSourceExpr);
+            BoolExpr WhenFalseInitExpr = Context.CreateEqualExpr(DestinationExpr, WhenFalseSourceExpr);
 
-            AddToSolver(branchTrue, WhenTrueInitExpr);
-            AddToSolver(branchFalse, WhenFalseInitExpr);
+            Context.AddToSolver(Solver, branchTrue, WhenTrueInitExpr);
+            Context.AddToSolver(Solver, branchFalse, WhenFalseInitExpr);
         }
     }
 
@@ -157,9 +146,9 @@ internal class ObjectManager
 
             Expr VariableExpr = CreateVariableExpr(Alias, VariableType);
             Expr InitializerExpr = GetDefaultExpr(VariableType);
-            BoolExpr InitExpr = Context.MkEq(VariableExpr, InitializerExpr);
+            BoolExpr InitExpr = Context.CreateEqualExpr(VariableExpr, InitializerExpr);
 
-            AddToSolver(branch, InitExpr);
+            Context.AddToSolver(Solver, branch, InitExpr);
         }
     }
 
@@ -172,9 +161,9 @@ internal class ObjectManager
 
         Dictionary<ExpressionType, Func<string, Expr>> SwitchTable = new()
         {
-            { ExpressionType.Boolean, Context.MkBoolConst },
-            { ExpressionType.Integer, Context.MkIntConst },
-            { ExpressionType.FloatingPoint, Context.MkRealConst },
+            { ExpressionType.Boolean, Context.CreateBooleanConstant },
+            { ExpressionType.Integer, Context.CreateIntegerConstant },
+            { ExpressionType.FloatingPoint, Context.CreateFloatingPointConstant },
         };
 
         if (variableType.IsSimple)
@@ -183,7 +172,7 @@ internal class ObjectManager
             Result = SwitchTable[variableType](AliasString);
         }
         else
-            Result = Context.MkIntConst(AliasString);
+            Result = Context.CreateReferenceConstant(AliasString);
 
         return Result;
     }
@@ -202,7 +191,7 @@ internal class ObjectManager
         if (variableInitializer is NewObjectExpression NewObject)
             Result = CreateObjectInitializer(NewObject);
         else if (variableInitializer is LiteralNullExpression LiteralNull)
-            return Null;
+            return Context.Null;
         else
         {
             Debug.Assert(SwitchTable.ContainsKey(variableType));
@@ -215,25 +204,25 @@ internal class ObjectManager
     private Expr CreateBooleanInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralBooleanValueExpression LiteralBoolean)
-            return LiteralBoolean.Value == true ? True : False;
+            return Context.CreateBooleanValue(LiteralBoolean.Value);
         else
-            return False;
+            return Context.False;
     }
 
     private Expr CreateIntegerInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralIntegerValueExpression LiteralInteger)
-            return LiteralInteger.Value == 0 ? Zero : CreateIntegerExpr(LiteralInteger.Value);
+            return Context.CreateIntegerValue(LiteralInteger.Value);
         else
-            return Zero;
+            return Context.Zero;
     }
 
     private Expr CreateFloatingPointInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
-            return LiteralFloatingPoint.Value == 0 ? Zero : CreateFloatingPointExpr(LiteralFloatingPoint.Value);
+            return Context.CreateFloatingPointValue(LiteralFloatingPoint.Value);
         else
-            return Zero;
+            return Context.Zero;
     }
 
     public Expr CreateObjectInitializer(NewObjectExpression newObjectExpression)
@@ -244,7 +233,7 @@ internal class ObjectManager
 
         ClassModel TypeClassModel = ClassModelTable[ClassName];
 
-        Expr Result = Context.MkInt(ObjectIndex);
+        Expr Result = Context.CreateReferenceValue(ObjectIndex);
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
@@ -254,16 +243,6 @@ internal class ObjectManager
         ObjectIndex++;
 
         return Result;
-    }
-
-    private IntExpr CreateIntegerExpr(int value)
-    {
-        return Context.MkInt(value);
-    }
-
-    private ArithExpr CreateFloatingPointExpr(double value)
-    {
-        return (ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
     }
 
     public Local FindOrCreateResultLocal(Method hostMethod, ExpressionType returnType)
@@ -293,13 +272,13 @@ internal class ObjectManager
             return localName;
     }
 
-    private Expr GetDefaultExpr(ExpressionType variableType)
+    public Expr GetDefaultExpr(ExpressionType variableType)
     {
         Dictionary<ExpressionType, Expr> SwitchTable = new()
         {
-            { ExpressionType.Boolean, False },
-            { ExpressionType.Integer, Zero },
-            { ExpressionType.FloatingPoint, Zero },
+            { ExpressionType.Boolean, Context.False },
+            { ExpressionType.Integer, Context.Zero },
+            { ExpressionType.FloatingPoint, Context.Zero },
         };
 
         Expr Result;
@@ -310,33 +289,10 @@ internal class ObjectManager
             Result = SwitchTable[variableType];
         }
         else
-            Result = Null;
+            Result = Context.Null;
 
         return Result;
     }
 
-    private void AddToSolver(BoolExpr? branch, BoolExpr boolExpr)
-    {
-        if (branch is not null)
-        {
-            Solver.Assert(Context.MkImplies(branch, boolExpr));
-            Log($"Adding {branch} => {boolExpr}");
-        }
-        else
-        {
-            Solver.Assert(boolExpr);
-            Log($"Adding {boolExpr}");
-        }
-    }
-
-    private void Log(string message)
-    {
-        Logger.Log(message);
-    }
-
-    private IntExpr Zero;
-    private BoolExpr False;
-    private BoolExpr True;
-    private IntExpr Null;
     private int ObjectIndex;
 }

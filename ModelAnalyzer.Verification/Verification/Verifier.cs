@@ -18,11 +18,7 @@ internal partial class Verifier : IDisposable
     public Verifier()
     {
         // Need model generation turned on.
-        Context = new Context(new Dictionary<string, string>() { { "model", "true" } });
-        Zero = Context.MkInt(0);
-        False = Context.MkBool(false);
-        True = Context.MkBool(true);
-        Null = Context.MkInt(0);
+        Context = new();
     }
 
     /// <summary>
@@ -142,8 +138,8 @@ internal partial class Verifier : IDisposable
 
     private void AnalyzeCallSequence(CallSequence callSequence)
     {
-        using Solver Solver = Context.MkSolver();
-        ObjectManager ObjectManager = new(Context) { Solver = Solver, Logger = Logger, ClassModelTable = ClassModelTable };
+        using Solver Solver = Context.CreateSolver();
+        ObjectManager ObjectManager = new(Context) { Solver = Solver, ClassModelTable = ClassModelTable };
         VerificationContext VerificationContext = new() { Solver = Solver, ClassModelTable = ClassModelTable, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable, ObjectManager = ObjectManager };
 
         AddInitialState(VerificationContext);
@@ -191,21 +187,6 @@ internal partial class Verifier : IDisposable
         return ResultLocal;
     }
 
-    private Expr GetDefaultExpr(ExpressionType variableType)
-    {
-        Dictionary<ExpressionType, Expr> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, False },
-            { ExpressionType.Integer, Zero },
-            { ExpressionType.FloatingPoint, Zero },
-        };
-
-        Debug.Assert(SwitchTable.ContainsKey(variableType));
-        Expr Result = SwitchTable[variableType];
-
-        return Result;
-    }
-
     private bool AddClassInvariant(VerificationContext verificationContext)
     {
         bool Result = true;
@@ -218,7 +199,7 @@ internal partial class Verifier : IDisposable
 
             if (BuildExpression(verificationContext, Invariant.BooleanExpression, out BoolExpr InvariantExpression))
             {
-                BoolExpr InvariantOpposite = Context.MkNot(InvariantExpression);
+                BoolExpr InvariantOpposite = Context.CreateOppositeExpr(InvariantExpression);
 
                 verificationContext.Solver.Push();
 
@@ -393,7 +374,7 @@ internal partial class Verifier : IDisposable
         Method? HostMethod = verificationContext.HostMethod;
         string AssertionType = VerificationErrorTypeToText(errorType);
         bool Result = true;
-        BoolExpr AssertionOppositeExpr = Context.MkNot(assertionExpr);
+        BoolExpr AssertionOppositeExpr = Context.CreateOppositeExpr(assertionExpr);
 
         verificationContext.Solver.Push();
 
@@ -432,30 +413,11 @@ internal partial class Verifier : IDisposable
         return AssertionTypeTable[errorType];
     }
 
-    private BoolExpr CreateBooleanExpr(bool value)
-    {
-        return Context.MkBool(value);
-    }
-
-    private IntExpr CreateIntegerExpr(int value)
-    {
-        return Context.MkInt(value);
-    }
-
-    private ArithExpr CreateFloatingPointExpr(double value)
-    {
-        return (ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort());
-    }
-
     private void Log(string message)
     {
         Logger.Log(message);
     }
 
-    private Context Context;
-    private IntExpr Zero;
-    private BoolExpr False;
-    private BoolExpr True;
-    private IntExpr Null;
+    private SolverContext Context;
     private Stopwatch VerificationWatch = new Stopwatch();
 }

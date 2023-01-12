@@ -89,10 +89,10 @@ internal partial class Verifier : IDisposable
 
         if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
         {
-            BoolExpr AssertionExpr = Context.MkNot(Context.MkEq(Right, Zero));
+            BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
             if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
             {
-                resultExpr = Zero;
+                resultExpr = Context.Zero;
                 return false;
             }
         }
@@ -107,14 +107,14 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IntExpr Left);
         bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IntExpr Right);
 
-        BoolExpr AssertionExpr = Context.MkNot(Context.MkEq(Right, Zero));
+        BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
         if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, remainderExpression.ToString(), VerificationErrorType.AssumeError))
         {
-            resultExpr = Zero;
+            resultExpr = Context.Zero;
             return false;
         }
 
-        resultExpr = Context.MkMod(Left, Right);
+        resultExpr = Context.CreateRemainderExpr(Left, Right);
 
         return ResultLeft && ResultRight;
     }
@@ -169,25 +169,25 @@ internal partial class Verifier : IDisposable
 
     private bool BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression, out BoolExpr resultExpr)
     {
-        resultExpr = CreateBooleanExpr(literalBooleanValueExpression.Value);
+        resultExpr = Context.CreateBooleanValue(literalBooleanValueExpression.Value);
         return true;
     }
 
     private bool BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression, out IntExpr resultExpr)
     {
-        resultExpr = CreateIntegerExpr(literalIntegerValueExpression.Value);
+        resultExpr = Context.CreateIntegerValue(literalIntegerValueExpression.Value);
         return true;
     }
 
     private bool BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression, out ArithExpr resultExpr)
     {
-        resultExpr = CreateFloatingPointExpr(literalFloatingPointValueExpression.Value);
+        resultExpr = Context.CreateFloatingPointValue(literalFloatingPointValueExpression.Value);
         return true;
     }
 
     private bool BuildLiteralNullExpression(LiteralNullExpression literalNullExpression, out Expr resultExpr)
     {
-        resultExpr = Null;
+        resultExpr = Context.Null;
         return true;
     }
 
@@ -265,7 +265,7 @@ internal partial class Verifier : IDisposable
 
     private bool BuildFunctionCallExpression(VerificationContext verificationContext, FunctionCallExpression functionCallExpression, Method calledFunction, out Expr resultExpr)
     {
-        resultExpr = GetDefaultExpr(calledFunction.ReturnType);
+        resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
 
         int Index = 0;

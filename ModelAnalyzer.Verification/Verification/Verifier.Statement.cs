@@ -107,16 +107,8 @@ internal partial class Verifier : IDisposable
         BoolExpr TrueBranchExpr;
         BoolExpr FalseBranchExpr;
 
-        if (verificationContext.Branch is BoolExpr Branch)
-        {
-            TrueBranchExpr = Context.MkAnd(Branch, ConditionExpr);
-            FalseBranchExpr = Context.MkAnd(Branch, Context.MkNot(ConditionExpr));
-        }
-        else
-        {
-            TrueBranchExpr = ConditionExpr;
-            FalseBranchExpr = Context.MkNot(ConditionExpr);
-        }
+        TrueBranchExpr = Context.CreateTrueBranchExpr(verificationContext.Branch, ConditionExpr);
+        FalseBranchExpr = Context.CreateFalseBranchExpr(verificationContext.Branch, ConditionExpr);
 
         verificationContext.ObjectManager.BeginBranch(out AliasTable BeforeWhenTrue);
 
