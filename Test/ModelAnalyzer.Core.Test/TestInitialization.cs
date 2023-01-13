@@ -1,6 +1,4 @@
-﻿namespace Miscellaneous.Test;
-
-using AnalysisLogger;
+﻿using AnalysisLogger;
 using ModelAnalyzer;
 using NUnit.Framework;
 
