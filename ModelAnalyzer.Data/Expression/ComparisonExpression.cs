@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a comparison expression.
 /// </summary>
-internal class ComparisonExpression : Expression
+internal class ComparisonExpression : Expression, IBinaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a integer division remainder expression.
 /// </summary>
-internal class RemainderExpression : Expression
+internal class RemainderExpression : Expression, IBinaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

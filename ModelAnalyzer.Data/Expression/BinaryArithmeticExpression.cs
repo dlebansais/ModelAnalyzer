@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a binary arithmetic expression.
 /// </summary>
-internal class BinaryArithmeticExpression : Expression
+internal class BinaryArithmeticExpression : Expression, IBinaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents an equality expression.
 /// </summary>
-internal class EqualityExpression : Expression
+internal class EqualityExpression : Expression, IBinaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

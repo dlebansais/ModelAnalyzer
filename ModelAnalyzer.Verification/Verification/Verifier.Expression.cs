@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Xml.Linq;
 using Microsoft.Z3;
 
 /// <summary>
@@ -18,50 +19,6 @@ internal partial class Verifier : IDisposable
 
         switch (expression)
         {
-            case BinaryArithmeticExpression BinaryArithmetic:
-                Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic, out ArithExpr BinaryArithmeticExpr);
-                ResultExpr = BinaryArithmeticExpr;
-                break;
-            case RemainderExpression Remainder:
-                Result = BuildRemainderExpression(verificationContext, Remainder, out IntExpr RemainderExpr);
-                ResultExpr = RemainderExpr;
-                break;
-            case UnaryArithmeticExpression UnaryArithmetic:
-                Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic, out ArithExpr UnaryArithmeticExpr);
-                ResultExpr = UnaryArithmeticExpr;
-                break;
-            case BinaryLogicalExpression BinaryLogical:
-                Result = BuildBinaryLogicalExpression(verificationContext, BinaryLogical, out BoolExpr BinaryLogicalExpr);
-                ResultExpr = BinaryLogicalExpr;
-                break;
-            case UnaryLogicalExpression UnaryLogical:
-                Result = BuildUnaryLogicalExpression(verificationContext, UnaryLogical, out BoolExpr UnaryLogicalExpr);
-                ResultExpr = UnaryLogicalExpr;
-                break;
-            case EqualityExpression Equality:
-                Result = BuildEqualityExpression(verificationContext, Equality, out BoolExpr EqualityExpr);
-                ResultExpr = EqualityExpr;
-                break;
-            case ComparisonExpression Comparison:
-                Result = BuildComparisonExpression(verificationContext, Comparison, out BoolExpr ComparisonExpr);
-                ResultExpr = ComparisonExpr;
-                break;
-            case LiteralBooleanValueExpression LiteralBooleanValue:
-                Result = BuildLiteralBooleanValueExpression(LiteralBooleanValue, out BoolExpr LiteralBooleanValueExpr);
-                ResultExpr = LiteralBooleanValueExpr;
-                break;
-            case LiteralIntegerValueExpression LiteralIntegerValue:
-                Result = BuildLiteralIntegerValueExpression(LiteralIntegerValue, out IntExpr LiteralIntegerValueExpr);
-                ResultExpr = LiteralIntegerValueExpr;
-                break;
-            case LiteralFloatingPointValueExpression LiteralFloatingPointValue:
-                Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue, out ArithExpr LiteralFloatingPointValueExpr);
-                ResultExpr = LiteralFloatingPointValueExpr;
-                break;
-            case LiteralNullExpression LiteralNull:
-                Result = BuildLiteralNullExpression(LiteralNull, out Expr LiteralNullExpr);
-                ResultExpr = LiteralNullExpr;
-                break;
             case VariableValueExpression VariableValue:
                 Result = BuildVariableValueExpression(verificationContext, VariableValue, out Expr VariableValueExpr);
                 ResultExpr = VariableValueExpr;
@@ -70,9 +27,17 @@ internal partial class Verifier : IDisposable
                 Result = BuildFunctionCallExpression(verificationContext, FunctionCall, out Expr FunctionCallExpr);
                 ResultExpr = FunctionCallExpr;
                 break;
-            case NewObjectExpression NewObject:
-                Result = BuildNewObjectExpression(verificationContext, NewObject, out Expr NewObjectExpr);
-                ResultExpr = NewObjectExpr;
+            case IBinaryExpression Binary:
+                Result = BuildBinaryExpression(verificationContext, Binary, out Expr BinaryExpr);
+                ResultExpr = BinaryExpr;
+                break;
+            case IUnaryExpression Unary:
+                Result = BuildUnaryExpression(verificationContext, Unary, out Expr unaryExpr);
+                ResultExpr = unaryExpr;
+                break;
+            case ILiteralExpression Literal:
+                Result = BuildLiteralValueExpression(verificationContext, Literal, out Expr LiteralExpr);
+                ResultExpr = LiteralExpr;
                 break;
         }
 
@@ -82,167 +47,125 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildBinaryArithmeticExpression(VerificationContext verificationContext, BinaryArithmeticExpression binaryArithmeticExpression, out ArithExpr resultExpr)
-    {
-        bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out ArithExpr Left);
-        bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out ArithExpr Right);
-
-        if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
-        {
-            BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
-            {
-                resultExpr = Context.Zero;
-                return false;
-            }
-        }
-
-        resultExpr = OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
-
-        return ResultLeft && ResultRight;
-    }
-
-    private bool BuildRemainderExpression(VerificationContext verificationContext, RemainderExpression remainderExpression, out IntExpr resultExpr)
-    {
-        bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IntExpr Left);
-        bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IntExpr Right);
-
-        BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
-        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, remainderExpression.ToString(), VerificationErrorType.AssumeError))
-        {
-            resultExpr = Context.Zero;
-            return false;
-        }
-
-        resultExpr = Context.CreateRemainderExpr(Left, Right);
-
-        return ResultLeft && ResultRight;
-    }
-
-    private bool BuildUnaryArithmeticExpression(VerificationContext verificationContext, UnaryArithmeticExpression unaryArithmeticExpression, out ArithExpr resultExpr)
-    {
-        bool ResultOperand = BuildExpression(verificationContext, unaryArithmeticExpression.Operand, out ArithExpr Operand);
-
-        resultExpr = OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
-
-        return ResultOperand;
-    }
-
-    private bool BuildBinaryLogicalExpression(VerificationContext verificationContext, BinaryLogicalExpression binaryLogicalExpression, out BoolExpr resultExpr)
-    {
-        bool ResultLeft = BuildExpression(verificationContext, binaryLogicalExpression.Left, out BoolExpr Left);
-        bool ResultRight = BuildExpression(verificationContext, binaryLogicalExpression.Right, out BoolExpr Right);
-
-        resultExpr = OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left, Right);
-
-        return ResultLeft && ResultRight;
-    }
-
-    private bool BuildUnaryLogicalExpression(VerificationContext verificationContext, UnaryLogicalExpression unaryLogicalExpression, out BoolExpr resultExpr)
-    {
-        bool ResultOperand = BuildExpression(verificationContext, unaryLogicalExpression.Operand, out BoolExpr Operand);
-
-        resultExpr = OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
-
-        return ResultOperand;
-    }
-
-    private bool BuildEqualityExpression(VerificationContext verificationContext, EqualityExpression equalityExpression, out BoolExpr resultExpr)
-    {
-        bool ResultLeft = BuildExpression(verificationContext, equalityExpression.Left, out Expr Left);
-        bool ResultRight = BuildExpression(verificationContext, equalityExpression.Right, out Expr Right);
-
-        resultExpr = OperatorBuilder.Equality[equalityExpression.Operator](Context, Left, Right);
-
-        return ResultLeft && ResultRight;
-    }
-
-    private bool BuildComparisonExpression(VerificationContext verificationContext, ComparisonExpression comparisonExpression, out BoolExpr resultExpr)
-    {
-        bool ResultLeft = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Left, out ArithExpr Left);
-        bool ResultRight = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Right, out ArithExpr Right);
-
-        resultExpr = OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
-
-        return ResultLeft && ResultRight;
-    }
-
-    private bool BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression, out BoolExpr resultExpr)
-    {
-        resultExpr = Context.CreateBooleanValue(literalBooleanValueExpression.Value);
-        return true;
-    }
-
-    private bool BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression, out IntExpr resultExpr)
-    {
-        resultExpr = Context.CreateIntegerValue(literalIntegerValueExpression.Value);
-        return true;
-    }
-
-    private bool BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression, out ArithExpr resultExpr)
-    {
-        resultExpr = Context.CreateFloatingPointValue(literalFloatingPointValueExpression.Value);
-        return true;
-    }
-
-    private bool BuildLiteralNullExpression(LiteralNullExpression literalNullExpression, out Expr resultExpr)
-    {
-        resultExpr = Context.Null;
-        return true;
-    }
-
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out Expr resultExpr)
     {
         resultExpr = null!;
 
-        string VariableName = variableValueExpression.VariableName.Text;
-        VariableAlias? VariableAlias = null;
+        string Name = variableValueExpression.VariableName.Text;
+        IVariableName? VariableName = null;
+        ExpressionType? VariableType = null;
+        Method? HostMethod = null;
 
-        foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
-            if (Entry.Key.Text == VariableName)
-            {
-                Property Property = Entry.Value;
-                resultExpr = verificationContext.ObjectManager.CreateValueExpr(hostMethod: null, Property.Name, Property.Type);
-                break;
-            }
+        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
 
-        foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
-            if (Entry.Key.Text == VariableName)
-            {
-                Field Field = Entry.Value;
-                resultExpr = verificationContext.ObjectManager.CreateValueExpr(hostMethod: null, Field.Name, Field.Type);
-                break;
-            }
+        Debug.Assert(VariableName is not null);
+        Debug.Assert(VariableType is not null);
 
-        if (verificationContext.HostMethod is Method HostMethod)
-        {
-            ReadOnlyParameterTable ParameterTable = HostMethod.ParameterTable;
-
-            foreach (KeyValuePair<ParameterName, Parameter> Entry in ParameterTable)
-                if (Entry.Key.Text == VariableName)
-                {
-                    Parameter Parameter = Entry.Value;
-                    resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, Parameter.Name, Parameter.Type);
-                    break;
-                }
-
-            ReadOnlyLocalTable LocalTable = HostMethod.LocalTable;
-
-            foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
-                if (Entry.Key.Text == VariableName)
-                {
-                    Local Local = Entry.Value;
-                    resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, Local.Name, Local.Type);
-                    break;
-                }
-
-            if (VariableAlias is null && verificationContext.ResultLocal is Local ResultLocal && VariableName == Ensure.ResultKeyword)
-                resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, ResultLocal.Name, ResultLocal.Type);
-        }
-
-        Debug.Assert(resultExpr is not null);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, VariableName!, VariableType!);
 
         return true;
+    }
+
+    private void LookupProperty(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    {
+        foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
+            if (Entry.Key.Text == name)
+            {
+                Property Property = Entry.Value;
+
+                Debug.Assert(hostMethod is null);
+                Debug.Assert(variableName is null);
+                Debug.Assert(variableType is null);
+
+                hostMethod = null;
+                variableName = Property.Name;
+                variableType = Property.Type;
+                break;
+            }
+    }
+
+    private void LookupField(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    {
+        foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
+            if (Entry.Key.Text == name)
+            {
+                Field Field = Entry.Value;
+
+                Debug.Assert(hostMethod is null);
+                Debug.Assert(variableName is null);
+                Debug.Assert(variableType is null);
+
+                hostMethod = null;
+                variableName = Field.Name;
+                variableType = Field.Type;
+                break;
+            }
+    }
+
+    private void LookupParameter(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    {
+        if (verificationContext.HostMethod is null)
+            return;
+
+        ReadOnlyParameterTable ParameterTable = verificationContext.HostMethod.ParameterTable;
+
+        foreach (KeyValuePair<ParameterName, Parameter> Entry in ParameterTable)
+            if (Entry.Key.Text == name)
+            {
+                Parameter Parameter = Entry.Value;
+
+                Debug.Assert(hostMethod is null);
+                Debug.Assert(variableName is null);
+                Debug.Assert(variableType is null);
+
+                variableName = Parameter.Name;
+                variableType = Parameter.Type;
+                hostMethod = verificationContext.HostMethod;
+
+                Debug.Assert(hostMethod is not null);
+                break;
+            }
+    }
+
+    private void LookupLocal(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    {
+        if (verificationContext.HostMethod is null)
+            return;
+
+        ReadOnlyLocalTable LocalTable = verificationContext.HostMethod.LocalTable;
+
+        foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
+            if (Entry.Key.Text == name)
+            {
+                Local Local = Entry.Value;
+
+                Debug.Assert(hostMethod is null);
+                Debug.Assert(variableName is null);
+                Debug.Assert(variableType is null);
+
+                variableName = Local.Name;
+                variableType = Local.Type;
+                hostMethod = verificationContext.HostMethod;
+
+                Debug.Assert(hostMethod is not null);
+                return;
+            }
+
+        if (verificationContext.ResultLocal is Local ResultLocal && name == Ensure.ResultKeyword)
+        {
+            Debug.Assert(hostMethod is null);
+            Debug.Assert(variableName is null);
+            Debug.Assert(variableType is null);
+
+            variableName = ResultLocal.Name;
+            variableType = ResultLocal.Type;
+            hostMethod = verificationContext.HostMethod;
+
+            Debug.Assert(hostMethod is not null);
+        }
     }
 
     private bool BuildFunctionCallExpression(VerificationContext verificationContext, FunctionCallExpression functionCallExpression, out Expr resultExpr)
@@ -306,6 +229,208 @@ internal partial class Verifier : IDisposable
         TemporaryResultIndex++;
 
         return Result;
+    }
+
+    private bool BuildBinaryExpression(VerificationContext verificationContext, IBinaryExpression binaryExpression, out Expr expr)
+    {
+        bool Result = false;
+        Expr? ResultExpr = null;
+
+        switch (binaryExpression)
+        {
+            case BinaryArithmeticExpression BinaryArithmetic:
+                Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic, out ArithExpr BinaryArithmeticExpr);
+                ResultExpr = BinaryArithmeticExpr;
+                break;
+            case RemainderExpression Remainder:
+                Result = BuildRemainderExpression(verificationContext, Remainder, out IntExpr RemainderExpr);
+                ResultExpr = RemainderExpr;
+                break;
+            case BinaryLogicalExpression BinaryLogical:
+                Result = BuildBinaryLogicalExpression(verificationContext, BinaryLogical, out BoolExpr BinaryLogicalExpr);
+                ResultExpr = BinaryLogicalExpr;
+                break;
+            case EqualityExpression Equality:
+                Result = BuildEqualityExpression(verificationContext, Equality, out BoolExpr EqualityExpr);
+                ResultExpr = EqualityExpr;
+                break;
+            case ComparisonExpression Comparison:
+                Result = BuildComparisonExpression(verificationContext, Comparison, out BoolExpr ComparisonExpr);
+                ResultExpr = ComparisonExpr;
+                break;
+        }
+
+        Debug.Assert(ResultExpr is not null);
+
+        expr = ResultExpr!;
+        return Result;
+    }
+
+    private bool BuildBinaryArithmeticExpression(VerificationContext verificationContext, BinaryArithmeticExpression binaryArithmeticExpression, out ArithExpr resultExpr)
+    {
+        bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out ArithExpr Left);
+        bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out ArithExpr Right);
+
+        if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
+        {
+            BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
+            {
+                resultExpr = Context.Zero;
+                return false;
+            }
+        }
+
+        resultExpr = OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left, Right);
+
+        return ResultLeft && ResultRight;
+    }
+
+    private bool BuildRemainderExpression(VerificationContext verificationContext, RemainderExpression remainderExpression, out IntExpr resultExpr)
+    {
+        bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IntExpr Left);
+        bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IntExpr Right);
+
+        BoolExpr AssertionExpr = Context.CreateNotEqualExpr(Right, Context.Zero);
+        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, remainderExpression.ToString(), VerificationErrorType.AssumeError))
+        {
+            resultExpr = Context.Zero;
+            return false;
+        }
+
+        resultExpr = Context.CreateRemainderExpr(Left, Right);
+
+        return ResultLeft && ResultRight;
+    }
+
+    private bool BuildBinaryLogicalExpression(VerificationContext verificationContext, BinaryLogicalExpression binaryLogicalExpression, out BoolExpr resultExpr)
+    {
+        bool ResultLeft = BuildExpression(verificationContext, binaryLogicalExpression.Left, out BoolExpr Left);
+        bool ResultRight = BuildExpression(verificationContext, binaryLogicalExpression.Right, out BoolExpr Right);
+
+        resultExpr = OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left, Right);
+
+        return ResultLeft && ResultRight;
+    }
+
+    private bool BuildEqualityExpression(VerificationContext verificationContext, EqualityExpression equalityExpression, out BoolExpr resultExpr)
+    {
+        bool ResultLeft = BuildExpression(verificationContext, equalityExpression.Left, out Expr Left);
+        bool ResultRight = BuildExpression(verificationContext, equalityExpression.Right, out Expr Right);
+
+        resultExpr = OperatorBuilder.Equality[equalityExpression.Operator](Context, Left, Right);
+
+        return ResultLeft && ResultRight;
+    }
+
+    private bool BuildComparisonExpression(VerificationContext verificationContext, ComparisonExpression comparisonExpression, out BoolExpr resultExpr)
+    {
+        bool ResultLeft = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Left, out ArithExpr Left);
+        bool ResultRight = BuildExpression<ArithExpr>(verificationContext, comparisonExpression.Right, out ArithExpr Right);
+
+        resultExpr = OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left, Right);
+
+        return ResultLeft && ResultRight;
+    }
+
+    private bool BuildUnaryExpression(VerificationContext verificationContext, IUnaryExpression unaryExpression, out Expr expr)
+    {
+        bool Result = false;
+        Expr? ResultExpr = null;
+
+        switch (unaryExpression)
+        {
+            case UnaryArithmeticExpression UnaryArithmetic:
+                Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic, out ArithExpr UnaryArithmeticExpr);
+                ResultExpr = UnaryArithmeticExpr;
+                break;
+            case UnaryLogicalExpression UnaryLogical:
+                Result = BuildUnaryLogicalExpression(verificationContext, UnaryLogical, out BoolExpr UnaryLogicalExpr);
+                ResultExpr = UnaryLogicalExpr;
+                break;
+        }
+
+        Debug.Assert(ResultExpr is not null);
+
+        expr = ResultExpr!;
+        return Result;
+    }
+
+    private bool BuildUnaryArithmeticExpression(VerificationContext verificationContext, UnaryArithmeticExpression unaryArithmeticExpression, out ArithExpr resultExpr)
+    {
+        bool ResultOperand = BuildExpression(verificationContext, unaryArithmeticExpression.Operand, out ArithExpr Operand);
+
+        resultExpr = OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand);
+
+        return ResultOperand;
+    }
+
+    private bool BuildUnaryLogicalExpression(VerificationContext verificationContext, UnaryLogicalExpression unaryLogicalExpression, out BoolExpr resultExpr)
+    {
+        bool ResultOperand = BuildExpression(verificationContext, unaryLogicalExpression.Operand, out BoolExpr Operand);
+
+        resultExpr = OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand);
+
+        return ResultOperand;
+    }
+
+    private bool BuildLiteralValueExpression(VerificationContext verificationContext, ILiteralExpression literalExpression, out Expr expr)
+    {
+        bool Result = false;
+        Expr? ResultExpr = null;
+
+        switch (literalExpression)
+        {
+            case LiteralBooleanValueExpression LiteralBooleanValue:
+                Result = BuildLiteralBooleanValueExpression(LiteralBooleanValue, out BoolExpr LiteralBooleanValueExpr);
+                ResultExpr = LiteralBooleanValueExpr;
+                break;
+            case LiteralIntegerValueExpression LiteralIntegerValue:
+                Result = BuildLiteralIntegerValueExpression(LiteralIntegerValue, out IntExpr LiteralIntegerValueExpr);
+                ResultExpr = LiteralIntegerValueExpr;
+                break;
+            case LiteralFloatingPointValueExpression LiteralFloatingPointValue:
+                Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue, out ArithExpr LiteralFloatingPointValueExpr);
+                ResultExpr = LiteralFloatingPointValueExpr;
+                break;
+            case LiteralNullExpression LiteralNull:
+                Result = BuildLiteralNullExpression(LiteralNull, out Expr LiteralNullExpr);
+                ResultExpr = LiteralNullExpr;
+                break;
+            case NewObjectExpression NewObject:
+                Result = BuildNewObjectExpression(verificationContext, NewObject, out Expr NewObjectExpr);
+                ResultExpr = NewObjectExpr;
+                break;
+        }
+
+        Debug.Assert(ResultExpr is not null);
+
+        expr = ResultExpr!;
+        return Result;
+    }
+
+    private bool BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression, out BoolExpr resultExpr)
+    {
+        resultExpr = Context.CreateBooleanValue(literalBooleanValueExpression.Value);
+        return true;
+    }
+
+    private bool BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression, out IntExpr resultExpr)
+    {
+        resultExpr = Context.CreateIntegerValue(literalIntegerValueExpression.Value);
+        return true;
+    }
+
+    private bool BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression, out ArithExpr resultExpr)
+    {
+        resultExpr = Context.CreateFloatingPointValue(literalFloatingPointValueExpression.Value);
+        return true;
+    }
+
+    private bool BuildLiteralNullExpression(LiteralNullExpression literalNullExpression, out Expr resultExpr)
+    {
+        resultExpr = Context.Null;
+        return true;
     }
 
     private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out Expr resultExpr)

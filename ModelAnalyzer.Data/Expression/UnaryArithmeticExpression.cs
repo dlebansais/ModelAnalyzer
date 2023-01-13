@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a unary arithmetic expression.
 /// </summary>
-internal class UnaryArithmeticExpression : Expression
+internal class UnaryArithmeticExpression : Expression, IUnaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]

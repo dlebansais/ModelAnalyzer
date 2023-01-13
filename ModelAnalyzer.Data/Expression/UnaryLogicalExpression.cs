@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a unary conditional expression.
 /// </summary>
-internal class UnaryLogicalExpression : Expression
+internal class UnaryLogicalExpression : Expression, IUnaryExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
