@@ -1,6 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace FieldWithInitializer.Test;
 
+using System;
 using System.Collections.Generic;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
@@ -10,9 +12,9 @@ public partial class VerifierTest
 {
     [Test]
     [Category("Verification")]
-    public void Verifier_OneBooleanFieldWithInitializerSuccess()
+    public void Verifier_OneBooleanSuccess()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<bool, LiteralBooleanValueExpression>(initialValue: false, invariantTestValue: false);
+        Verifier TestObject = CreateOneVerifier<bool, LiteralBooleanValueExpression>(initialValue: false, invariantTestValue: false);
 
         TestObject.Verify();
 
@@ -22,9 +24,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneBooleanFieldWithInitializerError()
+    public void Verifier_OneBooleanError()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<bool, LiteralBooleanValueExpression>(initialValue: true, invariantTestValue: false);
+        Verifier TestObject = CreateOneVerifier<bool, LiteralBooleanValueExpression>(initialValue: true, invariantTestValue: false);
 
         TestObject.Verify();
 
@@ -35,9 +37,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneIntegerFieldWithInitializerSuccess()
+    public void Verifier_OneIntegerSuccess()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<int, LiteralIntegerValueExpression>(initialValue: 0, invariantTestValue: 0);
+        Verifier TestObject = CreateOneVerifier<int, LiteralIntegerValueExpression>(initialValue: 0, invariantTestValue: 0);
 
         TestObject.Verify();
 
@@ -47,9 +49,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneIntegerFieldWithInitializerError()
+    public void Verifier_OneIntegerError()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<int, LiteralIntegerValueExpression>(initialValue: 1, invariantTestValue: 0);
+        Verifier TestObject = CreateOneVerifier<int, LiteralIntegerValueExpression>(initialValue: 1, invariantTestValue: 0);
 
         TestObject.Verify();
 
@@ -60,9 +62,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFloatingPointFieldWithInitializerSuccess()
+    public void Verifier_OneFloatingPointSuccess()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 0.0, invariantTestValue: 0.0);
+        Verifier TestObject = CreateOneVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 0.0, invariantTestValue: 0.0);
 
         TestObject.Verify();
 
@@ -72,9 +74,9 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_OneFloatingPointFieldWithInitializerError()
+    public void Verifier_OneFloatingPointError()
     {
-        Verifier TestObject = CreateOneFieldWithInitializerVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 1.0, invariantTestValue: 0.0);
+        Verifier TestObject = CreateOneVerifier<double, LiteralFloatingPointValueExpression>(initialValue: 1.0, invariantTestValue: 0.0);
 
         TestObject.Verify();
 
@@ -83,7 +85,7 @@ public partial class VerifierTest
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 
-    private Verifier CreateOneFieldWithInitializerVerifier<TValue, TExpression>(TValue initialValue, TValue invariantTestValue)
+    private Verifier CreateOneVerifier<TValue, TExpression>(TValue initialValue, TValue invariantTestValue)
         where TExpression : Expression, ILiteralExpression<TValue>, ILiteralExpression, new()
     {
         TExpression Initializer = new() { Value = initialValue };
@@ -130,7 +132,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = 0,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -279,7 +281,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = 0,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,

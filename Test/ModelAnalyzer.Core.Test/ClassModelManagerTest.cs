@@ -1,4 +1,4 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace ClassModelManager.Test;
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using FileExtractor;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Miscellaneous.Test;
+using ModelAnalyzer;
 using NUnit.Framework;
 using ProcessCommunication;
 

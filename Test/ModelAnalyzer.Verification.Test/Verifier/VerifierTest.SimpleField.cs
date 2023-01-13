@@ -1,6 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace SimpleField.Test;
 
+using System;
 using System.Collections.Generic;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
@@ -129,7 +131,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = 0,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,

@@ -1,4 +1,4 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Core.Test;
 
 public record ItemNameTest
 {

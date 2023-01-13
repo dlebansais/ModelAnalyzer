@@ -1,6 +1,7 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Miscellaneous.Test;
 
 using AnalysisLogger;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 [SetUpFixture]

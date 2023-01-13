@@ -1,5 +1,6 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Miscellaneous.Test;
 
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>

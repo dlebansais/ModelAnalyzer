@@ -1,6 +1,9 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace MethodCall.Test;
 
+using System;
+using ModelAnalyzer;
 using NUnit.Framework;
+using Verification.Test;
 
 /// <summary>
 /// Tests for the <see cref="Verifier"/> class.
@@ -10,7 +13,7 @@ public partial class VerifierTest
     private const string MethodCallSourceCodeInteger1 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger1
+class Program_Verifier_Integer1
 {
     public void Write1()
     {
@@ -26,7 +29,7 @@ class Program_Verifier_MethodCallInteger1
     private const string MethodCallSourceCodeInteger2 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger2
+class Program_Verifier_Integer2
 {
     int X;
 
@@ -46,7 +49,7 @@ class Program_Verifier_MethodCallInteger2
     private const string MethodCallSourceCodeInteger3 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger3
+class Program_Verifier_Integer3
 {
     int X;
     int Y;
@@ -72,7 +75,7 @@ class Program_Verifier_MethodCallInteger3
     private const string MethodCallSourceCodeInteger4 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger4
+class Program_Verifier_Integer4
 {
     int X;
 
@@ -93,7 +96,7 @@ class Program_Verifier_MethodCallInteger4
     private const string MethodCallSourceCodeInteger5 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger5
+class Program_Verifier_Integer5
 {
     int X;
 
@@ -114,7 +117,7 @@ class Program_Verifier_MethodCallInteger5
     private const string MethodCallSourceCodeInteger6 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger6
+class Program_Verifier_Integer6
 {
     public int X { get; set; }
 
@@ -136,7 +139,7 @@ class Program_Verifier_MethodCallInteger6
     private const string MethodCallSourceCodeInteger7 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger7
+class Program_Verifier_Integer7
 {
     public int X { get; set; }
 
@@ -157,7 +160,7 @@ class Program_Verifier_MethodCallInteger7
     private const string MethodCallSourceCodeInteger8 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger8
+class Program_Verifier_Integer8
 {
     public int X { get; set; }
 
@@ -178,7 +181,7 @@ class Program_Verifier_MethodCallInteger8
     private const string MethodCallSourceCodeInteger9 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger9
+class Program_Verifier_Integer9
 {
     int X;
 
@@ -204,7 +207,7 @@ class Program_Verifier_MethodCallInteger9
     private const string MethodCallSourceCodeInteger10 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger10
+class Program_Verifier_Integer10
 {
     public int X { get; set; }
 
@@ -231,7 +234,7 @@ class Program_Verifier_MethodCallInteger10
     private const string MethodCallSourceCodeInteger11 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger11
+class Program_Verifier_Integer11
 {
     public int X { get; set; }
 
@@ -246,7 +249,7 @@ class Program_Verifier_MethodCallInteger11
     private const string MethodCallSourceCodeInteger12 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger12
+class Program_Verifier_Integer12
 {
     public int X { get; set; }
 
@@ -266,7 +269,7 @@ class Program_Verifier_MethodCallInteger12
     private const string MethodCallSourceCodeInteger13 = @"
 using System;
 
-class Program_Verifier_MethodCallInteger13
+class Program_Verifier_Integer13
 {
     int X;
 
@@ -290,9 +293,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger1_Success()
+    public void Verifier_Integer1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger1, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -302,9 +305,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger2_Error()
+    public void Verifier_Integer2_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -315,9 +318,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger3_Error()
+    public void Verifier_Integer3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -328,9 +331,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger4_Error()
+    public void Verifier_Integer4_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger4, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -341,9 +344,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger5_Success()
+    public void Verifier_Integer5_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger5, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -353,9 +356,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger6_Success()
+    public void Verifier_Integer6_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger6, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -365,9 +368,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger7_Error()
+    public void Verifier_Integer7_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger7, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -378,9 +381,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger8_Success()
+    public void Verifier_Integer8_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger8, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger8, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -390,9 +393,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger9_Error()
+    public void Verifier_Integer9_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger9, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger9, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -403,9 +406,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger10_Error()
+    public void Verifier_Integer10_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger10, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger10, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -416,9 +419,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger11_Error()
+    public void Verifier_Integer11_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger11, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger11, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -429,9 +432,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger12_Error()
+    public void Verifier_Integer12_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger12, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger12, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -442,9 +445,9 @@ class Program_Verifier_MethodCallInteger13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MethodCallInteger13_Error()
+    public void Verifier_Integer13_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MethodCallSourceCodeInteger13, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger13, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 

@@ -74,7 +74,7 @@ Everything else, attributes, preprocessor directives etc. is not supported.
 
 ### Supported types
 
-The analyzer supports predefined `bool`, `int` and `double` types only. It also supports reference to classes that are modeled, but note that only the default parameter-less constructor is supported, and type parameters are not. The reference can be nullable. For example, `public Foo? X { get; set; } = new();` and `public Foo? X { get; set; } = null;` are both valid. 
+The analyzer supports `bool`, `int` and `double` predefined types only. It also supports reference to classes that are modeled, but note that only the default parameter-less constructor is supported, and type parameters are not. The reference can be nullable. For example, `public Foo? X { get; set; } = new();` and `public Foo? X { get; set; } = null;` are both valid. 
 
 ## Method contract
 

@@ -1,7 +1,8 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Miscellaneous.Test;
 
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>

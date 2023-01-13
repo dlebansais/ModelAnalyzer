@@ -1,6 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace Operators.Test;
 
+using System;
 using System.Collections.Generic;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
@@ -10,7 +12,7 @@ public partial class VerifierTest
 {
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerAddSuccess()
+    public void Verifier_IntegerAddSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(0, 1, BinaryArithmeticOperator.Add, 1, maxDepth: 1);
 
@@ -22,7 +24,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerAddError()
+    public void Verifier_IntegerAddError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(0, 1, BinaryArithmeticOperator.Add, 1, maxDepth: 2);
 
@@ -35,7 +37,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleAddSuccess()
+    public void Verifier_DoubleAddSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(0.0, 1.0, BinaryArithmeticOperator.Add, 1.0, maxDepth: 1);
 
@@ -47,7 +49,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleAddError()
+    public void Verifier_DoubleAddError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(0.0, 1.0, BinaryArithmeticOperator.Add, 1.0, maxDepth: 2);
 
@@ -60,7 +62,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerAdd2Success()
+    public void Verifier_IntegerAdd2Success()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Add, 3, maxDepth: 1);
 
@@ -72,7 +74,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerAdd2Error()
+    public void Verifier_IntegerAdd2Error()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Add, 3, maxDepth: 2);
 
@@ -85,7 +87,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleAdd2Success()
+    public void Verifier_DoubleAdd2Success()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Add, 3.0, maxDepth: 1);
 
@@ -97,7 +99,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleAdd2Error()
+    public void Verifier_DoubleAdd2Error()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Add, 3.0, maxDepth: 2);
 
@@ -110,7 +112,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerSubtractSuccess()
+    public void Verifier_IntegerSubtractSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(0, 1, BinaryArithmeticOperator.Subtract, -1, maxDepth: 1);
 
@@ -122,7 +124,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerSubtractError()
+    public void Verifier_IntegerSubtractError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(0, 1, BinaryArithmeticOperator.Subtract, -1, maxDepth: 2);
 
@@ -135,7 +137,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleSubtractSuccess()
+    public void Verifier_DoubleSubtractSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(0.0, 1.0, BinaryArithmeticOperator.Subtract, -1.0, maxDepth: 1);
 
@@ -147,7 +149,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleSubtractError()
+    public void Verifier_DoubleSubtractError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(0.0, 1.0, BinaryArithmeticOperator.Subtract, -1.0, maxDepth: 2);
 
@@ -160,7 +162,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerSubtract2Success()
+    public void Verifier_IntegerSubtract2Success()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Subtract, -1, maxDepth: 1);
 
@@ -172,7 +174,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerSubtract2Error()
+    public void Verifier_IntegerSubtract2Error()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Subtract, -1, maxDepth: 2);
 
@@ -185,7 +187,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleSubtract2Success()
+    public void Verifier_DoubleSubtract2Success()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Subtract, -1.0, maxDepth: 1);
 
@@ -197,7 +199,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleSubtract2Error()
+    public void Verifier_DoubleSubtract2Error()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Subtract, -1.0, maxDepth: 2);
 
@@ -210,7 +212,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerMultiplySuccess()
+    public void Verifier_IntegerMultiplySuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Multiply, 2, maxDepth: 1);
 
@@ -222,7 +224,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerMultiplyError()
+    public void Verifier_IntegerMultiplyError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, 2, BinaryArithmeticOperator.Multiply, 2, maxDepth: 2);
 
@@ -235,7 +237,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleMultiplySuccess()
+    public void Verifier_DoubleMultiplySuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Multiply, 2.0, maxDepth: 1);
 
@@ -247,7 +249,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleMultiplyError()
+    public void Verifier_DoubleMultiplyError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, 2.0, BinaryArithmeticOperator.Multiply, 2.0, maxDepth: 2);
 
@@ -260,7 +262,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerDivideSuccess()
+    public void Verifier_IntegerDivideSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(2, 2, BinaryArithmeticOperator.Divide, 1, maxDepth: 1);
 
@@ -272,7 +274,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerDivideError()
+    public void Verifier_IntegerDivideError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<int, LiteralIntegerValueExpression>(2, 2, BinaryArithmeticOperator.Divide, 1, maxDepth: 2);
 
@@ -285,7 +287,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleDivideSuccess()
+    public void Verifier_DoubleDivideSuccess()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(2.0, 2.0, BinaryArithmeticOperator.Divide, 1.0, maxDepth: 1);
 
@@ -297,7 +299,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleDivideError()
+    public void Verifier_DoubleDivideError()
     {
         Verifier TestObject = CreateBinaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(2.0, 2.0, BinaryArithmeticOperator.Divide, 1.0, maxDepth: 2);
 
@@ -378,7 +380,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -392,7 +394,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerMinusSuccess()
+    public void Verifier_IntegerMinusSuccess()
     {
         Verifier TestObject = CreateUnaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, UnaryArithmeticOperator.Minus, -1, maxDepth: 1);
 
@@ -404,7 +406,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerMinus2Success()
+    public void Verifier_IntegerMinus2Success()
     {
         Verifier TestObject = CreateUnaryOperatorVerifier<int, LiteralIntegerValueExpression>(1, UnaryArithmeticOperator.Minus, -1, maxDepth: 2);
 
@@ -416,7 +418,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleMinusSuccess()
+    public void Verifier_DoubleMinusSuccess()
     {
         Verifier TestObject = CreateUnaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, UnaryArithmeticOperator.Minus, -1.0, maxDepth: 1);
 
@@ -428,7 +430,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_DoubleMinus2Success()
+    public void Verifier_DoubleMinus2Success()
     {
         Verifier TestObject = CreateUnaryOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, UnaryArithmeticOperator.Minus, -1.0, maxDepth: 2);
 
@@ -507,7 +509,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -521,7 +523,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGTSuccess()
+    public void Verifier_IntegerGTSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThan, 0, maxDepth: 0);
 
@@ -533,7 +535,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGTEqualSuccess()
+    public void Verifier_IntegerGTEqualSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThan, 1, maxDepth: 1);
 
@@ -545,7 +547,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGTError()
+    public void Verifier_IntegerGTError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThan, 0, maxDepth: 1);
 
@@ -558,7 +560,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGESuccess()
+    public void Verifier_IntegerGESuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThanOrEqual, 0, maxDepth: 0);
 
@@ -570,7 +572,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGEEqualError()
+    public void Verifier_IntegerGEEqualError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThanOrEqual, 1, maxDepth: 1);
 
@@ -583,7 +585,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerGEError()
+    public void Verifier_IntegerGEError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.GreaterThanOrEqual, 0, maxDepth: 1);
 
@@ -596,7 +598,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLTSuccess()
+    public void Verifier_IntegerLTSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(0, ComparisonOperator.LessThan, 1, maxDepth: 0);
 
@@ -608,7 +610,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLTEqualSuccess()
+    public void Verifier_IntegerLTEqualSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.LessThan, 1, maxDepth: 1);
 
@@ -620,7 +622,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLTError()
+    public void Verifier_IntegerLTError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(0, ComparisonOperator.LessThan, 1, maxDepth: 1);
 
@@ -633,7 +635,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLESuccess()
+    public void Verifier_IntegerLESuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(0, ComparisonOperator.LessThanOrEqual, 1, maxDepth: 0);
 
@@ -645,7 +647,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLEEqualError()
+    public void Verifier_IntegerLEEqualError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(1, ComparisonOperator.LessThanOrEqual, 1, maxDepth: 1);
 
@@ -658,7 +660,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerLEError()
+    public void Verifier_IntegerLEError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<int, LiteralIntegerValueExpression>(0, ComparisonOperator.LessThanOrEqual, 1, maxDepth: 1);
 
@@ -671,7 +673,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGTSuccess()
+    public void Verifier_FloatingPointGTSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThan, 0.0, maxDepth: 0);
 
@@ -683,7 +685,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGTEqualSuccess()
+    public void Verifier_FloatingPointGTEqualSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThan, 1.0, maxDepth: 1);
 
@@ -695,7 +697,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGTError()
+    public void Verifier_FloatingPointGTError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThan, 0.0, maxDepth: 1);
 
@@ -708,7 +710,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGESuccess()
+    public void Verifier_FloatingPointGESuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThanOrEqual, 0.0, maxDepth: 0);
 
@@ -720,7 +722,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGEEqualError()
+    public void Verifier_FloatingPointGEEqualError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThanOrEqual, 1.0, maxDepth: 1);
 
@@ -733,7 +735,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointGEError()
+    public void Verifier_FloatingPointGEError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.GreaterThanOrEqual, 0.0, maxDepth: 1);
 
@@ -746,7 +748,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLTSuccess()
+    public void Verifier_FloatingPointLTSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(0, ComparisonOperator.LessThan, 1.0, maxDepth: 0);
 
@@ -758,7 +760,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLTEqualSuccess()
+    public void Verifier_FloatingPointLTEqualSuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.LessThan, 1.0, maxDepth: 1);
 
@@ -770,7 +772,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLTError()
+    public void Verifier_FloatingPointLTError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(0, ComparisonOperator.LessThan, 1.0, maxDepth: 1);
 
@@ -783,7 +785,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLESuccess()
+    public void Verifier_FloatingPointLESuccess()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(0, ComparisonOperator.LessThanOrEqual, 1.0, maxDepth: 0);
 
@@ -795,7 +797,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLEEqualError()
+    public void Verifier_FloatingPointLEEqualError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, ComparisonOperator.LessThanOrEqual, 1.0, maxDepth: 1);
 
@@ -808,7 +810,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointLEError()
+    public void Verifier_FloatingPointLEError()
     {
         Verifier TestObject = CreateComparisonOperatorVerifier<double, LiteralFloatingPointValueExpression>(0, ComparisonOperator.LessThanOrEqual, 1.0, maxDepth: 1);
 
@@ -888,7 +890,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -902,7 +904,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanFalseOrTrueSuccess()
+    public void Verifier_BooleanFalseOrTrueSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(false, BinaryLogicalOperator.Or, true, maxDepth: 0);
 
@@ -914,7 +916,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanFalseOrTrueError()
+    public void Verifier_BooleanFalseOrTrueError()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(false, BinaryLogicalOperator.Or, true, maxDepth: 1);
 
@@ -927,7 +929,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanTrueOrFalseError()
+    public void Verifier_BooleanTrueOrFalseError()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(true, BinaryLogicalOperator.Or, false, maxDepth: 1);
 
@@ -940,7 +942,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanFalseOrFalseSuccess()
+    public void Verifier_BooleanFalseOrFalseSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(false, BinaryLogicalOperator.Or, false, maxDepth: 1);
 
@@ -952,7 +954,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanTrueAndTrueSuccess()
+    public void Verifier_BooleanTrueAndTrueSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(true, BinaryLogicalOperator.And, true, maxDepth: 0);
 
@@ -964,7 +966,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanTrueAndTrueError()
+    public void Verifier_BooleanTrueAndTrueError()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(true, BinaryLogicalOperator.And, true, maxDepth: 1);
 
@@ -977,7 +979,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanFalseAndTrueSuccess()
+    public void Verifier_BooleanFalseAndTrueSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(false, BinaryLogicalOperator.And, true, maxDepth: 1);
 
@@ -989,7 +991,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanTrueAndFalseSuccess()
+    public void Verifier_BooleanTrueAndFalseSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(true, BinaryLogicalOperator.And, false, maxDepth: 1);
 
@@ -1001,7 +1003,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanFalseAndFalseSuccess()
+    public void Verifier_BooleanFalseAndFalseSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(false, BinaryLogicalOperator.And, false, maxDepth: 1);
 
@@ -1079,7 +1081,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -1093,7 +1095,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanNotSuccess()
+    public void Verifier_BooleanNotSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(UnaryLogicalOperator.Not, false, maxDepth: 0);
 
@@ -1105,7 +1107,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanNotError()
+    public void Verifier_BooleanNotError()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(UnaryLogicalOperator.Not, false, maxDepth: 1);
 
@@ -1118,7 +1120,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_BooleanNotTrueSuccess()
+    public void Verifier_BooleanNotTrueSuccess()
     {
         Verifier TestObject = CreateLogicalOperatorVerifier(UnaryLogicalOperator.Not, true, maxDepth: 1);
 
@@ -1195,7 +1197,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
@@ -1209,7 +1211,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerEqualIntegerSuccess()
+    public void Verifier_IntegerEqualIntegerSuccess()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<int, LiteralIntegerValueExpression>(1, EqualityOperator.Equal, 1, maxDepth: 0);
 
@@ -1221,7 +1223,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerEqualIntegerError()
+    public void Verifier_IntegerEqualIntegerError()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<int, LiteralIntegerValueExpression>(1, EqualityOperator.Equal, 1, maxDepth: 1);
 
@@ -1234,7 +1236,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointEqualFloatingPointSuccess()
+    public void Verifier_FloatingPointEqualFloatingPointSuccess()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, EqualityOperator.Equal, 1.0, maxDepth: 0);
 
@@ -1246,7 +1248,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointEqualFloatingPointError()
+    public void Verifier_FloatingPointEqualFloatingPointError()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, EqualityOperator.Equal, 1.0, maxDepth: 1);
 
@@ -1259,7 +1261,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerNotEqualIntegerSuccess()
+    public void Verifier_IntegerNotEqualIntegerSuccess()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<int, LiteralIntegerValueExpression>(1, EqualityOperator.NotEqual, 0, maxDepth: 0);
 
@@ -1271,7 +1273,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_IntegerNotEqualIntegerError()
+    public void Verifier_IntegerNotEqualIntegerError()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<int, LiteralIntegerValueExpression>(1, EqualityOperator.NotEqual, 0, maxDepth: 1);
 
@@ -1284,7 +1286,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointNotEqualFloatingPointSuccess()
+    public void Verifier_FloatingPointNotEqualFloatingPointSuccess()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, EqualityOperator.NotEqual, 0.0, maxDepth: 0);
 
@@ -1296,7 +1298,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Operators_FloatingPointNotEqualFloatingPointError()
+    public void Verifier_FloatingPointNotEqualFloatingPointError()
     {
         Verifier TestObject = CreateEqualityOperatorVerifier<double, LiteralFloatingPointValueExpression>(1.0, EqualityOperator.NotEqual, 0.0, maxDepth: 1);
 
@@ -1376,7 +1378,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,

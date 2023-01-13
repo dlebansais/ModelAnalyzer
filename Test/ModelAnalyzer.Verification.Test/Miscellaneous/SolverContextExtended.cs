@@ -1,7 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace Miscellaneous.Test;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using ModelAnalyzer;
 
 internal class SolverContextExtended : SolverContext, IDisposable
 {

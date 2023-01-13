@@ -1,6 +1,8 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Miscellaneous.Test;
 
 using System.Collections.Generic;
+using Core.Test;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>

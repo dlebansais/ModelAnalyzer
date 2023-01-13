@@ -1,6 +1,9 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace MiscStatements.Test;
 
+using System;
+using ModelAnalyzer;
 using NUnit.Framework;
+using Verification.Test;
 
 /// <summary>
 /// Tests for the <see cref="Verifier"/> class.
@@ -278,9 +281,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements1_Success()
+    public void Verifier_Statement1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode1, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -290,9 +293,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements2_Success()
+    public void Verifier_Statement2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -302,9 +305,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements2_Error()
+    public void Verifier_Statement2_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode2, maxDepth: 2, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode2, maxDepth: 2, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -315,9 +318,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements3_Success()
+    public void Verifier_Statement3_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -327,9 +330,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements3_Error()
+    public void Verifier_Statement3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 2, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 2, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -340,9 +343,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements3_ErrorAgain()
+    public void Verifier_Statement3_ErrorAgain()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 3, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode3, maxDepth: 3, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -353,9 +356,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements4_Success()
+    public void Verifier_Statement4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -365,9 +368,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements4_Error()
+    public void Verifier_Statement4_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 2, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 2, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -378,9 +381,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements4_ErrorAgain()
+    public void Verifier_Statement4_ErrorAgain()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 3, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode4, maxDepth: 3, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -391,9 +394,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements5_Success()
+    public void Verifier_Statement5_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode5, maxDepth: 2, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode5, maxDepth: 2, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -403,9 +406,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements6_Error()
+    public void Verifier_Statement6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode6, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -416,9 +419,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements7_Error()
+    public void Verifier_Statement7_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode7, maxDepth: 0, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode7, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -429,9 +432,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements8_Error()
+    public void Verifier_Statement8_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode8, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode8, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -442,9 +445,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements9_Error()
+    public void Verifier_Statement9_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode9, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode9, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -455,9 +458,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements10_Success()
+    public void Verifier_Statement10_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode10, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode10, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -467,9 +470,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements11_Error()
+    public void Verifier_Statement11_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode11, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode11, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -480,9 +483,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements12_Error()
+    public void Verifier_Statement12_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode12, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode12, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -493,9 +496,9 @@ class Program_Verifier_MiscStatement13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_MiscStatements13_Error()
+    public void Verifier_Statement13_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(MiscStatementSourceCode13, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode13, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 

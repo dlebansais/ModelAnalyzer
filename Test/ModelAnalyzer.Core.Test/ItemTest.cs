@@ -1,4 +1,6 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Core.Test;
+
+using ModelAnalyzer;
 
 public record ItemTest : INameable<ItemNameTest>
 {

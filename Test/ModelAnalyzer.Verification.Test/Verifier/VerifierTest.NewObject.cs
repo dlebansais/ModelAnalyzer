@@ -1,6 +1,9 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace NewObject.Test;
 
+using System;
+using ModelAnalyzer;
 using NUnit.Framework;
+using Verification.Test;
 
 /// <summary>
 /// Tests for the <see cref="Verifier"/> class.
@@ -42,7 +45,7 @@ class Program_Verifier_NewObject1_2
     [Category("Verification")]
     public void Verifier_NewObject1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(NewObjectSourceCode1, maxDepth: 2, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(NewObjectSourceCode1, maxDepth: 2, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -76,7 +79,7 @@ class Program_Verifier_NewObject2_2
     [Category("Verification")]
     public void Verifier_NewObject2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(NewObjectSourceCode2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(NewObjectSourceCode2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -108,7 +111,7 @@ class Program_Verifier_NewObject3_2
     [Category("Verification")]
     public void Verifier_NewObject3_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(NewObjectSourceCode3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(NewObjectSourceCode3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 

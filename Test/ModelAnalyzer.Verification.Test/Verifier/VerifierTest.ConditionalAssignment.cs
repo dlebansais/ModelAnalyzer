@@ -1,7 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace ConditionalAssignment.Test;
 
 using System;
 using System.Collections.Generic;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
@@ -9,11 +10,9 @@ using NUnit.Framework;
 /// </summary>
 public partial class VerifierTest
 {
-    private static readonly TimeSpan MaxDuration = TimeSpan.MaxValue;
-
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneBooleanFieldSuccess()
+    public void Verifier_OneBooleanFieldSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 0, whenTrue: true);
 
@@ -25,7 +24,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneBooleanFieldError()
+    public void Verifier_OneBooleanFieldError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: true, assignmentValue: true, maxDepth: 0, whenTrue: true);
 
@@ -38,7 +37,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneBooleanFieldWithWriteSuccess()
+    public void Verifier_OneBooleanFieldWithWriteSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 1, whenTrue: false);
 
@@ -50,7 +49,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneBooleanFieldWithWriteError()
+    public void Verifier_OneBooleanFieldWithWriteError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 1, whenTrue: true);
 
@@ -63,7 +62,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneIntegerFieldSuccess()
+    public void Verifier_OneIntegerFieldSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 0, whenTrue: true);
 
@@ -75,7 +74,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneIntegerFieldError()
+    public void Verifier_OneIntegerFieldError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 1, assignmentValue: 1, maxDepth: 0, whenTrue: true);
 
@@ -88,7 +87,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneIntegerFieldWithWriteSuccess()
+    public void Verifier_OneIntegerFieldWithWriteSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 1, whenTrue: false);
 
@@ -100,7 +99,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneIntegerFieldWithWriteError()
+    public void Verifier_OneIntegerFieldWithWriteError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 1, whenTrue: true);
 
@@ -113,7 +112,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneFloatingPointFieldSuccess()
+    public void Verifier_OneFloatingPointFieldSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 0, whenTrue: true);
 
@@ -125,7 +124,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneFloatingPointFieldError()
+    public void Verifier_OneFloatingPointFieldError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 1.0, assignmentValue: 1.0, maxDepth: 0, whenTrue: true);
 
@@ -138,7 +137,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneFloatingPointFieldWithWriteSuccess()
+    public void Verifier_OneFloatingPointFieldWithWriteSuccess()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 1, whenTrue: false);
 
@@ -150,7 +149,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_ConditionalAssignment_OneFloatingPointFieldWithWriteError()
+    public void Verifier_OneFloatingPointFieldWithWriteError()
     {
         Verifier TestObject = CreateConditionalAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 1, whenTrue: true);
 
@@ -233,7 +232,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,

@@ -1,8 +1,9 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace Miscellaneous.Test;
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using ModelAnalyzer;
 
 internal class VerifierExtended : Verifier, IDisposable
 {

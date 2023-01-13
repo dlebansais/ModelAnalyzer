@@ -1,4 +1,4 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Miscellaneous.Test;
 
 using System;
 using System.Reflection;

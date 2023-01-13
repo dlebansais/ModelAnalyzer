@@ -1,10 +1,12 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace Core.Test;
 
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Miscellaneous.Test;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>

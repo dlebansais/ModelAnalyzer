@@ -1,4 +1,4 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace ClassModelManager.Test;
 
 using System;
 

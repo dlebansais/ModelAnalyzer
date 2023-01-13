@@ -1,6 +1,9 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace Ensure.Test;
 
+using System;
+using ModelAnalyzer;
 using NUnit.Framework;
+using Verification.Test;
 
 /// <summary>
 /// Tests for the <see cref="Verifier"/> class.
@@ -10,7 +13,7 @@ public partial class VerifierTest
     private const string EnsureSourceCodeBoolean1 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean1
+class Program_Verifier_Boolean1
 {
     public bool X { get; set; }
 
@@ -30,7 +33,7 @@ class Program_Verifier_EnsureBoolean1
     private const string EnsureSourceCodeBoolean2 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean2
+class Program_Verifier_Boolean2
 {
     bool X;
 
@@ -44,7 +47,7 @@ class Program_Verifier_EnsureBoolean2
     private const string EnsureSourceCodeBoolean3 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean3
+class Program_Verifier_Boolean3
 {
     public bool X { get; set; }
 
@@ -60,7 +63,7 @@ class Program_Verifier_EnsureBoolean3
     private const string EnsureSourceCodeBoolean4 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean4
+class Program_Verifier_Boolean4
 {
     public bool X { get; set; }
 
@@ -77,7 +80,7 @@ class Program_Verifier_EnsureBoolean4
     private const string EnsureSourceCodeBoolean5 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean5
+class Program_Verifier_Boolean5
 {
     public bool X { get; set; }
     public bool Y { get; set; }
@@ -96,7 +99,7 @@ class Program_Verifier_EnsureBoolean5
     private const string EnsureSourceCodeBoolean6 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean6
+class Program_Verifier_Boolean6
 {
     public bool X { get; set; }
     public bool Y { get; set; }
@@ -115,7 +118,7 @@ class Program_Verifier_EnsureBoolean6
     private const string EnsureSourceCodeBoolean7 = @"
 using System;
 
-class Program_Verifier_EnsureBoolean7
+class Program_Verifier_Boolean7
 {
     public bool X { get; set; }
     public bool Y { get; set; }
@@ -134,9 +137,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean1_Success()
+    public void Verifier_Boolean1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean1, maxDepth: 0, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean1, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -146,9 +149,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean1_Error()
+    public void Verifier_Boolean1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean1, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -159,9 +162,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean2_Success()
+    public void Verifier_Boolean2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -171,9 +174,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean3_Error()
+    public void Verifier_Boolean3_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -184,9 +187,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean4_Success()
+    public void Verifier_Boolean4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean4, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -196,9 +199,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean5_Error()
+    public void Verifier_Boolean5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean5, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -209,9 +212,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean6_Error()
+    public void Verifier_Boolean6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean6, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -222,9 +225,9 @@ class Program_Verifier_EnsureBoolean7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureBoolean7_Success()
+    public void Verifier_Boolean7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeBoolean7, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeBoolean7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -235,7 +238,7 @@ class Program_Verifier_EnsureBoolean7
     private const string EnsureSourceCodeInteger1 = @"
 using System;
 
-class Program_Verifier_EnsureInteger1
+class Program_Verifier_Integer1
 {
     public int X { get; set; }
 
@@ -255,7 +258,7 @@ class Program_Verifier_EnsureInteger1
     private const string EnsureSourceCodeInteger2 = @"
 using System;
 
-class Program_Verifier_EnsureInteger2
+class Program_Verifier_Integer2
 {
     int X;
 
@@ -269,7 +272,7 @@ class Program_Verifier_EnsureInteger2
     private const string EnsureSourceCodeInteger3 = @"
 using System;
 
-class Program_Verifier_EnsureInteger3
+class Program_Verifier_Integer3
 {
     public int X { get; set; }
 
@@ -285,7 +288,7 @@ class Program_Verifier_EnsureInteger3
     private const string EnsureSourceCodeInteger4 = @"
 using System;
 
-class Program_Verifier_EnsureInteger4
+class Program_Verifier_Integer4
 {
     public int X { get; set; }
 
@@ -302,7 +305,7 @@ class Program_Verifier_EnsureInteger4
     private const string EnsureSourceCodeInteger5 = @"
 using System;
 
-class Program_Verifier_EnsureInteger5
+class Program_Verifier_Integer5
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -321,7 +324,7 @@ class Program_Verifier_EnsureInteger5
     private const string EnsureSourceCodeInteger6 = @"
 using System;
 
-class Program_Verifier_EnsureInteger6
+class Program_Verifier_Integer6
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -340,7 +343,7 @@ class Program_Verifier_EnsureInteger6
     private const string EnsureSourceCodeInteger7 = @"
 using System;
 
-class Program_Verifier_EnsureInteger7
+class Program_Verifier_Integer7
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -359,9 +362,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger1_Success()
+    public void Verifier_Integer1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger1, maxDepth: 0, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger1, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -371,9 +374,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger1_Error()
+    public void Verifier_Integer1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger1, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -384,9 +387,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger2_Success()
+    public void Verifier_Integer2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -396,9 +399,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger3_Success()
+    public void Verifier_Integer3_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -408,9 +411,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger4_Success()
+    public void Verifier_Integer4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger4, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -420,9 +423,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger5_Error()
+    public void Verifier_Integer5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger5, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -433,9 +436,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger6_Error()
+    public void Verifier_Integer6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger6, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -446,9 +449,9 @@ class Program_Verifier_EnsureInteger7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureInteger7_Success()
+    public void Verifier_Integer7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeInteger7, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeInteger7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -459,7 +462,7 @@ class Program_Verifier_EnsureInteger7
     private const string EnsureSourceCodeFloatingPoint1 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint1
+class Program_Verifier_FloatingPoint1
 {
     public double X { get; set; }
 
@@ -479,7 +482,7 @@ class Program_Verifier_EnsureFloatingPoint1
     private const string EnsureSourceCodeFloatingPoint2 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint2
+class Program_Verifier_FloatingPoint2
 {
     double X;
 
@@ -493,7 +496,7 @@ class Program_Verifier_EnsureFloatingPoint2
     private const string EnsureSourceCodeFloatingPoint3 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint3
+class Program_Verifier_FloatingPoint3
 {
     public double X { get; set; }
 
@@ -509,7 +512,7 @@ class Program_Verifier_EnsureFloatingPoint3
     private const string EnsureSourceCodeFloatingPoint4 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint4
+class Program_Verifier_FloatingPoint4
 {
     public double X { get; set; }
 
@@ -526,7 +529,7 @@ class Program_Verifier_EnsureFloatingPoint4
     private const string EnsureSourceCodeFloatingPoint5 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint5
+class Program_Verifier_FloatingPoint5
 {
     public double X { get; set; }
     public double Y { get; set; }
@@ -545,7 +548,7 @@ class Program_Verifier_EnsureFloatingPoint5
     private const string EnsureSourceCodeFloatingPoint6 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint6
+class Program_Verifier_FloatingPoint6
 {
     public double X { get; set; }
     public double Y { get; set; }
@@ -564,7 +567,7 @@ class Program_Verifier_EnsureFloatingPoint6
     private const string EnsureSourceCodeFloatingPoint7 = @"
 using System;
 
-class Program_Verifier_EnsureFloatingPoint7
+class Program_Verifier_FloatingPoint7
 {
     public double X { get; set; }
     public double Y { get; set; }
@@ -583,9 +586,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint1_Success()
+    public void Verifier_FloatingPoint1_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint1, maxDepth: 0, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint1, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -595,9 +598,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint1_Error()
+    public void Verifier_FloatingPoint1_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint1, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -608,9 +611,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint2_Success()
+    public void Verifier_FloatingPoint2_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint2, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -620,9 +623,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint3_Success()
+    public void Verifier_FloatingPoint3_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint3, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -632,9 +635,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint4_Success()
+    public void Verifier_FloatingPoint4_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint4, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -644,9 +647,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint5_Error()
+    public void Verifier_FloatingPoint5_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint5, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -657,9 +660,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint6_Error()
+    public void Verifier_FloatingPoint6_Error()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint6, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -670,9 +673,9 @@ class Program_Verifier_EnsureFloatingPoint7
 
     [Test]
     [Category("Verification")]
-    public void Verifier_EnsureFloatingPoint7_Success()
+    public void Verifier_FloatingPoint7_Success()
     {
-        Verifier TestObject = CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint7, maxDepth: 1, maxDuration: MaxDuration);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(EnsureSourceCodeFloatingPoint7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 

@@ -1,6 +1,7 @@
-﻿namespace ModelAnalyzer.Core.Test;
+﻿namespace ClassModelManager.Test;
 
 using System;
+using ModelAnalyzer;
 
 internal class ClassModelManagerExtended : ClassModelManager, IDisposable
 {

@@ -1,6 +1,8 @@
-﻿namespace ModelAnalyzer.Verification.Test;
+﻿namespace SimpleFieldAssignment.Test;
 
+using System;
 using System.Collections.Generic;
+using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
@@ -10,7 +12,7 @@ public partial class VerifierTest
 {
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneBooleanFieldSuccess()
+    public void Verifier_OneBooleanFieldSuccess()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 0);
 
@@ -22,7 +24,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneBooleanFieldError()
+    public void Verifier_OneBooleanFieldError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: true, assignmentValue: true, maxDepth: 0);
 
@@ -35,7 +37,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneBooleanFieldWithWriteError()
+    public void Verifier_OneBooleanFieldWithWriteError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<bool, LiteralBooleanValueExpression>(invariantTestValue: false, assignmentValue: true, maxDepth: 1);
 
@@ -48,7 +50,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneIntegerFieldSuccess()
+    public void Verifier_OneIntegerFieldSuccess()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 0);
 
@@ -60,7 +62,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneIntegerFieldError()
+    public void Verifier_OneIntegerFieldError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 1, assignmentValue: 1, maxDepth: 0);
 
@@ -73,7 +75,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneIntegerFieldWithWriteError()
+    public void Verifier_OneIntegerFieldWithWriteError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<int, LiteralIntegerValueExpression>(invariantTestValue: 0, assignmentValue: 1, maxDepth: 1);
 
@@ -86,7 +88,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldSuccess()
+    public void Verifier_OneFloatingPointFieldSuccess()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 0);
 
@@ -98,7 +100,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldError()
+    public void Verifier_OneFloatingPointFieldError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 1.0, assignmentValue: 1.0, maxDepth: 0);
 
@@ -111,7 +113,7 @@ public partial class VerifierTest
 
     [Test]
     [Category("Verification")]
-    public void Verifier_SimpleFieldAssignment_OneFloatingPointFieldWithWriteError()
+    public void Verifier_OneFloatingPointFieldWithWriteError()
     {
         Verifier TestObject = CreateSimpleFieldAssignmentVerifier<double, LiteralFloatingPointValueExpression>(invariantTestValue: 0.0, assignmentValue: 1.0, maxDepth: 1);
 
@@ -188,7 +190,7 @@ public partial class VerifierTest
         Verifier TestObject = new()
         {
             MaxDepth = maxDepth,
-            MaxDuration = MaxDuration,
+            MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
