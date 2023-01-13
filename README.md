@@ -46,9 +46,9 @@ To help the analyzer, programmers can add contract clauses:
 The analyzer supports:
 
 + Inheriting from interfaces, but not from a base class.
-+ A [limited set](#supported-types) of C# pre-defined types.
-+ Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`).
-+ Public (or internal) read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized but only with a literal constant value (ex: `public int X { get; set; } = 1;`).
++ A [limited set](#supported-types) of C# types.
++ Private fields of a supported type. Ex: `private int X, Y;`. Fields can be initialized but only with a literal constant value (ex: `bool B = true;`, `double F = 2.0;`), and only `null` or `new()` for references (if `null`, the type must be nullable).
++ Public (or internal) read/write auto properties of a supported type. Ex: `public double X { get; set; }`. Properties can be initialized with similar restrictions as fields.
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields or properties.
   * Parameters cannot be assigned, they are read-only.
@@ -65,16 +65,16 @@ The analyzer supports:
   * Parenthesis.
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
-  * Integer or double constants (ex: `0`, `1.0`), `true` and `false`.
+  * Integer or double constants (ex: `0`, `1.0`), `true` and `false`, `null` and `new()`.
   * Variables, either fields, properties, local variables or parameters. Fields and local variables are not allowed in method contracts (see below).
-  * Invocation of a function, but of the same class only.
+  * Invocation of a function, but of the same class only (ex: `z = Add(x, y);`).
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.
 
 ### Supported types
 
-The analyzer supports `bool`, `int` and `double` types only.
+The analyzer supports predefined `bool`, `int` and `double` types only. It also supports reference to classes that are modeled, but note that only the default parameter-less constructor is supported, and type parameters are not. The reference can be nullable. For example, `public Foo? X { get; set; } = new();` and `public Foo? X { get; set; } = null;` are both valid. 
 
 ## Method contract
 
