@@ -25,12 +25,12 @@ internal class ExprSet<T> : IExprSet<T>
     /// <param name="expressionSets">The list of expressions.</param>
     public ExprSet(ICollection<IExprSet<T>> expressionSets)
     {
-        ExprCollection<T> ExpressionList = new();
+        List<T> ExpressionList = new();
 
         foreach (IExprSet<T> Item in expressionSets)
             ExpressionList.AddRange(Item.Expressions);
 
-        Expressions = ExpressionList.AsReadOnly();
+        Expressions = new ExprCollection<T>(ExpressionList).AsReadOnly();
     }
 
     /// <summary>

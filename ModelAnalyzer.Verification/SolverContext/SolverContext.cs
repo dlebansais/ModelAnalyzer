@@ -24,7 +24,7 @@ internal partial class SolverContext : IDisposable
         Null = new RefExprCapsule() { Item = Context.MkInt(0) };
         ZeroSet = Zero.ToSingleSet();
         FalseSet = False.ToSingleSet();
-        NullSet = new ExprSet<IRefExprCapsule>(Null);
+        NullSet = Null.ToSingleSet();
     }
 
     /// <summary>
