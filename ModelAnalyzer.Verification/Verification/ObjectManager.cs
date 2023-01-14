@@ -3,8 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using AnalysisLogger;
 using Microsoft.Z3;
 
 /// <summary>
@@ -12,6 +10,11 @@ using Microsoft.Z3;
 /// </summary>
 internal class ObjectManager
 {
+    /// <summary>
+    /// Gets the name of the root object.
+    /// </summary>
+    public const string ThisObject = "this";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ObjectManager"/> class.
     /// </summary>
@@ -42,7 +45,7 @@ internal class ObjectManager
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
 
-    public Expr CreateVariable(Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    public Expr CreateVariable(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
         Expr? InitializerExpr;
 
@@ -51,17 +54,17 @@ internal class ObjectManager
         else
             InitializerExpr = null;
 
-        return CreateVariableInternal(hostMethod, variableName, variableType, branch: null, InitializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr);
     }
 
-    public Expr CreateVariable(Method? hostMethod, IVariableName variableName, ExpressionType variableType, BoolExpr? branch, Expr? initializerExpr)
+    public Expr CreateVariable(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, BoolExpr? branch, Expr? initializerExpr)
     {
-        return CreateVariableInternal(hostMethod, variableName, variableType, branch, initializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr);
     }
 
-    private Expr CreateVariableInternal(Method? hostMethod, IVariableName variableName, ExpressionType variableType, BoolExpr? branch, Expr? initializerExpr)
+    private Expr CreateVariableInternal(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, BoolExpr? branch, Expr? initializerExpr)
     {
-        IVariableName VariableBlockName = CreateBlockName(hostMethod, variableName);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
 
         AliasTable.AddOrIncrement(Variable);
@@ -78,9 +81,9 @@ internal class ObjectManager
         return VariableExpr;
     }
 
-    public Expr CreateValueExpr(Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    public Expr CreateValueExpr(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
     {
-        IVariableName VariableBlockName = CreateBlockName(hostMethod, variableName);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
         VariableAlias VariableAlias = AliasTable.GetAlias(Variable);
         Expr ResultExpr = CreateVariableExpr(VariableAlias, variableType);
@@ -253,23 +256,33 @@ internal class ObjectManager
 
         LocalName ResultLocalName = new LocalName() { Text = Ensure.ResultKeyword };
         Local ResultLocal = new Local() { Name = ResultLocalName, Type = returnType, Initializer = null };
-        IVariableName ResultLocalBlockName = CreateBlockName(hostMethod, ResultLocal.Name);
-        Variable ResultLocalVariable = new(ResultLocalBlockName, returnType);
+        LocalName ResultBlockLocalName = CreateBlockName(owner: null, hostMethod, ResultLocal.Name);
+        Variable ResultLocalVariable = new(ResultBlockLocalName, returnType);
 
         AliasTable.AddOrIncrement(ResultLocalVariable);
 
         return ResultLocal;
     }
 
-    private static IVariableName CreateBlockName(Method? hostMethod, IVariableName localName)
+    public static LocalName CreateBlockName(string? owner, Method? hostMethod, IVariableName localName)
     {
+        LocalName Result = null!;
+
         if (hostMethod is not null)
         {
-            string LocalBlockText = $"{hostMethod.Name.Text}${localName.Text}";
-            return new LocalName() { Text = LocalBlockText };
+            string LocalBlockText = $"{hostMethod.Name.Text}-${localName.Text}";
+            Result = new LocalName() { Text = LocalBlockText };
         }
-        else
-            return localName;
+
+        if (owner is not null)
+        {
+            string OwnerText = $"{owner}:${localName.Text}";
+            Result = new LocalName() { Text = OwnerText };
+        }
+
+        Debug.Assert(Result is not null);
+
+        return Result!;
     }
 
     public Expr GetDefaultExpr(ExpressionType variableType)

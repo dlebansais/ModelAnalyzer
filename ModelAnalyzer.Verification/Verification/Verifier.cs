@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using AnalysisLogger;
 using Microsoft.Z3;
 
@@ -167,13 +166,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(ObjectManager.ThisObject, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(ObjectManager.ThisObject, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -265,7 +264,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
+            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
         }
     }
 
@@ -278,14 +277,8 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
         {
             Local Local = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
         }
-    }
-
-    private static LocalName CreateLocalBlockName(Method method, Local local)
-    {
-        string LocalBlockText = $"{method.Name.Text}${local.Name.Text}";
-        return new LocalName() { Text = LocalBlockText };
     }
 
     // checkOpposite: false for a call outside the call (the call is assumed to fulfill the contract)

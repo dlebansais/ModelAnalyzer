@@ -62,7 +62,8 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == DestinationName)
             {
                 Property Property = Entry.Value;
-                Variable Destination = new Variable(Property.Name, Property.Type);
+                IVariableName PropertyBlockName = ObjectManager.CreateBlockName(ObjectManager.ThisObject, hostMethod: null, Property.Name);
+                Variable Destination = new(PropertyBlockName, Property.Type);
                 Result = AddAssignmentExecution(verificationContext, Destination, Source);
                 break;
             }
@@ -71,7 +72,8 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == DestinationName)
             {
                 Field Field = Entry.Value;
-                Variable Destination = new Variable(Field.Name, Field.Type);
+                IVariableName FieldBlockName = ObjectManager.CreateBlockName(ObjectManager.ThisObject, hostMethod: null, Field.Name);
+                Variable Destination = new(FieldBlockName, Field.Type);
                 Result = AddAssignmentExecution(verificationContext, Destination, Source);
                 break;
             }
@@ -80,7 +82,7 @@ internal partial class Verifier : IDisposable
             if (Entry.Key.Text == DestinationName)
             {
                 Local Local = Entry.Value;
-                LocalName LocalBlockName = CreateLocalBlockName(HostMethod, Local);
+                IVariableName LocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, Local.Name);
                 Variable Destination = new(LocalBlockName, Local.Type);
                 Result = AddAssignmentExecution(verificationContext, Destination, Source);
                 break;
@@ -161,7 +163,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, ResultLocal = null };
@@ -193,7 +195,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, ReturnExpression, out Expr ResultInitializerExpr))
                 return false;
 
-            LocalName ResultLocalBlockName = CreateLocalBlockName(HostMethod, ResultLocal);
+            IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultLocal.Name);
             Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
 
             verificationContext.ObjectManager.Assign(verificationContext.Branch, ResultLocalVariable, ResultInitializerExpr);

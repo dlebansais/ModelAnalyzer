@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Xml.Linq;
 using Microsoft.Z3;
 
 /// <summary>
@@ -49,12 +48,10 @@ internal partial class Verifier : IDisposable
 
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out Expr resultExpr)
     {
-        resultExpr = null!;
-
         string Name = variableValueExpression.VariableName.Text;
+        Method? HostMethod = null;
         IVariableName? VariableName = null;
         ExpressionType? VariableType = null;
-        Method? HostMethod = null;
 
         LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
         LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
@@ -64,7 +61,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod, VariableName!, VariableType!);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? ObjectManager.ThisObject : null, HostMethod, VariableName!, VariableType!);
 
         return true;
     }
@@ -200,12 +197,12 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         LocalName ResultLocalName = new LocalName() { Text = CreateTemporaryResultLocal() };
         Local ResultLocal = new Local() { Name = ResultLocalName, Type = calledFunction.ReturnType, Initializer = null };
-        verificationContext.ObjectManager.CreateVariable(calledFunction, ResultLocal.Name, ResultLocal.Type, branch: null, initializerExpr: null);
+        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, ResultLocal.Name, ResultLocal.Type, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = ResultLocal };
 
@@ -218,7 +215,7 @@ internal partial class Verifier : IDisposable
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(calledFunction, ResultLocal.Name, ResultLocal.Type);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, ResultLocal.Name, ResultLocal.Type);
 
         return true;
     }
