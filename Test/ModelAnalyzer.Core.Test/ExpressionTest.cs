@@ -93,6 +93,18 @@ class Program_CoreExpression_2
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
+    private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
+    {
+        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
+        BlockSyntax Block = Method.Body!;
+        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)Block.Statements[0];
+        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
+        BinaryExpressionSyntax BinaryExpression = (BinaryExpressionSyntax)AssignmentExpression.Right;
+        SyntaxToken Operator = BinaryExpression.OperatorToken;
+
+        return Operator;
+    }
+
     [Test]
     [Category("Core")]
     public void Expression_BinaryLogical()
@@ -148,6 +160,17 @@ class Program_CoreExpression_4
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
 
+    private SyntaxToken LocateBinaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
+    {
+        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
+        BlockSyntax Block = Method.Body!;
+        IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
+        BinaryExpressionSyntax BinaryExpression = (BinaryExpressionSyntax)IfStatement.Condition;
+        SyntaxToken Operator = BinaryExpression.OperatorToken;
+
+        return Operator;
+    }
+
     [Test]
     [Category("Core")]
     public void Expression_UnaryLogical()
@@ -200,6 +223,17 @@ class Program_CoreExpression_6
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    private SyntaxToken LocateUnaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
+    {
+        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
+        BlockSyntax Block = Method.Body!;
+        IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
+        PrefixUnaryExpressionSyntax UnaryExpression = (PrefixUnaryExpressionSyntax)IfStatement.Condition;
+        SyntaxToken Operator = UnaryExpression.OperatorToken;
+
+        return Operator;
     }
 
     [Test]
@@ -495,6 +529,18 @@ class Program_CoreExpression_16
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    private SyntaxToken LocateUnaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
+    {
+        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
+        BlockSyntax Block = Method.Body!;
+        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)Block.Statements[0];
+        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
+        PrefixUnaryExpressionSyntax UnaryExpression = (PrefixUnaryExpressionSyntax)AssignmentExpression.Right;
+        SyntaxToken Operator = UnaryExpression.OperatorToken;
+
+        return Operator;
     }
 
     [Test]
@@ -1443,51 +1489,5 @@ class Program_CoreExpression_53
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
-    }
-
-    private SyntaxToken LocateBinaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
-    {
-        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
-        BlockSyntax Block = Method.Body!;
-        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)Block.Statements[0];
-        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
-        BinaryExpressionSyntax BinaryExpression = (BinaryExpressionSyntax)AssignmentExpression.Right;
-        SyntaxToken Operator = BinaryExpression.OperatorToken;
-
-        return Operator;
-    }
-
-    private SyntaxToken LocateUnaryArithmeticOperator(ClassDeclarationSyntax classDeclaration)
-    {
-        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
-        BlockSyntax Block = Method.Body!;
-        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)Block.Statements[0];
-        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
-        PrefixUnaryExpressionSyntax UnaryExpression = (PrefixUnaryExpressionSyntax)AssignmentExpression.Right;
-        SyntaxToken Operator = UnaryExpression.OperatorToken;
-
-        return Operator;
-    }
-
-    private SyntaxToken LocateBinaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
-    {
-        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
-        BlockSyntax Block = Method.Body!;
-        IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
-        BinaryExpressionSyntax BinaryExpression = (BinaryExpressionSyntax)IfStatement.Condition;
-        SyntaxToken Operator = BinaryExpression.OperatorToken;
-
-        return Operator;
-    }
-
-    private SyntaxToken LocateUnaryLogicalOperator(ClassDeclarationSyntax classDeclaration)
-    {
-        MethodDeclarationSyntax Method = (MethodDeclarationSyntax)classDeclaration.Members[1];
-        BlockSyntax Block = Method.Body!;
-        IfStatementSyntax IfStatement = (IfStatementSyntax)Block.Statements[0];
-        PrefixUnaryExpressionSyntax UnaryExpression = (PrefixUnaryExpressionSyntax)IfStatement.Condition;
-        SyntaxToken Operator = UnaryExpression.OperatorToken;
-
-        return Operator;
     }
 }
