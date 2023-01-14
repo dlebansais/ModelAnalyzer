@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents a code verifier.
@@ -51,66 +50,41 @@ internal partial class Verifier : IDisposable
 
     private bool AddAssignmentExecution(VerificationContext verificationContext, AssignmentStatement assignmentStatement)
     {
-        Debug.Assert(verificationContext.HostMethod is not null);
-
-        Method HostMethod = verificationContext.HostMethod!;
-        Expression Source = assignmentStatement.Expression;
-        string DestinationName = assignmentStatement.DestinationName.Text;
-        bool Result = false;
-
-        foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
-            if (Entry.Key.Text == DestinationName)
-            {
-                Property Property = Entry.Value;
-                IVariableName PropertyBlockName = ObjectManager.CreateBlockName(ObjectManager.ThisObject, hostMethod: null, Property.Name);
-                Variable Destination = new(PropertyBlockName, Property.Type);
-                Result = AddAssignmentExecution(verificationContext, Destination, Source);
-                break;
-            }
-
-        foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
-            if (Entry.Key.Text == DestinationName)
-            {
-                Field Field = Entry.Value;
-                IVariableName FieldBlockName = ObjectManager.CreateBlockName(ObjectManager.ThisObject, hostMethod: null, Field.Name);
-                Variable Destination = new(FieldBlockName, Field.Type);
-                Result = AddAssignmentExecution(verificationContext, Destination, Source);
-                break;
-            }
-
-        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
-            if (Entry.Key.Text == DestinationName)
-            {
-                Local Local = Entry.Value;
-                IVariableName LocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, Local.Name);
-                Variable Destination = new(LocalBlockName, Local.Type);
-                Result = AddAssignmentExecution(verificationContext, Destination, Source);
-                break;
-            }
-
-        return Result;
-    }
-
-    private bool AddAssignmentExecution(VerificationContext verificationContext, Variable destination, Expression source)
-    {
-        if (!BuildExpression(verificationContext, source, out Expr SourceExpr))
+        if (!BuildExpression(verificationContext, assignmentStatement.Expression, out IExprSet<IExprCapsule> SourceExpr))
             return false;
 
-        verificationContext.ObjectManager.Assign(verificationContext.Branch, destination, SourceExpr);
+        string Name = assignmentStatement.DestinationName.Text;
+        Method? HostMethod = null;
+        IVariableName? VariableName = null;
+        ExpressionType? VariableType = null;
+
+        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+
+        Debug.Assert(VariableName is not null);
+        Debug.Assert(VariableType is not null);
+
+        IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? ObjectManager.ThisObject : null, HostMethod, VariableName!);
+        Variable Destination = new(VariableBlockName, VariableType!);
+
+        verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
 
         return true;
     }
 
     private bool AddConditionalExecution(VerificationContext verificationContext, ConditionalStatement conditionalStatement)
     {
-        if (!BuildExpression(verificationContext, conditionalStatement.Condition, out BoolExpr ConditionExpr))
+        if (!BuildExpression(verificationContext, conditionalStatement.Condition, out IExprSet<IBoolExprCapsule> ConditionExpr))
             return false;
 
-        BoolExpr TrueBranchExpr;
-        BoolExpr FalseBranchExpr;
+        IBoolExprCapsule TrueBranchExpr;
+        IBoolExprCapsule FalseBranchExpr;
 
-        TrueBranchExpr = Context.CreateTrueBranchExpr(verificationContext.Branch, ConditionExpr);
-        FalseBranchExpr = Context.CreateFalseBranchExpr(verificationContext.Branch, ConditionExpr);
+        Debug.Assert(ConditionExpr.IsSingle);
+
+        TrueBranchExpr = Context.CreateTrueBranchExpr(verificationContext.Branch, ConditionExpr.MainExpression);
+        FalseBranchExpr = Context.CreateFalseBranchExpr(verificationContext.Branch, ConditionExpr.MainExpression);
 
         verificationContext.ObjectManager.BeginBranch(out AliasTable BeforeWhenTrue);
 
@@ -160,7 +134,7 @@ internal partial class Verifier : IDisposable
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!BuildExpression(verificationContext, Argument.Expression, out Expr InitializerExpr))
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule> InitializerExpr))
                 return false;
 
             verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
@@ -192,7 +166,7 @@ internal partial class Verifier : IDisposable
             Method HostMethod = verificationContext.HostMethod!;
             Local ResultLocal = verificationContext.ResultLocal!;
 
-            if (!BuildExpression(verificationContext, ReturnExpression, out Expr ResultInitializerExpr))
+            if (!BuildExpression(verificationContext, ReturnExpression, out IExprSet<IExprCapsule> ResultInitializerExpr))
                 return false;
 
             IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultLocal.Name);

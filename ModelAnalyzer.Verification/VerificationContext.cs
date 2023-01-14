@@ -51,5 +51,5 @@ internal record VerificationContext
     /// <summary>
     /// Gets or sets the execution branch. Null if not within some conditional statement.
     /// </summary>
-    public BoolExpr? Branch { get; set; }
+    public IBoolExprCapsule? Branch { get; set; }
 }

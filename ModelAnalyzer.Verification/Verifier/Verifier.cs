@@ -196,14 +196,17 @@ internal partial class Verifier : IDisposable
         {
             Invariant Invariant = InvariantList[i];
 
-            if (BuildExpression(verificationContext, Invariant.BooleanExpression, out BoolExpr InvariantExpression))
+            if (BuildExpression(verificationContext, Invariant.BooleanExpression, out IExprSet<IBoolExprCapsule> InvariantExpression))
             {
-                BoolExpr InvariantOpposite = Context.CreateOppositeExpr(InvariantExpression);
+                IExprSet<IBoolExprCapsule> InvariantOpposite = Context.CreateOppositeExprSet(InvariantExpression);
 
                 verificationContext.Solver.Push();
 
-                Log($"Adding invariant opposite {InvariantOpposite}");
-                verificationContext.Solver.Assert(InvariantOpposite);
+                foreach (IBoolExprCapsule Expression in InvariantOpposite.Expressions)
+                {
+                    Log($"Adding invariant opposite {Expression.Item}");
+                    verificationContext.Solver.Assert(Expression.Item);
+                }
 
                 if (verificationContext.Solver.Check() == Status.SATISFIABLE)
                 {
@@ -295,7 +298,7 @@ internal partial class Verifier : IDisposable
             IExpression AssertionExpression = Require.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
-            if (!BuildExpression(verificationContext, AssertionExpression, out BoolExpr AssertionExpr))
+            if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
             if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType))
@@ -320,7 +323,7 @@ internal partial class Verifier : IDisposable
             IExpression AssertionExpression = Ensure.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 
-            if (!BuildExpression(verificationContext, AssertionExpression, out BoolExpr AssertionExpr))
+            if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
             if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType, keepNormal))
@@ -334,7 +337,7 @@ internal partial class Verifier : IDisposable
     }
 
     // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
-    private bool AddMethodAssertionNormal(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string text, VerificationErrorType errorType, bool keepNormal)
+    private bool AddMethodAssertionNormal(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, int index, string text, VerificationErrorType errorType, bool keepNormal)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
@@ -345,8 +348,11 @@ internal partial class Verifier : IDisposable
         if (!keepNormal)
             verificationContext.Solver.Push();
 
-        Log($"Adding {AssertionType} {assertionExpr}");
-        verificationContext.Solver.Assert(assertionExpr);
+        foreach (IBoolExprCapsule Expression in assertionExpr.Expressions)
+        {
+            Log($"Adding {AssertionType} {Expression.Item}");
+            verificationContext.Solver.Assert(Expression.Item);
+        }
 
         if (verificationContext.Solver.Check() != Status.SATISFIABLE)
         {
@@ -362,17 +368,20 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, BoolExpr assertionExpr, int index, string text, VerificationErrorType errorType)
+    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, int index, string text, VerificationErrorType errorType)
     {
         Method? HostMethod = verificationContext.HostMethod;
         string AssertionType = VerificationErrorTypeToText(errorType);
         bool Result = true;
-        BoolExpr AssertionOppositeExpr = Context.CreateOppositeExpr(assertionExpr);
+        IExprSet<IBoolExprCapsule> AssertionOppositeExpr = Context.CreateOppositeExprSet(assertionExpr);
 
         verificationContext.Solver.Push();
 
-        Log($"Adding {AssertionType} opposite {AssertionOppositeExpr}");
-        verificationContext.Solver.Assert(AssertionOppositeExpr);
+        foreach (IBoolExprCapsule Expression in AssertionOppositeExpr.Expressions)
+        {
+            Log($"Adding {AssertionType} opposite {Expression.Item}");
+            verificationContext.Solver.Assert(Expression.Item);
+        }
 
         if (verificationContext.Solver.Check() == Status.SATISFIABLE)
         {

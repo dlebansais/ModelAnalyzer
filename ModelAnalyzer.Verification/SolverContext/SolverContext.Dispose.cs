@@ -51,19 +51,19 @@ internal partial class SolverContext : IDisposable
         {
         }
 
-        using (Zero)
+        using (Zero.Item)
         {
         }
 
-        using (False)
+        using (False.Item)
         {
         }
 
-        using (True)
+        using (True.Item)
         {
         }
 
-        using (Null)
+        using (Null.Item)
         {
         }
     }
