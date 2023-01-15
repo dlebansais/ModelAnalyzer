@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using AnalysisLogger;
 using Microsoft.Z3;
 
 /// <summary>
@@ -18,14 +19,20 @@ internal partial class SolverContext : IDisposable
     {
         // Need model generation turned on.
         Context = new Context(new Dictionary<string, string>() { { "model", "true" } });
+
         Zero = Context.MkInt(0).Encapsulate();
         False = Context.MkBool(false).Encapsulate();
         True = Context.MkBool(true).Encapsulate();
-        Null = new RefExprCapsule() { Item = Context.MkInt(0) };
+        Null = Context.MkInt(0).EncapsulateAsRef(string.Empty, 0);
         ZeroSet = Zero.ToSingleSet();
         FalseSet = False.ToSingleSet();
         NullSet = Null.ToSingleSet();
     }
+
+    /// <summary>
+    /// Gets or sets the logger.
+    /// </summary>
+    public IAnalysisLogger Logger { get; set; } = new NullLogger();
 
     /// <summary>
     /// Gets the zero constant.
@@ -67,6 +74,8 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     public Solver CreateSolver()
     {
+        Log("*** Creating a new solver");
+
         return Context.MkSolver();
     }
 
@@ -100,10 +109,11 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Creates a reference constant.
     /// </summary>
+    /// <param name="className">The class name.</param>
     /// <param name="name">The constant name.</param>
-    public IRefExprCapsule CreateReferenceConstant(string name)
+    public IRefExprCapsule CreateReferenceConstant(string className, string name)
     {
-        return new RefExprCapsule() { Item = Context.MkIntConst(name) };
+        return Context.MkIntConst(name).EncapsulateAsRef(className, 0);
     }
 
     /// <summary>
@@ -136,11 +146,12 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Creates a reference value.
     /// </summary>
+    /// <param name="className">The class name.</param>
     /// <param name="value">The value.</param>
-    public IRefExprCapsule CreateReferenceValue(int value)
+    public IRefExprCapsule CreateReferenceValue(string className, int value)
     {
         Debug.Assert(value > 0);
-        return new RefExprCapsule() { Item = Context.MkInt(value) };
+        return Context.MkInt(value).EncapsulateAsRef(className, value);
     }
 
     /// <summary>
@@ -399,10 +410,24 @@ internal partial class SolverContext : IDisposable
     public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
     {
         foreach (IBoolExprCapsule Expression in boolExpr.Expressions)
+        {
+            BoolExpr Expr;
+
             if (branch is not null)
-                solver.Assert(Context.MkImplies(branch.Item, Expression.Item));
+                Expr = Context.MkImplies(branch.Item, Expression.Item);
             else
-                solver.Assert(Expression.Item);
+                Expr = Expression.Item;
+
+            Log($"Adding {Expr}");
+            solver.Assert(Expr);
+        }
+    }
+
+    private void Log(string message)
+    {
+        Debug.WriteLine(message);
+
+        Logger.Log(message);
     }
 
     private Context Context;

@@ -191,34 +191,4 @@ class Program_BadExpression_8
 }
 ");
     }
-/*
-    [Test]
-    [Category("Analyzer")]
-    public async Task MemberAccessBadPath_Diagnostic()
-    {
-        await VerifyCS.VerifyAnalyzerAsync(@"
-using System;
-
-class Program_BadExpression_9
-{
-    public int Z { get; set; }
-}
-
-class Program_BadExpression_10
-{
-    public Program_BadExpression_9 Y { get; set; } = new();
-}
-
-class Program_BadExpression_11
-{
-    public int Write()
-    {
-        Program_BadExpression_10 X = new();
-        return X.Y.Z;
-    }
-    // Ensure: [|Result == 1|]MA0009
-}
-");
-    }
-*/
 }

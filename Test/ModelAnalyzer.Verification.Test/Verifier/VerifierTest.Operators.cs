@@ -377,12 +377,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -506,12 +505,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -887,12 +885,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1078,12 +1075,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1194,12 +1190,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1375,12 +1370,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),

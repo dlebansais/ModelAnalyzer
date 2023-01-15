@@ -11,18 +11,14 @@ using Microsoft.Z3;
 internal class ObjectManager
 {
     /// <summary>
-    /// Gets the name of the root object.
-    /// </summary>
-    public const string ThisObject = "this";
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="ObjectManager"/> class.
     /// </summary>
     /// <param name="context">The context.</param>
     public ObjectManager(SolverContext context)
     {
         Context = context;
-        ObjectIndex = 1;
+        ThisObject = Context.CreateReferenceValue("this", 1);
+        ObjectIndex = 2;
     }
 
     /// <summary>
@@ -45,7 +41,12 @@ internal class ObjectManager
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
 
-    public IExprSet<IExprCapsule> CreateVariable(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    /// <summary>
+    /// Gets the expressions for the root object.
+    /// </summary>
+    public IRefExprCapsule ThisObject { get; }
+
+    public IExprSet<IExprCapsule> CreateVariable(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
         IExprSet<IExprCapsule>? InitializerExpr;
 
@@ -57,12 +58,12 @@ internal class ObjectManager
         return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr);
     }
 
-    public IExprSet<IExprCapsule> CreateVariable(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
+    public IExprSet<IExprCapsule> CreateVariable(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
     {
         return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr);
     }
 
-    private IExprSet<IExprCapsule> CreateVariableInternal(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
+    private IExprSet<IExprCapsule> CreateVariableInternal(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
     {
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
@@ -81,7 +82,7 @@ internal class ObjectManager
         return VariableExpr;
     }
 
-    public IExprSet<IExprCapsule> CreateValueExpr(string? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    public IExprSet<IExprCapsule> CreateValueExpr(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
     {
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
@@ -240,7 +241,7 @@ internal class ObjectManager
     public IExprSet<IExprCapsule> CreateObjectInitializer(ExpressionType expressionType)
     {
         ClassModel TypeClassModel = TypeToModel(expressionType);
-        IExprCapsule ReferenceResult = Context.CreateReferenceValue(ObjectIndex++);
+        IRefExprCapsule ReferenceResult = Context.CreateReferenceValue(TypeClassModel.Name, ObjectIndex++);
 
         List<IExprSet<IExprCapsule>> PropertySetList = new();
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
@@ -290,17 +291,18 @@ internal class ObjectManager
     public IExprSet<IExprCapsule> CreateReferenceConstant(VariableAlias alias, ExpressionType variableType)
     {
         ClassModel TypeClassModel = TypeToModel(variableType);
-        IExprCapsule ReferenceResult = Context.CreateReferenceConstant(alias.ToString());
+        IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(TypeClassModel.Name, alias.ToString());
         List<IExprSet<IExprCapsule>> PropertySetList = new();
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
 
-            IVariableName PropertyBlockName = CreateBlockName(TypeClassModel.Name, hostMethod: null, Property.Name);
+            IVariableName PropertyBlockName = CreateBlockName(ReferenceResult, hostMethod: null, Property.Name);
             Variable PropertyVariable = new(PropertyBlockName, Property.Type);
 
-            AliasTable.AddOrIncrement(PropertyVariable);
+            if (!AliasTable.ContainsVariable(PropertyVariable))
+                AliasTable.AddVariable(PropertyVariable);
 
             VariableAlias PropertyVariableNameAlias = AliasTable.GetAlias(PropertyVariable);
 
@@ -330,7 +332,7 @@ internal class ObjectManager
         return ResultLocal;
     }
 
-    public static LocalName CreateBlockName(string? owner, Method? hostMethod, IVariableName localName)
+    public static LocalName CreateBlockName(IRefExprCapsule? owner, Method? hostMethod, IVariableName localName)
     {
         LocalName Result = null!;
 
@@ -342,7 +344,10 @@ internal class ObjectManager
 
         if (owner is not null)
         {
-            string OwnerText = $"{owner}:${localName.Text}";
+            Debug.Assert(owner.ClassName != string.Empty);
+
+            string OwnerText = $"{owner.ClassName}#{owner.Index}:${localName.Text}";
+
             Result = new LocalName() { Text = OwnerText };
         }
 

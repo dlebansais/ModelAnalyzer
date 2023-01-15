@@ -9,11 +9,10 @@ internal class VerifierExtended : Verifier, IDisposable
 {
     [SetsRequiredMembers]
     public VerifierExtended()
-        : base()
+        : base(string.Empty)
     {
         MaxDepth = 0;
         ClassModelTable = new Dictionary<string, ClassModel>();
-        ClassName = string.Empty;
         PropertyTable = new();
         FieldTable = new();
         MethodTable = new();

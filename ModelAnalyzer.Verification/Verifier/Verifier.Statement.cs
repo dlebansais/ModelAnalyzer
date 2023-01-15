@@ -65,7 +65,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? ObjectManager.ThisObject : null, HostMethod, VariableName!);
+        IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? verificationContext.ObjectManager.ThisObject : null, HostMethod, VariableName!);
         Variable Destination = new(VariableBlockName, VariableType!);
 
         verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);

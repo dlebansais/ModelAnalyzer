@@ -128,12 +128,11 @@ public partial class VerifierTest
             AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
         };
 
-        Verifier TestObject = new()
+        Verifier TestObject = new(ClassName)
         {
             MaxDepth = 0,
             MaxDuration = TimeSpan.MaxValue,
             ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
-            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,

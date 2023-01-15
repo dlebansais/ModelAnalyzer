@@ -47,12 +47,13 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
+    /*
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule> resultExpr)
     {
         List<IVariable> VariablePath = variableValueExpression.VariablePath;
         Debug.Assert(VariablePath.Count >= 1);
 
-        string Name = VariablePath.Last().Name.Text;
+        string Name = VariablePath.First().Name.Text;
         Method? HostMethod = null;
         IVariableName? VariableName = null;
         ExpressionType? VariableType = null;
@@ -65,9 +66,69 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? ObjectManager.ThisObject : null, HostMethod, VariableName!, VariableType!);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.ObjectManager.ThisObject : null, HostMethod, VariableName!, VariableType!);
+
+        for (int i = 1; i < VariablePath.Count; i++)
+        {
+            Debug.Assert(VariablePath[i] is IProperty);
+            IProperty Property = (IProperty)VariablePath[i];
+
+            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
+            IRefExprCapsule Reference = (IRefExprCapsule)resultExpr.MainExpression;
+
+            resultExpr = verificationContext.ObjectManager.CreateValueExpr(Reference, hostMethod: null, Property.Name, Property.Type);
+        }
 
         return true;
+    }*/
+
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule> resultExpr)
+    {
+        return BuildVariableValueExpression(verificationContext, variableValueExpression.VariablePath, pathIndex: 0, owner: verificationContext.ObjectManager.ThisObject, out resultExpr);
+    }
+
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, IRefExprCapsule? owner, out IExprSet<IExprCapsule> resultExpr)
+    {
+        Debug.Assert(pathIndex < variablePath.Count);
+
+        string Name = variablePath[pathIndex].Name.Text;
+        Method? HostMethod = null;
+        IVariableName? VariableName = null;
+        ExpressionType? VariableType = null;
+
+        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+
+        if (pathIndex == 0)
+        {
+            LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        }
+
+        Debug.Assert(VariableName is not null);
+        Debug.Assert(VariableType is not null);
+
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? owner : null, HostMethod, VariableName!, VariableType!);
+
+        if (pathIndex + 1 < variablePath.Count)
+        {
+            ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+            VerificationContext NewVerificationContext = verificationContext with
+            {
+                PropertyTable = ClassModel.PropertyTable,
+                FieldTable = ReadOnlyFieldTable.Empty,
+                MethodTable = ReadOnlyMethodTable.Empty,
+                HostMethod = null,
+                ResultLocal = null,
+            };
+
+            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
+            IRefExprCapsule NewReference = (IRefExprCapsule)resultExpr.MainExpression;
+
+            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, NewReference, out resultExpr);
+        }
+        else
+            return true;
     }
 
     private void LookupProperty(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)

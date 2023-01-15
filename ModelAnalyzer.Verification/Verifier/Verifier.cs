@@ -14,9 +14,11 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Verifier"/> class.
     /// </summary>
-    public Verifier()
+    /// <param name="className">The class name of the root object.</param>
+    public Verifier(string className)
     {
-        // Need model generation turned on.
+        // TODO: make ClassName a required property.
+        ClassName = className;
         Context = new();
     }
 
@@ -27,6 +29,7 @@ internal partial class Verifier : IDisposable
     {
         VerificationWatch.Restart();
 
+        Context.Logger = Logger;
         Verify(depth: 0);
     }
 
@@ -48,7 +51,7 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets the class name.
     /// </summary>
-    required public string ClassName { get; init; }
+    public string ClassName { get; }
 
     /// <summary>
     /// Gets the property table.
@@ -71,9 +74,9 @@ internal partial class Verifier : IDisposable
     required public IReadOnlyList<Invariant> InvariantList { get; init; }
 
     /// <summary>
-    /// Gets the logger.
+    /// Gets or sets the logger.
     /// </summary>
-    public IAnalysisLogger Logger { get; init; } = new NullLogger();
+    public IAnalysisLogger Logger { get; set; } = new NullLogger();
 
     /// <summary>
     /// Gets a value indicating whether the invariant is violated.
@@ -166,13 +169,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(ObjectManager.ThisObject, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.ThisObject, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(ObjectManager.ThisObject, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.ThisObject, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -417,6 +420,8 @@ internal partial class Verifier : IDisposable
 
     private void Log(string message)
     {
+        Debug.WriteLine(message);
+
         Logger.Log(message);
     }
 

@@ -25,6 +25,11 @@ internal static class Encapsulation
         }
     }
 
+    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, string className, int index)
+    {
+        return new RefExprCapsule() { Item = expr, ClassName = className, Index = index };
+    }
+
     public static IExprSet<IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
     {
         return new ExprSet<IBoolExprCapsule>(expr);
