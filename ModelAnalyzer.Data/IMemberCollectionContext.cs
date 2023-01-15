@@ -26,9 +26,4 @@ internal interface IMemberCollectionContext
     /// Gets the current method with parameters and locals.
     /// </summary>
     Method? HostMethod { get; }
-
-    /// <summary>
-    /// Gets the local variable that represents the value returned by a method.
-    /// </summary>
-    Local? ResultLocal { get; }
 }

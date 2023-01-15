@@ -102,11 +102,6 @@ internal record ParsingContext : IMemberCollectionContext
     public bool IsLocalAllowed { get; set; }
 
     /// <summary>
-    /// Gets or sets the local variable that represents the value returned by a method. This is either a local declared in the method or one made up by the parser.
-    /// </summary>
-    public Local? ResultLocal { get; set; }
-
-    /// <summary>
     /// Gets or sets a context to calculate the location of an expression. This is usually relative to the source code root, but also can be relative to a trivia for assertions, for instance.
     /// </summary>
     public LocationContext? LocationContext { get; set; }

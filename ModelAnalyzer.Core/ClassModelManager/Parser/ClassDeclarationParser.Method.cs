@@ -61,6 +61,7 @@ internal partial class ClassDeclarationParser
 
                 List<Require> RequireList;
                 ReadOnlyLocalTable LocalTable;
+                Local? ResultLocal;
                 List<Statement> StatementList;
                 List<Ensure> EnsureList;
 
@@ -97,6 +98,7 @@ internal partial class ClassDeclarationParser
                     MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsFieldAllowed = true, IsLocalAllowed = true };
 
                     StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
+                    ResultLocal = FindOrCreateResultLocal(LocalTable, ReturnType);
 
                     TemporaryMethod = new Method
                     {
@@ -106,13 +108,11 @@ internal partial class ClassDeclarationParser
                         ReturnType = ReturnType,
                         RequireList = RequireList,
                         LocalTable = LocalTable,
+                        ResultLocal = ResultLocal,
                         StatementList = StatementList,
                         EnsureList = new List<Ensure>(),
                     };
-
-                    // TODO: reuse existing result local in Method.
-                    Local? ResultLocal = ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalTable, ReturnType) : null;
-                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, ResultLocal = ResultLocal };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod };
 
                     EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration);
                 }
@@ -120,6 +120,7 @@ internal partial class ClassDeclarationParser
                 {
                     RequireList = new List<Require>();
                     LocalTable = ReadOnlyLocalTable.Empty;
+                    ResultLocal = null;
                     StatementList = new List<Statement>();
                     EnsureList = new List<Ensure>();
                 }
@@ -132,6 +133,7 @@ internal partial class ClassDeclarationParser
                     ReturnType = ReturnType,
                     RequireList = RequireList,
                     LocalTable = LocalTable,
+                    ResultLocal = ResultLocal,
                     StatementList = StatementList,
                     EnsureList = EnsureList,
                 };
@@ -414,18 +416,24 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Local FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType)
+    private Local? FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType)
     {
         Debug.Assert(returnType != ExpressionType.Other);
-        Debug.Assert(returnType != ExpressionType.Void);
 
-        LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
+        Local? ResultLocal;
 
-        foreach (KeyValuePair<LocalName, Local> Entry in localTable)
-            if (Entry.Key == ResultName)
-                return Entry.Value;
+        if (returnType != ExpressionType.Void)
+        {
+            LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
 
-        Local ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null };
+            foreach (KeyValuePair<LocalName, Local> Entry in localTable)
+                if (Entry.Key == ResultName)
+                    return Entry.Value;
+
+            ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null };
+        }
+        else
+            ResultLocal = null;
 
         return ResultLocal;
     }

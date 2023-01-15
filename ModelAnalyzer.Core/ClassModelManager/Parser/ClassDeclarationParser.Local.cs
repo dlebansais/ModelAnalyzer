@@ -19,20 +19,6 @@ internal partial class ClassDeclarationParser
         else
             LocalTable = new();
 
-        Debug.Assert(parsingContext.HostMethod is not null);
-        Method HostMethod = parsingContext.HostMethod!;
-
-        Local? ResultLocal = LocalTable.GetResultLocal();
-
-        if (ResultLocal is null)
-        {
-            ExpressionType ReturnType = HostMethod.ReturnType;
-            Debug.Assert(ReturnType != ExpressionType.Other);
-
-            if (HostMethod.ReturnType != ExpressionType.Void)
-                HostMethod.ResultLocal = new Local() { Name = new LocalName() { Text = Ensure.ResultKeyword }, Type = ReturnType, Initializer = null };
-        }
-
         return LocalTable;
     }
 
