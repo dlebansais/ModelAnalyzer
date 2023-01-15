@@ -226,4 +226,54 @@ class Program_Verifier_NewObject5_3
         Assert.That(VerificationResult2.IsError, Is.True);
         Assert.That(VerificationResult2.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
+
+    private const string NewObjectSourceCode6 = @"
+using System;
+
+class Program_Verifier_NewObject6_1
+{
+    public int Z { get; set; } = 1;
+}
+
+class Program_Verifier_NewObject6_2
+{
+    public Program_Verifier_NewObject6_1 Y { get; set; } = new();
+}
+
+class Program_Verifier_NewObject6_3
+{
+    Program_Verifier_NewObject6_2 X = new();
+
+    public int Read1()
+    {
+        return Read2(X);
+    }
+    // Ensure: Result == 1
+
+    int Read2(Program_Verifier_NewObject6_2 x)
+    {
+        return Read3(x.Y);
+    }
+
+    int Read3(Program_Verifier_NewObject6_1 y)
+    {
+        return y.Z;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_NewObject6_Success()
+    {
+        List<Verifier> TestObjectList = Tools.CreateMultiVerifierFromSourceCode(NewObjectSourceCode6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        foreach (Verifier Item in TestObjectList)
+        {
+            Item.Verify();
+
+            VerificationResult VerificationResult = Item.VerificationResult;
+            Assert.That(VerificationResult.IsSuccess, Is.True);
+        }
+    }
 }
