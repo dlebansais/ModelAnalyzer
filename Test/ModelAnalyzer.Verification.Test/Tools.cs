@@ -58,11 +58,12 @@ public static class Tools
         {
             ClassModel ClassModel = (ClassModel)Entry.Value;
 
-            TestObject = new(ClassModel.Name)
+            TestObject = new()
             {
                 MaxDepth = maxDepth,
                 MaxDuration = maxDuration,
                 ClassModelTable = ClassModelTable,
+                ClassName = ClassModel.Name,
                 PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
                 MethodTable = ClassModel.MethodTable,
@@ -117,11 +118,12 @@ public static class Tools
         {
             ClassModel ClassModel = (ClassModel)Entry.Value;
 
-            Verifier TestObject = new(ClassModel.Name)
+            Verifier TestObject = new()
             {
                 MaxDepth = maxDepth,
                 MaxDuration = maxDuration,
                 ClassModelTable = ClassModelTable,
+                ClassName = ClassModel.Name,
                 PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
                 MethodTable = ClassModel.MethodTable,

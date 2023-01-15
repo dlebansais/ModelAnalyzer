@@ -14,11 +14,8 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Verifier"/> class.
     /// </summary>
-    /// <param name="className">The class name of the root object.</param>
-    public Verifier(string className)
+    public Verifier()
     {
-        // TODO: make ClassName a required property.
-        ClassName = className;
         Context = new();
     }
 
@@ -51,7 +48,7 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets the class name.
     /// </summary>
-    public string ClassName { get; }
+    required public string ClassName { get; init; }
 
     /// <summary>
     /// Gets the property table.

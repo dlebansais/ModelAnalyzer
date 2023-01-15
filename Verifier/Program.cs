@@ -120,11 +120,12 @@ internal class Program
 
         try
         {
-            using Verifier Verifier = new(ClassName)
+            using Verifier Verifier = new()
             {
                 MaxDepth = MaxDepth,
                 MaxDuration = MaxDuration,
                 ClassModelTable = classModelTable,
+                ClassName = ClassName,
                 PropertyTable = classModel.PropertyTable,
                 FieldTable = classModel.FieldTable,
                 MethodTable = classModel.MethodTable,
