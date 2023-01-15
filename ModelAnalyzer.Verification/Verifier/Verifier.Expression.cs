@@ -265,12 +265,11 @@ internal partial class Verifier : IDisposable
             verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
-        // TODO: reuse existing result local in Method.
-        LocalName ResultLocalName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local ResultLocal = new Local() { Name = ResultLocalName, Type = calledFunction.ReturnType, Initializer = null };
-        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, ResultLocal.Name, ResultLocal.Type, branch: null, initializerExpr: null);
+        LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
+        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
+        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
 
-        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = ResultLocal };
+        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = CallResult };
 
         if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
             return false;
@@ -281,7 +280,7 @@ internal partial class Verifier : IDisposable
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, ResultLocal.Name, ResultLocal.Type);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
 
         return true;
     }

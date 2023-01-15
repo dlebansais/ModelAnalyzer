@@ -315,16 +315,16 @@ internal class ObjectManager
         return Result;
     }
 
-    // TODO: reuse existing result local in Method.
     public Local FindOrCreateResultLocal(Method hostMethod, ExpressionType returnType)
     {
         foreach (KeyValuePair<LocalName, Local> Entry in hostMethod.LocalTable)
             if (Entry.Key.Text == Ensure.ResultKeyword)
                 return Entry.Value;
 
-        LocalName ResultLocalName = new LocalName() { Text = Ensure.ResultKeyword };
-        Local ResultLocal = new Local() { Name = ResultLocalName, Type = returnType, Initializer = null };
-        LocalName ResultBlockLocalName = CreateBlockName(owner: null, hostMethod, ResultLocal.Name);
+        Local? ResultLocal = hostMethod.ResultLocal as Local;
+        Debug.Assert(ResultLocal is not null);
+
+        LocalName ResultBlockLocalName = CreateBlockName(owner: null, hostMethod, ResultLocal!.Name);
         Variable ResultLocalVariable = new(ResultBlockLocalName, returnType);
 
         AliasTable.AddOrIncrement(ResultLocalVariable);

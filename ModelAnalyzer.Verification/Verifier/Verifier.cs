@@ -179,14 +179,19 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private Local FindOrCreateResultLocal(VerificationContext verificationContext, ExpressionType returnType)
+    private Local? FindOrCreateResultLocal(VerificationContext verificationContext, ExpressionType returnType)
     {
-        Debug.Assert(verificationContext.HostMethod is not null);
+        if (returnType != ExpressionType.Void)
+        {
+            Debug.Assert(verificationContext.HostMethod is not null);
 
-        Method HostMethod = verificationContext.HostMethod!;
-        Local ResultLocal = verificationContext.ObjectManager.FindOrCreateResultLocal(HostMethod, returnType);
+            Method HostMethod = verificationContext.HostMethod!;
+            Local ResultLocal = verificationContext.ObjectManager.FindOrCreateResultLocal(HostMethod, returnType);
 
-        return ResultLocal;
+            return ResultLocal;
+        }
+        else
+            return null;
     }
 
     private bool AddClassInvariant(VerificationContext verificationContext)
@@ -234,7 +239,7 @@ internal partial class Verifier : IDisposable
     private bool AddMethodCallStateWithInit(VerificationContext verificationContext, Method hostMethod)
     {
         VerificationContext LocalVerificationContext = verificationContext with { HostMethod = hostMethod };
-        Local? ResultLocal = hostMethod.ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType) : null;
+        Local? ResultLocal = FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType);
         VerificationContext StatementVerificationContext = LocalVerificationContext with { ResultLocal = ResultLocal };
 
         return AddMethodCallState(StatementVerificationContext);
