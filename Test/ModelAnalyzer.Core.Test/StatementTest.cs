@@ -217,6 +217,7 @@ class Program_CoreStatement_5
   int Read()
   {
     int Y
+
     return X;
   }
 "));
@@ -880,6 +881,7 @@ class Program_CoreStatement_29
   int Read()
   {
     int Result = 1
+
     return Result;
   }
 "));
@@ -1031,6 +1033,7 @@ class Program_CoreStatement_34
   {
     Program_CoreStatement_33 Y
     bool Z
+
     Y = X;
     Z = Y == new Program_CoreStatement_33();
   }

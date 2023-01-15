@@ -48,9 +48,17 @@ internal class Method : IMethod, INameable<MethodName>
     required public List<Statement> StatementList { get; init; }
 
     /// <summary>
+    /// Gets or sets the Result local variable.
+    /// </summary>
+    public ILocal? ResultLocal { get; set; }
+
+    /// <summary>
     /// Gets the method guarantees.
     /// </summary>
     required public List<Ensure> EnsureList { get; init; }
+
+    /// <inheritdoc/>
+    public IList<IParameter> GetParameters() => new List<IParameter>(ParameterTable.Table.List.ConvertAll(entry => entry.Value));
 
     /// <inheritdoc/>
     public IList<IRequire> GetRequires() => new List<IRequire>(RequireList);

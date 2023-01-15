@@ -74,14 +74,48 @@ internal partial class ClassDeclarationParser
     public Unsupported Unsupported { get; private set; } = new();
 
     /// <summary>
-    /// Parses the class declaration.
+    /// Parses the class declaration, first phase.
     /// </summary>
-    public void Parse()
+    public void ParsePhase1()
     {
         string ClassName = ClassDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
 
-        Log($"Parsing declaration of class '{ClassName}'");
+        Log($"Parsing declaration of class '{ClassName}', phase one");
+
+        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, SemanticModel = SemanticModel };
+
+        if (IsClassDeclarationSupported(ClassDeclaration))
+        {
+            ParsingContext = ParsingContext with { PropertyTable = ParseProperties(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { FieldTable = ParseFields(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { MethodTable = ParseMethods(ParsingContext, ClassDeclaration) };
+            ParsingContext = ParsingContext with { IsMethodParsingFirstPassDone = true };
+
+            PropertyTable = ParsingContext.PropertyTable.AsReadOnly();
+            FieldTable = ParsingContext.FieldTable.AsReadOnly();
+            MethodTable = ParsingContext.MethodTable.AsReadOnly();
+        }
+        else
+        {
+            ParsingContext.Unsupported.InvalidDeclaration = true;
+            PropertyTable = ReadOnlyPropertyTable.Empty;
+            FieldTable = ReadOnlyFieldTable.Empty;
+            MethodTable = ReadOnlyMethodTable.Empty;
+        }
+
+        Unsupported = ParsingContext.Unsupported;
+    }
+
+    /// <summary>
+    /// Parses the class declaration, second phase.
+    /// </summary>
+    public void ParsePhase2()
+    {
+        string ClassName = ClassDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
+
+        Log($"Parsing declaration of class '{ClassName}', phase two");
 
         ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, SemanticModel = SemanticModel };
 

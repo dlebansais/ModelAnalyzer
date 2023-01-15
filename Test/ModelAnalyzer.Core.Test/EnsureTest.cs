@@ -423,6 +423,7 @@ class Program_CoreEnsure_10
   public void Write(int x)
   {
     int X
+
     X = x;
   }
 "));

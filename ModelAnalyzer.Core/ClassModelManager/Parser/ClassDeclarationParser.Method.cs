@@ -109,6 +109,8 @@ internal partial class ClassDeclarationParser
                         StatementList = StatementList,
                         EnsureList = new List<Ensure>(),
                     };
+
+                    // TODO: reuse existing result local in Method.
                     Local? ResultLocal = ReturnType != ExpressionType.Void ? FindOrCreateResultLocal(LocalTable, ReturnType) : null;
                     MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, ResultLocal = ResultLocal };
 

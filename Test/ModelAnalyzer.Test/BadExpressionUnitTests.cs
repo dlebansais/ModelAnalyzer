@@ -167,4 +167,58 @@ class Program_BadExpression_6
 // Invariant: [|Y|]MA0009 >= 0
 ");
     }
+
+    [Test]
+    [Category("Analyzer")]
+    public async Task MemberAccessGoodPath_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_7
+{
+    public int Y { get; set; }
+}
+
+class Program_BadExpression_8
+{
+    public int Write()
+    {
+        Program_BadExpression_7 X = new();
+        return X.Y;
+    }
+    // Ensure: Result == 0
+}
+");
+    }
+/*
+    [Test]
+    [Category("Analyzer")]
+    public async Task MemberAccessBadPath_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+using System;
+
+class Program_BadExpression_9
+{
+    public int Z { get; set; }
+}
+
+class Program_BadExpression_10
+{
+    public Program_BadExpression_9 Y { get; set; } = new();
+}
+
+class Program_BadExpression_11
+{
+    public int Write()
+    {
+        Program_BadExpression_10 X = new();
+        return X.Y.Z;
+    }
+    // Ensure: [|Result == 1|]MA0009
+}
+");
+    }
+*/
 }

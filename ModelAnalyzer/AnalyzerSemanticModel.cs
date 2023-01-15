@@ -24,6 +24,9 @@ public class AnalyzerSemanticModel : IModel
     public SemanticModel SemanticModel { get; }
 
     /// <inheritdoc/>
+    public Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; } = new();
+
+    /// <inheritdoc/>
     public bool HasBaseType(ClassDeclarationSyntax classDeclaration)
     {
         INamedTypeSymbol? TypeSymbol = SemanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;

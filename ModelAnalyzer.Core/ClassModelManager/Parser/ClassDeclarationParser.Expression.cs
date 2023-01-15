@@ -1,8 +1,10 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,6 +30,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParsePrefixUnaryExpression(NestedParsingContext, PrefixUnaryExpression, ref IsErrorReported, ref Location);
         else if (expressionNode is IdentifierNameSyntax IdentifierName)
             NewExpression = TryParseVariableValueExpression(NestedParsingContext, IdentifierName);
+        else if (expressionNode is MemberAccessExpressionSyntax MemberAccessExpression)
+            NewExpression = TryParseMemberAccessExpression(NestedParsingContext, MemberAccessExpression);
         else if (expressionNode is LiteralExpressionSyntax LiteralExpression)
             NewExpression = TryParseLiteralValueExpression(LiteralExpression);
         else if (expressionNode is ParenthesizedExpressionSyntax ParenthesizedExpression)
@@ -229,9 +233,89 @@ internal partial class ClassDeclarationParser
         string VariableName = identifierName.Identifier.ValueText;
 
         if (TryFindVariableByName(parsingContext, VariableName, out IVariable Variable))
-            NewExpression = new VariableValueExpression { VariableName = Variable.Name };
+        {
+            VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = new List<IVariable>() { Variable }, PathLocation = identifierName.GetLocation() };
+            NewExpression = NewVariableValueExpression;
+        }
         else
             Log($"Unknown variable '{VariableName}'.");
+
+        return NewExpression;
+    }
+
+    private Expression? TryParseMemberAccessExpression(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression)
+    {
+        Expression? NewExpression = null;
+        MemberAccessExpressionSyntax ObjectExpression = memberAccessExpression;
+        List<string> NamePath = new();
+
+        while (ObjectExpression.Expression is MemberAccessExpressionSyntax NestedObjectExpression && ObjectExpression.OperatorToken.IsKind(SyntaxKind.DotToken))
+        {
+            string RightName = ObjectExpression.Name.Identifier.ValueText;
+            NamePath.Insert(0, RightName);
+
+            ObjectExpression = NestedObjectExpression;
+        }
+
+        if (ObjectExpression.Expression is IdentifierNameSyntax ObjectName && ObjectExpression.OperatorToken.IsKind(SyntaxKind.DotToken))
+        {
+            string LeftName = ObjectName.Identifier.ValueText;
+            string RightName = ObjectExpression.Name.Identifier.ValueText;
+            NamePath.Insert(0, RightName);
+            NamePath.Insert(0, LeftName);
+
+            if (TryFindVariableByName(parsingContext, LeftName, out IVariable Variable))
+            {
+                List<IVariable> VariablePath = new() { Variable };
+                string PropertyName = string.Empty;
+
+                for (int i = 0; i + 1 < NamePath.Count; i++)
+                {
+                    IList<IProperty> PropertyList;
+                    ExpressionType VariableType = Variable.Type;
+
+                    if (!VariableType.IsSimple)
+                    {
+                        string ClassName = VariableType.Name;
+                        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+
+                        if (!Phase1ClassModelTable.ContainsKey(ClassName))
+                            break;
+
+                        IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+                        PropertyList = ClassModel.GetProperties();
+                    }
+                    else
+                        PropertyList = new List<IProperty>();
+
+                    PropertyName = NamePath[i + 1];
+
+                    bool IsFound = false;
+                    foreach (IProperty Item in PropertyList)
+                        if (Item.Name.Text == PropertyName)
+                        {
+                            Variable = Item;
+                            IsFound = true;
+                            break;
+                        }
+
+                    if (!IsFound)
+                        break;
+
+                    VariablePath.Add(Variable);
+                }
+
+                if (VariablePath.Count == NamePath.Count)
+                {
+                    VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = memberAccessExpression.GetLocation() };
+                    NewExpression = NewVariableValueExpression;
+                }
+                else
+                    Log($"Unknown property '{PropertyName}'.");
+            }
+            else
+                Log($"Unknown variable '{LeftName}'.");
+        }
 
         return NewExpression;
     }
@@ -287,7 +371,17 @@ internal partial class ClassDeclarationParser
                 List<Statement> ParentStatementList = parsingContext.StatementList;
                 int OwnerStatementIndex = ParentStatementList.Count;
 
-                parsingContext.FunctionCallExpressionList.Add(new FunctionCallStatementEntry() { HostMethod = parsingContext.HostMethod, Expression = NewExpression, OwnerStatementIndex = OwnerStatementIndex, ParentStatementList = ParentStatementList });
+                // TODO: in place checks, no more entry.
+                // TODO: also remove the invariant or the ensure in case of invalid call.
+                FunctionCallStatementEntry NewEntry = new FunctionCallStatementEntry()
+                {
+                    HostMethod = parsingContext.HostMethod,
+                    Expression = NewExpression,
+                    OwnerStatementIndex = OwnerStatementIndex,
+                    ParentStatementList = ParentStatementList,
+                };
+
+                parsingContext.FunctionCallExpressionList.Add(NewEntry);
             }
         }
 

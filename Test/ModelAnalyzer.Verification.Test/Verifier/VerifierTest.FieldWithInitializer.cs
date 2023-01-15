@@ -103,7 +103,7 @@ public partial class VerifierTest
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.Name };
+        VariableValueExpression Variable = new() { VariablePath = new List<IVariable>() { TestField }, PathLocation = null! };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()
@@ -248,10 +248,10 @@ public partial class VerifierTest
         TestFieldTable.AddItem(TestField1);
         TestFieldTable.AddItem(TestField2);
 
-        VariableValueExpression Variable1 = new() { VariableName = TestField1.Name };
+        VariableValueExpression Variable1 = new() { VariablePath = new List<IVariable>() { TestField1 }, PathLocation = null! };
         EqualityExpression VariableEqualZero1 = new EqualityExpression() { Left = Variable1, Right = Zero1, Operator = EqualityOperator.Equal };
 
-        VariableValueExpression Variable2 = new() { VariableName = TestField2.Name };
+        VariableValueExpression Variable2 = new() { VariablePath = new List<IVariable>() { TestField2 }, PathLocation = null! };
         EqualityExpression VariableEqualZero2 = new EqualityExpression() { Left = Variable2, Right = Zero2, Operator = EqualityOperator.Equal };
 
         BinaryLogicalExpression AndExpression = new() { Left = VariableEqualZero1, Operator = BinaryLogicalOperator.And, Right = VariableEqualZero2 };

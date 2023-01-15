@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Z3;
 
 /// <summary>
@@ -48,7 +49,10 @@ internal partial class Verifier : IDisposable
 
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule> resultExpr)
     {
-        string Name = variableValueExpression.VariableName.Text;
+        List<IVariable> VariablePath = variableValueExpression.VariablePath;
+        Debug.Assert(VariablePath.Count >= 1);
+
+        string Name = VariablePath.Last().Name.Text;
         Method? HostMethod = null;
         IVariableName? VariableName = null;
         ExpressionType? VariableType = null;
@@ -200,6 +204,7 @@ internal partial class Verifier : IDisposable
             verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
+        // TODO: reuse existing result local in Method.
         LocalName ResultLocalName = new LocalName() { Text = CreateTemporaryResultLocal() };
         Local ResultLocal = new Local() { Name = ResultLocalName, Type = calledFunction.ReturnType, Initializer = null };
         verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, ResultLocal.Name, ResultLocal.Type, branch: null, initializerExpr: null);

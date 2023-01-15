@@ -17,6 +17,9 @@ public class MadeUpSemanticModel : IModel
     }
 
     /// <inheritdoc/>
+    public Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; } = new();
+
+    /// <inheritdoc/>
     public bool HasBaseType(ClassDeclarationSyntax classDeclaration)
     {
         bool Result = false;

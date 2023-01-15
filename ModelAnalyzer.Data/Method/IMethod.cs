@@ -13,6 +13,16 @@ public interface IMethod
     IClassMemberName Name { get; }
 
     /// <summary>
+    /// Gets the return type.
+    /// </summary>
+    ExpressionType ReturnType { get; }
+
+    /// <summary>
+    /// Gets the list of parameters.
+    /// </summary>
+    IList<IParameter> GetParameters();
+
+    /// <summary>
     /// Gets the list of require clauses.
     /// </summary>
     IList<IRequire> GetRequires();
@@ -21,6 +31,11 @@ public interface IMethod
     /// Gets the list of local variables.
     /// </summary>
     IList<ILocal> GetLocals();
+
+    /// <summary>
+    /// Gets the Result local variable.
+    /// </summary>
+    ILocal? ResultLocal { get; }
 
     /// <summary>
     /// Gets the list of ensure clauses.

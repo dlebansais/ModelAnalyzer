@@ -1490,4 +1490,112 @@ class Program_CoreExpression_53
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_PathAssignment()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_54
+{
+    public int Y { get; set; }
+}
+
+class Program_CoreExpression_55
+{
+    public void Write()
+    {
+        Program_CoreExpression_54 X = new();
+        int N;
+
+        N = X.Y;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel1.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_55
+  public void Write()
+  {
+    Program_CoreExpression_54 X = new Program_CoreExpression_54()
+    int N
+
+    N = X.Y;
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_LongPathAssignment()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_56
+{
+    public double Z { get; set; }
+}
+
+class Program_CoreExpression_57
+{
+    public Program_CoreExpression_56 Y { get; set; } = new();
+}
+
+class Program_CoreExpression_58
+{
+    public Program_CoreExpression_57 X { get; set; } = new();
+}
+
+class Program_CoreExpression_59
+{
+    public void Write()
+    {
+        Program_CoreExpression_58 A = new();
+        double D;
+
+        D = A.X.Y.Z;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(4));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+        IClassModel ClassModel3 = ClassModelList[3];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel3.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel3.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_59
+  public void Write()
+  {
+    Program_CoreExpression_58 A = new Program_CoreExpression_58()
+    double D
+
+    D = A.X.Y.Z;
+  }
+"));
+    }
 }

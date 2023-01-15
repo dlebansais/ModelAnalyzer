@@ -113,6 +113,10 @@ internal partial record ClassModel : IClassModel
         builder.AppendLine("{");
 
         AppendLocals(builder, method.LocalTable);
+
+        if (method.LocalTable.Count > 0 && method.StatementList.Count > 0)
+            builder.AppendLine();
+
         AppendStatements(builder, method.StatementList, 0);
 
         AppendIndentation(builder, indentation: 0);

@@ -179,11 +179,20 @@ public partial class ClassModelManager : IDisposable
                 VerificationState OldVerificationState = Context.VerificationState;
                 ModelExchange OldClassModelExchange = OldVerificationState.ModelExchange;
                 Dictionary<string, ClassModel> OldClassModelTable = OldClassModelExchange.ClassModelTable;
+                Dictionary<string, IClassModel> Phase1ClassModelTable = new();
                 Dictionary<string, ClassModel> NewClassModelTable = new();
 
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                 {
-                    ClassModel NewClassModel = AddOrUpdateClassModel(OldClassModelTable, NewClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
+                    ClassModel NewClassModel = ParseClassModelPhase1(classDeclarationList, ClassDeclaration, semanticModel);
+                    Phase1ClassModelTable.Add(NewClassModel.Name, NewClassModel);
+                }
+
+                semanticModel.Phase1ClassModelTable = Phase1ClassModelTable;
+
+                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+                {
+                    ClassModel NewClassModel = AddOrUpdateClassModelPhase2(OldClassModelTable, NewClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
                     Result.Add(ClassDeclaration, NewClassModel);
                 }
 
@@ -227,13 +236,38 @@ public partial class ClassModelManager : IDisposable
         return Result;
     }
 
-    private ClassModel AddOrUpdateClassModel(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    private ClassModel ParseClassModelPhase1(List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
         Debug.Assert(ClassName != string.Empty);
 
         ClassDeclarationParser Parser = new(classDeclarationList, classDeclaration, semanticModel) { Logger = Logger };
-        Parser.Parse();
+        Parser.ParsePhase1();
+
+        ClassModel ClassModel = new ClassModel()
+        {
+            Name = ClassName,
+            PropertyTable = Parser.PropertyTable,
+            FieldTable = Parser.FieldTable,
+            MethodTable = Parser.MethodTable,
+            InvariantList = Parser.InvariantList,
+            Unsupported = Parser.Unsupported,
+            InvariantViolations = new List<IInvariantViolation>().AsReadOnly(),
+            RequireViolations = new List<IRequireViolation>().AsReadOnly(),
+            EnsureViolations = new List<IEnsureViolation>().AsReadOnly(),
+            AssumeViolations = new List<IAssumeViolation>().AsReadOnly(),
+        };
+
+        return ClassModel;
+    }
+
+    private ClassModel AddOrUpdateClassModelPhase2(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    {
+        string ClassName = classDeclaration.Identifier.ValueText;
+        Debug.Assert(ClassName != string.Empty);
+
+        ClassDeclarationParser Parser = new(classDeclarationList, classDeclaration, semanticModel) { Logger = Logger };
+        Parser.ParsePhase2();
 
         ClassModel NewClassModel;
 

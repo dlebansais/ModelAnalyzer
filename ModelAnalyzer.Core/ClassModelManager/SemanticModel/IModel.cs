@@ -22,4 +22,9 @@ public interface IModel
     /// <param name="isNullable">True if the type is nullable.</param>
     /// <param name="classType">The type upon return if a type with that name exists.</param>
     bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType);
+
+    /// <summary>
+    /// Gets or sets the table of class models after the first phase or parsing.
+    /// </summary>
+    Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; }
 }

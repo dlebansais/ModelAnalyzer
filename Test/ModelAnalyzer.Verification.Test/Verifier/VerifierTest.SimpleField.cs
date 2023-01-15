@@ -102,7 +102,7 @@ public partial class VerifierTest
         FieldTable TestFieldTable = new();
         TestFieldTable.AddItem(TestField);
 
-        VariableValueExpression Variable = new() { VariableName = TestField.Name };
+        VariableValueExpression Variable = new() { VariablePath = new List<IVariable>() { TestField }, PathLocation = null! };
         EqualityExpression VariableEqualZero = new EqualityExpression() { Left = Variable, Right = Zero, Operator = EqualityOperator.Equal };
 
         Invariant TestInvariant = new()

@@ -258,7 +258,7 @@ internal partial class ClassDeclarationParser
                 {
                     LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
                     bool IsResultInLocals = HostMethod.LocalTable.ContainsItem(ResultName);
-                    bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariableName.Text == ResultName.Text;
+                    bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariablePath.Count == 1 && VariableValue.VariablePath[0].Name.Text == ResultName.Text;
 
                     if (IsResultReturned || !IsResultInLocals)
                         NewStatement = new ReturnStatement { Expression = ReturnExpression };

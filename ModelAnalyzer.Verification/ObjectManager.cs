@@ -313,6 +313,7 @@ internal class ObjectManager
         return Result;
     }
 
+    // TODO: reuse existing result local in Method.
     public Local FindOrCreateResultLocal(Method hostMethod, ExpressionType returnType)
     {
         foreach (KeyValuePair<LocalName, Local> Entry in hostMethod.LocalTable)
