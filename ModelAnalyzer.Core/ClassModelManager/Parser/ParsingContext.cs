@@ -112,9 +112,9 @@ internal record ParsingContext : IMemberCollectionContext
     public bool IsExpressionNested { get; set; }
 
     /// <summary>
-    /// Gets or sets the list of parsed statements.
+    /// Gets or sets the current call location.
     /// </summary>
-    public List<Statement> StatementList { get; set; } = new();
+    public ICallLocation? CallLocation { get; set; }
 
     /// <summary>
     /// Gets or sets the list of method call statements.

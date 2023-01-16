@@ -1,7 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
-
 /// <summary>
 /// Represents the context of a parsed method call statement.
 /// </summary>
@@ -18,7 +16,7 @@ internal class MethodCallStatementEntry
     required public Method HostMethod { get; init; }
 
     /// <summary>
-    /// Gets the parent statement list.
+    /// Gets the call location.
     /// </summary>
-    required public List<Statement> ParentStatementList { get; init; }
+    required public ICallLocation CallLocation { get; init; }
 }

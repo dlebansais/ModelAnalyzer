@@ -54,7 +54,8 @@ internal partial class ClassDeclarationParser
         if (TryParseAssertionTextInTrivia(Text, out SyntaxTree SyntaxTree, out int Offset))
         {
             LocationContext LocationContext = new(trivia, header, Offset);
-            ParsingContext EnsureParsingContext = parsingContext with { IsFieldAllowed = false, IsLocalAllowed = false, LocationContext = LocationContext, IsExpressionNested = false };
+            CallRequireLocation CallLocation = new() { ParentRequireList = requireList, RequireIndex = requireList.Count };
+            ParsingContext EnsureParsingContext = parsingContext with { IsFieldAllowed = false, IsLocalAllowed = false, LocationContext = LocationContext, IsExpressionNested = false, CallLocation = CallLocation };
 
             if (IsValidAssertionSyntaxTree(EnsureParsingContext, SyntaxTree, out Expression BooleanExpression, out IsErrorReported))
             {

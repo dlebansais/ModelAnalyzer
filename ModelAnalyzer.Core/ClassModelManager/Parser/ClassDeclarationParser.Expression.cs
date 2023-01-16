@@ -368,17 +368,14 @@ internal partial class ClassDeclarationParser
             {
                 NewExpression = new FunctionCallExpression { FunctionName = FunctionName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
 
-                List<Statement> ParentStatementList = parsingContext.StatementList;
-                int OwnerStatementIndex = ParentStatementList.Count;
+                Debug.Assert(parsingContext.CallLocation is not null);
+                ICallLocation CallLocation = parsingContext.CallLocation!;
 
-                // TODO: in place checks, no more entry.
-                // TODO: also remove the invariant or the ensure in case of invalid call.
                 FunctionCallStatementEntry NewEntry = new FunctionCallStatementEntry()
                 {
                     HostMethod = parsingContext.HostMethod,
                     Expression = NewExpression,
-                    OwnerStatementIndex = OwnerStatementIndex,
-                    ParentStatementList = ParentStatementList,
+                    CallLocation = CallLocation,
                 };
 
                 parsingContext.FunctionCallExpressionList.Add(NewEntry);

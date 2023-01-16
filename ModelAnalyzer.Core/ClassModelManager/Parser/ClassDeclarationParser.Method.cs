@@ -210,41 +210,35 @@ internal partial class ClassDeclarationParser
 
     private void ReportInvalidMethodCalls(ParsingContext parsingContext)
     {
-        Dictionary<Statement, List<Statement>> RemovedStatementTable = new();
+        List<ICallLocation> RemovedCallLocationList = new();
         bool IsErrorReported;
 
         ParsingContext InvariantParsingContext = parsingContext with { HostMethod = null };
         IsErrorReported = false;
-        ReportInvalidMethodCalls(InvariantParsingContext, new List<Method>(), RemovedStatementTable, ref IsErrorReported);
+        ReportInvalidMethodCalls(InvariantParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
 
         foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
         {
             ParsingContext MethodParsingContext = parsingContext with { HostMethod = Entry.Value };
             IsErrorReported = false;
-            ReportInvalidMethodCalls(MethodParsingContext, new List<Method>(), RemovedStatementTable, ref IsErrorReported);
+            ReportInvalidMethodCalls(MethodParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
         }
 
-        foreach (KeyValuePair<Statement, List<Statement>> Entry in RemovedStatementTable)
-        {
-            Statement OwnerStatement = Entry.Key;
-            List<Statement> ParentStatementList = Entry.Value;
-
-            bool IsRemoved = ParentStatementList.Remove(OwnerStatement);
-            Debug.Assert(IsRemoved);
-        }
+        foreach (ICallLocation CallLocation in RemovedCallLocationList)
+            CallLocation.RemoveCall();
     }
 
-    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, ref bool isErrorReported)
+    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, ref bool isErrorReported)
     {
         foreach (MethodCallStatementEntry Entry in parsingContext.MethodCallStatementList)
             if (parsingContext.HostMethod is not null && Entry.HostMethod.Name == parsingContext.HostMethod.Name)
             {
                 MethodCallStatement MethodCall = Entry.Statement;
 
-                if (!IsValidMethodCall(parsingContext, visitedMethodList, removedStatementTable, MethodCall, out Location Location, ref isErrorReported))
+                if (!IsValidMethodCall(parsingContext, visitedMethodList, removedCallLocationList, MethodCall, out Location Location, ref isErrorReported))
                 {
                     parsingContext.Unsupported.AddUnsupportedStatement(Location);
-                    removedStatementTable.Add(MethodCall, Entry.ParentStatementList);
+                    removedCallLocationList.Add(Entry.CallLocation);
                 }
             }
 
@@ -257,29 +251,19 @@ internal partial class ClassDeclarationParser
             {
                 FunctionCallExpression FunctionCall = Entry.Expression;
 
-                if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedStatementTable, FunctionCall, out Location Location, ref isErrorReported))
+                if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedCallLocationList, FunctionCall, out Location Location, ref isErrorReported))
                 {
                     if (!isErrorReported)
                     {
                         parsingContext.Unsupported.AddUnsupportedExpression(Location);
-
-                        int OwnerStatementIndex = Entry.OwnerStatementIndex;
-                        List<Statement> ParentStatementList = Entry.ParentStatementList;
-
-                        Debug.Assert(OwnerStatementIndex >= 0);
-
-                        if (OwnerStatementIndex < ParentStatementList.Count)
-                        {
-                            Statement OwnerStatement = ParentStatementList[OwnerStatementIndex];
-                            removedStatementTable.Add(OwnerStatement, ParentStatementList);
-                        }
+                        removedCallLocationList.Add(Entry.CallLocation);
                     }
                 }
             }
         }
     }
 
-    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, MethodCallStatement methodCall, out Location location, ref bool isErrorReported)
+    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, MethodCallStatement methodCall, out Location location, ref bool isErrorReported)
     {
         MethodTable MethodTable = parsingContext.MethodTable;
         Method HostMethod = parsingContext.HostMethod!;
@@ -333,12 +317,12 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.Add(CalledMethod);
 
         ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
-        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedStatementTable, ref isErrorReported);
+        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
 
         return true;
     }
 
-    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, Dictionary<Statement, List<Statement>> removedStatementTable, FunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
+    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, FunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
     {
         MethodTable MethodTable = parsingContext.MethodTable;
         Method? HostMethod = parsingContext.HostMethod;
@@ -392,7 +376,7 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.Add(CalledMethod);
 
         ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
-        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedStatementTable, ref isErrorReported);
+        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
 
         return true;
     }

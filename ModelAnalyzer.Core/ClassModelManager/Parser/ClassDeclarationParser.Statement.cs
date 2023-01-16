@@ -27,7 +27,7 @@ internal partial class ClassDeclarationParser
     {
         List<Statement> StatementList = new();
         LocationContext LocationContext = new(expressionBody);
-        ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext, StatementList = StatementList };
+        ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext, CallLocation = new CallExpressionBodyLocation() };
 
         Expression? Expression = ParseExpression(ExpressionBodyContext, expressionBody);
         if (Expression is not null)
@@ -44,15 +44,21 @@ internal partial class ClassDeclarationParser
     private List<Statement> ParseBlockStatements(ParsingContext parsingContext, BlockSyntax block, bool isMainBlock)
     {
         List<Statement> StatementList = new();
-        ParsingContext BlockContext = parsingContext with { StatementList = StatementList };
 
-        foreach (StatementSyntax Item in block.Statements)
+        for (int StatementIndex = 0; StatementIndex < block.Statements.Count; StatementIndex++)
+        {
+            StatementSyntax Item = block.Statements[StatementIndex];
+
             if (Item is not LocalDeclarationStatementSyntax)
             {
+                CallStatementLocation CallLocation = new() { ParentStatementList = StatementList, StatementIndex = StatementIndex };
+                ParsingContext BlockContext = parsingContext with { CallLocation = CallLocation };
+
                 Statement? NewStatement = ParseStatement(BlockContext, Item, isMainBlock && Item == block.Statements.Last());
                 if (NewStatement is not null)
                     StatementList.Add(NewStatement);
             }
+        }
 
         return StatementList;
     }
@@ -65,7 +71,8 @@ internal partial class ClassDeclarationParser
             StatementList = ParseBlockStatements(parsingContext, Block, isMainBlock: false);
         else
         {
-            ParsingContext SingleStatementContext = parsingContext with { StatementList = StatementList };
+            CallStatementLocation CallLocation = new() { ParentStatementList = StatementList, StatementIndex = 0 };
+            ParsingContext SingleStatementContext = parsingContext with { CallLocation = CallLocation };
 
             Statement? NewStatement = ParseStatement(SingleStatementContext, node, isLastStatement: false);
             if (NewStatement is not null)
@@ -201,9 +208,11 @@ internal partial class ClassDeclarationParser
             if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
             {
                 Debug.Assert(parsingContext.HostMethod is not null);
+                Debug.Assert(parsingContext.CallLocation is not null);
+                ICallLocation CallLocation = parsingContext.CallLocation!;
 
                 NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
-                parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = parsingContext.HostMethod!, Statement = NewStatement, ParentStatementList = parsingContext.StatementList });
+                parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = parsingContext.HostMethod!, Statement = NewStatement, CallLocation = CallLocation });
             }
         }
         else
