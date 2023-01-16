@@ -264,60 +264,82 @@ internal partial class ClassDeclarationParser
             NamePath.Insert(0, RightName);
             NamePath.Insert(0, LeftName);
 
-            if (TryFindVariableByName(parsingContext, LeftName, out IVariable Variable))
-            {
-                List<IVariable> VariablePath = new() { Variable };
-                string PropertyName = string.Empty;
-
-                for (int i = 0; i + 1 < NamePath.Count; i++)
-                {
-                    IList<IProperty> PropertyList;
-                    ExpressionType VariableType = Variable.Type;
-
-                    if (!VariableType.IsSimple)
-                    {
-                        string ClassName = VariableType.Name;
-                        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
-
-                        if (!Phase1ClassModelTable.ContainsKey(ClassName))
-                            break;
-
-                        IClassModel ClassModel = Phase1ClassModelTable[ClassName];
-                        PropertyList = ClassModel.GetProperties();
-                    }
-                    else
-                        PropertyList = new List<IProperty>();
-
-                    PropertyName = NamePath[i + 1];
-
-                    bool IsFound = false;
-                    foreach (IProperty Item in PropertyList)
-                        if (Item.Name.Text == PropertyName)
-                        {
-                            Variable = Item;
-                            IsFound = true;
-                            break;
-                        }
-
-                    if (!IsFound)
-                        break;
-
-                    VariablePath.Add(Variable);
-                }
-
-                if (VariablePath.Count == NamePath.Count)
-                {
-                    VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = memberAccessExpression.GetLocation() };
-                    NewExpression = NewVariableValueExpression;
-                }
-                else
-                    Log($"Unknown property '{PropertyName}'.");
-            }
-            else
-                Log($"Unknown variable '{LeftName}'.");
+            Location PathLocation = memberAccessExpression.GetLocation();
+            NewExpression = TryParseMemberAccessExpression(parsingContext, NamePath, PathLocation);
         }
 
         return NewExpression;
+    }
+
+    private Expression? TryParseMemberAccessExpression(ParsingContext parsingContext, List<string> namePath, Location pathLocation)
+    {
+        Debug.Assert(namePath.Count >= 2);
+
+        Expression? NewExpression = null;
+        string LeftName = namePath[0];
+
+        if (TryFindVariableByName(parsingContext, LeftName, out IVariable Variable))
+        {
+            List<IVariable> VariablePath = new() { Variable };
+            string PropertyName = string.Empty;
+
+            for (int i = 0; i + 1 < namePath.Count; i++)
+                if (TryParseNextVariable(parsingContext, namePath, i, ref Variable))
+                    VariablePath.Add(Variable);
+                else
+                    break;
+
+            if (VariablePath.Count == namePath.Count)
+            {
+                VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = pathLocation };
+                NewExpression = NewVariableValueExpression;
+            }
+            else
+                Log($"Unknown property '{PropertyName}'.");
+        }
+        else
+            Log($"Unknown variable '{LeftName}'.");
+
+        return NewExpression;
+    }
+
+    private bool TryParseNextVariable(ParsingContext parsingContext, List<string> namePath, int index, ref IVariable variable)
+    {
+        Debug.Assert(index >= 0);
+        Debug.Assert(index + 1 < namePath.Count);
+
+        IList<IProperty> PropertyList;
+        ExpressionType VariableType = variable.Type;
+
+        if (!VariableType.IsSimple)
+        {
+            string ClassName = VariableType.Name;
+            Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+
+            if (!Phase1ClassModelTable.ContainsKey(ClassName))
+                return false;
+
+            IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+            PropertyList = ClassModel.GetProperties();
+        }
+        else
+            PropertyList = new List<IProperty>();
+
+        string PropertyName = namePath[index + 1];
+
+        bool IsFound = false;
+        foreach (IProperty Item in PropertyList)
+            if (Item.Name.Text == PropertyName)
+            {
+                variable = Item;
+                IsFound = true;
+                break;
+            }
+
+        if (!IsFound)
+            return false;
+
+        return true;
     }
 
     private Expression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
