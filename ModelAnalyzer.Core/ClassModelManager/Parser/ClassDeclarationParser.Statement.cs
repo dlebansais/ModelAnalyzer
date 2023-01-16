@@ -171,7 +171,7 @@ internal partial class ClassDeclarationParser
     private bool IsSourceAndDestinationTypeCompatible(ParsingContext parsingContext, IVariable destination, Expression source)
     {
         ExpressionType DestinationType = destination.Type;
-        ExpressionType SourceType = source.GetExpressionType(parsingContext);
+        ExpressionType SourceType = source.GetExpressionType();
 
         return IsSourceAndDestinationTypeCompatible(DestinationType, SourceType);
     }

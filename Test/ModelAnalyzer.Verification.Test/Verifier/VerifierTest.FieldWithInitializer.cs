@@ -96,7 +96,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(memberCollectionContext: null!),
+            Type = Zero.GetExpressionType(),
             Initializer = Initializer,
         };
 
@@ -233,14 +233,14 @@ public partial class VerifierTest
         Field TestField1 = new()
         {
             Name = new FieldName { Text = FieldName1 },
-            Type = Zero1.GetExpressionType(memberCollectionContext: null!),
+            Type = Zero1.GetExpressionType(),
             Initializer = Initializer,
         };
 
         Field TestField2 = new()
         {
             Name = new FieldName { Text = FieldName2 },
-            Type = Zero2.GetExpressionType(memberCollectionContext: null!),
+            Type = Zero2.GetExpressionType(),
             Initializer = Initializer,
         };
 

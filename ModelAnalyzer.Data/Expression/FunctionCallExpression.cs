@@ -14,7 +14,7 @@ internal class FunctionCallExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext)
+    public override ExpressionType GetExpressionType()
     {
         // Can return ExpressionType.Other if the expression doesn't match an existing function name.
         return ReturnType;

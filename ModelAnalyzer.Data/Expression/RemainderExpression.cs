@@ -12,7 +12,7 @@ internal class RemainderExpression : Expression, IBinaryExpression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext) => ExpressionType.Integer;
+    public override ExpressionType GetExpressionType() => ExpressionType.Integer;
 
     /// <summary>
     /// Gets the left expression.

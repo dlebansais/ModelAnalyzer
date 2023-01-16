@@ -384,7 +384,7 @@ internal partial class ClassDeclarationParser
     private bool IsValidMethodCallArgument(ParsingContext parsingContext, Argument argument, Parameter parameter, ref bool isErrorReported)
     {
         Expression ArgumentExpression = (Expression)argument.Expression;
-        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType(parsingContext);
+        ExpressionType ArgumentType = ArgumentExpression.GetExpressionType();
 
         // If ArgumentType is ExpressionType.Other, this is an unsupported expression.
         if (ArgumentType != ExpressionType.Other)

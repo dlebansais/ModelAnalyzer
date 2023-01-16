@@ -135,7 +135,7 @@ public partial class VerifierTest
         Field TestField = new()
         {
             Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(memberCollectionContext: null!),
+            Type = Zero.GetExpressionType(),
             Initializer = null,
         };
 

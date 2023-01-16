@@ -12,7 +12,7 @@ internal class ComparisonExpression : Expression, IBinaryExpression
     public override bool IsSimple => false;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext) => ExpressionType.Boolean;
+    public override ExpressionType GetExpressionType() => ExpressionType.Boolean;
 
     /// <summary>
     /// Gets the left expression.

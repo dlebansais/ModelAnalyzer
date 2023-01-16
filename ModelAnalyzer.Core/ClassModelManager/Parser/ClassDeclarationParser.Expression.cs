@@ -95,13 +95,13 @@ internal partial class ClassDeclarationParser
 
         Expression? NewExpression = null;
 
-        if (left.GetExpressionType(parsingContext) != ExpressionType.Integer)
+        if (left.GetExpressionType() != ExpressionType.Integer)
         {
             Log($"'{left}' must be an integer.");
 
             location = parsingContext.LocationContext!.GetLocation(operatorToken);
         }
-        else if (right.GetExpressionType(parsingContext) != ExpressionType.Integer)
+        else if (right.GetExpressionType() != ExpressionType.Integer)
         {
             Log($"'{right}' must be an integer.");
 

@@ -348,7 +348,7 @@ internal partial class ClassDeclarationParser
         Expression? Expression = ParseExpression(parsingContext, expressionNode);
         if (Expression is not null)
         {
-            if (Expression.GetExpressionType(parsingContext) == ExpressionType.Boolean)
+            if (Expression.GetExpressionType() == ExpressionType.Boolean)
             {
                 booleanExpression = Expression;
                 return true;

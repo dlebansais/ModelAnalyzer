@@ -13,6 +13,5 @@ internal abstract class Expression : IExpression
     /// <summary>
     /// Gets the expression type.
     /// </summary>
-    /// <param name="memberCollectionContext">The context.</param>
-    public abstract ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext);
+    public abstract ExpressionType GetExpressionType();
 }

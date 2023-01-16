@@ -13,7 +13,7 @@ internal class NewObjectExpression : Expression, ILiteralExpression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext) => ObjectType;
+    public override ExpressionType GetExpressionType() => ObjectType;
 
     /// <summary>
     /// Gets the variable.

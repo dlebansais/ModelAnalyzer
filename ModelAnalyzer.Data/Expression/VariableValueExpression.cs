@@ -16,7 +16,7 @@ internal class VariableValueExpression : Expression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext)
+    public override ExpressionType GetExpressionType()
     {
         Debug.Assert(VariablePath.Count >= 1);
 

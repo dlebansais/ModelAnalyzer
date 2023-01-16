@@ -12,7 +12,7 @@ internal class LiteralNullExpression : Expression, ILiteralExpression
     public override bool IsSimple => true;
 
     /// <inheritdoc/>
-    public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext) => ExpressionType.Null;
+    public override ExpressionType GetExpressionType() => ExpressionType.Null;
 
     /// <inheritdoc/>
     public override string ToString()
