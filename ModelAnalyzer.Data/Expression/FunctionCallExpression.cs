@@ -16,23 +16,19 @@ internal class FunctionCallExpression : Expression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType(IMemberCollectionContext memberCollectionContext)
     {
-        ExpressionType Result = ExpressionType.Other;
-
-        foreach (Method Method in memberCollectionContext.GetMethods())
-            if (Method.Name.Text == FunctionName.Text)
-            {
-                Result = Method.ReturnType;
-                break;
-            }
-
         // Can return ExpressionType.Other if the expression doesn't match an existing function name.
-        return Result;
+        return ReturnType;
     }
 
     /// <summary>
     /// Gets the function name.
     /// </summary>
     required public MethodName FunctionName { get; init; }
+
+    /// <summary>
+    /// Gets the function return type.
+    /// </summary>
+    required public ExpressionType ReturnType { get; init; }
 
     /// <summary>
     /// Gets the function name location.

@@ -14,6 +14,11 @@ internal record ParsingContext : IMemberCollectionContext
     required public List<ClassDeclarationSyntax> ClassDeclarationList { get; init; }
 
     /// <summary>
+    /// Gets the name of the parsed class.
+    /// </summary>
+    required public string ClassName { get; init; }
+
+    /// <summary>
     /// Gets the semantic model.
     /// </summary>
     required public IModel SemanticModel { get; init; }

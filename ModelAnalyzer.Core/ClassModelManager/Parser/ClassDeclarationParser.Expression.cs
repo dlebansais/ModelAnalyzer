@@ -388,7 +388,24 @@ internal partial class ClassDeclarationParser
 
             if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
             {
-                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+                ExpressionType ReturnType = ExpressionType.Other;
+
+                string ClassName = parsingContext.ClassName;
+                Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+
+                if (Phase1ClassModelTable.ContainsKey(ClassName))
+                {
+                    IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+
+                    foreach (Method Method in ClassModel.GetMethods())
+                        if (Method.Name.Text == FunctionName.Text)
+                        {
+                            ReturnType = Method.ReturnType;
+                            break;
+                        }
+                }
+
+                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, ReturnType = ReturnType, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
 
                 Debug.Assert(parsingContext.CallLocation is not null);
                 ICallLocation CallLocation = parsingContext.CallLocation!;

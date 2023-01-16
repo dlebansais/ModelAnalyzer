@@ -83,7 +83,7 @@ internal partial class ClassDeclarationParser
 
         Log($"Parsing declaration of class '{ClassName}', phase one");
 
-        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, SemanticModel = SemanticModel };
+        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, ClassName = ClassName, SemanticModel = SemanticModel };
 
         if (IsClassDeclarationSupported(ClassDeclaration))
         {
@@ -117,7 +117,7 @@ internal partial class ClassDeclarationParser
 
         Log($"Parsing declaration of class '{ClassName}', phase two");
 
-        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, SemanticModel = SemanticModel };
+        ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, ClassName = ClassName, SemanticModel = SemanticModel };
 
         if (IsClassDeclarationSupported(ClassDeclaration))
         {
