@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// <summary>
 /// Represents the context to use when parsing a class.
 /// </summary>
-internal record ParsingContext : IMemberCollectionContext
+internal record ParsingContext
 {
     /// <summary>
     /// Gets the list of class declarations.
@@ -33,32 +33,10 @@ internal record ParsingContext : IMemberCollectionContext
     /// </summary>
     public PropertyTable PropertyTable { get; set; } = new();
 
-    /// <inheritdoc/>
-    List<Property> IMemberCollectionContext.GetProperties()
-    {
-        List<Property> Result = new();
-
-        foreach (KeyValuePair<PropertyName, Property> Entry in PropertyTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
-
     /// <summary>
     /// Gets or sets the table of class fields.
     /// </summary>
     public FieldTable FieldTable { get; set; } = new();
-
-    /// <inheritdoc/>
-    List<Field> IMemberCollectionContext.GetFields()
-    {
-        List<Field> Result = new();
-
-        foreach (KeyValuePair<FieldName, Field> Entry in FieldTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
 
     /// <summary>
     /// Gets or sets a value indicating whether the first pass of method parsing is done.
@@ -69,17 +47,6 @@ internal record ParsingContext : IMemberCollectionContext
     /// Gets or sets the table of class methods.
     /// </summary>
     public MethodTable MethodTable { get; set; } = new();
-
-    /// <inheritdoc/>
-    List<Method> IMemberCollectionContext.GetMethods()
-    {
-        List<Method> Result = new();
-
-        foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
-            Result.Add(Entry.Value);
-
-        return Result;
-    }
 
     /// <summary>
     /// Gets or sets a value indicating whether all passes of method parsing are done.
