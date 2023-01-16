@@ -21,7 +21,8 @@ internal class CallStatementLocation : ICallLocation
     /// <inheritdoc/>
     public void RemoveCall()
     {
-        Debug.Assert(StatementIndex >= 0 && StatementIndex < ParentStatementList.Count);
+        Debug.Assert(StatementIndex >= 0);
+        Debug.Assert(StatementIndex < ParentStatementList.Count);
 
         ParentStatementList.RemoveAt(StatementIndex);
     }

@@ -109,7 +109,7 @@ class Program_CoreMethod_2
         IUnsupportedMethod UnsupportedMethod = ClassModel.Unsupported.Methods[0];
         Assert.That(UnsupportedMethod.Name.Text, Is.EqualTo("*"));
         Assert.That(UnsupportedMethod.ReturnType, Is.EqualTo(ExpressionType.Other));
-        Assert.That(UnsupportedMethod.GetParameters().Count, Is.EqualTo(1));
+        Assert.That(UnsupportedMethod.GetParameters().Count, Is.EqualTo(0));
         Assert.That(UnsupportedMethod.GetRequires().Count, Is.EqualTo(0));
         Assert.That(UnsupportedMethod.GetLocals().Count, Is.EqualTo(0));
         Assert.That(UnsupportedMethod.ResultLocal, Is.Null);

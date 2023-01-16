@@ -479,4 +479,40 @@ class Program_CoreEnsure_12
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Ensure_InvalidFunctionCall()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreEnsure_13
+{
+    public void Write(int x)
+    {
+    }
+    // Ensure: Write2() == 0
+
+    int Write2(int x)
+    {
+        return x;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+
+        IList<IMethod> Methods = ClassModel.GetMethods();
+        Assert.That(Methods.Count, Is.EqualTo(2));
+
+        IMethod FirstMethod = Methods.First();
+        IList<IEnsure> Ensures = FirstMethod.GetEnsures();
+        Assert.That(Ensures.Count, Is.EqualTo(0));
+    }
 }

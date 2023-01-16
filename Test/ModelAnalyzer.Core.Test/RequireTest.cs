@@ -474,4 +474,40 @@ class Program_CoreRequire_11
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Require_InvalidFunctionCall()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreRequire_12
+{
+    public void Write(int x)
+    // Require: Write2() == 0
+    {
+    }
+
+    int Write2(int x)
+    {
+        return x;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
+
+        IList<IMethod> Methods = ClassModel.GetMethods();
+        Assert.That(Methods.Count, Is.EqualTo(2));
+
+        IMethod FirstMethod = Methods.First();
+        IList<IRequire> Requires = FirstMethod.GetRequires();
+        Assert.That(Requires.Count, Is.EqualTo(0));
+    }
 }
