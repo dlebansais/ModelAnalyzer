@@ -35,6 +35,13 @@ class Program_CoreParameter_0
         IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        IList<IMethod> Methods = ClassModel.GetMethods();
+        Assert.That(Methods.Count, Is.EqualTo(1));
+
+        IMethod FirstMethod = Methods.First();
+        IList<IParameter> Parameters = FirstMethod.GetParameters();
+        Assert.That(Parameters.Count, Is.EqualTo(2));
     }
 
     [Test]
