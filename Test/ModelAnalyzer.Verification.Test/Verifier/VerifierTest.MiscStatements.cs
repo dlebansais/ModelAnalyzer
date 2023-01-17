@@ -530,7 +530,7 @@ class Program_Verifier_MiscStatement14
     [Category("Verification")]
     public void Verifier_Statement14_Success()
     {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode14, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode14, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
@@ -561,11 +561,75 @@ class Program_Verifier_MiscStatement15
     [Category("Verification")]
     public void Verifier_Statement15_Success()
     {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode15, maxDepth: 0, maxDuration: TimeSpan.MaxValue);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode15, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    private const string MiscStatementSourceCode16 = @"
+using System;
+
+class Program_Verifier_MiscStatement16
+{
+    public int Write(int x)
+    // Require: Write2(x) == 1
+    {
+        return x;
+    }
+    // Ensure: Result != 1
+
+    int Write2(int x)
+    {
+        return x;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Statement16_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode16, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    private const string MiscStatementSourceCode17 = @"
+using System;
+
+class Program_Verifier_MiscStatement17
+{
+    public int Write(int x)
+    // Require: x != 1
+    {
+        return x;
+    }
+    // Ensure: Write2(Result) == 1
+
+    int Write2(int x)
+    {
+        return x;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Statement17_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode17, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.False);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
 }

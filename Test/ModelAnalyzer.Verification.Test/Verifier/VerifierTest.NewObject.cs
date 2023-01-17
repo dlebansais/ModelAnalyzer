@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ModelAnalyzer;
 using NUnit.Framework;
 using Verification.Test;
