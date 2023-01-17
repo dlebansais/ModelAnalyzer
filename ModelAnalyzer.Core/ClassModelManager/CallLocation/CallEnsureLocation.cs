@@ -21,7 +21,8 @@ internal class CallEnsureLocation : ICallLocation
     /// <inheritdoc/>
     public void RemoveCall()
     {
-        Debug.Assert(EnsureIndex >= 0 && EnsureIndex < ParentEnsureList.Count);
+        Debug.Assert(EnsureIndex >= 0);
+        Debug.Assert(EnsureIndex < ParentEnsureList.Count);
 
         ParentEnsureList.RemoveAt(EnsureIndex);
     }

@@ -257,7 +257,7 @@ internal partial class ClassDeclarationParser
             ObjectExpression = NestedObjectExpression;
         }
 
-        if (ObjectExpression.Expression is IdentifierNameSyntax ObjectName && ObjectExpression.OperatorToken.IsKind(SyntaxKind.DotToken))
+        if (ObjectExpression.Expression is IdentifierNameSyntax ObjectName)
         {
             string LeftName = ObjectName.Identifier.ValueText;
             string RightName = ObjectExpression.Name.Identifier.ValueText;
@@ -308,26 +308,22 @@ internal partial class ClassDeclarationParser
         Debug.Assert(index >= 0);
         Debug.Assert(index + 1 < namePath.Count);
 
-        IList<IProperty> PropertyList;
         ExpressionType VariableType = variable.Type;
 
-        if (!VariableType.IsSimple)
-        {
-            string ClassName = VariableType.Name;
-            Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+        if (VariableType.IsSimple)
+            return false;
 
-            if (!Phase1ClassModelTable.ContainsKey(ClassName))
-                return false;
+        string ClassName = VariableType.Name;
+        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
-            IClassModel ClassModel = Phase1ClassModelTable[ClassName];
-            PropertyList = ClassModel.GetProperties();
-        }
-        else
-            PropertyList = new List<IProperty>();
+        if (!Phase1ClassModelTable.ContainsKey(ClassName))
+            return false;
 
+        IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+        IList<IProperty> PropertyList = ClassModel.GetProperties();
         string PropertyName = namePath[index + 1];
-
         bool IsFound = false;
+
         foreach (IProperty Item in PropertyList)
             if (Item.Name.Text == PropertyName)
             {
@@ -393,17 +389,15 @@ internal partial class ClassDeclarationParser
                 string ClassName = parsingContext.ClassName;
                 Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
-                if (Phase1ClassModelTable.ContainsKey(ClassName))
-                {
-                    IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+                Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
+                IClassModel ClassModel = Phase1ClassModelTable[ClassName];
 
-                    foreach (Method Method in ClassModel.GetMethods())
-                        if (Method.Name.Text == FunctionName.Text)
-                        {
-                            ReturnType = Method.ReturnType;
-                            break;
-                        }
-                }
+                foreach (Method Method in ClassModel.GetMethods())
+                    if (Method.Name.Text == FunctionName.Text)
+                    {
+                        ReturnType = Method.ReturnType;
+                        break;
+                    }
 
                 NewExpression = new FunctionCallExpression { FunctionName = FunctionName, ReturnType = ReturnType, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
 

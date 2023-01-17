@@ -21,7 +21,8 @@ internal class CallRequireLocation : ICallLocation
     /// <inheritdoc/>
     public void RemoveCall()
     {
-        Debug.Assert(RequireIndex >= 0 && RequireIndex < ParentRequireList.Count);
+        Debug.Assert(RequireIndex >= 0);
+        Debug.Assert(RequireIndex < ParentRequireList.Count);
 
         ParentRequireList.RemoveAt(RequireIndex);
     }
