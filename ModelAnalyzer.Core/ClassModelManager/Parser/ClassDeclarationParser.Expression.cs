@@ -251,8 +251,8 @@ internal partial class ClassDeclarationParser
 
         while (ObjectExpression.Expression is MemberAccessExpressionSyntax NestedObjectExpression && ObjectExpression.OperatorToken.IsKind(SyntaxKind.DotToken))
         {
-            string RightName = ObjectExpression.Name.Identifier.ValueText;
-            NamePath.Insert(0, RightName);
+            string NextName = ObjectExpression.Name.Identifier.ValueText;
+            NamePath.Insert(0, NextName);
 
             ObjectExpression = NestedObjectExpression;
         }
@@ -316,8 +316,7 @@ internal partial class ClassDeclarationParser
         string ClassName = VariableType.Name;
         Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
-        if (!Phase1ClassModelTable.ContainsKey(ClassName))
-            return false;
+        Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
 
         IClassModel ClassModel = Phase1ClassModelTable[ClassName];
         IList<IProperty> PropertyList = ClassModel.GetProperties();

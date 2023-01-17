@@ -1669,4 +1669,75 @@ class Program_CoreExpression_63
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidSecondVariableInPath()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_64
+{
+    public int Z { get; set; }
+}
+
+class Program_CoreExpression_65
+{
+    public int Y { get; set; }
+}
+
+class Program_CoreExpression_66
+{
+    public void Write()
+    {
+        Program_CoreExpression_65 X = new();
+        int N;
+
+        N = X.Y.Z;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidSecondClassInPath()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_67
+{
+    public void Write()
+    {
+        int X;
+        
+        X = nameof(X).Length;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+    }
 }

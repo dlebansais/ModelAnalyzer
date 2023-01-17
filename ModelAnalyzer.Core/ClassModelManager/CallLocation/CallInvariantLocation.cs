@@ -21,7 +21,8 @@ internal class CallInvariantLocation : ICallLocation
     /// <inheritdoc/>
     public void RemoveCall()
     {
-        Debug.Assert(InvariantIndex >= 0 && InvariantIndex < ParentInvariantList.Count);
+        Debug.Assert(InvariantIndex >= 0);
+        Debug.Assert(InvariantIndex < ParentInvariantList.Count);
 
         ParentInvariantList.RemoveAt(InvariantIndex);
     }

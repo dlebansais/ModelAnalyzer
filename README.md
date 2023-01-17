@@ -66,7 +66,9 @@ The analyzer supports:
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`, `null` and `new()`.
-  * Variables, either fields, properties, local variables or parameters. Fields and local variables are not allowed in method contracts (see below).
+  * Variables in the form `X.Y1.Y2`... where Y1 and following names are optional.
+    - `X` can be either a field, a property, a local variable or a parameter. Fields and local variables are not allowed in method contracts (see below).
+    - `Y1` and following names, if present, must be properties. 
   * Invocation of a function, but of the same class only (ex: `z = Add(x, y);`).
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
@@ -115,7 +117,7 @@ public class Test
 // Invariant: N == 0 || (N >= 32 && N <= 512)
 ````
 
-Invariants can use fields.
+Class invariants can use fields.
 
 ## Suppressing warnings
 
