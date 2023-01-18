@@ -197,7 +197,7 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseMethodCallStatement(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
-        MethodCallStatement? NewStatement = null;
+        PrivateMethodCallStatement? NewStatement = null;
 
         if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
         {
@@ -211,7 +211,7 @@ internal partial class ClassDeclarationParser
                 Debug.Assert(parsingContext.CallLocation is not null);
                 ICallLocation CallLocation = parsingContext.CallLocation!;
 
-                NewStatement = new MethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+                NewStatement = new PrivateMethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
                 parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = parsingContext.HostMethod!, Statement = NewStatement, CallLocation = CallLocation });
             }
         }

@@ -233,7 +233,7 @@ internal partial class ClassDeclarationParser
         foreach (MethodCallStatementEntry Entry in parsingContext.MethodCallStatementList)
             if (parsingContext.HostMethod is not null && Entry.HostMethod.Name == parsingContext.HostMethod.Name)
             {
-                MethodCallStatement MethodCall = Entry.Statement;
+                PrivateMethodCallStatement MethodCall = Entry.Statement;
 
                 if (!IsValidMethodCall(parsingContext, visitedMethodList, removedCallLocationList, MethodCall, out Location Location, ref isErrorReported))
                 {
@@ -249,7 +249,7 @@ internal partial class ClassDeclarationParser
 
             if (IsMethodFound)
             {
-                FunctionCallExpression FunctionCall = Entry.Expression;
+                PrivateFunctionCallExpression FunctionCall = Entry.Expression;
 
                 if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedCallLocationList, FunctionCall, out Location Location, ref isErrorReported))
                 {
@@ -263,7 +263,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, MethodCallStatement methodCall, out Location location, ref bool isErrorReported)
+    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, PrivateMethodCallStatement methodCall, out Location location, ref bool isErrorReported)
     {
         MethodTable MethodTable = parsingContext.MethodTable;
         Method HostMethod = parsingContext.HostMethod!;
@@ -322,7 +322,7 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
-    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, FunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
+    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, PrivateFunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
     {
         MethodTable MethodTable = parsingContext.MethodTable;
         Method? HostMethod = parsingContext.HostMethod;

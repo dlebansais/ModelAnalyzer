@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a call to a function as an expression.
 /// </summary>
-internal class FunctionCallExpression : Expression
+internal class PrivateFunctionCallExpression : Expression
 {
     /// <inheritdoc/>
     [JsonIgnore]

@@ -371,7 +371,7 @@ internal partial class ClassDeclarationParser
 
     private Expression? TryParseFunctionCallExpression(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
-        FunctionCallExpression? NewExpression = null;
+        PrivateFunctionCallExpression? NewExpression = null;
 
         if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
         {
@@ -396,7 +396,7 @@ internal partial class ClassDeclarationParser
                         break;
                     }
 
-                NewExpression = new FunctionCallExpression { FunctionName = FunctionName, ReturnType = ReturnType, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
+                NewExpression = new PrivateFunctionCallExpression { FunctionName = FunctionName, ReturnType = ReturnType, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
 
                 Debug.Assert(parsingContext.CallLocation is not null);
                 ICallLocation CallLocation = parsingContext.CallLocation!;

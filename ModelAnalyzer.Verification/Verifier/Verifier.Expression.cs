@@ -23,7 +23,7 @@ internal partial class Verifier : IDisposable
                 Result = BuildVariableValueExpression(verificationContext, VariableValue, out IExprSet<IExprCapsule> VariableValueExpr);
                 ResultExpr = VariableValueExpr;
                 break;
-            case FunctionCallExpression FunctionCall:
+            case PrivateFunctionCallExpression FunctionCall:
                 Result = BuildFunctionCallExpression(verificationContext, FunctionCall, out IExprSet<IExprCapsule> FunctionCallExpr);
                 ResultExpr = FunctionCallExpr;
                 break;
@@ -230,7 +230,7 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private bool BuildFunctionCallExpression(VerificationContext verificationContext, FunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
     {
         bool Result = false;
         resultExpr = null!;
@@ -248,7 +248,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildFunctionCallExpression(VerificationContext verificationContext, FunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
     {
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;

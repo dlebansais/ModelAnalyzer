@@ -33,7 +33,7 @@ internal partial class Verifier : IDisposable
                 Result = AddConditionalExecution(verificationContext, Conditional);
                 IsAdded = true;
                 break;
-            case MethodCallStatement MethodCall:
+            case PrivateMethodCallStatement MethodCall:
                 Result = AddMethodCallExecution(verificationContext, MethodCall);
                 IsAdded = true;
                 break;
@@ -105,7 +105,7 @@ internal partial class Verifier : IDisposable
         return TrueBranchResult && FalseBranchResult;
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement)
+    private bool AddMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement)
     {
         bool Result = true;
         bool IsExecuted = false;
@@ -124,7 +124,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, MethodCallStatement methodCallStatement, Method calledMethod)
+    private bool AddMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement, Method calledMethod)
     {
         List<Argument> ArgumentList = methodCallStatement.ArgumentList;
 

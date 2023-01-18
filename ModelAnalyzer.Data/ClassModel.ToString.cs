@@ -189,7 +189,7 @@ internal partial record ClassModel : IClassModel
                 AppendConditionalStatement(builder, Conditional, indentation);
                 IsHandled = true;
                 break;
-            case MethodCallStatement MethodCall:
+            case PrivateMethodCallStatement MethodCall:
                 AppendMethodCallStatement(builder, MethodCall, indentation);
                 IsHandled = true;
                 break;
@@ -221,7 +221,7 @@ internal partial record ClassModel : IClassModel
         }
     }
 
-    private void AppendMethodCallStatement(StringBuilder builder, MethodCallStatement statement, int indentation)
+    private void AppendMethodCallStatement(StringBuilder builder, PrivateMethodCallStatement statement, int indentation)
     {
         AppendStatementText(builder, $"{statement.MethodName.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }

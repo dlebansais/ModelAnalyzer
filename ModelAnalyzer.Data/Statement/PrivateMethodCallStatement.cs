@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 /// Represents a return statement.
 /// </summary>
 [DebuggerDisplay("{MethodName.Text}({string.Join(\", \", ArgumentList)})")]
-internal class MethodCallStatement : Statement
+internal class PrivateMethodCallStatement : Statement
 {
     /// <summary>
     /// Gets the method name.
