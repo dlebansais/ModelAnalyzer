@@ -8,27 +8,26 @@ using ModelAnalyzer;
 using NUnit.Framework;
 
 /// <summary>
-/// Tests for the <see cref="Ensure"/> class.
+/// Tests for the <see cref="Statement"/> class.
 /// </summary>
-public partial class ExpressionTest
+public partial class StatementTest
 {
     [Test]
     [Category("Core")]
-    public void Expression_FunctionCall()
+    public void Statement_MethodCall()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_FunctionCall_1
+class Program_CoreMethodCallStatement_1
 {
-    public int Write1(int x)
+    public void Write1(int x)
     {
-        return Write2(x);
+        Write2(x);
     }
 
-    int Write2(int x)
+    void Write2(int x)
     {
-        return x;
     }
 }
 ").First();
@@ -40,349 +39,30 @@ class Program_CoreExpression_FunctionCall_1
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_FunctionCall_1
-  public int Write1(int x)
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethodCallStatement_1
+  public void Write1(int x)
   {
-    return Write2(x);
+    Write2(x);
   }
 
-  int Write2(int x)
+  void Write2(int x)
   {
-    return x;
   }
 "));
     }
 
     [Test]
     [Category("Core")]
-    public void Expression_FunctionCallBadMethod()
+    public void Statement_MethodCallBadMethod()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_FunctionCall_2
+class Program_CoreMethodCallStatement_2
 {
-    public int Write1(int x)
+    public void Write1(int x)
     {
-        return x[0]();
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallNamedArgument()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_3
-{
-    public int Write1()
-    {
-        return Write2(x: 0);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallRefArgument()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_4
-{
-    public int Write1(int x)
-    {
-        return Write2(ref x);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallInvalidExpression()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_5
-{
-    public int Write1(int x)
-    {
-        return Write2(x[0]);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallInvalidName()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_6
-{
-    public int Write1(int x)
-    {
-        return Write2(x);
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallInvalidRecursive()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_7
-{
-    public int Write1(int x)
-    {
-        return Write1(x);
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallTooManyArguments()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_8
-{
-    public int Write1(int x)
-    {
-        return Write2(x, x);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallTooManyArgumentsNested()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_9
-{
-    public int Write1(int x)
-    {
-        if (false)
-            return Write2(x, x);
-        else
-            return Write2(x);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(2));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallMatchingArguments()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_10
-{
-    int X;
-
-    public int Write1(bool x, int y, double z)
-    {
-        X = Write2(x, y, z);
-        X = Write2(true, 1, 1.0);
-        X = Write2(true, 1, 1);
-    }
-
-    int Write2(bool x, int y, double z)
-    {
-        return 0;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallNonMatchingArguments()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_11
-{
-    public int Write1()
-    {
-        return Write2(true);
-    }
-
-    int Write2(int x)
-    {
-        return x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallCircular()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_12
-{
-    public int Write1()
-    {
-        return Write2();
-    }
-
-    int Write2()
-    {
-        return Write1();
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallCircularNested()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_13
-{
-    public int Write1()
-    {
-        if (false)
-            return Write2();
-
-        return 0;
-    }
-
-    int Write2()
-    {
-        return Write1();
+        x[0]();
     }
 }
 ").First();
@@ -397,21 +77,332 @@ class Program_CoreExpression_FunctionCall_13
 
     [Test]
     [Category("Core")]
-    public void Expression_FunctionCallComposite()
+    public void Statement_MethodCallNamedArgument()
     {
         ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_FunctionCall_14
+class Program_CoreMethodCallStatement_3
 {
-    public int Write1(int x)
+    public void Write1()
     {
-        return Write2(x) + Write2(x);
+        Write2(x: 0);
     }
 
-    int Write2(int x)
+    void Write2(int x)
     {
-        return x;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallRefArgument()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_4
+{
+    public void Write1(int x)
+    {
+        Write2(ref x);
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallInvalidExpression()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_5
+{
+    public void Write1(int x)
+    {
+        Write2(nameof(x));
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallInvalidName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_6
+{
+    public void Write1(int x)
+    {
+        Write2(x);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallInvalidRecursive()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_7
+{
+    public void Write1(int x)
+    {
+        Write1(x);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallTooManyArguments()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_8
+{
+    public void Write1(int x)
+    {
+        Write2(x, x);
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallTooManyArgumentsNested()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_9
+{
+    public void Write1(int x)
+    {
+        if (false)
+            Write2(x, x);
+        else
+            Write2(x);
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallMatchingArguments()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_10
+{
+    public void Write1(bool x, int y, double z)
+    {
+        Write2(x, y, z);
+        Write2(true, 1, 1.0);
+        Write2(true, 1, 1);
+    }
+
+    void Write2(bool x, int y, double z)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallNonMatchingArguments()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_11
+{
+    public void Write1()
+    {
+        Write2(true);
+    }
+
+    void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallCircular()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_12
+{
+    public void Write1()
+    {
+        Write2();
+    }
+
+    void Write2()
+    {
+        Write1();
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallCircularNested()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_13
+{
+    public void Write1()
+    {
+        if (false)
+            Write2();
+    }
+
+    void Write2()
+    {
+        Write1();
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Statements.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_MethodCallMultiple()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_14
+{
+    public void Write1(int x)
+    {
+        Write2(x);
+        Write3(x);
+    }
+
+    void Write2(int x)
+    {
+    }
+
+    void Write3(int x)
+    {
     }
 }
 ").First();
@@ -423,138 +414,44 @@ class Program_CoreExpression_FunctionCall_14
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_FunctionCall_14
-  public int Write1(int x)
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethodCallStatement_14
+  public void Write1(int x)
   {
-    return Write2(x) + Write2(x);
+    Write2(x);
+    Write3(x);
   }
 
-  int Write2(int x)
+  void Write2(int x)
   {
-    return x;
+  }
+
+  void Write3(int x)
+  {
   }
 "));
     }
 
     [Test]
     [Category("Core")]
-    public void Expression_FunctionCallInInvariant()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_15
-{
-    int X;
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-
-    int Read(int x)
-    {
-        return x;
-    }
-}
-// Invariant: Read(X) >= 0 || Read(X) < 0
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
-
-        string? ClassModelString = ClassModel.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_FunctionCall_15
-  int X
-
-  public void Write(int x)
-  {
-    X = x;
-  }
-
-  int Read(int x)
-  {
-    return x;
-  }
-  * (Read(X) >= 0) || (Read(X) < 0)
-"));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallExpressionBody()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_16
-{
-    public int Write1() => Write2();
-
-    int Write2() => Write1();
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(2));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_FunctionCallInvalidInvariantExpression()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreExpression_FunctionCall_17
-{
-    int X;
-
-    int Write(int x, int y)
-    {
-        return 0;
-    }
-}
-// Invariant: Write(X) == 0
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-        Assert.That(ClassModel.Unsupported.Expressions.Count, Is.EqualTo(1));
-    }
-
-    [Test]
-    [Category("Core")]
-    public void Expression_PublicFunctionCall()
+    public void Statement_PublicMethodCall()
     {
         List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
 using System;
 
-class Program_CoreExpression_FunctionCall_18
+class Program_CoreMethodCallStatement_15
 {
-    public int ReadY()
+    public void WriteY()
     {
-        return 0;
     }
 }
 
-class Program_CoreExpression_FunctionCall_19
+class Program_CoreMethodCallStatement_16
 {
-    public int ReadX()
+    public void WriteX()
     {
-        Program_CoreExpression_FunctionCall_18 X = new();
+        Program_CoreMethodCallStatement_15 X = new();
 
-        return X.ReadY();
+        X.WriteY();
     }
 }
 ");
@@ -572,12 +469,12 @@ class Program_CoreExpression_FunctionCall_19
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
 
         string? ClassModelString = ClassModel1.ToString();
-        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_FunctionCall_19
-  public int ReadX()
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethodCallStatement_16
+  public void WriteX()
   {
-    Program_CoreExpression_FunctionCall_18 X = new Program_CoreExpression_FunctionCall_18()
+    Program_CoreMethodCallStatement_15 X = new Program_CoreMethodCallStatement_15()
 
-    return X.ReadY();
+    X.WriteY();
   }
 "));
     }

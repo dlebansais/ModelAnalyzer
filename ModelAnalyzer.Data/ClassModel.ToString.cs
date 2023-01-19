@@ -190,7 +190,11 @@ internal partial record ClassModel : IClassModel
                 IsHandled = true;
                 break;
             case PrivateMethodCallStatement MethodCall:
-                AppendMethodCallStatement(builder, MethodCall, indentation);
+                AppendPrivateMethodCallStatement(builder, MethodCall, indentation);
+                IsHandled = true;
+                break;
+            case PublicMethodCallStatement MethodCall:
+                AppendPublicMethodCallStatement(builder, MethodCall, indentation);
                 IsHandled = true;
                 break;
             case ReturnStatement Return:
@@ -221,9 +225,15 @@ internal partial record ClassModel : IClassModel
         }
     }
 
-    private void AppendMethodCallStatement(StringBuilder builder, PrivateMethodCallStatement statement, int indentation)
+    private void AppendPrivateMethodCallStatement(StringBuilder builder, PrivateMethodCallStatement statement, int indentation)
     {
-        AppendStatementText(builder, $"{statement.MethodName.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
+        AppendStatementText(builder, $"{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
+    }
+
+    private void AppendPublicMethodCallStatement(StringBuilder builder, PublicMethodCallStatement statement, int indentation)
+    {
+        List<string> NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);
+        AppendStatementText(builder, $"{string.Join(".", NamePath)}.{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }
 
     private void AppendReturnStatement(StringBuilder builder, ReturnStatement statement, int indentation)

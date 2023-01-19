@@ -208,34 +208,35 @@ internal partial class ClassDeclarationParser
         return IsMethodSupported;
     }
 
-    private void ReportInvalidMethodCalls(ParsingContext parsingContext)
+    private void ReportInvalidCalls(ParsingContext parsingContext)
     {
         List<ICallLocation> RemovedCallLocationList = new();
         bool IsErrorReported;
 
         ParsingContext InvariantParsingContext = parsingContext with { HostMethod = null };
         IsErrorReported = false;
-        ReportInvalidMethodCalls(InvariantParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
+        ReportInvalidCalls(InvariantParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
 
         foreach (KeyValuePair<MethodName, Method> Entry in parsingContext.MethodTable)
         {
             ParsingContext MethodParsingContext = parsingContext with { HostMethod = Entry.Value };
             IsErrorReported = false;
-            ReportInvalidMethodCalls(MethodParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
+            ReportInvalidCalls(MethodParsingContext, new List<Method>(), RemovedCallLocationList, ref IsErrorReported);
         }
 
         foreach (ICallLocation CallLocation in RemovedCallLocationList)
             CallLocation.RemoveCall();
     }
 
-    private void ReportInvalidMethodCalls(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, ref bool isErrorReported)
+    private void ReportInvalidCalls(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, ref bool isErrorReported)
     {
         foreach (MethodCallStatementEntry Entry in parsingContext.MethodCallStatementList)
             if (parsingContext.HostMethod is not null && Entry.HostMethod.Name == parsingContext.HostMethod.Name)
             {
-                PrivateMethodCallStatement MethodCall = Entry.Statement;
+                IMethodCallStatement MethodCall = Entry.Statement;
+                ClassModel? CallTarget = GetCallTargetClassModel(parsingContext, MethodCall);
 
-                if (!IsValidMethodCall(parsingContext, visitedMethodList, removedCallLocationList, MethodCall, out Location Location, ref isErrorReported))
+                if (!IsValidMethodCall(parsingContext, visitedMethodList, removedCallLocationList, MethodCall, CallTarget, out Location Location, ref isErrorReported))
                 {
                     parsingContext.Unsupported.AddUnsupportedStatement(Location);
                     removedCallLocationList.Add(Entry.CallLocation);
@@ -249,9 +250,10 @@ internal partial class ClassDeclarationParser
 
             if (IsMethodFound)
             {
-                PrivateFunctionCallExpression FunctionCall = Entry.Expression;
+                IFunctionCallExpression FunctionCall = Entry.Expression;
+                ClassModel? CallTarget = GetCallTargetClassModel(parsingContext, FunctionCall);
 
-                if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedCallLocationList, FunctionCall, out Location Location, ref isErrorReported))
+                if (!IsValidFunctionCall(parsingContext, visitedMethodList, removedCallLocationList, FunctionCall, CallTarget, out Location Location, ref isErrorReported))
                 {
                     if (!isErrorReported)
                     {
@@ -263,20 +265,31 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, PrivateMethodCallStatement methodCall, out Location location, ref bool isErrorReported)
+    private ClassModel? GetCallTargetClassModel(ParsingContext parsingContext, ICall call)
     {
-        MethodTable MethodTable = parsingContext.MethodTable;
+        ClassModel? Result = null;
+
+        if (call is IPublicCall AsPublicCall)
+            GetLastClassModel(parsingContext, AsPublicCall.VariablePath, out Result);
+
+        return Result;
+    }
+
+    private bool IsValidMethodCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, IMethodCallStatement methodCall, ClassModel? callTarget, out Location location, ref bool isErrorReported)
+    {
         Method HostMethod = parsingContext.HostMethod!;
+        ReadOnlyMethodTable MethodTable = callTarget is null ? parsingContext.MethodTable.AsReadOnly() : callTarget.MethodTable;
+        bool IsTargetSelf = callTarget is null || callTarget.Name == parsingContext.ClassName;
 
         location = methodCall.NameLocation;
 
-        if (methodCall.MethodName == HostMethod.Name)
+        if (IsTargetSelf && methodCall.Name == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == methodCall.MethodName)
+            if (Entry.Key == methodCall.Name)
             {
                 CalledMethod = Entry.Value;
                 break;
@@ -317,25 +330,26 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.Add(CalledMethod);
 
         ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
-        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
+        ReportInvalidCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
 
         return true;
     }
 
-    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, PrivateFunctionCallExpression functionCall, out Location location, ref bool isErrorReported)
+    private bool IsValidFunctionCall(ParsingContext parsingContext, List<Method> visitedMethodList, List<ICallLocation> removedCallLocationList, IFunctionCallExpression functionCall, ClassModel? callTarget, out Location location, ref bool isErrorReported)
     {
-        MethodTable MethodTable = parsingContext.MethodTable;
         Method? HostMethod = parsingContext.HostMethod;
+        ReadOnlyMethodTable MethodTable = callTarget is null ? parsingContext.MethodTable.AsReadOnly() : callTarget.MethodTable;
+        bool IsTargetSelf = callTarget is null || callTarget.Name == parsingContext.ClassName;
 
         location = functionCall.NameLocation;
 
-        if (HostMethod is not null && functionCall.FunctionName == HostMethod.Name)
+        if (HostMethod is not null && IsTargetSelf && functionCall.Name == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == functionCall.FunctionName)
+            if (Entry.Key == functionCall.Name)
             {
                 CalledMethod = Entry.Value;
                 break;
@@ -376,7 +390,7 @@ internal partial class ClassDeclarationParser
         NewVisitedMethodList.Add(CalledMethod);
 
         ParsingContext CalledMethodParsingContext = parsingContext with { HostMethod = CalledMethod };
-        ReportInvalidMethodCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
+        ReportInvalidCalls(CalledMethodParsingContext, NewVisitedMethodList, removedCallLocationList, ref isErrorReported);
 
         return true;
     }

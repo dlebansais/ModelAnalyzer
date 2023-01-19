@@ -33,8 +33,12 @@ internal partial class Verifier : IDisposable
                 Result = AddConditionalExecution(verificationContext, Conditional);
                 IsAdded = true;
                 break;
-            case PrivateMethodCallStatement MethodCall:
-                Result = AddMethodCallExecution(verificationContext, MethodCall);
+            case PrivateMethodCallStatement PrivateMethodCall:
+                Result = AddPrivateMethodCallExecution(verificationContext, PrivateMethodCall);
+                IsAdded = true;
+                break;
+            case PublicMethodCallStatement PublicMethodCall:
+                Result = AddPublicMethodCallExecution(verificationContext, PublicMethodCall);
                 IsAdded = true;
                 break;
             case ReturnStatement Return:
@@ -105,16 +109,16 @@ internal partial class Verifier : IDisposable
         return TrueBranchResult && FalseBranchResult;
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement)
+    private bool AddPrivateMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement)
     {
         bool Result = true;
         bool IsExecuted = false;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == methodCallStatement.MethodName)
+            if (Entry.Key == methodCallStatement.Name)
             {
                 Method CalledMethod = Entry.Value;
-                Result = AddMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
+                Result = AddPrivateMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
                 IsExecuted = true;
                 break;
             }
@@ -124,7 +128,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement, Method calledMethod)
+    private bool AddPrivateMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement, Method calledMethod)
     {
         List<Argument> ArgumentList = methodCallStatement.ArgumentList;
 
@@ -152,6 +156,35 @@ internal partial class Verifier : IDisposable
             return false;
 
         return true;
+    }
+
+    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PublicMethodCallStatement methodCallStatement)
+    {
+        // TODO
+        bool Result = false;
+
+        /*
+        bool IsExecuted = false;
+
+        foreach (var Entry in MethodTable)
+            if (Entry.Key == methodCallStatement.Name)
+            {
+                Method CalledMethod = Entry.Value;
+                Result = AddMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
+                IsExecuted = true;
+                break;
+            }
+
+        Debug.Assert(IsExecuted);
+        */
+
+        return Result;
+    }
+
+    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement, Method calledMethod)
+    {
+        // TODO
+        return false;
     }
 
     private bool AddReturnExecution(VerificationContext verificationContext, ReturnStatement returnStatement)

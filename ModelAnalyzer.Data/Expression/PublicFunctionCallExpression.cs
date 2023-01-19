@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a call to a function as an expression.
 /// </summary>
-internal class PublicFunctionCallExpression : Expression
+internal class PublicFunctionCallExpression : Expression, IFunctionCallExpression, IPublicCall
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -20,30 +20,22 @@ internal class PublicFunctionCallExpression : Expression
         return ReturnType;
     }
 
-    /// <summary>
-    /// Gets the variable path.
-    /// </summary>
+    /// <inheritdoc/>
     required public List<IVariable> VariablePath { get; init; }
 
-    /// <summary>
-    /// Gets the function name.
-    /// </summary>
-    required public MethodName FunctionName { get; init; }
+    /// <inheritdoc/>
+    required public MethodName Name { get; init; }
 
     /// <summary>
     /// Gets the function return type.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }
 
-    /// <summary>
-    /// Gets the function name location.
-    /// </summary>
+    /// <inheritdoc/>
     [JsonIgnore]
     required public Location NameLocation { get; init; }
 
-    /// <summary>
-    /// Gets the list of arguments.
-    /// </summary>
+    /// <inheritdoc/>
     required public List<Argument> ArgumentList { get; init; }
 
     /// <inheritdoc/>
@@ -52,6 +44,6 @@ internal class PublicFunctionCallExpression : Expression
         string PathString = string.Join(".", VariablePath.ConvertAll(item => item.Name.Text));
         string ArgumentString = string.Join(", ", ArgumentList);
 
-        return $"{PathString}.{FunctionName.Text}({ArgumentString})";
+        return $"{PathString}.{Name.Text}({ArgumentString})";
     }
 }

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a call to a function as an expression.
 /// </summary>
-internal class PrivateFunctionCallExpression : Expression
+internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -20,25 +20,19 @@ internal class PrivateFunctionCallExpression : Expression
         return ReturnType;
     }
 
-    /// <summary>
-    /// Gets the function name.
-    /// </summary>
-    required public MethodName FunctionName { get; init; }
+    /// <inheritdoc/>
+    required public MethodName Name { get; init; }
 
     /// <summary>
     /// Gets the function return type.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }
 
-    /// <summary>
-    /// Gets the function name location.
-    /// </summary>
+    /// <inheritdoc/>
     [JsonIgnore]
     required public Location NameLocation { get; init; }
 
-    /// <summary>
-    /// Gets the list of arguments.
-    /// </summary>
+    /// <inheritdoc/>
     required public List<Argument> ArgumentList { get; init; }
 
     /// <inheritdoc/>
@@ -46,6 +40,6 @@ internal class PrivateFunctionCallExpression : Expression
     {
         string ArgumentString = string.Join(", ", ArgumentList);
 
-        return $"{FunctionName.Text}({ArgumentString})";
+        return $"{Name.Text}({ArgumentString})";
     }
 }

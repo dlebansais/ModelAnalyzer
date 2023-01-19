@@ -8,7 +8,7 @@ internal class MethodCallStatementEntry
     /// <summary>
     /// Gets the parsed statement.
     /// </summary>
-    required public PrivateMethodCallStatement Statement { get; init; }
+    required public IMethodCallStatement Statement { get; init; }
 
     /// <summary>
     /// Gets the host method where the statement is found.

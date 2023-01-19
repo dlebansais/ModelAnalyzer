@@ -23,9 +23,13 @@ internal partial class Verifier : IDisposable
                 Result = BuildVariableValueExpression(verificationContext, VariableValue, out IExprSet<IExprCapsule> VariableValueExpr);
                 ResultExpr = VariableValueExpr;
                 break;
-            case PrivateFunctionCallExpression FunctionCall:
-                Result = BuildFunctionCallExpression(verificationContext, FunctionCall, out IExprSet<IExprCapsule> FunctionCallExpr);
-                ResultExpr = FunctionCallExpr;
+            case PrivateFunctionCallExpression PrivateFunctionCall:
+                Result = BuildPrivateFunctionCallExpression(verificationContext, PrivateFunctionCall, out IExprSet<IExprCapsule> PrivateFunctionCallExpr);
+                ResultExpr = PrivateFunctionCallExpr;
+                break;
+            case PublicFunctionCallExpression PublicFunctionCall:
+                Result = BuildPublicFunctionCallExpression(verificationContext, PublicFunctionCall, out IExprSet<IExprCapsule> PublicFunctionCallExpr);
+                ResultExpr = PublicFunctionCallExpr;
                 break;
             case IBinaryExpression Binary:
                 Result = BuildBinaryExpression(verificationContext, Binary, out IExprSet<IExprCapsule> BinaryExpr);
@@ -230,16 +234,16 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private bool BuildFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
     {
         bool Result = false;
         resultExpr = null!;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == functionCallExpression.FunctionName)
+            if (Entry.Key == functionCallExpression.Name)
             {
                 Method CalledFunction = Entry.Value;
-                Result = BuildFunctionCallExpression(verificationContext, functionCallExpression, CalledFunction, out resultExpr);
+                Result = BuildPrivateFunctionCallExpression(verificationContext, functionCallExpression, CalledFunction, out resultExpr);
                 break;
             }
 
@@ -248,7 +252,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
     {
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
@@ -283,6 +287,34 @@ internal partial class Verifier : IDisposable
         resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
 
         return true;
+    }
+
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
+    {
+        // TODO
+        bool Result = false;
+        resultExpr = null!;
+
+        /*
+        foreach (var Entry in MethodTable)
+            if (Entry.Key == functionCallExpression.Name)
+            {
+                Method CalledFunction = Entry.Value;
+                Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, CalledFunction, out resultExpr);
+                break;
+            }
+
+        Debug.Assert(resultExpr is not null);
+        */
+
+        return Result;
+    }
+
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
+    {
+        // TODO
+        resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
+        return false;
     }
 
     private string CreateTemporaryResultLocal()

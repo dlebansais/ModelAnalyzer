@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -197,28 +198,63 @@ internal partial class ClassDeclarationParser
 
     private Statement? TryParseMethodCallStatement(ParsingContext parsingContext, InvocationExpressionSyntax invocationExpression, ref bool isErrorReported)
     {
-        PrivateMethodCallStatement? NewStatement = null;
+        Statement? NewStatement = null;
 
-        if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
+        ArgumentListSyntax InvocationArgumentList = invocationExpression.ArgumentList;
+        List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
+
+        if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
         {
-            MethodName MethodName = new() { Text = IdentifierName.Identifier.ValueText };
-            ArgumentListSyntax InvocationArgumentList = invocationExpression.ArgumentList;
-            List<Argument> ArgumentList = TryParseArgumentList(parsingContext, InvocationArgumentList, ref isErrorReported);
-
-            if (ArgumentList.Count == InvocationArgumentList.Arguments.Count)
-            {
-                Debug.Assert(parsingContext.HostMethod is not null);
-                Debug.Assert(parsingContext.CallLocation is not null);
-                ICallLocation CallLocation = parsingContext.CallLocation!;
-
-                NewStatement = new PrivateMethodCallStatement { MethodName = MethodName, NameLocation = IdentifierName.GetLocation(), ArgumentList = ArgumentList };
-                parsingContext.MethodCallStatementList.Add(new MethodCallStatementEntry() { HostMethod = parsingContext.HostMethod!, Statement = NewStatement, CallLocation = CallLocation });
-            }
+            if (invocationExpression.Expression is IdentifierNameSyntax IdentifierName)
+                NewStatement = TryParsePrivateMethodCallStatement(parsingContext, IdentifierName, ArgumentList, ref isErrorReported);
+            else if (invocationExpression.Expression is MemberAccessExpressionSyntax MemberAccessExpression)
+                NewStatement = TryParsePublicMethodCallStatement(parsingContext, MemberAccessExpression, ArgumentList, ref isErrorReported);
+            else
+                Log("Unsupported method name.");
         }
-        else
-            Log("Unsupported method name.");
 
         return NewStatement;
+    }
+
+    private PrivateMethodCallStatement? TryParsePrivateMethodCallStatement(ParsingContext parsingContext, IdentifierNameSyntax identifierName, List<Argument> argumentList, ref bool isErrorReported)
+    {
+        MethodName MethodName = new() { Text = identifierName.Identifier.ValueText };
+
+        PrivateMethodCallStatement NewStatement = new() { Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        AddMethodCallEntry(parsingContext, NewStatement);
+
+        return NewStatement;
+    }
+
+    private PublicMethodCallStatement? TryParsePublicMethodCallStatement(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression, List<Argument> argumentList, ref bool isErrorReported)
+    {
+        PublicMethodCallStatement? NewStatement = null;
+
+        if (TryParseNamePath(memberAccessExpression, out List<string> NamePath, out Location PathLocation))
+            if (TryParsePropertyPath(parsingContext, NamePath, out List<IVariable> VariablePath, out string LastName))
+                if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
+                {
+                    NewStatement = new PublicMethodCallStatement { VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                    AddMethodCallEntry(parsingContext, NewStatement);
+                }
+
+        return NewStatement;
+    }
+
+    private void AddMethodCallEntry(ParsingContext parsingContext, IMethodCallStatement statement)
+    {
+        Debug.Assert(parsingContext.HostMethod is not null);
+        Debug.Assert(parsingContext.CallLocation is not null);
+        ICallLocation CallLocation = parsingContext.CallLocation!;
+
+        MethodCallStatementEntry NewEntry = new()
+        {
+            HostMethod = parsingContext.HostMethod!,
+            Statement = statement,
+            CallLocation = CallLocation,
+        };
+
+        parsingContext.MethodCallStatementList.Add(NewEntry);
     }
 
     private Statement? TryParseIfStatement(ParsingContext parsingContext, IfStatementSyntax ifStatement, ref bool isErrorReported)
