@@ -478,4 +478,133 @@ class Program_CoreMethodCallStatement_16
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_InvalidCallPath()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_17
+{
+    public void WriteZ()
+    {
+    }
+}
+
+class Program_CoreMethodCallStatement_18
+{
+    Program_CoreMethodCallStatement_17 Y = new();
+}
+
+class Program_CoreMethodCallStatement_19
+{
+    public void WriteX()
+    {
+        Program_CoreMethodCallStatement_18 X = new();
+
+        X.Y.WriteZ();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_InvalidLastMethod()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_20
+{
+    public void WriteY()
+    {
+    }
+}
+
+class Program_CoreMethodCallStatement_21
+{
+    public void WriteX()
+    {
+        Program_CoreMethodCallStatement_20 X = new();
+
+        X.OtherMethod();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_InvalidMiddleProperty()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_22
+{
+    public int Z { get; set; }
+}
+
+class Program_CoreMethodCallStatement_23
+{
+    public int Y { get; set; }
+}
+
+class Program_CoreMethodCallStatement_24
+{
+    public void WriteX()
+    {
+        Program_CoreMethodCallStatement_23 X = new();
+
+        X.Y.Z();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
 }

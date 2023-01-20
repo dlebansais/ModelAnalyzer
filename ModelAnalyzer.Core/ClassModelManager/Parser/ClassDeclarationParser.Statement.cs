@@ -230,13 +230,12 @@ internal partial class ClassDeclarationParser
     {
         PublicMethodCallStatement? NewStatement = null;
 
-        if (TryParseNamePath(memberAccessExpression, out List<string> NamePath, out Location PathLocation))
-            if (TryParsePropertyPath(parsingContext, NamePath, out List<IVariable> VariablePath, out string LastName))
-                if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
-                {
-                    NewStatement = new PublicMethodCallStatement { VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
-                    AddMethodCallEntry(parsingContext, NewStatement);
-                }
+        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out string LastName, out Location PathLocation))
+            if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
+            {
+                NewStatement = new PublicMethodCallStatement { VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                AddMethodCallEntry(parsingContext, NewStatement);
+            }
 
         return NewStatement;
     }

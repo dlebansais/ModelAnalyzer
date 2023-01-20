@@ -581,4 +581,173 @@ class Program_CoreExpression_FunctionCall_19
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_PublicFunctionCallInExpression()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_20
+{
+    public int ReadY()
+    {
+        return 0;
+    }
+}
+
+class Program_CoreExpression_FunctionCall_21
+{
+    public int ReadX()
+    {
+        Program_CoreExpression_FunctionCall_20 X = new();
+        int N;
+
+        N = X.ReadY();
+        return N + X.ReadY();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidCallPath()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_22
+{
+    public int ReadZ()
+    {
+        return 0;
+    }
+}
+
+class Program_CoreExpression_FunctionCall_23
+{
+    Program_CoreExpression_FunctionCall_22 Y = new();
+}
+
+class Program_CoreExpression_FunctionCall_24
+{
+    public int ReadX()
+    {
+        Program_CoreExpression_FunctionCall_23 X = new();
+
+        return X.Y.ReadZ();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidLastMethod()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_25
+{
+    public int ReadY()
+    {
+        return 0;
+    }
+}
+
+class Program_CoreExpression_FunctionCall_26
+{
+    public int ReadX()
+    {
+        Program_CoreExpression_FunctionCall_25 X = new();
+
+        return X.OtherMethod();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidMiddleProperty()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_27
+{
+    public int Z { get; set; }
+}
+
+class Program_CoreExpression_FunctionCall_28
+{
+    public int Y { get; set; }
+}
+
+class Program_CoreExpression_FunctionCall_29
+{
+    public int ReadX()
+    {
+        Program_CoreExpression_FunctionCall_28 X = new();
+
+        return X.Y.Z.SomeMethod();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }

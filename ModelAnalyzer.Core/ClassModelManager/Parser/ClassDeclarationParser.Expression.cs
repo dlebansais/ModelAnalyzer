@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -246,15 +245,14 @@ internal partial class ClassDeclarationParser
     {
         Expression? NewExpression = null;
 
-        if (TryParseNamePath(memberAccessExpression, out List<string> NamePath, out Location PathLocation))
-            if (TryParsePropertyPath(parsingContext, NamePath, out List<IVariable> VariablePath, out string LastName))
-                if (TryParseLastNameAsProperty(parsingContext, VariablePath, LastName, out Property LastProperty))
-                {
-                    VariablePath.Add(LastProperty);
+        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out string LastName, out Location PathLocation))
+            if (TryParseLastNameAsProperty(parsingContext, VariablePath, LastName, out Property LastProperty))
+            {
+                VariablePath.Add(LastProperty);
 
-                    VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = PathLocation };
-                    NewExpression = NewVariableValueExpression;
-                }
+                VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = PathLocation };
+                NewExpression = NewVariableValueExpression;
+            }
 
         return NewExpression;
     }
@@ -341,13 +339,12 @@ internal partial class ClassDeclarationParser
     {
         PublicFunctionCallExpression? NewExpression = null;
 
-        if (TryParseNamePath(memberAccessExpression, out List<string> NamePath, out Location PathLocation))
-            if (TryParsePropertyPath(parsingContext, NamePath, out List<IVariable> VariablePath, out string LastName))
-                if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
-                {
-                    NewExpression = new PublicFunctionCallExpression { VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
-                    AddFunctionCallEntry(parsingContext, NewExpression);
-                }
+        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out string LastName, out Location PathLocation))
+            if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
+            {
+                NewExpression = new PublicFunctionCallExpression { VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                AddFunctionCallEntry(parsingContext, NewExpression);
+            }
 
         return NewExpression;
     }
@@ -385,158 +382,5 @@ internal partial class ClassDeclarationParser
                 NewExpression = new NewObjectExpression() { ObjectType = ObjectType };
 
         return NewExpression;
-    }
-
-    private bool TryParseNamePath(MemberAccessExpressionSyntax memberAccessExpression, out List<string> namePath, out Location pathLocation)
-    {
-        namePath = new List<string>();
-        MemberAccessExpressionSyntax ObjectExpression = memberAccessExpression;
-
-        while (ObjectExpression.Expression is MemberAccessExpressionSyntax NestedObjectExpression && ObjectExpression.OperatorToken.IsKind(SyntaxKind.DotToken))
-        {
-            string NextName = ObjectExpression.Name.Identifier.ValueText;
-            namePath.Insert(0, NextName);
-
-            ObjectExpression = NestedObjectExpression;
-        }
-
-        if (ObjectExpression.Expression is IdentifierNameSyntax ObjectName)
-        {
-            string LeftName = ObjectName.Identifier.ValueText;
-            string RightName = ObjectExpression.Name.Identifier.ValueText;
-            namePath.Insert(0, RightName);
-            namePath.Insert(0, LeftName);
-
-            pathLocation = memberAccessExpression.GetLocation();
-            return true;
-        }
-
-        pathLocation = null!;
-        return false;
-    }
-
-    private bool TryParsePropertyPath(ParsingContext parsingContext, List<string> namePath, out List<IVariable> variablePath, out string lastName)
-    {
-        Debug.Assert(namePath.Count >= 2);
-
-        variablePath = new List<IVariable>();
-        string LeftName = namePath[0];
-
-        if (TryFindVariableByName(parsingContext, LeftName, out IVariable Variable))
-        {
-            variablePath.Add(Variable);
-            string PropertyName = string.Empty;
-
-            for (int i = 0; i + 2 < namePath.Count; i++)
-                if (TryParseNextVariable(parsingContext, namePath, i, ref Variable))
-                    variablePath.Add(Variable);
-                else
-                    break;
-
-            if (variablePath.Count + 1 == namePath.Count)
-            {
-                lastName = namePath.Last();
-                return true;
-            }
-            else
-                Log($"Unknown property '{PropertyName}'.");
-        }
-        else
-            Log($"Unknown variable '{LeftName}'.");
-
-        lastName = null!;
-        return false;
-    }
-
-    private bool TryParseNextVariable(ParsingContext parsingContext, List<string> namePath, int index, ref IVariable variable)
-    {
-        Debug.Assert(index >= 0);
-        Debug.Assert(index + 2 < namePath.Count);
-
-        ExpressionType VariableType = variable.Type;
-
-        if (VariableType.IsSimple)
-            return false;
-
-        string ClassName = VariableType.Name;
-        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
-
-        Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
-
-        IClassModel ClassModel = Phase1ClassModelTable[ClassName];
-        IList<IProperty> PropertyList = ClassModel.GetProperties();
-        string PropertyName = namePath[index + 1];
-        bool IsFound = false;
-
-        foreach (IProperty Item in PropertyList)
-            if (Item.Name.Text == PropertyName)
-            {
-                variable = Item;
-                IsFound = true;
-                break;
-            }
-
-        if (!IsFound)
-            return false;
-
-        return true;
-    }
-
-    private bool TryParseLastNameAsProperty(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out Property property)
-    {
-        if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
-        {
-            foreach (KeyValuePair<PropertyName, Property> Entry in ClassModel.PropertyTable)
-                if (Entry.Key.Text == lastName)
-                {
-                    property = Entry.Value;
-                    return true;
-                }
-
-            Log($"Unknown property '{lastName}'.");
-        }
-
-        property = null!;
-        return false;
-    }
-
-    private bool TryParseLastNameAsMethod(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out Method method)
-    {
-        if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
-        {
-            foreach (KeyValuePair<MethodName, Method> Entry in ClassModel.MethodTable)
-                if (Entry.Key.Text == lastName)
-                {
-                    method = Entry.Value;
-                    return true;
-                }
-
-            Log($"Unknown method '{lastName}'.");
-        }
-
-        method = null!;
-        return false;
-    }
-
-    public static bool GetLastClassModel(ParsingContext parsingContext, List<IVariable> variablePath, out ClassModel classModel)
-    {
-        Debug.Assert(variablePath.Count >= 1);
-
-        IVariable LastVariable = variablePath.Last();
-        ExpressionType VariableType = LastVariable.Type;
-
-        if (!VariableType.IsSimple)
-        {
-            string ClassName = VariableType.Name;
-            Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
-
-            Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
-
-            classModel = (ClassModel)Phase1ClassModelTable[ClassName];
-            return true;
-        }
-
-        classModel = null!;
-        return false;
     }
 }
