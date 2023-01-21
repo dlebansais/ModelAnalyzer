@@ -138,6 +138,35 @@ public class Test
 }
 ````
 
+## Execution flow checks
+
+The analyzer mostly looks for violation of contracts, but can also detect errorsin the execution flow. Currently, only divide by zero error is detected.
+
+Consider the code below: 
+
+````csharp
+public class Test
+{
+    public int Remainder(int x, int y)
+    {
+        return x % y; // MA0015
+    }
+}
+````
+
+The analyzer detects that `y` can be 0 and therefore the `Remainder` function can throw `DivideByZeroException`. To fix the code, add a require clause as follow:
+
+````csharp
+public class Test
+{
+    public int Remainder(int x, int y)
+    // Require: y != 0
+    {
+        return x % y;
+    }
+}
+````
+
 ## List of diagnostics
 
 | Code   | Diagnostic                                         |
