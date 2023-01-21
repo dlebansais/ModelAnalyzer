@@ -90,6 +90,7 @@ internal partial record ClassModel : IClassModel
     private void MethodToString(StringBuilder builder, Method method)
     {
         string Modifier = method.AccessModifier == AccessModifier.Public ? "public " : string.Empty;
+        Modifier += method.IsStatic ? "static " : string.Empty;
 
         string Parameters = string.Empty;
 
@@ -232,7 +233,13 @@ internal partial record ClassModel : IClassModel
 
     private void AppendPublicMethodCallStatement(StringBuilder builder, PublicMethodCallStatement statement, int indentation)
     {
-        List<string> NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);
+        List<string> NamePath;
+
+        if (statement.ClassModel is not null)
+            NamePath = new List<string>() { statement.ClassModel.Name };
+        else
+            NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);
+
         AppendStatementText(builder, $"{string.Join(".", NamePath)}.{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }
 

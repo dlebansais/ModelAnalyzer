@@ -751,4 +751,54 @@ class Program_CoreExpression_FunctionCall_29
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel2.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_PrivateStaticFunctionCall()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_30
+{
+    public int Write1(int x)
+    {
+        int Result;
+
+        Result = Write2(x);
+        Result = Program_CoreExpression_FunctionCall_30.Write2(x);
+
+        return Result;
+    }
+
+    static int Write2(int x)
+    {
+        return x;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreExpression_FunctionCall_30
+  public int Write1(int x)
+  {
+    int Result
+
+    Result = Program_CoreExpression_FunctionCall_30.Write2(x);
+    Result = Program_CoreExpression_FunctionCall_30.Write2(x);
+    return Result;
+  }
+
+  static int Write2(int x)
+  {
+    return x;
+  }
+"));
+    }
 }

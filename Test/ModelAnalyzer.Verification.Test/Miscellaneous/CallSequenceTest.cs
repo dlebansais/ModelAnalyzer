@@ -31,6 +31,7 @@ public class CallSequenceTest
         {
             Name = new MethodName() { Text = MethodName1 },
             AccessModifier = AccessModifier.Public,
+            IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
@@ -48,6 +49,7 @@ public class CallSequenceTest
         {
             Name = new MethodName() { Text = MethodName2 },
             AccessModifier = AccessModifier.Public,
+            IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
@@ -76,6 +78,7 @@ public class CallSequenceTest
         {
             Name = new MethodName() { Text = MethodName },
             AccessModifier = AccessModifier.Public,
+            IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),

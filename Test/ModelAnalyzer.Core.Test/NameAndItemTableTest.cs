@@ -73,6 +73,7 @@ public class NameAndItemTableTest
         {
             Name = TestMethodName,
             AccessModifier = AccessModifier.Public,
+            IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),

@@ -219,8 +219,22 @@ internal partial class ClassDeclarationParser
     private PrivateMethodCallStatement? TryParsePrivateMethodCallStatement(ParsingContext parsingContext, IdentifierNameSyntax identifierName, List<Argument> argumentList, ref bool isErrorReported)
     {
         MethodName MethodName = new() { Text = identifierName.Identifier.ValueText };
+        string ClassName = parsingContext.ClassName;
+        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
-        PrivateMethodCallStatement NewStatement = new() { Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
+        ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[ClassName];
+        bool IsStatic = false;
+
+        foreach (KeyValuePair<MethodName, Method> Entry in ClassModel.MethodTable)
+            if (Entry.Key.Text == MethodName.Text)
+            {
+                Method CalledMethod = Entry.Value;
+                IsStatic = CalledMethod.IsStatic;
+                break;
+            }
+
+        PrivateMethodCallStatement NewStatement = new() { ClassModel = IsStatic ? ClassModel : null, Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddMethodCallEntry(parsingContext, NewStatement);
 
         return NewStatement;
@@ -229,13 +243,25 @@ internal partial class ClassDeclarationParser
     private PublicMethodCallStatement? TryParsePublicMethodCallStatement(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression, List<Argument> argumentList, ref bool isErrorReported)
     {
         PublicMethodCallStatement? NewStatement = null;
+        string LastName;
+        Location PathLocation;
 
-        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out string LastName, out Location PathLocation))
+        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out LastName, out PathLocation))
+        {
             if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement { ClassModel = null, VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddMethodCallEntry(parsingContext, NewStatement);
             }
+        }
+        else if (TryParseTypeName(parsingContext, memberAccessExpression, out ClassModel ClassModel, out LastName, out PathLocation))
+        {
+            if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
+            {
+                NewStatement = new PublicMethodCallStatement { ClassModel = ClassModel, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                AddMethodCallEntry(parsingContext, NewStatement);
+            }
+        }
 
         return NewStatement;
     }

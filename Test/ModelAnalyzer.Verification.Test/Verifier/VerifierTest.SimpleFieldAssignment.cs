@@ -162,6 +162,7 @@ public partial class VerifierTest
         {
             Name = MethodName,
             AccessModifier = AccessModifier.Public,
+            IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
             LocalTable = ReadOnlyLocalTable.Empty,

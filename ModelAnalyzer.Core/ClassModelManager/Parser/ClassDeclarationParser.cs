@@ -529,19 +529,53 @@ internal partial class ClassDeclarationParser
         return true;
     }
 
+    private bool TryParseTypeName(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression, out ClassModel classModel, out string lastName, out Location pathLocation)
+    {
+        classModel = null!;
+
+        if (TryParseNamePath(memberAccessExpression, out List<string> NamePath, out pathLocation))
+        {
+            Debug.Assert(NamePath.Count >= 2);
+
+            if (NamePath.Count == 2)
+            {
+                string LeftName = NamePath[0];
+
+                if (parsingContext.SemanticModel.Phase1ClassModelTable.ContainsKey(LeftName))
+                {
+                    classModel = (ClassModel)parsingContext.SemanticModel.Phase1ClassModelTable[LeftName];
+                    lastName = NamePath.Last();
+                    return true;
+                }
+                else
+                    Log($"Unknown class '{LeftName}'.");
+            }
+        }
+
+        lastName = null!;
+        pathLocation = null!;
+        return false;
+    }
+
     private bool TryParseLastNameAsProperty(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out Property property)
     {
         if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
-        {
-            foreach (KeyValuePair<PropertyName, Property> Entry in ClassModel.PropertyTable)
-                if (Entry.Key.Text == lastName)
-                {
-                    property = Entry.Value;
-                    return true;
-                }
+            return TryParseLastNameAsProperty(parsingContext, ClassModel, lastName, out property);
 
-            Log($"Unknown property '{lastName}'.");
-        }
+        property = null!;
+        return false;
+    }
+
+    private bool TryParseLastNameAsProperty(ParsingContext parsingContext, ClassModel classModel, string lastName, out Property property)
+    {
+        foreach (KeyValuePair<PropertyName, Property> Entry in classModel.PropertyTable)
+            if (Entry.Key.Text == lastName)
+            {
+                property = Entry.Value;
+                return true;
+            }
+
+        Log($"Unknown property '{lastName}'.");
 
         property = null!;
         return false;
@@ -550,16 +584,22 @@ internal partial class ClassDeclarationParser
     private bool TryParseLastNameAsMethod(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out Method method)
     {
         if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
-        {
-            foreach (KeyValuePair<MethodName, Method> Entry in ClassModel.MethodTable)
-                if (Entry.Key.Text == lastName)
-                {
-                    method = Entry.Value;
-                    return true;
-                }
+            return TryParseLastNameAsMethod(parsingContext, ClassModel, lastName, out method);
 
-            Log($"Unknown method '{lastName}'.");
-        }
+        method = null!;
+        return false;
+    }
+
+    private bool TryParseLastNameAsMethod(ParsingContext parsingContext, ClassModel classModel, string lastName, out Method method)
+    {
+        foreach (KeyValuePair<MethodName, Method> Entry in classModel.MethodTable)
+            if (Entry.Key.Text == lastName)
+            {
+                method = Entry.Value;
+                return true;
+            }
+
+        Log($"Unknown method '{lastName}'.");
 
         method = null!;
         return false;

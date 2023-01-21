@@ -39,7 +39,7 @@ internal partial class ClassDeclarationParser
         // Ignore duplicate names, the compiler will catch them.
         if (!methodTable.ContainsItem(MethodName))
         {
-            if (IsMethodDeclarationValid(parsingContext, methodDeclaration, out AccessModifier AccessModifier, out ExpressionType ReturnType))
+            if (IsMethodDeclarationValid(parsingContext, methodDeclaration, out AccessModifier AccessModifier, out bool IsStatic, out ExpressionType ReturnType))
             {
                 Method TemporaryMethod;
                 ParsingContext MethodParsingContext;
@@ -48,6 +48,7 @@ internal partial class ClassDeclarationParser
                 {
                     Name = MethodName,
                     AccessModifier = AccessModifier,
+                    IsStatic = IsStatic,
                     ParameterTable = ReadOnlyParameterTable.Empty,
                     ReturnType = ReturnType,
                     RequireList = new List<Require>(),
@@ -71,6 +72,7 @@ internal partial class ClassDeclarationParser
                     {
                         Name = MethodName,
                         AccessModifier = AccessModifier,
+                        IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = new List<Require>(),
@@ -88,6 +90,7 @@ internal partial class ClassDeclarationParser
                     {
                         Name = MethodName,
                         AccessModifier = AccessModifier,
+                        IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = RequireList,
@@ -104,6 +107,7 @@ internal partial class ClassDeclarationParser
                     {
                         Name = MethodName,
                         AccessModifier = AccessModifier,
+                        IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = RequireList,
@@ -129,6 +133,7 @@ internal partial class ClassDeclarationParser
                 {
                     Name = MethodName,
                     AccessModifier = AccessModifier,
+                    IsStatic = IsStatic,
                     ParameterTable = ParameterTable,
                     ReturnType = ReturnType,
                     RequireList = RequireList,
@@ -151,7 +156,7 @@ internal partial class ClassDeclarationParser
         }
     }
 
-    private bool IsMethodDeclarationValid(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration, out AccessModifier accessModifier, out ExpressionType returnType)
+    private bool IsMethodDeclarationValid(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration, out AccessModifier accessModifier, out bool isStatic, out ExpressionType returnType)
     {
         bool IsMethodSupported = true;
 
@@ -170,6 +175,7 @@ internal partial class ClassDeclarationParser
         }
 
         accessModifier = AccessModifier.Private;
+        isStatic = false;
         Dictionary<SyntaxKind, AccessModifier> AccessModifierTable = new()
         {
             { SyntaxKind.PrivateKeyword, AccessModifier.Private },
@@ -183,6 +189,8 @@ internal partial class ClassDeclarationParser
 
             if (AccessModifierTable.ContainsKey(ModifierKind))
                 accessModifier = AccessModifierTable[ModifierKind];
+            else if (Modifier.IsKind(SyntaxKind.StaticKeyword))
+                isStatic = true;
             else
             {
                 LogWarning($"Unsupported '{Modifier.ValueText}' method modifier.");
@@ -269,8 +277,11 @@ internal partial class ClassDeclarationParser
     {
         ClassModel? Result = null;
 
-        if (call is IPublicCall AsPublicCall)
-            GetLastClassModel(parsingContext, AsPublicCall.VariablePath, out Result);
+        if (call.ClassModel is not null)
+            Result = call.ClassModel;
+        else if (call is IPublicCall AsPublicCall)
+            if (GetLastClassModel(parsingContext, AsPublicCall.VariablePath, out ClassModel ClassModel))
+                Result = ClassModel;
 
         return Result;
     }

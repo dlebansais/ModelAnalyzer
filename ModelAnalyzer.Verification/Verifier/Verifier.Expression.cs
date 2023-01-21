@@ -262,13 +262,24 @@ internal partial class Verifier : IDisposable
         bool Result = false;
         resultExpr = null!;
 
-        ClassModel ClassModel = GetLastClassModel(verificationContext, functionCallExpression.VariablePath);
+        ClassModel ClassModel;
+        Instance CalledInstance;
 
-        BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
+        if (functionCallExpression.ClassModel is not null)
+        {
+            ClassModel = functionCallExpression.ClassModel;
+            CalledInstance = new() { ClassModel = ClassModel, Expr = verificationContext.ObjectManager.Context.Null };
+        }
+        else
+        {
+            ClassModel = GetLastClassModel(verificationContext, functionCallExpression.VariablePath);
 
-        Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
-        IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
-        Instance CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
+            BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
+
+            Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
+            IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
+            CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
+        }
 
         foreach (var Entry in ClassModel.MethodTable)
             if (Entry.Key == functionCallExpression.Name)
@@ -311,16 +322,20 @@ internal partial class Verifier : IDisposable
             ResultLocal = CallResult,
         };
 
+        bool IsStaticCall = calledInstance.Expr == verificationContext.ObjectManager.Context.Null;
+
         if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
             return false;
 
-        verificationContext.ObjectManager.ClearState(calledInstance);
+        if (!IsStaticCall)
+            verificationContext.ObjectManager.ClearState(calledInstance);
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        if (!AddClassInvariant(CallVerificationContext))
-            return false;
+        if (!IsStaticCall)
+            if (!AddClassInvariant(CallVerificationContext))
+                return false;
 
         resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
 

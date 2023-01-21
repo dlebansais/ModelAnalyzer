@@ -344,7 +344,7 @@ using System;
 
 class Program_CoreMethod_10
 {
-    static void Write()
+    protected void Write()
     {
     }
 }
@@ -535,5 +535,67 @@ class Program_CoreMethod_19
         IClassModel ClassModel1 = ClassModelList[1];
 
         Assert.That(ClassModel0.Unsupported.IsEmpty && ClassModel1.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Method_Static()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_20
+{
+    static int Sum(int x, int y)
+    {
+        return x + y;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_20
+  static int Sum(int x, int y)
+  {
+    return x + y;
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Method_PublicStatic()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethod_21
+{
+    public static int Sum(int x, int y)
+    {
+        return x + y;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethod_21
+  public static int Sum(int x, int y)
+  {
+    return x + y;
+  }
+"));
     }
 }

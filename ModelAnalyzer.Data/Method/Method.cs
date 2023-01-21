@@ -23,6 +23,11 @@ internal class Method : IMethod, INameable<MethodName>
     required public AccessModifier AccessModifier { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether the method is static.
+    /// </summary>
+    required public bool IsStatic { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether the method returns a value.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }

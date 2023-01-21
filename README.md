@@ -52,6 +52,7 @@ The analyzer supports:
 + Private or public methods that return either `void` or one of the supported types and take zero or more parameters (also of a supported type).
   * Parameters are not allowed to have the same name as fields or properties.
   * Parameters cannot be assigned, they are read-only.
+  * Static methods are supported.
 + The `Result` name is reserved and cannot be used for fields, properties or parameters. If `Result` is a local variable, then a return statement must be `return Result;`. 
 + Local variables of a supported type. They are not allowed to have the same name as fields, properties or parameters.
 + Assignment of an expression to a field, property or local variable.

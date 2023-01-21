@@ -29,7 +29,7 @@ using System;
 
 class [|Program_ClassModel_1|]
 {
-    static void Main()
+    protected void Main()
     {
     }
 }
@@ -39,7 +39,7 @@ using System;
 // No model
 class Program_ClassModel_1
 {
-    static void Main()
+    protected void Main()
     {
     }
 }
@@ -109,7 +109,7 @@ using System;
 // Some comment
 class [|Program_ClassModel_5|]
 {
-    static void Main()
+    protected void Main()
     {
     }
 }
@@ -120,7 +120,7 @@ using System;
 // No model
 class Program_ClassModel_5
 {
-    static void Main()
+    protected void Main()
     {
     }
 }
@@ -548,7 +548,7 @@ using System;
 
 class [|Program_ClassModel_27|]
 {
-    static int Read()
+    protected int Read()
     {
         return 0;
     }
@@ -559,7 +559,7 @@ using System;
 // No model
 class Program_ClassModel_27
 {
-    static int Read()
+    protected int Read()
     {
         return 0;
     }

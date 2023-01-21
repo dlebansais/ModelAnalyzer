@@ -21,6 +21,9 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     }
 
     /// <inheritdoc/>
+    required public ClassModel? ClassModel { get; init; }
+
+    /// <inheritdoc/>
     required public List<IVariable> VariablePath { get; init; }
 
     /// <inheritdoc/>
@@ -41,7 +44,14 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     /// <inheritdoc/>
     public override string ToString()
     {
-        string PathString = string.Join(".", VariablePath.ConvertAll(item => item.Name.Text));
+        List<string> NamePath;
+
+        if (ClassModel is not null)
+            NamePath = new List<string>() { ClassModel.Name };
+        else
+            NamePath = VariablePath.ConvertAll(item => item.Name.Text);
+
+        string PathString = string.Join(".", NamePath);
         string ArgumentString = string.Join(", ", ArgumentList);
 
         return $"{PathString}.{Name.Text}({ArgumentString})";

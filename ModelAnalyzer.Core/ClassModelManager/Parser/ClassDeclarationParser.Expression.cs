@@ -313,23 +313,25 @@ internal partial class ClassDeclarationParser
     private PrivateFunctionCallExpression TryParsePrivateFunctionCallExpression(ParsingContext parsingContext, IdentifierNameSyntax identifierName, List<Argument> argumentList, ref bool isErrorReported)
     {
         MethodName FunctionName = new() { Text = identifierName.Identifier.ValueText };
-
         ExpressionType ReturnType = ExpressionType.Other;
-
         string ClassName = parsingContext.ClassName;
         Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
         Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
-        IClassModel ClassModel = Phase1ClassModelTable[ClassName];
+        ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[ClassName];
+        bool IsStatic = false;
 
-        foreach (Method Method in ClassModel.GetMethods())
-            if (Method.Name.Text == FunctionName.Text)
+        foreach (KeyValuePair<MethodName, Method> Entry in ClassModel.MethodTable)
+            if (Entry.Key.Text == FunctionName.Text)
             {
-                ReturnType = Method.ReturnType;
+                Method CalledMethod = Entry.Value;
+
+                IsStatic = CalledMethod.IsStatic;
+                ReturnType = CalledMethod.ReturnType;
                 break;
             }
 
-        PrivateFunctionCallExpression NewExpression = new() { Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        PrivateFunctionCallExpression NewExpression = new() { ClassModel = IsStatic ? ClassModel : null, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddFunctionCallEntry(parsingContext, NewExpression);
 
         return NewExpression;
@@ -338,13 +340,25 @@ internal partial class ClassDeclarationParser
     private PublicFunctionCallExpression? TryParsePublicFunctionCallExpression(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression, List<Argument> argumentList, ref bool isErrorReported)
     {
         PublicFunctionCallExpression? NewExpression = null;
+        string LastName;
+        Location PathLocation;
 
-        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out string LastName, out Location PathLocation))
+        if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out LastName, out PathLocation))
+        {
             if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
             {
-                NewExpression = new PublicFunctionCallExpression { VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewExpression = new PublicFunctionCallExpression { ClassModel = null, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
             }
+        }
+        else if (TryParseTypeName(parsingContext, memberAccessExpression, out ClassModel ClassModel, out LastName, out PathLocation))
+        {
+            if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
+            {
+                NewExpression = new PublicFunctionCallExpression { ClassModel = ClassModel, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                AddFunctionCallEntry(parsingContext, NewExpression);
+            }
+        }
 
         return NewExpression;
     }
