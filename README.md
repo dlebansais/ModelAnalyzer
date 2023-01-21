@@ -57,7 +57,12 @@ The analyzer supports:
 + Assignment of an expression to a field, property or local variable.
 + The `return` statement, but at the end of a method only.
 + The `if` `else` statement.
-+ Invocation of a method - of the same class only - that has no return value.
++ Path of the form `X.Y1.Y2`... where Y1 and following names are optional.
+  * `X` can be either a field, a property, a local variable or a parameter. Fields and local variables are not allowed in method contracts (see below).
+  * `Y1` and following names, if present, must be properties. 
++ Invocation of a method that has no return value.
+  * Of the same class. Ex: `Add(x, y);`
+  * Along a path. Ex: `a.b.c.Add(x, y);`
 + A restricted subset of expressions:
   * The `+`, `-`, `*` and `/` binary operators.
   * The remainder operator `%` for integers.
@@ -66,10 +71,12 @@ The analyzer supports:
   * The `!`, `&&` and `||` logical operators.
   * The `==`, `!=`, `>`, `>=`, `<` and `<=` comparison operators.
   * Integer or double constants (ex: `0`, `1.0`), `true` and `false`, `null` and `new()`.
-  * Variables in the form `X.Y1.Y2`... where Y1 and following names are optional.
-    - `X` can be either a field, a property, a local variable or a parameter. Fields and local variables are not allowed in method contracts (see below).
-    - `Y1` and following names, if present, must be properties. 
-  * Invocation of a function, but of the same class only (ex: `z = Add(x, y);`).
+  * Variables:
+    - Either a field, a property of the current class, or a local variable or a parameter in the current method. Fields and local variables are not allowed in method contracts (see below).
+    - Or a property as the last name in a path. Ex: in `a.b.c`, `b` and `c` must be properties.   
+  * Invocation of a function
+    - Of the same class (ex: `z = Sum(x, y);`).
+    - Of another class with calls of the form `X.Y1.Y2`...`.Function(<arguments>)` where Y1 and following names are optional, with the same restriction as variables above. Ex: `z = a.b.c.Sum(x, y);`.
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
 
 Everything else, attributes, preprocessor directives etc. is not supported.
