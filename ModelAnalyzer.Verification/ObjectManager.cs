@@ -17,7 +17,7 @@ internal class ObjectManager
     public ObjectManager(SolverContext context)
     {
         Context = context;
-        RootInstance = Context.CreateReferenceValue("this", 1);
+        RootInstanceExpr = Context.CreateReferenceValue("this", 1);
         ObjectIndex = 2;
     }
 
@@ -29,7 +29,7 @@ internal class ObjectManager
     /// <summary>
     /// Gets the expressions for the root instance.
     /// </summary>
-    public IRefExprCapsule RootInstance { get; }
+    public IRefExprCapsule RootInstanceExpr { get; }
 
     /// <summary>
     /// Gets the solver.
@@ -46,7 +46,7 @@ internal class ObjectManager
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
 
-    public IExprSet<IExprCapsule> CreateVariable(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    public IExprSet<IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
         IExprSet<IExprCapsule>? InitializerExpr;
 
@@ -58,12 +58,12 @@ internal class ObjectManager
         return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr);
     }
 
-    public IExprSet<IExprCapsule> CreateVariable(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
+    public IExprSet<IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
     {
         return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr);
     }
 
-    private IExprSet<IExprCapsule> CreateVariableInternal(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
+    private IExprSet<IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprSet<IExprCapsule>? initializerExpr)
     {
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
@@ -82,7 +82,7 @@ internal class ObjectManager
         return VariableExpr;
     }
 
-    public IExprSet<IExprCapsule> CreateValueExpr(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    public IExprSet<IExprCapsule> CreateValueExpr(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
     {
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
@@ -298,15 +298,16 @@ internal class ObjectManager
 
     public IExprSet<IExprCapsule> CreateReferenceConstant(VariableAlias alias, ExpressionType variableType)
     {
-        ClassModel TypeClassModel = TypeToModel(variableType);
-        IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(TypeClassModel.Name, alias.ToString());
+        ClassModel ReferenceClassModel = TypeToModel(variableType);
+        IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(ReferenceClassModel.Name, alias.ToString());
+        Instance Reference = new() { ClassModel = ReferenceClassModel, Expr = ReferenceResult };
         List<IExprSet<IExprCapsule>> VariableSetList = new();
 
-        foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
+        foreach (KeyValuePair<PropertyName, Property> Entry in ReferenceClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
 
-            IVariableName PropertyBlockName = CreateBlockName(ReferenceResult, hostMethod: null, Property.Name);
+            IVariableName PropertyBlockName = CreateBlockName(Reference, hostMethod: null, Property.Name);
             Variable PropertyVariable = new(PropertyBlockName, Property.Type);
 
             if (!AliasTable.ContainsVariable(PropertyVariable))
@@ -318,11 +319,11 @@ internal class ObjectManager
             VariableSetList.Add(PropertyExpressions);
         }
 
-        foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
+        foreach (KeyValuePair<FieldName, Field> Entry in ReferenceClassModel.FieldTable)
         {
             Field Field = Entry.Value;
 
-            IVariableName FieldBlockName = CreateBlockName(ReferenceResult, hostMethod: null, Field.Name);
+            IVariableName FieldBlockName = CreateBlockName(Reference, hostMethod: null, Field.Name);
             Variable FieldVariable = new(FieldBlockName, Field.Type);
 
             if (!AliasTable.ContainsVariable(FieldVariable))
@@ -356,7 +357,7 @@ internal class ObjectManager
         return ResultLocal;
     }
 
-    public static LocalName CreateBlockName(IRefExprCapsule? owner, Method? hostMethod, IVariableName localName)
+    public static LocalName CreateBlockName(Instance? owner, Method? hostMethod, IVariableName localName)
     {
         LocalName Result = null!;
 
@@ -368,9 +369,10 @@ internal class ObjectManager
 
         if (owner is not null)
         {
-            Debug.Assert(owner.ClassName != string.Empty);
+            string ClassName = owner.Expr.ClassName;
+            Debug.Assert(ClassName != string.Empty);
 
-            string OwnerText = $"{owner.ClassName}#{owner.Index}:${localName.Text}";
+            string OwnerText = $"{ClassName}#{owner.Expr.Index}:${localName.Text}";
 
             Result = new LocalName() { Text = OwnerText };
         }
@@ -420,9 +422,9 @@ internal class ObjectManager
         return Result;
     }
 
-    public void ClearState(IRefExprCapsule reference, ClassModel classModel)
+    public void ClearState(Instance reference)
     {
-        foreach (KeyValuePair<PropertyName, Property> Entry in classModel.PropertyTable)
+        foreach (KeyValuePair<PropertyName, Property> Entry in reference.ClassModel.PropertyTable)
         {
             LocalName PropertyBlockLocalName = CreateBlockName(reference, hostMethod: null, Entry.Key);
             Variable PropertyVariable = new(PropertyBlockLocalName, Entry.Value.Type);

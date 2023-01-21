@@ -167,7 +167,8 @@ internal partial class Verifier : IDisposable
         BuildVariableValueExpression(verificationContext, methodCallStatement.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
 
         Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
-        IRefExprCapsule CalledInstance = (IRefExprCapsule)CalledClassExpr.MainExpression;
+        IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
+        Instance CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
 
         bool IsExecuted = false;
 
@@ -175,7 +176,7 @@ internal partial class Verifier : IDisposable
             if (Entry.Key == methodCallStatement.Name)
             {
                 Method CalledMethod = Entry.Value;
-                Result = AddPublicMethodCallExecution(verificationContext, methodCallStatement, ClassModel, CalledInstance, CalledMethod);
+                Result = AddPublicMethodCallExecution(verificationContext, methodCallStatement, CalledInstance, CalledMethod);
                 IsExecuted = true;
                 break;
             }
@@ -185,7 +186,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PublicMethodCallStatement methodCallStatement, ClassModel classModel, IRefExprCapsule calledInstance, Method calledMethod)
+    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PublicMethodCallStatement methodCallStatement, Instance calledInstance, Method calledMethod)
     {
         List<Argument> ArgumentList = methodCallStatement.ArgumentList;
 
@@ -203,23 +204,20 @@ internal partial class Verifier : IDisposable
 
         VerificationContext CallVerificationContext = verificationContext with
         {
-            PropertyTable = classModel.PropertyTable,
-            FieldTable = classModel.FieldTable,
-            MethodTable = classModel.MethodTable,
+            Instance = calledInstance,
             HostMethod = calledMethod,
             ResultLocal = null,
-            Instance = calledInstance,
         };
 
         if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
             return false;
 
-        verificationContext.ObjectManager.ClearState(calledInstance, classModel);
+        verificationContext.ObjectManager.ClearState(calledInstance);
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        if (!AddClassInvariant(CallVerificationContext, classModel))
+        if (!AddClassInvariant(CallVerificationContext))
             return false;
 
         return true;

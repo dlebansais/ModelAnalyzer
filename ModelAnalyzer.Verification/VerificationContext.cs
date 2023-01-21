@@ -19,19 +19,29 @@ internal record VerificationContext
     required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
 
     /// <summary>
-    /// Gets or sets the table of class properties.
+    /// Gets the object manager.
     /// </summary>
-    public ReadOnlyPropertyTable PropertyTable { get; set; } = new();
+    required public ObjectManager ObjectManager { get; init; }
 
     /// <summary>
-    /// Gets or sets the table of class fields.
+    /// Gets the instance to work on.
     /// </summary>
-    public ReadOnlyFieldTable FieldTable { get; set; } = new();
+    required public Instance Instance { get; init; }
 
     /// <summary>
-    /// Gets or sets the table of class methods.
+    /// Gets the table of class properties.
     /// </summary>
-    public ReadOnlyMethodTable MethodTable { get; set; } = new();
+    public ReadOnlyPropertyTable PropertyTable { get => Instance.ClassModel.PropertyTable; }
+
+    /// <summary>
+    /// Gets the table of class fields.
+    /// </summary>
+    public ReadOnlyFieldTable FieldTable { get => Instance.ClassModel.FieldTable; }
+
+    /// <summary>
+    /// Gets the table of class methods.
+    /// </summary>
+    public ReadOnlyMethodTable MethodTable { get => Instance.ClassModel.MethodTable; }
 
     /// <summary>
     /// Gets or sets the method within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.
@@ -42,16 +52,6 @@ internal record VerificationContext
     /// Gets or sets the local variable that represents the value returned by a method. This is either a local declared in the method or one made up by the parser.
     /// </summary>
     public Local? ResultLocal { get; set; }
-
-    /// <summary>
-    /// Gets the object manager.
-    /// </summary>
-    required public ObjectManager ObjectManager { get; init; }
-
-    /// <summary>
-    /// Gets the instance to work on.
-    /// </summary>
-    required public IRefExprCapsule Instance { get; init; }
 
     /// <summary>
     /// Gets or sets the execution branch. Null if not within some conditional statement.

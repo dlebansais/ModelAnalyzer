@@ -87,16 +87,14 @@ internal partial class Verifier : IDisposable
             ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
 
             Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule NewReference = (IRefExprCapsule)resultExpr.MainExpression;
+            IRefExprCapsule ReferenceExpr = (IRefExprCapsule)resultExpr.MainExpression;
+            Instance Reference = new() { ClassModel = ClassModel, Expr = ReferenceExpr };
 
             VerificationContext NewVerificationContext = verificationContext with
             {
-                PropertyTable = ClassModel.PropertyTable,
-                FieldTable = ReadOnlyFieldTable.Empty,
-                MethodTable = ReadOnlyMethodTable.Empty,
+                Instance = Reference,
                 HostMethod = null,
                 ResultLocal = null,
-                Instance = NewReference,
             };
 
             return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
@@ -269,13 +267,14 @@ internal partial class Verifier : IDisposable
         BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
 
         Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
-        IRefExprCapsule CalledInstance = (IRefExprCapsule)CalledClassExpr.MainExpression;
+        IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
+        Instance CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
 
         foreach (var Entry in ClassModel.MethodTable)
             if (Entry.Key == functionCallExpression.Name)
             {
                 Method CalledFunction = Entry.Value;
-                Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, ClassModel, CalledInstance, CalledFunction, out resultExpr);
+                Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, CalledInstance, CalledFunction, out resultExpr);
                 break;
             }
 
@@ -284,7 +283,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, ClassModel classModel, IRefExprCapsule calledInstance, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, Instance calledInstance, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
     {
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
@@ -307,23 +306,20 @@ internal partial class Verifier : IDisposable
 
         VerificationContext CallVerificationContext = verificationContext with
         {
-            PropertyTable = classModel.PropertyTable,
-            FieldTable = classModel.FieldTable,
-            MethodTable = classModel.MethodTable,
+            Instance = calledInstance,
             HostMethod = calledFunction,
             ResultLocal = CallResult,
-            Instance = calledInstance,
         };
 
         if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
             return false;
 
-        verificationContext.ObjectManager.ClearState(calledInstance, classModel);
+        verificationContext.ObjectManager.ClearState(calledInstance);
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        if (!AddClassInvariant(CallVerificationContext, classModel))
+        if (!AddClassInvariant(CallVerificationContext))
             return false;
 
         resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);

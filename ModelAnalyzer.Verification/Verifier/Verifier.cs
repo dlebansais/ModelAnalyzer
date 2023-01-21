@@ -146,15 +146,15 @@ internal partial class Verifier : IDisposable
             ClassModelTable = ClassModelTable,
         };
 
+        ClassModel ClassModel = ClassModelTable[ClassName];
+        Instance ThisInstance = new() { ClassModel = ClassModel, Expr = ObjectManager.RootInstanceExpr };
+
         VerificationContext VerificationContext = new()
         {
             Solver = Solver,
             ClassModelTable = ClassModelTable,
-            PropertyTable = PropertyTable,
-            FieldTable = FieldTable,
-            MethodTable = MethodTable,
             ObjectManager = ObjectManager,
-            Instance = ObjectManager.RootInstance,
+            Instance = ThisInstance,
         };
 
         AddInitialState(VerificationContext);
@@ -168,9 +168,7 @@ internal partial class Verifier : IDisposable
             if (!AddMethodCallStateWithInit(VerificationContext, Method))
                 return;
 
-        ClassModel ClassModel = ClassModelTable[ClassName];
-
-        if (!AddClassInvariant(VerificationContext, ClassModel))
+        if (!AddClassInvariant(VerificationContext))
             return;
 
         VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Success, ClassName = ClassName };
@@ -184,13 +182,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.RootInstance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.RootInstance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -209,13 +207,14 @@ internal partial class Verifier : IDisposable
             return null;
     }
 
-    private bool AddClassInvariant(VerificationContext verificationContext, ClassModel classModel)
+    private bool AddClassInvariant(VerificationContext verificationContext)
     {
         bool Result = true;
-        string ClassName = classModel.Name;
-        IReadOnlyList<Invariant> InvariantList = classModel.InvariantList;
+        Instance Instance = verificationContext.Instance;
+        string ClassName = Instance.ClassModel.Name;
+        IReadOnlyList<Invariant> InvariantList = Instance.ClassModel.InvariantList;
 
-        Log($"Invariant for class {classModel.Name}");
+        Log($"Invariant for class {ClassName}");
 
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
