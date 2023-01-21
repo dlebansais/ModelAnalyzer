@@ -49,6 +49,11 @@ internal record VerificationContext
     required public ObjectManager ObjectManager { get; init; }
 
     /// <summary>
+    /// Gets the instance to work on.
+    /// </summary>
+    required public IRefExprCapsule Instance { get; init; }
+
+    /// <summary>
     /// Gets or sets the execution branch. Null if not within some conditional statement.
     /// </summary>
     public IBoolExprCapsule? Branch { get; set; }

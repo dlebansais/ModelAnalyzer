@@ -69,7 +69,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? verificationContext.ObjectManager.ThisObject : null, HostMethod, VariableName!);
+        IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!);
         Variable Destination = new(VariableBlockName, VariableType!);
 
         verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
@@ -160,31 +160,69 @@ internal partial class Verifier : IDisposable
 
     private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PublicMethodCallStatement methodCallStatement)
     {
-        // TODO
         bool Result = false;
 
-        /*
+        ClassModel ClassModel = GetLastClassModel(verificationContext, methodCallStatement.VariablePath);
+
+        BuildVariableValueExpression(verificationContext, methodCallStatement.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
+
+        Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
+        IRefExprCapsule CalledInstance = (IRefExprCapsule)CalledClassExpr.MainExpression;
+
         bool IsExecuted = false;
 
-        foreach (var Entry in MethodTable)
+        foreach (var Entry in ClassModel.MethodTable)
             if (Entry.Key == methodCallStatement.Name)
             {
                 Method CalledMethod = Entry.Value;
-                Result = AddMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
+                Result = AddPublicMethodCallExecution(verificationContext, methodCallStatement, ClassModel, CalledInstance, CalledMethod);
                 IsExecuted = true;
                 break;
             }
 
         Debug.Assert(IsExecuted);
-        */
 
         return Result;
     }
 
-    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PrivateMethodCallStatement methodCallStatement, Method calledMethod)
+    private bool AddPublicMethodCallExecution(VerificationContext verificationContext, PublicMethodCallStatement methodCallStatement, ClassModel classModel, IRefExprCapsule calledInstance, Method calledMethod)
     {
-        // TODO
-        return false;
+        List<Argument> ArgumentList = methodCallStatement.ArgumentList;
+
+        int Index = 0;
+        foreach (var Entry in calledMethod.ParameterTable)
+        {
+            Argument Argument = ArgumentList[Index++];
+            Parameter Parameter = Entry.Value;
+
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule> InitializerExpr))
+                return false;
+
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+        }
+
+        VerificationContext CallVerificationContext = verificationContext with
+        {
+            PropertyTable = classModel.PropertyTable,
+            FieldTable = classModel.FieldTable,
+            MethodTable = classModel.MethodTable,
+            HostMethod = calledMethod,
+            ResultLocal = null,
+            Instance = calledInstance,
+        };
+
+        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+            return false;
+
+        verificationContext.ObjectManager.ClearState(calledInstance, classModel);
+
+        if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
+            return false;
+
+        if (!AddClassInvariant(CallVerificationContext, classModel))
+            return false;
+
+        return true;
     }
 
     private bool AddReturnExecution(VerificationContext verificationContext, ReturnStatement returnStatement)

@@ -721,7 +721,8 @@ class Program_CoreExpression_FunctionCall_27
 
 class Program_CoreExpression_FunctionCall_28
 {
-    public int Y { get; set; }
+    public int Y1 { get; set; }
+    public int Y2 { get; set; }
 }
 
 class Program_CoreExpression_FunctionCall_29
@@ -730,7 +731,7 @@ class Program_CoreExpression_FunctionCall_29
     {
         Program_CoreExpression_FunctionCall_28 X = new();
 
-        return X.Y.Z.SomeMethod();
+        return X.Y2.Z.SomeMethod();
     }
 }
 ");

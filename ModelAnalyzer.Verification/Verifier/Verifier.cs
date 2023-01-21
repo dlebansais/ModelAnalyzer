@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using AnalysisLogger;
 using Microsoft.Z3;
 
@@ -138,8 +139,23 @@ internal partial class Verifier : IDisposable
     private void AnalyzeCallSequence(CallSequence callSequence)
     {
         using Solver Solver = Context.CreateSolver();
-        ObjectManager ObjectManager = new(Context) { Solver = Solver, ClassModelTable = ClassModelTable };
-        VerificationContext VerificationContext = new() { Solver = Solver, ClassModelTable = ClassModelTable, PropertyTable = PropertyTable, FieldTable = FieldTable, MethodTable = MethodTable, ObjectManager = ObjectManager };
+
+        ObjectManager ObjectManager = new(Context)
+        {
+            Solver = Solver,
+            ClassModelTable = ClassModelTable,
+        };
+
+        VerificationContext VerificationContext = new()
+        {
+            Solver = Solver,
+            ClassModelTable = ClassModelTable,
+            PropertyTable = PropertyTable,
+            FieldTable = FieldTable,
+            MethodTable = MethodTable,
+            ObjectManager = ObjectManager,
+            Instance = ObjectManager.RootInstance,
+        };
 
         AddInitialState(VerificationContext);
 
@@ -152,7 +168,9 @@ internal partial class Verifier : IDisposable
             if (!AddMethodCallStateWithInit(VerificationContext, Method))
                 return;
 
-        if (!AddClassInvariant(VerificationContext))
+        ClassModel ClassModel = ClassModelTable[ClassName];
+
+        if (!AddClassInvariant(VerificationContext, ClassModel))
             return;
 
         VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Success, ClassName = ClassName };
@@ -166,13 +184,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.ThisObject, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.RootInstance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.ThisObject, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.ObjectManager.RootInstance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -191,11 +209,13 @@ internal partial class Verifier : IDisposable
             return null;
     }
 
-    private bool AddClassInvariant(VerificationContext verificationContext)
+    private bool AddClassInvariant(VerificationContext verificationContext, ClassModel classModel)
     {
         bool Result = true;
+        string ClassName = classModel.Name;
+        IReadOnlyList<Invariant> InvariantList = classModel.InvariantList;
 
-        Log($"Invariant for class {ClassName}");
+        Log($"Invariant for class {classModel.Name}");
 
         for (int i = 0; i < InvariantList.Count && Result == true; i++)
         {
@@ -418,6 +438,21 @@ internal partial class Verifier : IDisposable
         Debug.Assert(AssertionTypeTable.ContainsKey(errorType));
 
         return AssertionTypeTable[errorType];
+    }
+
+    public static ClassModel GetLastClassModel(VerificationContext verificationContext, List<IVariable> variablePath)
+    {
+        Debug.Assert(variablePath.Count >= 1);
+
+        IVariable LastVariable = variablePath.Last();
+        ExpressionType VariableType = LastVariable.Type;
+
+        string ClassName = VariableType.Name;
+        Dictionary<string, ClassModel> ClassModelTable = verificationContext.ClassModelTable;
+
+        Debug.Assert(ClassModelTable.ContainsKey(ClassName));
+
+        return ClassModelTable[ClassName];
     }
 
     private void Log(string message)

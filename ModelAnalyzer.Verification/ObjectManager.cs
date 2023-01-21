@@ -17,7 +17,7 @@ internal class ObjectManager
     public ObjectManager(SolverContext context)
     {
         Context = context;
-        ThisObject = Context.CreateReferenceValue("this", 1);
+        RootInstance = Context.CreateReferenceValue("this", 1);
         ObjectIndex = 2;
     }
 
@@ -25,6 +25,11 @@ internal class ObjectManager
     /// Gets the solver.
     /// </summary>
     public SolverContext Context { get; }
+
+    /// <summary>
+    /// Gets the expressions for the root instance.
+    /// </summary>
+    public IRefExprCapsule RootInstance { get; }
 
     /// <summary>
     /// Gets the solver.
@@ -40,11 +45,6 @@ internal class ObjectManager
     /// Gets or sets the table of aliases.
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
-
-    /// <summary>
-    /// Gets the expressions for the root object.
-    /// </summary>
-    public IRefExprCapsule ThisObject { get; }
 
     public IExprSet<IExprCapsule> CreateVariable(IRefExprCapsule? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
@@ -394,6 +394,17 @@ internal class ObjectManager
         ExprSet<IExprCapsule> Result = new(Context.Null, PropertySetList);
 
         return Result;
+    }
+
+    public void ClearState(IRefExprCapsule reference, ClassModel classModel)
+    {
+        foreach (KeyValuePair<PropertyName, Property> Entry in classModel.PropertyTable)
+        {
+            LocalName PropertyBlockLocalName = CreateBlockName(reference, hostMethod: null, Entry.Key);
+            Variable PropertyVariable = new(PropertyBlockLocalName, Entry.Value.Type);
+
+            AliasTable.IncrementAlias(PropertyVariable);
+        }
     }
 
     public ClassModel TypeToModel(ExpressionType type)

@@ -26,6 +26,18 @@ class Program_Verifier_Integer1
 }
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer1_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
     private const string MethodCallSourceCodeInteger2 = @"
 using System;
 
@@ -45,6 +57,19 @@ class Program_Verifier_Integer2
 }
 // Invariant: X == 0
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer2_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
 
     private const string MethodCallSourceCodeInteger3 = @"
 using System;
@@ -72,6 +97,19 @@ class Program_Verifier_Integer3
 // Invariant: Y == 0
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer3_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
     private const string MethodCallSourceCodeInteger4 = @"
 using System;
 
@@ -93,6 +131,19 @@ class Program_Verifier_Integer4
 // Invariant: X == 0
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer4_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
     private const string MethodCallSourceCodeInteger5 = @"
 using System;
 
@@ -113,6 +164,18 @@ class Program_Verifier_Integer5
 }
 // Invariant: X == 0
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer5_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 
     private const string MethodCallSourceCodeInteger6 = @"
 using System;
@@ -136,6 +199,18 @@ class Program_Verifier_Integer6
 // Invariant: X == 0
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer6_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
     private const string MethodCallSourceCodeInteger7 = @"
 using System;
 
@@ -157,6 +232,19 @@ class Program_Verifier_Integer7
 }
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer7_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
     private const string MethodCallSourceCodeInteger8 = @"
 using System;
 
@@ -177,6 +265,18 @@ class Program_Verifier_Integer8
     }
 }
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer8_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger8, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 
     private const string MethodCallSourceCodeInteger9 = @"
 using System;
@@ -203,6 +303,19 @@ class Program_Verifier_Integer9
 }
 // Invariant: X == 0
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer9_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger9, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
 
     private const string MethodCallSourceCodeInteger10 = @"
 using System;
@@ -231,6 +344,19 @@ class Program_Verifier_Integer10
 // Invariant: X == 0
 ";
 
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer10_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger10, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
     private const string MethodCallSourceCodeInteger11 = @"
 using System;
 
@@ -245,6 +371,19 @@ class Program_Verifier_Integer11
     // Ensure: X == 0 && X != 0
 }
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer11_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger11, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
 
     private const string MethodCallSourceCodeInteger12 = @"
 using System;
@@ -265,6 +404,19 @@ class Program_Verifier_Integer12
     // Ensure: X == 0 && X != 0
 }
 ";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer12_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger12, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
 
     private const string MethodCallSourceCodeInteger13 = @"
 using System;
@@ -293,158 +445,6 @@ class Program_Verifier_Integer13
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Integer1_Success()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer2_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer3_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer4_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer5_Success()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer6_Success()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer7_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer8_Success()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger8, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsSuccess, Is.True);
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer9_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger9, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer10_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger10, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer11_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger11, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
-    }
-
-    [Test]
-    [Category("Verification")]
-    public void Verifier_Integer12_Error()
-    {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger12, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
-
-        TestObject.Verify();
-
-        VerificationResult VerificationResult = TestObject.VerificationResult;
-        Assert.That(VerificationResult.IsError, Is.True);
-        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
-    }
-
-    [Test]
-    [Category("Verification")]
     public void Verifier_Integer13_Error()
     {
         Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger13, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
@@ -454,5 +454,44 @@ class Program_Verifier_Integer13
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    private const string MethodCallSourceCodeInteger14 = @"
+using System;
+
+class Program_Verifier_Integer14_1
+{
+    public int Y { get; set; }
+
+    public void Write(int n)
+    // Require: n > 0
+    {
+        Y = n;
+    }
+    // Ensure: Y > 0
+}
+
+class Program_Verifier_Integer14_2
+{
+    public Program_Verifier_Integer14_1 X { get; set; } = new();
+
+    public void Write1(int n)
+    // Require: n > 0
+    {
+        X.Write(n);
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer14_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger14, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
     }
 }

@@ -3,8 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents a code verifier.
@@ -51,47 +49,17 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    /*
     private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule> resultExpr)
     {
-        List<IVariable> VariablePath = variableValueExpression.VariablePath;
-        Debug.Assert(VariablePath.Count >= 1);
-
-        string Name = VariablePath.First().Name.Text;
-        Method? HostMethod = null;
-        IVariableName? VariableName = null;
-        ExpressionType? VariableType = null;
-
-        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-        LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-        LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-        LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-
-        Debug.Assert(VariableName is not null);
-        Debug.Assert(VariableType is not null);
-
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.ObjectManager.ThisObject : null, HostMethod, VariableName!, VariableType!);
-
-        for (int i = 1; i < VariablePath.Count; i++)
-        {
-            Debug.Assert(VariablePath[i] is IProperty);
-            IProperty Property = (IProperty)VariablePath[i];
-
-            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule Reference = (IRefExprCapsule)resultExpr.MainExpression;
-
-            resultExpr = verificationContext.ObjectManager.CreateValueExpr(Reference, hostMethod: null, Property.Name, Property.Type);
-        }
-
-        return true;
-    }*/
-
-    private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule> resultExpr)
-    {
-        return BuildVariableValueExpression(verificationContext, variableValueExpression.VariablePath, pathIndex: 0, owner: verificationContext.ObjectManager.ThisObject, out resultExpr);
+        return BuildVariableValueExpression(verificationContext, variableValueExpression.VariablePath, out resultExpr);
     }
 
-    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, IRefExprCapsule? owner, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, out IExprSet<IExprCapsule> resultExpr)
+    {
+        return BuildVariableValueExpression(verificationContext, variablePath, pathIndex: 0, out resultExpr);
+    }
+
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, out IExprSet<IExprCapsule> resultExpr)
     {
         Debug.Assert(pathIndex < variablePath.Count);
 
@@ -112,11 +80,15 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? owner : null, HostMethod, VariableName!, VariableType!);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!, VariableType!);
 
         if (pathIndex + 1 < variablePath.Count)
         {
             ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+
+            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
+            IRefExprCapsule NewReference = (IRefExprCapsule)resultExpr.MainExpression;
+
             VerificationContext NewVerificationContext = verificationContext with
             {
                 PropertyTable = ClassModel.PropertyTable,
@@ -124,12 +96,10 @@ internal partial class Verifier : IDisposable
                 MethodTable = ReadOnlyMethodTable.Empty,
                 HostMethod = null,
                 ResultLocal = null,
+                Instance = NewReference,
             };
 
-            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule NewReference = (IRefExprCapsule)resultExpr.MainExpression;
-
-            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, NewReference, out resultExpr);
+            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
         }
         else
             return true;
@@ -291,30 +261,74 @@ internal partial class Verifier : IDisposable
 
     private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule> resultExpr)
     {
-        // TODO
         bool Result = false;
         resultExpr = null!;
 
-        /*
-        foreach (var Entry in MethodTable)
+        ClassModel ClassModel = GetLastClassModel(verificationContext, functionCallExpression.VariablePath);
+
+        BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
+
+        Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
+        IRefExprCapsule CalledInstance = (IRefExprCapsule)CalledClassExpr.MainExpression;
+
+        foreach (var Entry in ClassModel.MethodTable)
             if (Entry.Key == functionCallExpression.Name)
             {
                 Method CalledFunction = Entry.Value;
-                Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, CalledFunction, out resultExpr);
+                Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, ClassModel, CalledInstance, CalledFunction, out resultExpr);
                 break;
             }
 
         Debug.Assert(resultExpr is not null);
-        */
 
         return Result;
     }
 
-    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, ClassModel classModel, IRefExprCapsule calledInstance, Method calledFunction, out IExprSet<IExprCapsule> resultExpr)
     {
-        // TODO
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
-        return false;
+        List<Argument> ArgumentList = functionCallExpression.ArgumentList;
+
+        int Index = 0;
+        foreach (var Entry in calledFunction.ParameterTable)
+        {
+            Argument Argument = ArgumentList[Index++];
+            Parameter Parameter = Entry.Value;
+
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule> InitializerExpr))
+                return false;
+
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+        }
+
+        LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
+        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
+        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
+
+        VerificationContext CallVerificationContext = verificationContext with
+        {
+            PropertyTable = classModel.PropertyTable,
+            FieldTable = classModel.FieldTable,
+            MethodTable = classModel.MethodTable,
+            HostMethod = calledFunction,
+            ResultLocal = CallResult,
+            Instance = calledInstance,
+        };
+
+        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+            return false;
+
+        verificationContext.ObjectManager.ClearState(calledInstance, classModel);
+
+        if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
+            return false;
+
+        if (!AddClassInvariant(CallVerificationContext, classModel))
+            return false;
+
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
+
+        return true;
     }
 
     private string CreateTemporaryResultLocal()
