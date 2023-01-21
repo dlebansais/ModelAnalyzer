@@ -243,15 +243,23 @@ internal class ObjectManager
         ClassModel TypeClassModel = TypeToModel(expressionType);
         IRefExprCapsule ReferenceResult = Context.CreateReferenceValue(TypeClassModel.Name, ObjectIndex++);
 
-        List<IExprSet<IExprCapsule>> PropertySetList = new();
+        List<IExprSet<IExprCapsule>> VariableSetList = new();
+
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
             IExprSet<IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, Property.Initializer);
-            PropertySetList.Add(PropertyExpressions);
+            VariableSetList.Add(PropertyExpressions);
         }
 
-        ExprSet<IExprCapsule> Result = new(ReferenceResult, PropertySetList);
+        foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
+        {
+            Field Field = Entry.Value;
+            IExprSet<IExprCapsule> FieldExpressions = CreateInitializerExpr(Field.Type, Field.Initializer);
+            VariableSetList.Add(FieldExpressions);
+        }
+
+        ExprSet<IExprCapsule> Result = new(ReferenceResult, VariableSetList);
 
         return Result;
     }
@@ -292,7 +300,7 @@ internal class ObjectManager
     {
         ClassModel TypeClassModel = TypeToModel(variableType);
         IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(TypeClassModel.Name, alias.ToString());
-        List<IExprSet<IExprCapsule>> PropertySetList = new();
+        List<IExprSet<IExprCapsule>> VariableSetList = new();
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
@@ -307,10 +315,26 @@ internal class ObjectManager
             VariableAlias PropertyVariableNameAlias = AliasTable.GetAlias(PropertyVariable);
 
             IExprSet<IExprCapsule> PropertyExpressions = CreateVariableExpr(PropertyVariableNameAlias, Property.Type);
-            PropertySetList.Add(PropertyExpressions);
+            VariableSetList.Add(PropertyExpressions);
         }
 
-        ExprSet<IExprCapsule> Result = new(ReferenceResult, PropertySetList);
+        foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
+        {
+            Field Field = Entry.Value;
+
+            IVariableName FieldBlockName = CreateBlockName(ReferenceResult, hostMethod: null, Field.Name);
+            Variable FieldVariable = new(FieldBlockName, Field.Type);
+
+            if (!AliasTable.ContainsVariable(FieldVariable))
+                AliasTable.AddVariable(FieldVariable);
+
+            VariableAlias FieldVariableNameAlias = AliasTable.GetAlias(FieldVariable);
+
+            IExprSet<IExprCapsule> FieldExpressions = CreateVariableExpr(FieldVariableNameAlias, Field.Type);
+            VariableSetList.Add(FieldExpressions);
+        }
+
+        ExprSet<IExprCapsule> Result = new(ReferenceResult, VariableSetList);
 
         return Result;
     }

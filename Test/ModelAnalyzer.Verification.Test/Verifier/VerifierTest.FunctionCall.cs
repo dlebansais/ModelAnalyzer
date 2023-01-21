@@ -586,6 +586,7 @@ class Program_Verifier_Integer16_2
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
     }
 
     private const string FunctionCallSourceCodeInteger17 = @"
@@ -669,5 +670,46 @@ class Program_Verifier_Integer18_2
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    private const string FunctionCallSourceCodeInteger19 = @"
+using System;
+
+class Program_Verifier_Integer19_1
+{
+    int Z;
+
+    public int ReadY()
+    {
+        return 0;
+    }
+}
+// Invariant: Z == 0
+// Invariant: Z != 0
+
+class Program_Verifier_Integer19_2
+{
+    Program_Verifier_Integer19_1 X = new();
+
+    public void Write()
+    {
+        int N;
+
+        N = X.ReadY();
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer19_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger19, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
 }

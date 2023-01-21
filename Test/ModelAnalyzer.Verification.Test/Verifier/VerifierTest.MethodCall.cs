@@ -494,4 +494,181 @@ class Program_Verifier_Integer14_2
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
     }
+
+    private const string MethodCallSourceCodeInteger15 = @"
+using System;
+
+class Program_Verifier_Integer15_1
+{
+    public int Z { get; set; }
+
+    public void Write(int n)
+    // Require: n == 0
+    {
+        Z = n + 1;
+    }
+    // Ensure: Z == n + 1
+}
+
+class Program_Verifier_Integer15_2
+{
+    Program_Verifier_Integer15_1 X = new();
+    public int Y { get; set; }
+
+    public void Write1(int n)
+    // Require: n != 0
+    {
+        X.Write(n);
+        Y = X.Z;
+    }
+    // Ensure: Y != 1
+
+    public void Write2(int n)
+    // Require: n == -1
+    {
+        X.Write(n);
+        Y = X.Z;
+    }
+    // Ensure: Y == 0
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer15_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger15, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    private const string MethodCallSourceCodeInteger16 = @"
+using System;
+
+class Program_Verifier_Integer16_1
+{
+    public int Z { get; set; }
+
+    public void Write(int n)
+    // Require: n < 0
+    {
+        Z = n;
+    }
+    // Ensure: Z >= 0
+    // Ensure: Z < 0
+}
+
+class Program_Verifier_Integer16_2
+{
+    Program_Verifier_Integer16_1 X = new();
+
+    public void WriteX(int n)
+    // Require: n < 0
+    {
+        X.Write(n);
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer16_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger16, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
+    }
+
+    private const string MethodCallSourceCodeInteger17 = @"
+using System;
+
+class Program_Verifier_Integer17_1
+{
+    public int Z { get; set; }
+
+    public void Write2(int x)
+    // Require: x == 0
+    {
+        Z = Write3(x);
+    }
+
+    int Write3(int x)
+    // Require: x == 1
+    {
+        return x;
+    }
+}
+
+class Program_Verifier_Integer17_2
+{
+    Program_Verifier_Integer17_1 X = new();
+    
+    public void Write1(int x)
+    // Require: x == 0
+    {
+        int N;
+
+        X.Write2(X.Write3(x));
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer17_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger17, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.RequireError));
+    }
+
+    private const string MethodCallSourceCodeInteger18 = @"
+using System;
+
+class Program_Verifier_Integer18_1
+{
+    int Z;
+
+    public void WriteY()
+    {
+    }
+}
+// Invariant: Z == 0
+// Invariant: Z != 0
+
+class Program_Verifier_Integer18_2
+{
+    Program_Verifier_Integer18_1 X = new();
+
+    public void Write()
+    {
+        X.WriteY();
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer18_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger18, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
 }
