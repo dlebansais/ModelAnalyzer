@@ -463,6 +463,10 @@ class Program_Verifier_Integer14_1
 {
     public int Y { get; set; }
 
+    public void Other()
+    {
+    }
+
     public void Write(int n)
     // Require: n > 0
     {

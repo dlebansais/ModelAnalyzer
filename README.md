@@ -140,7 +140,7 @@ public class Test
 
 ## Execution flow checks
 
-The analyzer mostly looks for violation of contracts, but can also detect errorsin the execution flow. Currently, only divide by zero error is detected.
+The analyzer mostly looks for violation of contracts, but can also detect errors in the execution flow. Currently, only divide by zero error is detected.
 
 Consider the code below: 
 
@@ -154,7 +154,7 @@ public class Test
 }
 ````
 
-The analyzer detects that `y` can be 0 and therefore the `Remainder` function can throw `DivideByZeroException`. To fix the code, add a require clause as follow:
+The analyzer detected that `y` can be 0 and therefore the `Remainder` function can throw `DivideByZeroException`. To fix the code, add a require clause as follow:
 
 ````csharp
 public class Test
