@@ -206,6 +206,7 @@ public partial class VerifierTest
             ClassName = ClassName,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
+            IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
             LocalTable = ReadOnlyLocalTable.Empty,

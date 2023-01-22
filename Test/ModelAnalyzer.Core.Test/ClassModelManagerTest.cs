@@ -869,7 +869,6 @@ isClassNameRepeated: true).First();
 
     private void VerificationWithContradictoryRequire(List<ClassDeclarationSyntax> classDeclarationList)
     {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 

@@ -75,6 +75,7 @@ public class NameAndItemTableTest
             ClassName = string.Empty,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
+            IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),

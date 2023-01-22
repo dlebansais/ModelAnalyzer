@@ -36,7 +36,7 @@ public partial class ClassModelManager : IDisposable
         {
             ModelExchange = new ModelExchange() { ClassModelTable = new Dictionary<string, ClassModel>(), ReceiveChannelGuid = receiveChannelGuid },
             IsVerificationRequestSent = false,
-            VerificationResult = VerificationResult.Default,
+            VerificationResultTable = new Dictionary<string, VerificationResult>(),
         };
 
         Context = new SynchronizedVerificationContext() { VerificationState = VerificationState };
@@ -164,7 +164,7 @@ public partial class ClassModelManager : IDisposable
 
     private IDictionary<ClassDeclarationSyntax, IClassModel> GetClassModelListInternal(CompilationContext compilationContext, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
-        Dictionary<ClassDeclarationSyntax, IClassModel> Result = new();
+        Dictionary<ClassDeclarationSyntax, IClassModel> ClassDeclarationModelTable = new();
 
         lock (Context.Lock)
         {
@@ -178,23 +178,13 @@ public partial class ClassModelManager : IDisposable
             {
                 VerificationState OldVerificationState = Context.VerificationState;
                 ModelExchange OldClassModelExchange = OldVerificationState.ModelExchange;
-                Dictionary<string, ClassModel> OldClassModelTable = OldClassModelExchange.ClassModelTable;
                 Dictionary<string, IClassModel> Phase1ClassModelTable = new();
+                Dictionary<string, ClassModel> OldClassModelTable = OldClassModelExchange.ClassModelTable;
                 Dictionary<string, ClassModel> NewClassModelTable = new();
 
-                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-                {
-                    ClassModel NewClassModel = ParseClassModelPhase1(classDeclarationList, ClassDeclaration, semanticModel);
-                    Phase1ClassModelTable.Add(NewClassModel.Name, NewClassModel);
-                }
-
+                ParsePhase1(Phase1ClassModelTable, classDeclarationList, semanticModel);
                 semanticModel.Phase1ClassModelTable = Phase1ClassModelTable;
-
-                foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-                {
-                    ClassModel NewClassModel = AddOrUpdateClassModelPhase2(OldClassModelTable, NewClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
-                    Result.Add(ClassDeclaration, NewClassModel);
-                }
+                ParsePhase2(OldClassModelTable, NewClassModelTable, ClassDeclarationModelTable, classDeclarationList, semanticModel);
 
                 ReportCyclicReferences(NewClassModelTable);
 
@@ -207,7 +197,7 @@ public partial class ClassModelManager : IDisposable
                 {
                     ModelExchange = NewClassModelExchange,
                     IsVerificationRequestSent = false,
-                    VerificationResult = VerificationResult.Default,
+                    VerificationResultTable = new Dictionary<string, VerificationResult>(),
                 };
 
                 Context.VerificationState = NewVerificationState;
@@ -226,14 +216,27 @@ public partial class ClassModelManager : IDisposable
                     Debug.Assert(ClassName != string.Empty);
                     Debug.Assert(ClassModelTable.ContainsKey(ClassName));
 
-                    Result.Add(ClassDeclaration, ClassModelTable[ClassName]);
+                    ClassDeclarationModelTable.Add(ClassDeclaration, ClassModelTable[ClassName]);
                 }
             }
 
             Context.LastCompilationContext = compilationContext;
         }
 
-        return Result;
+        return ClassDeclarationModelTable;
+    }
+
+    private void ParsePhase1(Dictionary<string, IClassModel> phase1ClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
+    {
+        Dictionary<string, ClassModel> PreloadedClasses = GetPreloadedClasses();
+        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+            phase1ClassModelTable.Add(Entry.Key, Entry.Value);
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+        {
+            ClassModel NewClassModel = ParseClassModelPhase1(classDeclarationList, ClassDeclaration, semanticModel);
+            phase1ClassModelTable.Add(NewClassModel.Name, NewClassModel);
+        }
     }
 
     private ClassModel ParseClassModelPhase1(List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
@@ -259,6 +262,19 @@ public partial class ClassModelManager : IDisposable
         };
 
         return ClassModel;
+    }
+
+    private void ParsePhase2(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, Dictionary<ClassDeclarationSyntax, IClassModel> classDeclarationModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
+    {
+        Dictionary<string, ClassModel> PreloadedClasses = GetPreloadedClasses();
+        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+            newClassModelTable.Add(Entry.Key, Entry.Value);
+
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+        {
+            ClassModel NewClassModel = AddOrUpdateClassModelPhase2(oldClassModelTable, newClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
+            classDeclarationModelTable.Add(ClassDeclaration, NewClassModel);
+        }
     }
 
     private ClassModel AddOrUpdateClassModelPhase2(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
@@ -308,6 +324,85 @@ public partial class ClassModelManager : IDisposable
         newClassModelTable.Add(ClassName, NewClassModel);
 
         return NewClassModel;
+    }
+
+    private Dictionary<string, ClassModel> GetPreloadedClasses()
+    {
+        Dictionary<string, ClassModel> PreloadedClasses = Preloaded.GetClasses();
+        Dictionary<string, ClassModel> Result = new();
+
+        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+        {
+            ClassModel ClassModel = Entry.Value;
+            FixPreloadedClassModelClauses(ClassModel);
+
+            Result.Add(ClassModel.Name, ClassModel);
+        }
+
+        return Result;
+    }
+
+    private void FixPreloadedClassModelClauses(ClassModel classModel)
+    {
+        foreach (KeyValuePair<MethodName, Method> Entry in classModel.MethodTable)
+        {
+            Method Method = Entry.Value;
+
+            for (int i = 0; i < Method.RequireList.Count; i++)
+            {
+                Require Require = Method.RequireList[i];
+                Method.RequireList[i] = FixedRequireClause(classModel, Method, Require);
+            }
+
+            for (int i = 0; i < Method.EnsureList.Count; i++)
+            {
+                Ensure Ensure = Method.EnsureList[i];
+                Method.EnsureList[i] = FixedEnsureClause(classModel, Method, Ensure);
+            }
+        }
+    }
+
+    private Require FixedRequireClause(ClassModel classModel, Method method, Require require)
+    {
+        string Text = require.Text;
+        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text);
+
+        Debug.Assert(BooleanExpression.GetExpressionType() == ExpressionType.Boolean);
+
+        return new Require()
+        {
+            Text = Text,
+            Location = Location.None,
+            BooleanExpression = BooleanExpression,
+        };
+    }
+
+    private Ensure FixedEnsureClause(ClassModel classModel, Method method, Ensure ensure)
+    {
+        string Text = ensure.Text;
+        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text);
+
+        Debug.Assert(BooleanExpression.GetExpressionType() == ExpressionType.Boolean);
+
+        return new Ensure()
+        {
+            Text = Text,
+            Location = Location.None,
+            BooleanExpression = BooleanExpression,
+        };
+    }
+
+    private Expression PreloadedClauseTextToExpression(ClassModel classModel, Method method, string text)
+    {
+        MadeUpSemanticModel SemanticModel = new();
+        SemanticModel.Phase1ClassModelTable.Add(classModel.Name, classModel);
+
+        ClassDeclarationParser Parser = new(new List<ClassDeclarationSyntax>(), null!, SemanticModel);
+        Expression? Expression = Parser.ParseAssertionText(method, text);
+
+        Debug.Assert(Expression is not null);
+
+        return Expression!;
     }
 
     private void ReportCyclicReferences(Dictionary<string, ClassModel> classModelTable)

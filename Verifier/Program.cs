@@ -90,27 +90,26 @@ internal class Program
             if (ModelExchange is not null)
             {
                 Log($"Class model list decoded");
-                ProcessModel(ModelExchange);
+                ProcessModels(ModelExchange);
             }
         }
     }
 
-    private static void ProcessModel(ModelExchange modelExchange)
+    private static void ProcessModels(ModelExchange modelExchange)
     {
-        VerificationResult VerificationResult = VerificationResult.Default;
+        List<VerificationResult> VerificationResultList = new();
 
         foreach (KeyValuePair<string, ClassModel> Entry in modelExchange.ClassModelTable)
         {
             ClassModel ClassModel = Entry.Value;
 
             Log(ClassModel.ToString());
-            VerificationResult = ProcessClassModel(modelExchange.ClassModelTable, ClassModel);
-
-            if (VerificationResult != VerificationResult.Default)
-                break;
+            VerificationResult VerificationResult = ProcessClassModel(modelExchange.ClassModelTable, ClassModel);
+            VerificationResultList.Add(VerificationResult);
         }
 
-        SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
+        foreach (VerificationResult VerificationResult in VerificationResultList)
+            SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
     }
 
     private static VerificationResult ProcessClassModel(Dictionary<string, ClassModel> classModelTable, ClassModel classModel)

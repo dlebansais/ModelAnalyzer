@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq.Expressions;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents the type of an expression.
@@ -45,6 +45,7 @@ public record ExpressionType
     /// </summary>
     /// <param name="name">The type name.</param>
     /// <param name="isNullable">Whether the type can have value 'null'.</param>
+    [JsonConstructor]
     public ExpressionType(string name, bool isNullable)
     {
         Name = name;
@@ -64,6 +65,7 @@ public record ExpressionType
     /// <summary>
     /// Gets a value indicating whether the type is one of the simple predefined types.
     /// </summary>
+    [JsonIgnore]
     public bool IsSimple
     {
         get

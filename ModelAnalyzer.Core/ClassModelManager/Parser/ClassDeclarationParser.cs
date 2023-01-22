@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using AnalysisLogger;
@@ -147,6 +146,35 @@ internal partial class ClassDeclarationParser
         }
 
         Unsupported = ParsingContext.Unsupported;
+    }
+
+    /// <summary>
+    /// Parses the text of an assertion.
+    /// </summary>
+    /// <param name="method">The mthod containing the assertion.</param>
+    /// <param name="text">The assertion text.</param>
+    public Expression? ParseAssertionText(Method method, string text)
+    {
+        CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
+        SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
+        CompilationUnitSyntax Root = SyntaxTree.GetCompilationUnitRoot();
+        GlobalStatementSyntax GlobalStatement = (GlobalStatementSyntax)Root.Members[0];
+        ExpressionStatementSyntax ExpressionStatement = (ExpressionStatementSyntax)GlobalStatement.Statement;
+        AssignmentExpressionSyntax AssignmentExpression = (AssignmentExpressionSyntax)ExpressionStatement.Expression;
+        ExpressionSyntax ExpressionNode = AssignmentExpression.Right;
+        LocationContext LocationContext = new(ExpressionNode);
+
+        ParsingContext ParsingContext = new()
+        {
+            ClassDeclarationList = new List<ClassDeclarationSyntax>(),
+            ClassName = string.Empty,
+            SemanticModel = SemanticModel,
+            HostMethod = method,
+            LocationContext = LocationContext,
+        };
+        Expression? Expression = ParseExpression(ParsingContext, ExpressionNode);
+
+        return Expression;
     }
 
     private bool IsClassDeclarationSupported(ClassDeclarationSyntax classDeclaration)

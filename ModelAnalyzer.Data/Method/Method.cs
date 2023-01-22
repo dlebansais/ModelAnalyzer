@@ -33,6 +33,11 @@ internal class Method : IMethod, INameable<MethodName>
     required public bool IsStatic { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether the method is preloaded.
+    /// </summary>
+    required public bool IsPreloaded { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether the method returns a value.
     /// </summary>
     required public ExpressionType ReturnType { get; init; }

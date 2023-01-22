@@ -100,9 +100,9 @@ public partial class ClassModelManager : IDisposable
             {
                 ClassModel ClassModel = ClassModelTable[className];
                 isFound = true;
-
                 VerificationState VerificationState = Context.VerificationState;
-                isVerified = VerificationState.VerificationResult != VerificationResult.Default;
+                isVerified = VerificationState.VerificationResultTable.ContainsKey(className);
+
                 if (isVerified)
                 {
                     invariantViolations = ClassModel.InvariantViolations;
@@ -171,7 +171,14 @@ public partial class ClassModelManager : IDisposable
         ClassModel NewClassModel = WithFilledViolationLists(OldClassModel, verificationResult);
         ClassModelTable[className] = NewClassModel;
 
-        Context.VerificationState = Context.VerificationState with { VerificationResult = verificationResult };
+        Dictionary<string, VerificationResult> VerificationResultTable = new(Context.VerificationState.VerificationResultTable);
+
+        if (VerificationResultTable.ContainsKey(className))
+            VerificationResultTable[className] = verificationResult;
+        else
+            VerificationResultTable.Add(className, verificationResult);
+
+        Context.VerificationState = Context.VerificationState with { VerificationResultTable = VerificationResultTable };
     }
 
     private static ClassModel WithFilledViolationLists(ClassModel oldClassModel, VerificationResult verificationResult)

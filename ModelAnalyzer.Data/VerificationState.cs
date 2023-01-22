@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
+
 /// <summary>
 /// Represents the model of a class.
 /// </summary>
@@ -18,5 +20,5 @@ internal partial record VerificationState
     /// <summary>
     /// Gets the verification result.
     /// </summary>
-    required public VerificationResult VerificationResult { get; init; }
+    required public Dictionary<string, VerificationResult> VerificationResultTable { get; init; }
 }

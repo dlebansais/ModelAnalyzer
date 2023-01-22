@@ -102,7 +102,7 @@ internal partial class Verifier : IDisposable
             {
                 Method Method = Entry.Value;
 
-                if (Method.AccessModifier == AccessModifier.Public)
+                if (Method.AccessModifier == AccessModifier.Public && !Method.IsPreloaded)
                 {
                     CallSequence NewCallSequence = callSequence.WithAddedCall(Method);
 
