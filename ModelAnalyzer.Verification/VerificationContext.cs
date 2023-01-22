@@ -39,11 +39,6 @@ internal record VerificationContext
     public ReadOnlyFieldTable FieldTable { get => Instance.ClassModel.FieldTable; }
 
     /// <summary>
-    /// Gets the table of class methods.
-    /// </summary>
-    public ReadOnlyMethodTable MethodTable { get => Instance.ClassModel.MethodTable; }
-
-    /// <summary>
     /// Gets or sets the method within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.
     /// </summary>
     public Method? HostMethod { get; set; }

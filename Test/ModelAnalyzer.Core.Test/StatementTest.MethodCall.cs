@@ -648,4 +648,74 @@ class Program_CoreMethodCallStatement_25
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_PrivateStaticBadMethodName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_26
+{
+    public void Write1(int x)
+    {
+        Write2(x);
+        Program_CoreMethodCallStatement_26.OtherMethod(x);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_PrivateStaticBadClassName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_27
+{
+    public void Write(int x)
+    {
+        nameof(x).OtherMethod(x);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_PrivateStaticWrongClassName()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_28
+{
+    public void Write(int x)
+    {
+        OtherClass.OtherMethod(x);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+    }
 }
