@@ -18,6 +18,11 @@ internal class Method : IMethod, INameable<MethodName>
     IClassMemberName IMethod.Name { get => Name; }
 
     /// <summary>
+    /// Gets the name of the class containing this method.
+    /// </summary>
+    required public string ClassName { get; init; }
+
+    /// <summary>
     /// Gets the access modifier.
     /// </summary>
     required public AccessModifier AccessModifier { get; init; }

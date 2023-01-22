@@ -607,4 +607,45 @@ class Program_CoreMethodCallStatement_24
         Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel2.Unsupported.Statements.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_PrivateStaticMethodCall()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreMethodCallStatement_25
+{
+    public void Write1(int x)
+    {
+        Write2(x);
+        Program_CoreMethodCallStatement_25.Write2(x);
+    }
+
+    static void Write2(int x)
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreMethodCallStatement_25
+  public void Write1(int x)
+  {
+    Program_CoreMethodCallStatement_25.Write2(x);
+    Program_CoreMethodCallStatement_25.Write2(x);
+  }
+
+  static void Write2(int x)
+  {
+  }
+"));
+    }
 }

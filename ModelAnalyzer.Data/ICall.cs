@@ -9,9 +9,9 @@ using Microsoft.CodeAnalysis;
 internal interface ICall
 {
     /// <summary>
-    /// Gets the class for a static method.
+    /// Gets the name of the class for a static method.
     /// </summary>
-    ClassModel? ClassModel { get; }
+    string? ClassName { get; }
 
     /// <summary>
     /// Gets the function or method name.

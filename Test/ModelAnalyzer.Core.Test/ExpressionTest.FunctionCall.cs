@@ -801,4 +801,42 @@ class Program_CoreExpression_FunctionCall_30
   }
 "));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidLastStaticMethod()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_31
+{
+    public int ReadY()
+    {
+        return 0;
+    }
+}
+
+class Program_CoreExpression_FunctionCall_32
+{
+    public int ReadX()
+    {
+        return Program_CoreExpression_FunctionCall_31.OtherMethod();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }

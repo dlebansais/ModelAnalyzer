@@ -164,9 +164,9 @@ internal partial class Verifier : IDisposable
         ClassModel ClassModel;
         Instance CalledInstance;
 
-        if (methodCallStatement.ClassModel is not null)
+        if (methodCallStatement.ClassName is not null)
         {
-            ClassModel = methodCallStatement.ClassModel;
+            ClassModel = GetClassModel(verificationContext, methodCallStatement.ClassName);
             CalledInstance = new() { ClassModel = ClassModel, Expr = verificationContext.ObjectManager.Context.Null };
         }
         else

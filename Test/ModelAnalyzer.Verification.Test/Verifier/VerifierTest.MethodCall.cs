@@ -675,4 +675,41 @@ class Program_Verifier_Integer18_2
         Assert.That(VerificationResult.IsError, Is.True);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
     }
+
+    private const string MethodCallSourceCodeInteger19 = @"
+using System;
+
+class Program_Verifier_Integer19_1
+{
+    public void Other()
+    {
+    }
+
+    public static void Write(int n)
+    // Require: n > 0
+    {
+    }
+}
+
+class Program_Verifier_Integer19_2
+{
+    public void Write1(int n)
+    // Require: n > 0
+    {
+        Program_Verifier_Integer19_1.Write(n);
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer19_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MethodCallSourceCodeInteger19, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }

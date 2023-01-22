@@ -363,7 +363,7 @@ internal class ObjectManager
 
         if (hostMethod is not null)
         {
-            string LocalBlockText = $"{hostMethod.Name.Text}-${localName.Text}";
+            string LocalBlockText = $"{hostMethod.ClassName}::{hostMethod.Name.Text}-${localName.Text}";
             Result = new LocalName() { Text = LocalBlockText };
         }
 

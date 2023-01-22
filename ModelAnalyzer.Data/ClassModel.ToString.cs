@@ -228,15 +228,16 @@ internal partial record ClassModel : IClassModel
 
     private void AppendPrivateMethodCallStatement(StringBuilder builder, PrivateMethodCallStatement statement, int indentation)
     {
-        AppendStatementText(builder, $"{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
+        string StaticString = statement.ClassName is null ? string.Empty : $"{statement.ClassName}.";
+        AppendStatementText(builder, $"{StaticString}{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }
 
     private void AppendPublicMethodCallStatement(StringBuilder builder, PublicMethodCallStatement statement, int indentation)
     {
         List<string> NamePath;
 
-        if (statement.ClassModel is not null)
-            NamePath = new List<string>() { statement.ClassModel.Name };
+        if (statement.ClassName is not null)
+            NamePath = new List<string>() { statement.ClassName };
         else
             NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);
 

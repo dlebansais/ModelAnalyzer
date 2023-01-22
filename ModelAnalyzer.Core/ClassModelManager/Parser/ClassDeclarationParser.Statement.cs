@@ -234,7 +234,7 @@ internal partial class ClassDeclarationParser
                 break;
             }
 
-        PrivateMethodCallStatement NewStatement = new() { ClassModel = IsStatic ? ClassModel : null, Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        PrivateMethodCallStatement NewStatement = new() { ClassName = IsStatic ? ClassName : null, Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddMethodCallEntry(parsingContext, NewStatement);
 
         return NewStatement;
@@ -250,7 +250,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { ClassModel = null, VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement { ClassName = null, VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddMethodCallEntry(parsingContext, NewStatement);
             }
         }
@@ -258,7 +258,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { ClassModel = ClassModel, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement { ClassName = ClassModel.Name, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddMethodCallEntry(parsingContext, NewStatement);
             }
         }

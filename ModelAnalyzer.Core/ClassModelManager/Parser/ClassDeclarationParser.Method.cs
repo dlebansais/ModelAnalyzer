@@ -47,6 +47,7 @@ internal partial class ClassDeclarationParser
                 TemporaryMethod = new Method
                 {
                     Name = MethodName,
+                    ClassName = parsingContext.ClassName,
                     AccessModifier = AccessModifier,
                     IsStatic = IsStatic,
                     ParameterTable = ReadOnlyParameterTable.Empty,
@@ -71,6 +72,7 @@ internal partial class ClassDeclarationParser
                     TemporaryMethod = new Method
                     {
                         Name = MethodName,
+                        ClassName = parsingContext.ClassName,
                         AccessModifier = AccessModifier,
                         IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
@@ -89,6 +91,7 @@ internal partial class ClassDeclarationParser
                     TemporaryMethod = new Method
                     {
                         Name = MethodName,
+                        ClassName = parsingContext.ClassName,
                         AccessModifier = AccessModifier,
                         IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
@@ -106,6 +109,7 @@ internal partial class ClassDeclarationParser
                     TemporaryMethod = new Method
                     {
                         Name = MethodName,
+                        ClassName = parsingContext.ClassName,
                         AccessModifier = AccessModifier,
                         IsStatic = IsStatic,
                         ParameterTable = ParameterTable,
@@ -132,6 +136,7 @@ internal partial class ClassDeclarationParser
                 Method NewMethod = new Method
                 {
                     Name = MethodName,
+                    ClassName = parsingContext.ClassName,
                     AccessModifier = AccessModifier,
                     IsStatic = IsStatic,
                     ParameterTable = ParameterTable,
@@ -277,11 +282,15 @@ internal partial class ClassDeclarationParser
     {
         ClassModel? Result = null;
 
-        if (call.ClassModel is not null)
-            Result = call.ClassModel;
+        if (call.ClassName is not null)
+            Result = GetClassModel(parsingContext, call.ClassName);
         else if (call is IPublicCall AsPublicCall)
-            if (GetLastClassModel(parsingContext, AsPublicCall.VariablePath, out ClassModel ClassModel))
-                Result = ClassModel;
+        {
+            bool IsModelFound = GetLastClassModel(parsingContext, AsPublicCall.VariablePath, out ClassModel ClassModel);
+            Debug.Assert(IsModelFound);
+
+            Result = ClassModel;
+        }
 
         return Result;
     }

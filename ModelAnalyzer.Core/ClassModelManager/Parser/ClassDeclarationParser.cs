@@ -614,17 +614,22 @@ internal partial class ClassDeclarationParser
 
         if (!VariableType.IsSimple)
         {
-            string ClassName = VariableType.Name;
-            Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
-
-            Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
-
-            classModel = (ClassModel)Phase1ClassModelTable[ClassName];
+            classModel = GetClassModel(parsingContext, VariableType.Name);
             return true;
         }
 
         classModel = null!;
         return false;
+    }
+
+    public static ClassModel GetClassModel(ParsingContext parsingContext, string className)
+    {
+        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+
+        Debug.Assert(Phase1ClassModelTable.ContainsKey(className));
+
+        ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[className];
+        return ClassModel;
     }
 
     private void Log(string message)

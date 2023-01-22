@@ -446,12 +446,16 @@ internal partial class Verifier : IDisposable
         IVariable LastVariable = variablePath.Last();
         ExpressionType VariableType = LastVariable.Type;
 
-        string ClassName = VariableType.Name;
+        return GetClassModel(verificationContext, VariableType.Name);
+    }
+
+    public static ClassModel GetClassModel(VerificationContext verificationContext, string className)
+    {
         Dictionary<string, ClassModel> ClassModelTable = verificationContext.ClassModelTable;
 
-        Debug.Assert(ClassModelTable.ContainsKey(ClassName));
+        Debug.Assert(ClassModelTable.ContainsKey(className));
 
-        return ClassModelTable[ClassName];
+        return ClassModelTable[className];
     }
 
     private void Log(string message)

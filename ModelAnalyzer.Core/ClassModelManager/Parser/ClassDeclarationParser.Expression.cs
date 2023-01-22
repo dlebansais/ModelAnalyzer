@@ -331,7 +331,7 @@ internal partial class ClassDeclarationParser
                 break;
             }
 
-        PrivateFunctionCallExpression NewExpression = new() { ClassModel = IsStatic ? ClassModel : null, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        PrivateFunctionCallExpression NewExpression = new() { ClassName = IsStatic ? ClassName : null, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddFunctionCallEntry(parsingContext, NewExpression);
 
         return NewExpression;
@@ -347,7 +347,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
             {
-                NewExpression = new PublicFunctionCallExpression { ClassModel = null, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewExpression = new PublicFunctionCallExpression { ClassName = null, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
             }
         }
@@ -355,7 +355,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
             {
-                NewExpression = new PublicFunctionCallExpression { ClassModel = ClassModel, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewExpression = new PublicFunctionCallExpression { ClassName = ClassModel.Name, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
             }
         }

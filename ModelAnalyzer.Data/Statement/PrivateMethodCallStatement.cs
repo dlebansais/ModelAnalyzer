@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 internal class PrivateMethodCallStatement : Statement, IMethodCallStatement
 {
     /// <inheritdoc/>
-    required public ClassModel? ClassModel { get; init; }
+    required public string? ClassName { get; init; }
 
     /// <inheritdoc/>
     required public MethodName Name { get; init; }

@@ -161,6 +161,7 @@ public partial class VerifierTest
         Method TestMethod = new()
         {
             Name = MethodName,
+            ClassName = ClassName,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
