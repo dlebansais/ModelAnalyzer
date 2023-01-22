@@ -316,20 +316,25 @@ public partial class ClassModelManager : IDisposable
         {
             VerificationState VerificationState = Context.VerificationState;
 
-            foreach (KeyValuePair<string, ClassModel> Entry in VerificationState.ModelExchange.ClassModelTable)
+            if (VerificationState.IsVerificationRequestSent)
+                Log($"Skipping complete verification, it's being done.");
+            else
             {
-                string ClassName = Entry.Key;
-                ClassModel ClassModel = Entry.Value;
+                bool AnyEmptyUnsupported = false;
 
-                if (!ClassModel.Unsupported.IsEmpty)
-                    Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
-                else if (VerificationState.IsVerificationRequestSent)
-                    Log($"Skipping complete verification for class '{ClassName}', it's being done.");
-                else
+                foreach (KeyValuePair<string, ClassModel> Entry in VerificationState.ModelExchange.ClassModelTable)
                 {
-                    Context.VerificationState = VerificationState with { IsVerificationRequestSent = true };
-                    break;
+                    string ClassName = Entry.Key;
+                    ClassModel ClassModel = Entry.Value;
+
+                    if (!ClassModel.Unsupported.IsEmpty)
+                        Log($"Skipping complete verification for class '{ClassName}', it has unsupported elements.");
+                    else
+                        AnyEmptyUnsupported = true;
                 }
+
+                if (AnyEmptyUnsupported)
+                    Context.VerificationState = VerificationState with { IsVerificationRequestSent = true };
             }
         }
 

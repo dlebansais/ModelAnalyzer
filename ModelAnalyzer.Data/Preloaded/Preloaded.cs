@@ -29,6 +29,10 @@ internal static class Preloaded
         ""Result >= 0"",
         ""Result * Result == d"",
       ]
+    },
+    {
+      ""Name"": ""ForTestOnly_DoNotUse"",
+      ""ReturnTypeName"": ""void"",
     }
   ]
 }";

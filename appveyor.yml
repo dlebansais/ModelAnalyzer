@@ -58,9 +58,9 @@ before_test:
     printf "dotnet test ./Test/%APPVEYOR_PROJECT_NAME%.\\x25\x31.Test/bin/x64/%CONFIGURATION%/netcoreapp3.1/%APPVEYOR_PROJECT_NAME%.\x25\x31.Test.dll -l console;verbosity=detailed --filter ""(TestCategory~Core)|(TestCategory~Verification)""\n" > runtests.bat
   - |-
     printf "@echo ************************************************************** Starting Tests..\n" > runtests1.bat
-    printf "runtests.bat Verification\n" >> runtests1.bat
+    printf "call runtests.bat Verification\n" >> runtests1.bat
   - |-
-    printf "runtests.bat Core\n" > runtests2.bat
+    printf "call runtests.bat Core\n" > runtests2.bat
     printf "set\n" >> runtests2.bat
     printf "dir\n" >> runtests2.bat
     printf "dir ..\n" >> runtests2.bat

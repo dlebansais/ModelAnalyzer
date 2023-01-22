@@ -79,6 +79,7 @@ The analyzer supports:
     - Of the same class (ex: `z = Sum(x, y);`).
     - Of another class with calls of the form `X.Y1.Y2`...`.Function(<arguments>)` where Y1 and following names are optional, with the same restriction as variables above. Ex: `z = a.b.c.Sum(x, y);`.
   * In ensure expressions (see below), `Result` can be used and represents the value after `return`. 
++ A very limited set of .NET classes (see the [Preloaded methods](#preloaded_methods) section.
 
 Everything else, attributes, preprocessor directives etc. is not supported.
 
@@ -168,6 +169,24 @@ public class Test
 }
 ````
 
+## Preloaded methods
+
+Some .NET methods are available with if corresponding `using` directive is present.
+
+### Math.Sqrt
+
+````csharp
+namespace Math;
+
+public static double Sqrt(double d)
+// Require: d >= 0
+{
+    /* ... */
+}
+// Ensure: Result >= 0
+// Ensure: Result * Result == d
+````
+ 
 ## List of diagnostics
 
 | Code   | Diagnostic                                         |
