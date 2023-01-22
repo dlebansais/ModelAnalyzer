@@ -15,7 +15,7 @@ public static class Timeouts
     /// <summary>
     /// The timeout waiting for verification acknowledge.
     /// </summary>
-    public static readonly TimeSpan VerificationAcknowledgeTimeout = TimeSpan.FromSeconds(5);
+    public static readonly TimeSpan VerificationAcknowledgeTimeout = TimeSpan.FromSeconds(10);
 
     /// <summary>
     /// The timeout waiting for new data to verify.
