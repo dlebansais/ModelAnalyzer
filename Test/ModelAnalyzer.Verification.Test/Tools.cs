@@ -42,14 +42,14 @@ public static class Tools
 
         Debug.Assert(ClassModels.Count > 0);
 
-        Dictionary<string, ClassModel> ClassModelTable = new();
+        ClassModelTable ClassModelTable = new();
 
         foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModels)
         {
             ClassModel ClassModel = (ClassModel)Entry.Value;
 
             Debug.Assert(ClassModel.Unsupported.IsEmpty);
-            ClassModelTable.Add(ClassModel.Name, ClassModel);
+            ClassModelTable.Add(ClassModel.ClassName, ClassModel);
         }
 
         Verifier TestObject = null!;
@@ -63,7 +63,7 @@ public static class Tools
                 MaxDepth = maxDepth,
                 MaxDuration = maxDuration,
                 ClassModelTable = ClassModelTable,
-                ClassName = ClassModel.Name,
+                ClassName = ClassModel.ClassName,
                 PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
                 MethodTable = ClassModel.MethodTable,
@@ -102,14 +102,14 @@ public static class Tools
 
         Debug.Assert(ClassModels.Count > 0);
 
-        Dictionary<string, ClassModel> ClassModelTable = new();
+        ClassModelTable ClassModelTable = new();
 
         foreach (KeyValuePair<ClassDeclarationSyntax, IClassModel> Entry in ClassModels)
         {
             ClassModel ClassModel = (ClassModel)Entry.Value;
 
             Debug.Assert(ClassModel.Unsupported.IsEmpty);
-            ClassModelTable.Add(ClassModel.Name, ClassModel);
+            ClassModelTable.Add(ClassModel.ClassName, ClassModel);
         }
 
         List<Verifier> TestObjectList = new();
@@ -123,7 +123,7 @@ public static class Tools
                 MaxDepth = maxDepth,
                 MaxDuration = maxDuration,
                 ClassModelTable = ClassModelTable,
-                ClassName = ClassModel.Name,
+                ClassName = ClassModel.ClassName,
                 PropertyTable = ClassModel.PropertyTable,
                 FieldTable = ClassModel.FieldTable,
                 MethodTable = ClassModel.MethodTable,

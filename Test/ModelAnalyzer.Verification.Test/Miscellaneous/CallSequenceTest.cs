@@ -30,7 +30,7 @@ public class CallSequenceTest
         Method Method1 = new()
         {
             Name = new MethodName() { Text = MethodName1 },
-            ClassName = string.Empty,
+            ClassName = ClassName.Empty,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
             IsPreloaded = false,
@@ -50,7 +50,7 @@ public class CallSequenceTest
         Method Method2 = new()
         {
             Name = new MethodName() { Text = MethodName2 },
-            ClassName = string.Empty,
+            ClassName = ClassName.Empty,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
             IsPreloaded = false,
@@ -81,7 +81,7 @@ public class CallSequenceTest
         Method Method = new()
         {
             Name = new MethodName() { Text = MethodName },
-            ClassName = string.Empty,
+            ClassName = ClassName.Empty,
             AccessModifier = AccessModifier.Public,
             IsStatic = false,
             IsPreloaded = false,

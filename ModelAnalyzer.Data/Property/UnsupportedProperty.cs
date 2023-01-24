@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported property.
@@ -11,6 +12,7 @@ internal class UnsupportedProperty : IUnsupportedProperty
     public IVariableName Name => new PropertyName() { Text = "*" };
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 
     /// <inheritdoc/>

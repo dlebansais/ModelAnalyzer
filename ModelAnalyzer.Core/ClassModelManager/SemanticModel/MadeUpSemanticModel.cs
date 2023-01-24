@@ -17,7 +17,7 @@ public class MadeUpSemanticModel : IModel
     }
 
     /// <inheritdoc/>
-    public Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; } = new();
+    public Dictionary<ClassName, IClassModel> Phase1ClassModelTable { get; set; } = new();
 
     /// <inheritdoc/>
     public bool HasBaseType(ClassDeclarationSyntax classDeclaration)
@@ -44,10 +44,10 @@ public class MadeUpSemanticModel : IModel
     /// <inheritdoc/>
     public bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType)
     {
-        string ClassName = identifierName.Identifier.ValueText;
+        ClassName ClassName = ClassName.FromSimpleString(identifierName.Identifier.ValueText);
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-            if (ClassDeclaration.Identifier.ValueText == ClassName)
+            if (ClassDeclaration.Identifier.ValueText == ClassName.Text)
             {
                 classType = new ExpressionType(ClassName, isNullable);
                 return true;
@@ -55,5 +55,11 @@ public class MadeUpSemanticModel : IModel
 
         classType = ExpressionType.Other;
         return false;
+    }
+
+    /// <inheritdoc/>
+    public ClassName ClassDeclarationToClassName(ClassDeclarationSyntax classDeclaration)
+    {
+        return ClassName.FromSimpleString(classDeclaration.Identifier.ValueText);
     }
 }

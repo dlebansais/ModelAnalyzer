@@ -64,7 +64,7 @@ internal partial class ClassDeclarationParser
     {
         if (implicitObjectCreationExpression.ArgumentList.Arguments.Count == 0 && implicitObjectCreationExpression.Initializer is null)
         {
-            ExpressionType ObjectType = new ExpressionType(variableType.Name, isNullable: false);
+            ExpressionType ObjectType = new ExpressionType(variableType.TypeName, isNullable: false);
             initializerExpression = new NewObjectExpression() { ObjectType = ObjectType };
             return true;
         }

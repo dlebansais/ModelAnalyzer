@@ -23,7 +23,7 @@ internal partial class SolverContext : IDisposable
         Zero = Context.MkInt(0).Encapsulate();
         False = Context.MkBool(false).Encapsulate();
         True = Context.MkBool(true).Encapsulate();
-        Null = Context.MkInt(0).EncapsulateAsRef(string.Empty, 0);
+        Null = Context.MkInt(0).EncapsulateAsRef(ClassName.Empty, 0);
         ZeroSet = Zero.ToSingleSet();
         FalseSet = False.ToSingleSet();
         NullSet = Null.ToSingleSet();
@@ -111,7 +111,7 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="className">The class name.</param>
     /// <param name="name">The constant name.</param>
-    public IRefExprCapsule CreateReferenceConstant(string className, string name)
+    public IRefExprCapsule CreateReferenceConstant(ClassName className, string name)
     {
         return Context.MkIntConst(name).EncapsulateAsRef(className, 0);
     }
@@ -148,7 +148,7 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="className">The class name.</param>
     /// <param name="value">The value.</param>
-    public IRefExprCapsule CreateReferenceValue(string className, int value)
+    public IRefExprCapsule CreateReferenceValue(ClassName className, int value)
     {
         Debug.Assert(value > 0);
         return Context.MkInt(value).EncapsulateAsRef(className, value);

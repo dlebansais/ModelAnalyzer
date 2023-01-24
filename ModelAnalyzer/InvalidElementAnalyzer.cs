@@ -174,7 +174,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         try
         {
             CompilationUnitSyntax CompilationUnit = (CompilationUnitSyntax)context.Node;
-            List<string> ExistingClassList = new();
+            List<ClassName> ExistingClassList = new();
             List<ClassDeclarationSyntax> ClassDeclarationList = new();
 
             foreach (MemberDeclarationSyntax Member in CompilationUnit.Members)
@@ -183,7 +183,7 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
                 else if (Member is NamespaceDeclarationSyntax NamespaceDeclaration)
                     AnalyzeNamespaceMembers(context, NamespaceDeclaration.Members, ExistingClassList, ClassDeclarationList);
                 else if (Member is ClassDeclarationSyntax ClassDeclaration)
-                    AddClassDeclaration(ExistingClassList, ClassDeclarationList, ClassDeclaration);
+                    AddClassDeclaration(context, ExistingClassList, ClassDeclarationList, ClassDeclaration);
 
             AnalyzeClasses(context, CompilationUnit, ClassDeclarationList);
 
@@ -199,16 +199,17 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members, List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList)
+    private void AnalyzeNamespaceMembers(SyntaxNodeAnalysisContext context, SyntaxList<MemberDeclarationSyntax> members, List<ClassName> existingClassList, List<ClassDeclarationSyntax> classDeclarationList)
     {
         foreach (MemberDeclarationSyntax NamespaceMember in members)
             if (NamespaceMember is ClassDeclarationSyntax ClassDeclaration)
-                AddClassDeclaration(existingClassList, classDeclarationList, ClassDeclaration);
+                AddClassDeclaration(context, existingClassList, classDeclarationList, ClassDeclaration);
     }
 
-    private void AddClassDeclaration(List<string> existingClassList, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration)
+    private void AddClassDeclaration(SyntaxNodeAnalysisContext context, List<ClassName> existingClassList, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration)
     {
-        existingClassList.Add(classDeclaration.Identifier.ValueText);
+        AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
+        existingClassList.Add(SemanticModel.ClassDeclarationToClassName(classDeclaration));
 
         // Ignore diagnostic for classes not modeled.
         if (!ClassModelManager.IsClassIgnoredForModeling(classDeclaration))
@@ -230,67 +231,67 @@ public class InvalidElementAnalyzer : DiagnosticAnalyzer
         foreach (IUnsupportedProperty Item in classModel.Unsupported.Properties)
         {
             string PropertyName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid property '{PropertyName}'.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid property '{PropertyName}'.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidProperty, Item.Location, PropertyName));
         }
 
         foreach (IUnsupportedField Item in classModel.Unsupported.Fields)
         {
             string FieldName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid field '{FieldName}'.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid field '{FieldName}'.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidField, Item.Location, FieldName));
         }
 
         foreach (IUnsupportedMethod Item in classModel.Unsupported.Methods)
         {
             string MethodName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid method '{MethodName}'.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid method '{MethodName}'.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidMethod, Item.Location, MethodName));
         }
 
         foreach (IUnsupportedParameter Item in classModel.Unsupported.Parameters)
         {
             string ParameterName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid parameter '{ParameterName}'.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid parameter '{ParameterName}'.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidParameter, Item.Location, ParameterName));
         }
 
         foreach (IUnsupportedRequire Item in classModel.Unsupported.Requires)
         {
             string AssertionText = Tools.Truncate(Item.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid require.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid require.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidRequire, Item.Location, AssertionText));
         }
 
         foreach (IUnsupportedEnsure Item in classModel.Unsupported.Ensures)
         {
             string AssertionText = Tools.Truncate(Item.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid ensure.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid ensure.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidEnsure, Item.Location, AssertionText));
         }
 
         foreach (IUnsupportedLocal Item in classModel.Unsupported.Locals)
         {
             string LocalName = Tools.Truncate(Item.Name.Text);
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid local variable '{LocalName}'.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid local variable '{LocalName}'.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidLocal, Item.Location, LocalName));
         }
 
         foreach (IUnsupportedStatement Item in classModel.Unsupported.Statements)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid statement.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid statement.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidStatement, Item.Location));
         }
 
         foreach (IUnsupportedExpression Item in classModel.Unsupported.Expressions)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting invalid expression.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting invalid expression.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidExpression, Item.Location));
         }
 
         foreach (IUnsupportedInvariant Item in classModel.Unsupported.Invariants)
         {
-            Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting bad invariant.");
+            Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting bad invariant.");
             context.ReportDiagnostic(Diagnostic.Create(RuleInvalidInvariant, Item.Location, Item.Text));
         }
     }

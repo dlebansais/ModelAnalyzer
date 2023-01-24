@@ -26,6 +26,6 @@ internal class NewObjectExpression : Expression, ILiteralExpression
         Debug.Assert(!ObjectType.IsSimple);
         Debug.Assert(!ObjectType.IsNullable);
 
-        return $"new {ObjectType.Name}()";
+        return $"new {ObjectType.TypeName}()";
     }
 }

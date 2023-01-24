@@ -24,7 +24,7 @@ public class AnalyzerSemanticModel : IModel
     public SemanticModel SemanticModel { get; }
 
     /// <inheritdoc/>
-    public Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; } = new();
+    public Dictionary<ClassName, IClassModel> Phase1ClassModelTable { get; set; } = new();
 
     /// <inheritdoc/>
     public bool HasBaseType(ClassDeclarationSyntax classDeclaration)
@@ -45,12 +45,12 @@ public class AnalyzerSemanticModel : IModel
         {
             if (NamedTypeSymbol.TypeKind == TypeKind.Class)
             {
-                string ClassName = NamedTypeSymbol.Name;
+                string SymbolName = NamedTypeSymbol.Name;
 
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-                    if (ClassDeclaration.Identifier.ValueText == ClassName)
+                    if (ClassDeclaration.Identifier.ValueText == SymbolName)
                     {
-                        classType = new ExpressionType(ClassName, isNullable);
+                        classType = new ExpressionType(ClassName.FromSimpleString(SymbolName), isNullable);
                         return true;
                     }
             }
@@ -58,5 +58,13 @@ public class AnalyzerSemanticModel : IModel
 
         classType = ExpressionType.Other;
         return false;
+    }
+
+    /// <inheritdoc/>
+    public ClassName ClassDeclarationToClassName(ClassDeclarationSyntax classDeclaration)
+    {
+        // TODO: get the proper namespace using
+        // https://stackoverflow.com/questions/20458457/getting-class-fullname-including-namespace-from-roslyn-classdeclarationsyntax
+        return ClassName.FromSimpleString(classDeclaration.Identifier.ValueText);
     }
 }

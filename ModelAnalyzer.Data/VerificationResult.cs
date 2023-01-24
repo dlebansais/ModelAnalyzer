@@ -13,7 +13,7 @@ internal record VerificationResult
     public static VerificationResult Default { get; } = new()
     {
         ErrorType = VerificationErrorType.Unknown,
-        ClassName = string.Empty,
+        ClassName = ClassName.Empty,
         MethodName = string.Empty,
         ErrorIndex = -1,
         ErrorText = string.Empty,
@@ -27,7 +27,7 @@ internal record VerificationResult
     /// <summary>
     /// Gets the class name.
     /// </summary>
-    required public string ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <summary>
     /// Gets the method name.

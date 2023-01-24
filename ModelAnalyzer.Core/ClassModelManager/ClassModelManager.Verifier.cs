@@ -33,7 +33,7 @@ public partial class ClassModelManager : IDisposable
     /// <param name="classModel">The class classModel.</param>
     private IClassModel WaitForVerification(IClassModel classModel)
     {
-        string ClassName = classModel.Name;
+        ClassName ClassName = classModel.ClassName;
 
         if (!classModel.Unsupported.IsEmpty)
         {
@@ -85,7 +85,7 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    private void CheckVerificationStatus(string className, out bool isFound, out bool isVerified, out IReadOnlyList<IInvariantViolation> invariantViolations, out IReadOnlyList<IRequireViolation> requireViolations, out IReadOnlyList<IEnsureViolation> ensureViolations, out IReadOnlyList<IAssumeViolation> assumeViolations)
+    private void CheckVerificationStatus(ClassName className, out bool isFound, out bool isVerified, out IReadOnlyList<IInvariantViolation> invariantViolations, out IReadOnlyList<IRequireViolation> requireViolations, out IReadOnlyList<IEnsureViolation> ensureViolations, out IReadOnlyList<IAssumeViolation> assumeViolations)
     {
         invariantViolations = null!;
         requireViolations = null!;
@@ -94,7 +94,7 @@ public partial class ClassModelManager : IDisposable
 
         lock (Context.Lock)
         {
-            Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+            ClassModelTable ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
 
             if (ClassModelTable.ContainsKey(className))
             {
@@ -136,7 +136,11 @@ public partial class ClassModelManager : IDisposable
         {
             Log(JsonString);
 
-            VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+            Settings.Converters.Add(new ClassNameConverter());
+            Settings.Converters.Add(new ClassModelTableConverter());
+
+            VerificationResult? VerificationResult = JsonConvert.DeserializeObject<VerificationResult>(JsonString, Settings);
             if (VerificationResult is not null)
                 UpdateVerificationEvent(VerificationResult);
             else
@@ -148,11 +152,11 @@ public partial class ClassModelManager : IDisposable
     {
         Log($"Verification result decoded: {verificationResult}");
 
-        string ClassName = verificationResult.ClassName;
+        ClassName ClassName = verificationResult.ClassName;
 
         lock (Context.Lock)
         {
-            Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+            ClassModelTable ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
 
             if (ClassModelTable.ContainsKey(ClassName))
             {
@@ -164,14 +168,14 @@ public partial class ClassModelManager : IDisposable
         Log($"Class '{ClassName}' no longer in the list of models, verification result lost.");
     }
 
-    private void UpdateVerificationEventForClass(string className, VerificationResult verificationResult)
+    private void UpdateVerificationEventForClass(ClassName className, VerificationResult verificationResult)
     {
-        Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+        ClassModelTable ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
         ClassModel OldClassModel = ClassModelTable[className];
         ClassModel NewClassModel = WithFilledViolationLists(OldClassModel, verificationResult);
         ClassModelTable[className] = NewClassModel;
 
-        Dictionary<string, VerificationResult> VerificationResultTable = new(Context.VerificationState.VerificationResultTable);
+        Dictionary<ClassName, VerificationResult> VerificationResultTable = new(Context.VerificationState.VerificationResultTable);
 
         if (VerificationResultTable.ContainsKey(className))
             VerificationResultTable[className] = verificationResult;
@@ -322,9 +326,9 @@ public partial class ClassModelManager : IDisposable
             {
                 bool AnyEmptyUnsupported = false;
 
-                foreach (KeyValuePair<string, ClassModel> Entry in VerificationState.ModelExchange.ClassModelTable)
+                foreach (KeyValuePair<ClassName, ClassModel> Entry in VerificationState.ModelExchange.ClassModelTable)
                 {
-                    string ClassName = Entry.Key;
+                    ClassName ClassName = Entry.Key;
                     ClassModel ClassModel = Entry.Value;
 
                     if (!ClassModel.Unsupported.IsEmpty)
@@ -342,7 +346,11 @@ public partial class ClassModelManager : IDisposable
         {
             ModelExchange ModelExchange = Context.VerificationState.ModelExchange;
 
-            string JSonString = JsonConvert.SerializeObject(ModelExchange, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+            Settings.Converters.Add(new ClassNameConverter());
+            Settings.Converters.Add(new ClassModelTableConverter());
+
+            string JSonString = JsonConvert.SerializeObject(ModelExchange, Settings);
             byte[] EncodedString = Converter.EncodeString(JSonString);
 
             if (EncodedString.Length <= channel.GetFreeLength())

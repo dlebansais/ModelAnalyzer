@@ -317,7 +317,7 @@ public partial class VerifierTest
         TExpression Operand = new() { Value = operandValue };
         TExpression OperandResult = new() { Value = operandResult };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -368,7 +368,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
@@ -384,7 +384,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -449,7 +449,7 @@ public partial class VerifierTest
         TExpression Zero = new() { Value = initializerValue };
         TExpression OperandResult = new() { Value = operandResult };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -500,7 +500,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -516,7 +516,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -833,7 +833,7 @@ public partial class VerifierTest
         LiteralBooleanValueExpression True = new() { Value = true };
         LiteralBooleanValueExpression False = new() { Value = false };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -884,7 +884,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -900,7 +900,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -1027,7 +1027,7 @@ public partial class VerifierTest
         LiteralBooleanValueExpression True = new() { Value = true };
         LiteralBooleanValueExpression False = new() { Value = false };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -1078,7 +1078,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1094,7 +1094,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -1147,7 +1147,7 @@ public partial class VerifierTest
         LiteralBooleanValueExpression True = new() { Value = true };
         LiteralBooleanValueExpression False = new() { Value = false };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -1197,7 +1197,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1213,7 +1213,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -1330,7 +1330,7 @@ public partial class VerifierTest
         LiteralBooleanValueExpression True = new() { Value = true };
         LiteralBooleanValueExpression False = new() { Value = false };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -1381,7 +1381,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -1397,7 +1397,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),

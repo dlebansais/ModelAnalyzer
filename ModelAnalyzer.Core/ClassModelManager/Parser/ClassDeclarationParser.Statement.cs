@@ -187,7 +187,7 @@ internal partial class ClassDeclarationParser
         {
             if (sourceType == ExpressionType.Null)
                 return true;
-            else if (destinationType.Name == sourceType.Name)
+            else if (destinationType.TypeName == sourceType.TypeName)
                 return true;
             else
                 return false;
@@ -219,8 +219,8 @@ internal partial class ClassDeclarationParser
     private PrivateMethodCallStatement? TryParsePrivateMethodCallStatement(ParsingContext parsingContext, IdentifierNameSyntax identifierName, List<Argument> argumentList, ref bool isErrorReported)
     {
         MethodName MethodName = new() { Text = identifierName.Identifier.ValueText };
-        string ClassName = parsingContext.ClassName;
-        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+        ClassName ClassName = parsingContext.ClassName;
+        Dictionary<ClassName, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
         Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
         ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[ClassName];
@@ -258,7 +258,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { ClassName = ClassModel.Name, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement { ClassName = ClassModel.ClassName, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddMethodCallEntry(parsingContext, NewStatement);
             }
         }

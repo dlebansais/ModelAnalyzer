@@ -20,7 +20,7 @@ internal class Method : IMethod, INameable<MethodName>
     /// <summary>
     /// Gets the name of the class containing this method.
     /// </summary>
-    required public string ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <summary>
     /// Gets the access modifier.

@@ -97,7 +97,7 @@ class Program_CoreClassModelManager_3
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<string>() { "Program_CoreClassModelManager_3" }));
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<ClassName>() { ClassName.FromSimpleString("Program_CoreClassModelManager_3") }));
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -120,7 +120,7 @@ class Program_CoreClassModelManager_4
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<string>()));
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement, waitIfAsync: false, manager => RemoveClasses(manager, new List<ClassName>()));
 
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
@@ -143,7 +143,7 @@ class Program_CoreClassModelManager_5
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<string>() { "Program_CoreClassModelManager_5" }));
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<ClassName>() { ClassName.FromSimpleString("Program_CoreClassModelManager_5") }));
         Assert.That(ClassModelList.Count, Is.EqualTo(2));
         ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
         ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
@@ -192,7 +192,7 @@ class Program_CoreClassModelManager_6
 
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<string>()));
+        List<IClassModel> ClassModelList = await TestHelper.ToClassModelAsync(new List<ClassDeclarationSyntax>() { ClassDeclaration, ClassDeclaration }, TokenReplacement, manager => RemoveClasses(manager, new List<ClassName>()));
         Assert.That(ClassModelList.Count, Is.EqualTo(2));
         ClassModel ClassModel1 = (ClassModel)ClassModelList[0];
         ClassModel ClassModel2 = (ClassModel)ClassModelList[1];
@@ -641,7 +641,7 @@ isClassNameRepeated: true).First();
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureStillThere);
     }
 
-    private void RemoveClasses(ClassModelManager manager, List<string> existingClassNameList)
+    private void RemoveClasses(ClassModelManager manager, List<ClassName> existingClassNameList)
     {
         manager.RemoveMissingClasses(existingClassNameList);
     }
@@ -818,7 +818,7 @@ isClassNameRepeated: true).First();
 
         CompilationContext CompilationContext = CompilationContext.GetAnother();
         ClassModel0 = Manager.GetClassModels(CompilationContext, ClassDeclarationList0, SemanticModel).First().Value;
-        Manager.RemoveMissingClasses(new List<string>());
+        Manager.RemoveMissingClasses(new List<ClassName>());
         ClassModel1 = Manager.GetClassModels(CompilationContext, ClassDeclarationList1, SemanticModel).First().Value;
 
         Thread.Sleep(Timeouts.VerifierProcessLaunchTimeout);

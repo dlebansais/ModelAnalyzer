@@ -18,7 +18,7 @@ internal class SynchronizedVerificationContext
     /// Checks whether the context contains the name of a class.
     /// </summary>
     /// <param name="className">The class name.</param>
-    public bool ContainsClass(string className)
+    public bool ContainsClass(ClassName className)
     {
         return VerificationState.ModelExchange.ClassModelTable.ContainsKey(className);
     }
@@ -27,9 +27,9 @@ internal class SynchronizedVerificationContext
     /// Removes a class by its name to clean up the list of classes that have been seen.
     /// </summary>
     /// <param name="className">The class name.</param>
-    public void RemoveClass(string className)
+    public void RemoveClass(ClassName className)
     {
-        Dictionary<string, ClassModel> ClassModelTable = VerificationState.ModelExchange.ClassModelTable;
+        ClassModelTable ClassModelTable = VerificationState.ModelExchange.ClassModelTable;
 
         Debug.Assert(ClassModelTable.ContainsKey(className));
 
@@ -39,7 +39,7 @@ internal class SynchronizedVerificationContext
     /// <summary>
     /// Gets the table of class models.
     /// </summary>
-    public ICollection<string> GetClassModelNameList()
+    public ICollection<ClassName> GetClassModelNameList()
     {
         return VerificationState.ModelExchange.ClassModelTable.Keys;
     }

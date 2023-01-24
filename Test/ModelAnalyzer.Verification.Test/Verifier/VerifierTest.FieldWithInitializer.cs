@@ -91,7 +91,7 @@ public partial class VerifierTest
         TExpression Initializer = new() { Value = initialValue };
         TExpression Zero = new() { Value = invariantTestValue };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -117,7 +117,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
@@ -133,7 +133,7 @@ public partial class VerifierTest
         {
             MaxDepth = 0,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
@@ -226,7 +226,7 @@ public partial class VerifierTest
         TExpression Zero1 = new() { Value = invariantTestValue1 };
         TExpression Zero2 = new() { Value = invariantTestValue2 };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName1 = "X";
         string FieldName2 = "Y";
 
@@ -266,7 +266,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = ReadOnlyMethodTable.Empty,
@@ -282,7 +282,7 @@ public partial class VerifierTest
         {
             MaxDepth = 0,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),

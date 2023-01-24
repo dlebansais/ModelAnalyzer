@@ -77,8 +77,8 @@ internal partial class ClassDeclarationParser
     /// </summary>
     public void ParsePhase1()
     {
-        string ClassName = ClassDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
+        ClassName ClassName = SemanticModel.ClassDeclarationToClassName(ClassDeclaration);
+        Debug.Assert(ClassName != ClassName.Empty);
 
         Log($"Parsing declaration of class '{ClassName}', phase one");
 
@@ -111,8 +111,8 @@ internal partial class ClassDeclarationParser
     /// </summary>
     public void ParsePhase2()
     {
-        string ClassName = ClassDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
+        ClassName ClassName = SemanticModel.ClassDeclarationToClassName(ClassDeclaration);
+        Debug.Assert(ClassName != ClassName.Empty);
 
         Log($"Parsing declaration of class '{ClassName}', phase two");
 
@@ -167,7 +167,7 @@ internal partial class ClassDeclarationParser
         ParsingContext ParsingContext = new()
         {
             ClassDeclarationList = new List<ClassDeclarationSyntax>(),
-            ClassName = string.Empty,
+            ClassName = ClassName.Empty,
             SemanticModel = SemanticModel,
             HostMethod = method,
             LocationContext = LocationContext,
@@ -533,8 +533,8 @@ internal partial class ClassDeclarationParser
         if (VariableType.IsSimple)
             return false;
 
-        string ClassName = VariableType.Name;
-        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+        ClassName ClassName = VariableType.TypeName;
+        Dictionary<ClassName, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
         Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
 
@@ -568,10 +568,11 @@ internal partial class ClassDeclarationParser
             if (NamePath.Count == 2)
             {
                 string LeftName = NamePath[0];
+                ClassName ClassName = ClassName.FromSimpleString(LeftName);
 
-                if (parsingContext.SemanticModel.Phase1ClassModelTable.ContainsKey(LeftName))
+                if (parsingContext.SemanticModel.Phase1ClassModelTable.ContainsKey(ClassName))
                 {
-                    classModel = (ClassModel)parsingContext.SemanticModel.Phase1ClassModelTable[LeftName];
+                    classModel = (ClassModel)parsingContext.SemanticModel.Phase1ClassModelTable[ClassName];
                     lastName = NamePath.Last();
                     return true;
                 }
@@ -642,7 +643,7 @@ internal partial class ClassDeclarationParser
 
         if (!VariableType.IsSimple)
         {
-            classModel = GetClassModel(parsingContext, VariableType.Name);
+            classModel = GetClassModel(parsingContext, VariableType.TypeName);
             return true;
         }
 
@@ -650,9 +651,9 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    public static ClassModel GetClassModel(ParsingContext parsingContext, string className)
+    public static ClassModel GetClassModel(ParsingContext parsingContext, ClassName className)
     {
-        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+        Dictionary<ClassName, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
         Debug.Assert(Phase1ClassModelTable.ContainsKey(className));
 

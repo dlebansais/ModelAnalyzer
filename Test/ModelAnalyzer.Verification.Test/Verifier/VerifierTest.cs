@@ -19,11 +19,11 @@ public partial class VerifierTest
     [Category("Verification")]
     public void Verifier_BasicTest()
     {
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
@@ -39,7 +39,7 @@ public partial class VerifierTest
         {
             MaxDepth = 0,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
@@ -59,11 +59,11 @@ public partial class VerifierTest
     [Category("Verification")]
     public void Verifier_EmptyDepth1()
     {
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = ReadOnlyMethodTable.Empty,
@@ -79,7 +79,7 @@ public partial class VerifierTest
         {
             MaxDepth = 1,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,

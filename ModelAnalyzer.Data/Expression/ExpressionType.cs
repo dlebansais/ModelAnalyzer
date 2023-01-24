@@ -7,55 +7,55 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents the type of an expression.
 /// </summary>
-[DebuggerDisplay("\"{Name, nq}{(IsNullable ? \"?\" : \"\"), nq}\"")]
+[DebuggerDisplay("\"{TypeName, nq}{(IsNullable ? \"?\" : \"\"), nq}\"")]
 public record ExpressionType
 {
     /// <summary>
     /// Gets the 'Other' type.
     /// </summary>
-    public static ExpressionType Other { get; } = new(string.Empty, isNullable: false);
+    public static ExpressionType Other { get; } = new(ClassName.Empty, isNullable: false);
 
     /// <summary>
     /// Gets the 'Void' type.
     /// </summary>
-    public static ExpressionType Void { get; } = new("void", isNullable: false);
+    public static ExpressionType Void { get; } = new(ClassName.FromSimpleString("void"), isNullable: false);
 
     /// <summary>
     /// Gets the 'Boolean' type.
     /// </summary>
-    public static ExpressionType Boolean { get; } = new("bool", isNullable: false);
+    public static ExpressionType Boolean { get; } = new(ClassName.FromSimpleString("bool"), isNullable: false);
 
     /// <summary>
     /// Gets the 'Integer' type.
     /// </summary>
-    public static ExpressionType Integer { get; } = new("int", isNullable: false);
+    public static ExpressionType Integer { get; } = new(ClassName.FromSimpleString("int"), isNullable: false);
 
     /// <summary>
     /// Gets the 'FloatingPoint' type.
     /// </summary>
-    public static ExpressionType FloatingPoint { get; } = new("double", isNullable: false);
+    public static ExpressionType FloatingPoint { get; } = new(ClassName.FromSimpleString("double"), isNullable: false);
 
     /// <summary>
     /// Gets the 'Null' type.
     /// </summary>
-    public static ExpressionType Null { get; } = new(string.Empty, isNullable: true);
+    public static ExpressionType Null { get; } = new(ClassName.Empty, isNullable: true);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExpressionType"/> class.
     /// </summary>
-    /// <param name="name">The type name.</param>
+    /// <param name="typeName">The type name.</param>
     /// <param name="isNullable">Whether the type can have value 'null'.</param>
     [JsonConstructor]
-    public ExpressionType(string name, bool isNullable)
+    public ExpressionType(ClassName typeName, bool isNullable)
     {
-        Name = name;
+        TypeName = typeName;
         IsNullable = isNullable;
     }
 
     /// <summary>
     /// Gets the friendly type name.
     /// </summary>
-    public string Name { get; }
+    public ClassName TypeName { get; }
 
     /// <summary>
     /// Gets a value indicating whether the type can have value 'null'.

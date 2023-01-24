@@ -502,7 +502,7 @@ class Program_CoreLocal_21
         ILocal FirstLocal = Locals.First();
 
         Assert.That(FirstLocal.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstLocal.Type.Name, Is.EqualTo("Program_CoreLocal_20"));
+        Assert.That(FirstLocal.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreLocal_20")));
         Assert.That(FirstLocal.Type.IsNullable, Is.False);
 
         string? ClassModelString = ClassModel1.ToString();
@@ -557,7 +557,7 @@ class Program_CoreLocal_23
         ILocal FirstLocal = Locals.First();
 
         Assert.That(FirstLocal.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstLocal.Type.Name, Is.EqualTo("Program_CoreLocal_22"));
+        Assert.That(FirstLocal.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreLocal_22")));
         Assert.That(FirstLocal.Type.IsNullable, Is.True);
 
         string? ClassModelString = ClassModel1.ToString();

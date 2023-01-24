@@ -605,7 +605,7 @@ class Program_CoreProperty_27
         IProperty FirstProperty = Properties.First();
 
         Assert.That(FirstProperty.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstProperty.Type.Name, Is.EqualTo("Program_CoreProperty_26"));
+        Assert.That(FirstProperty.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreProperty_26")));
         Assert.That(FirstProperty.Type.IsNullable, Is.False);
 
         string? ClassModelString = ClassModel1.ToString();
@@ -649,7 +649,7 @@ class Program_CoreProperty_29
         IProperty FirstProperty = Properties.First();
 
         Assert.That(FirstProperty.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstProperty.Type.Name, Is.EqualTo("Program_CoreProperty_28"));
+        Assert.That(FirstProperty.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreProperty_28")));
         Assert.That(FirstProperty.Type.IsNullable, Is.True);
 
         string? ClassModelString = ClassModel1.ToString();

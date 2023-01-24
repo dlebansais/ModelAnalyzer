@@ -304,7 +304,7 @@ internal partial class ClassDeclarationParser
     {
         Method HostMethod = parsingContext.HostMethod!;
         ReadOnlyMethodTable MethodTable = callTarget is null ? parsingContext.MethodTable.AsReadOnly() : callTarget.MethodTable;
-        bool IsTargetSelf = callTarget is null || callTarget.Name == parsingContext.ClassName;
+        bool IsTargetSelf = callTarget is null || callTarget.ClassName == parsingContext.ClassName;
 
         location = methodCall.NameLocation;
 
@@ -364,7 +364,7 @@ internal partial class ClassDeclarationParser
     {
         Method? HostMethod = parsingContext.HostMethod;
         ReadOnlyMethodTable MethodTable = callTarget is null ? parsingContext.MethodTable.AsReadOnly() : callTarget.MethodTable;
-        bool IsTargetSelf = callTarget is null || callTarget.Name == parsingContext.ClassName;
+        bool IsTargetSelf = callTarget is null || callTarget.ClassName == parsingContext.ClassName;
 
         location = functionCall.NameLocation;
 

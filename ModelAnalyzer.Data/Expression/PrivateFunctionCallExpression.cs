@@ -21,7 +21,7 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     }
 
     /// <inheritdoc/>
-    required public string? ClassName { get; init; }
+    required public ClassName? ClassName { get; init; }
 
     /// <inheritdoc/>
     required public MethodName Name { get; init; }

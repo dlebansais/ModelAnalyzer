@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 internal static class Preloaded
 {
     private const string MathSqrt = @"{
-  ""Name"": ""Math"",
+  ""ClassName"": ""Math"",
   ""Methods"": [
     {
       ""Name"": ""Sqrt"",
@@ -40,9 +40,9 @@ internal static class Preloaded
     /// <summary>
     /// Gets the table of preloaded classes.
     /// </summary>
-    public static Dictionary<string, ClassModel> GetClasses()
+    public static ClassModelTable GetClasses()
     {
-        Dictionary<string, ClassModel> PreloadedClasses = new();
+        ClassModelTable PreloadedClasses = new();
 
         string[] StoredJsonClasses = new string[]
         {
@@ -52,7 +52,7 @@ internal static class Preloaded
         foreach (string JsonString in StoredJsonClasses)
         {
             ClassModel ClassModel = JsonStringToClassModel(JsonString);
-            PreloadedClasses.Add(ClassModel.Name, ClassModel);
+            PreloadedClasses.Add(ClassModel.ClassName, ClassModel);
         }
 
         return PreloadedClasses;
@@ -76,7 +76,10 @@ internal static class Preloaded
     /// <param name="jsonString">The string in JSON format.</param>
     private static PreloadedClassModel JsonStringToPreloadedClassModel(string jsonString)
     {
-        PreloadedClassModel? PreloadedClassModel = JsonConvert.DeserializeObject<PreloadedClassModel>(jsonString);
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+        Settings.Converters.Add(new ClassNameConverter());
+
+        PreloadedClassModel? PreloadedClassModel = JsonConvert.DeserializeObject<PreloadedClassModel>(jsonString, Settings);
 
         Debug.Assert(PreloadedClassModel is not null);
 
@@ -93,13 +96,13 @@ internal static class Preloaded
 
         foreach (PreloadedMethod Item in preloadedClassModel.Methods)
         {
-            Method NewMethod = CreateMethod(preloadedClassModel.Name, Item);
+            Method NewMethod = CreateMethod(preloadedClassModel.ClassName, Item);
             NewMethodTable.AddItem(NewMethod);
         }
 
         ClassModel NewClassModel = new()
         {
-            Name = preloadedClassModel.Name,
+            ClassName = preloadedClassModel.ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = ReadOnlyFieldTable.Empty,
             MethodTable = NewMethodTable.AsReadOnly(),
@@ -119,7 +122,7 @@ internal static class Preloaded
     /// </summary>
     /// <param name="className">The name of the class containing the method.</param>
     /// <param name="preloadedMethod">The preloaded method.</param>
-    private static Method CreateMethod(string className, PreloadedMethod preloadedMethod)
+    private static Method CreateMethod(ClassName className, PreloadedMethod preloadedMethod)
     {
         ParameterTable ParameterTable = new();
 

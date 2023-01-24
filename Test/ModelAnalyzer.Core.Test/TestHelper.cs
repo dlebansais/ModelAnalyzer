@@ -105,7 +105,7 @@ internal class TestHelper
 
         tokenReplacement.Restore();
 
-        Manager.RemoveMissingClasses(new List<string>());
+        Manager.RemoveMissingClasses(new List<ClassName>());
 
         return ClassModelList;
     }

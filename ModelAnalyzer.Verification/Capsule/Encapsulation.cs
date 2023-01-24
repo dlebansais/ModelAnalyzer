@@ -25,7 +25,7 @@ internal static class Encapsulation
         }
     }
 
-    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, string className, int index)
+    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, ClassName className, int index)
     {
         return new RefExprCapsule() { Item = expr, ClassName = className, Index = index };
     }

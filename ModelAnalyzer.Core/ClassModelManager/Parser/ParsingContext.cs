@@ -16,7 +16,7 @@ internal record ParsingContext
     /// <summary>
     /// Gets the name of the parsed class.
     /// </summary>
-    required public string ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <summary>
     /// Gets the semantic model.

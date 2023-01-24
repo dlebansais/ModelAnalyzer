@@ -61,8 +61,7 @@ before_test:
     printf "call runtests.bat Verification\n" >> runtests1.bat
   - |-
     printf "call runtests.bat Core\n" > runtests2.bat
-    printf "set\n" >> runtests2.bat
-    printf "dir \%\%TMP\%\%\n" >> runtests2.bat
+    printf "dir C:/Users/appveyor/AppData/Local/Temp/1\n" >> runtests2.bat
   - |-
     printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:\x25\x31 -filter:""+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*"" -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
 

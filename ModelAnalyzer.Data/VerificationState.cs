@@ -20,5 +20,5 @@ internal partial record VerificationState
     /// <summary>
     /// Gets the verification result.
     /// </summary>
-    required public Dictionary<string, VerificationResult> VerificationResultTable { get; init; }
+    required public Dictionary<ClassName, VerificationResult> VerificationResultTable { get; init; }
 }

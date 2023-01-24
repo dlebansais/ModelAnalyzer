@@ -384,7 +384,7 @@ class Program_CoreField_16
         IField FirstField = Fields.First();
 
         Assert.That(FirstField.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstField.Type.Name, Is.EqualTo("Program_CoreField_15"));
+        Assert.That(FirstField.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreField_15")));
         Assert.That(FirstField.Type.IsNullable, Is.True);
 
         string? ClassModelString = ClassModel1.ToString();
@@ -428,7 +428,7 @@ class Program_CoreField_18
         IField FirstField = Fields.First();
 
         Assert.That(FirstField.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstField.Type.Name, Is.EqualTo("Program_CoreField_17"));
+        Assert.That(FirstField.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreField_17")));
         Assert.That(FirstField.Type.IsNullable, Is.False);
 
         string? ClassModelString = ClassModel1.ToString();
@@ -472,7 +472,7 @@ class Program_CoreField_20
         IField FirstField = Fields.First();
 
         Assert.That(FirstField.Name.Text, Is.EqualTo("X"));
-        Assert.That(FirstField.Type.Name, Is.EqualTo("Program_CoreField_19"));
+        Assert.That(FirstField.Type.TypeName, Is.EqualTo(ClassName.FromSimpleString("Program_CoreField_19")));
         Assert.That(FirstField.Type.IsNullable, Is.True);
 
         string? ClassModelString = ClassModel1.ToString();

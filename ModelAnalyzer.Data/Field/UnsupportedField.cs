@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported field.
@@ -11,6 +12,7 @@ internal class UnsupportedField : IUnsupportedField
     required public IVariableName Name { get; init; }
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 
     /// <inheritdoc/>

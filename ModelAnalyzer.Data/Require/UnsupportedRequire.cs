@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported requirement.
@@ -11,5 +12,6 @@ internal class UnsupportedRequire : IUnsupportedRequire
     required public string Text { get; init; }
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 }

@@ -11,7 +11,7 @@ internal partial record ModelExchange
     /// <summary>
     /// Gets the class models.
     /// </summary>
-    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+    required public ClassModelTable ClassModelTable { get; init; }
 
     /// <summary>
     /// Gets the recive channel guid.

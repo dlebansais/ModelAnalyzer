@@ -44,12 +44,12 @@ internal partial class Verifier : IDisposable
     /// <summary>
     /// Gets the class models.
     /// </summary>
-    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+    required public ClassModelTable ClassModelTable { get; init; }
 
     /// <summary>
     /// Gets the class name.
     /// </summary>
-    required public string ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <summary>
     /// Gets the property table.
@@ -211,7 +211,7 @@ internal partial class Verifier : IDisposable
     {
         bool Result = true;
         Instance Instance = verificationContext.Instance;
-        string ClassName = Instance.ClassModel.Name;
+        ClassName ClassName = Instance.ClassModel.ClassName;
         IReadOnlyList<Invariant> InvariantList = Instance.ClassModel.InvariantList;
 
         Log($"Invariant for class {ClassName}");
@@ -446,12 +446,12 @@ internal partial class Verifier : IDisposable
         IVariable LastVariable = variablePath.Last();
         ExpressionType VariableType = LastVariable.Type;
 
-        return GetClassModel(verificationContext, VariableType.Name);
+        return GetClassModel(verificationContext, VariableType.TypeName);
     }
 
-    public static ClassModel GetClassModel(VerificationContext verificationContext, string className)
+    public static ClassModel GetClassModel(VerificationContext verificationContext, ClassName className)
     {
-        Dictionary<string, ClassModel> ClassModelTable = verificationContext.ClassModelTable;
+        ClassModelTable ClassModelTable = verificationContext.ClassModelTable;
 
         Debug.Assert(ClassModelTable.ContainsKey(className));
 

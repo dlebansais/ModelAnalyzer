@@ -10,7 +10,7 @@ public interface IClassModel
     /// <summary>
     /// Gets the class name.
     /// </summary>
-    string Name { get; }
+    ClassName ClassName { get; }
 
     /// <summary>
     /// Gets the list of properties.

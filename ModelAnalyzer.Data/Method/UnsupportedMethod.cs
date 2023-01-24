@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported method.
@@ -15,6 +16,7 @@ internal class UnsupportedMethod : IUnsupportedMethod
     public ExpressionType ReturnType => ExpressionType.Other;
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 
     /// <inheritdoc/>

@@ -16,7 +16,7 @@ internal record VerificationContext
     /// <summary>
     /// Gets the class models.
     /// </summary>
-    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+    required public ClassModelTable ClassModelTable { get; init; }
 
     /// <summary>
     /// Gets the object manager.

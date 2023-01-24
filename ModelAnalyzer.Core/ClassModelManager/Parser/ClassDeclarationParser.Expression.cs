@@ -314,8 +314,8 @@ internal partial class ClassDeclarationParser
     {
         MethodName FunctionName = new() { Text = identifierName.Identifier.ValueText };
         ExpressionType ReturnType = ExpressionType.Other;
-        string ClassName = parsingContext.ClassName;
-        Dictionary<string, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
+        ClassName ClassName = parsingContext.ClassName;
+        Dictionary<ClassName, IClassModel> Phase1ClassModelTable = parsingContext.SemanticModel.Phase1ClassModelTable;
 
         Debug.Assert(Phase1ClassModelTable.ContainsKey(ClassName));
         ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[ClassName];
@@ -355,7 +355,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
             {
-                NewExpression = new PublicFunctionCallExpression { ClassName = ClassModel.Name, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewExpression = new PublicFunctionCallExpression { ClassName = ClassModel.ClassName, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
             }
         }

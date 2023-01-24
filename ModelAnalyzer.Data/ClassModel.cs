@@ -8,7 +8,7 @@ using System.Collections.Generic;
 internal partial record ClassModel : IClassModel
 {
     /// <inheritdoc/>
-    required public string Name { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <summary>
     /// Gets the property table.

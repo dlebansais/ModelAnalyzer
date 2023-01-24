@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported parameter.
@@ -11,6 +12,7 @@ internal class UnsupportedParameter : IUnsupportedParameter
     public IVariableName Name => new ParameterName() { Text = "*" };
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 
     /// <inheritdoc/>

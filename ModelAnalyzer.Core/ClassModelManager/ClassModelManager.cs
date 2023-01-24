@@ -34,9 +34,9 @@ public partial class ClassModelManager : IDisposable
         Extractor.Extract();
         VerificationState VerificationState = new()
         {
-            ModelExchange = new ModelExchange() { ClassModelTable = new Dictionary<string, ClassModel>(), ReceiveChannelGuid = receiveChannelGuid },
+            ModelExchange = new ModelExchange() { ClassModelTable = new ClassModelTable(), ReceiveChannelGuid = receiveChannelGuid },
             IsVerificationRequestSent = false,
-            VerificationResultTable = new Dictionary<string, VerificationResult>(),
+            VerificationResultTable = new Dictionary<ClassName, VerificationResult>(),
         };
 
         Context = new SynchronizedVerificationContext() { VerificationState = VerificationState };
@@ -141,19 +141,19 @@ public partial class ClassModelManager : IDisposable
     /// Removes classes that no longer exist.
     /// </summary>
     /// <param name="existingClassList">The list of existing classes.</param>
-    public void RemoveMissingClasses(List<string> existingClassList)
+    public void RemoveMissingClasses(List<ClassName> existingClassList)
     {
         Log("Cleaning up classes that no longer exist.");
 
         lock (Context.Lock)
         {
-            List<string> ToRemoveClassList = new();
+            List<ClassName> ToRemoveClassList = new();
 
-            foreach (string ClassName in Context.GetClassModelNameList())
+            foreach (ClassName ClassName in Context.GetClassModelNameList())
                 if (!existingClassList.Contains(ClassName))
                     ToRemoveClassList.Add(ClassName);
 
-            foreach (string ClassName in ToRemoveClassList)
+            foreach (ClassName ClassName in ToRemoveClassList)
             {
                 Log($"Removing class '{ClassName}'.");
 
@@ -172,15 +172,15 @@ public partial class ClassModelManager : IDisposable
 
             // Compare this compilation context with the previous one. They will be different if their hash code is not the same, or if the new context is an asynchronous request.
             bool IsNewCompilationContext = !Context.LastCompilationContext.IsCompatibleWith(compilationContext);
-            bool ClassModelAlreadyExistForAll = classDeclarationList.TrueForAll(classDeclaration => Context.ContainsClass(classDeclaration.Identifier.ValueText));
+            bool ClassModelAlreadyExistForAll = classDeclarationList.TrueForAll(classDeclaration => Context.ContainsClass(semanticModel.ClassDeclarationToClassName(classDeclaration)));
 
             if (IsNewCompilationContext || !ClassModelAlreadyExistForAll)
             {
                 VerificationState OldVerificationState = Context.VerificationState;
                 ModelExchange OldClassModelExchange = OldVerificationState.ModelExchange;
-                Dictionary<string, IClassModel> Phase1ClassModelTable = new();
-                Dictionary<string, ClassModel> OldClassModelTable = OldClassModelExchange.ClassModelTable;
-                Dictionary<string, ClassModel> NewClassModelTable = new();
+                Dictionary<ClassName, IClassModel> Phase1ClassModelTable = new();
+                ClassModelTable OldClassModelTable = OldClassModelExchange.ClassModelTable;
+                ClassModelTable NewClassModelTable = new();
 
                 ParsePhase1(Phase1ClassModelTable, classDeclarationList, semanticModel);
                 semanticModel.Phase1ClassModelTable = Phase1ClassModelTable;
@@ -197,7 +197,7 @@ public partial class ClassModelManager : IDisposable
                 {
                     ModelExchange = NewClassModelExchange,
                     IsVerificationRequestSent = false,
-                    VerificationResultTable = new Dictionary<string, VerificationResult>(),
+                    VerificationResultTable = new Dictionary<ClassName, VerificationResult>(),
                 };
 
                 Context.VerificationState = NewVerificationState;
@@ -207,13 +207,13 @@ public partial class ClassModelManager : IDisposable
             }
             else
             {
-                Dictionary<string, ClassModel> ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
+                ClassModelTable ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
 
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                 {
-                    string ClassName = ClassDeclaration.Identifier.ValueText;
+                    ClassName ClassName = semanticModel.ClassDeclarationToClassName(ClassDeclaration);
 
-                    Debug.Assert(ClassName != string.Empty);
+                    Debug.Assert(ClassName != ClassName.Empty);
                     Debug.Assert(ClassModelTable.ContainsKey(ClassName));
 
                     ClassDeclarationModelTable.Add(ClassDeclaration, ClassModelTable[ClassName]);
@@ -226,30 +226,30 @@ public partial class ClassModelManager : IDisposable
         return ClassDeclarationModelTable;
     }
 
-    private void ParsePhase1(Dictionary<string, IClassModel> phase1ClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
+    private void ParsePhase1(Dictionary<ClassName, IClassModel> phase1ClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
-        Dictionary<string, ClassModel> PreloadedClasses = GetPreloadedClasses();
-        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+        ClassModelTable PreloadedClasses = GetPreloadedClasses();
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in PreloadedClasses)
             phase1ClassModelTable.Add(Entry.Key, Entry.Value);
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
             ClassModel NewClassModel = ParseClassModelPhase1(classDeclarationList, ClassDeclaration, semanticModel);
-            phase1ClassModelTable.Add(NewClassModel.Name, NewClassModel);
+            phase1ClassModelTable.Add(NewClassModel.ClassName, NewClassModel);
         }
     }
 
     private ClassModel ParseClassModelPhase1(List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
     {
-        string ClassName = classDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
+        ClassName ClassName = semanticModel.ClassDeclarationToClassName(classDeclaration);
+        Debug.Assert(ClassName != ClassName.Empty);
 
         ClassDeclarationParser Parser = new(classDeclarationList, classDeclaration, semanticModel) { Logger = Logger };
         Parser.ParsePhase1();
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = Parser.PropertyTable,
             FieldTable = Parser.FieldTable,
             MethodTable = Parser.MethodTable,
@@ -264,10 +264,10 @@ public partial class ClassModelManager : IDisposable
         return ClassModel;
     }
 
-    private void ParsePhase2(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, Dictionary<ClassDeclarationSyntax, IClassModel> classDeclarationModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
+    private void ParsePhase2(ClassModelTable oldClassModelTable, ClassModelTable newClassModelTable, Dictionary<ClassDeclarationSyntax, IClassModel> classDeclarationModelTable, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
-        Dictionary<string, ClassModel> PreloadedClasses = GetPreloadedClasses();
-        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+        ClassModelTable PreloadedClasses = GetPreloadedClasses();
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in PreloadedClasses)
             newClassModelTable.Add(Entry.Key, Entry.Value);
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
@@ -277,10 +277,10 @@ public partial class ClassModelManager : IDisposable
         }
     }
 
-    private ClassModel AddOrUpdateClassModelPhase2(Dictionary<string, ClassModel> oldClassModelTable, Dictionary<string, ClassModel> newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
+    private ClassModel AddOrUpdateClassModelPhase2(ClassModelTable oldClassModelTable, ClassModelTable newClassModelTable, List<ClassDeclarationSyntax> classDeclarationList, ClassDeclarationSyntax classDeclaration, IModel semanticModel)
     {
-        string ClassName = classDeclaration.Identifier.ValueText;
-        Debug.Assert(ClassName != string.Empty);
+        ClassName ClassName = semanticModel.ClassDeclarationToClassName(classDeclaration);
+        Debug.Assert(ClassName != ClassName.Empty);
 
         ClassDeclarationParser Parser = new(classDeclarationList, classDeclaration, semanticModel) { Logger = Logger };
         Parser.ParsePhase2();
@@ -308,7 +308,7 @@ public partial class ClassModelManager : IDisposable
 
             NewClassModel = new ClassModel()
             {
-                Name = ClassName,
+                ClassName = ClassName,
                 PropertyTable = Parser.PropertyTable,
                 FieldTable = Parser.FieldTable,
                 MethodTable = Parser.MethodTable,
@@ -326,17 +326,17 @@ public partial class ClassModelManager : IDisposable
         return NewClassModel;
     }
 
-    private Dictionary<string, ClassModel> GetPreloadedClasses()
+    private ClassModelTable GetPreloadedClasses()
     {
-        Dictionary<string, ClassModel> PreloadedClasses = Preloaded.GetClasses();
-        Dictionary<string, ClassModel> Result = new();
+        ClassModelTable PreloadedClasses = Preloaded.GetClasses();
+        ClassModelTable Result = new();
 
-        foreach (KeyValuePair<string, ClassModel> Entry in PreloadedClasses)
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in PreloadedClasses)
         {
             ClassModel ClassModel = Entry.Value;
             FixPreloadedClassModelClauses(ClassModel);
 
-            Result.Add(ClassModel.Name, ClassModel);
+            Result.Add(ClassModel.ClassName, ClassModel);
         }
 
         return Result;
@@ -395,7 +395,7 @@ public partial class ClassModelManager : IDisposable
     private Expression PreloadedClauseTextToExpression(ClassModel classModel, Method method, string text)
     {
         MadeUpSemanticModel SemanticModel = new();
-        SemanticModel.Phase1ClassModelTable.Add(classModel.Name, classModel);
+        SemanticModel.Phase1ClassModelTable.Add(classModel.ClassName, classModel);
 
         ClassDeclarationParser Parser = new(new List<ClassDeclarationSyntax>(), null!, SemanticModel);
         Expression? Expression = Parser.ParseAssertionText(method, text);
@@ -405,21 +405,21 @@ public partial class ClassModelManager : IDisposable
         return Expression!;
     }
 
-    private void ReportCyclicReferences(Dictionary<string, ClassModel> classModelTable)
+    private void ReportCyclicReferences(ClassModelTable classModelTable)
     {
-        foreach (KeyValuePair<string, ClassModel> Entry in classModelTable)
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in classModelTable)
             if (IsCycleDetected(classModelTable, Entry.Value))
                 break;
     }
 
-    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, ClassModel classModel)
+    private bool IsCycleDetected(ClassModelTable classModelTable, ClassModel classModel)
     {
-        List<string> VisitedClasses = new() { classModel.Name };
+        List<ClassName> VisitedClasses = new() { classModel.ClassName };
 
         return IsCycleDetected(classModelTable, VisitedClasses, classModel);
     }
 
-    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, List<string> visitedClasses, ClassModel classModel)
+    private bool IsCycleDetected(ClassModelTable classModelTable, List<ClassName> visitedClasses, ClassModel classModel)
     {
         if (!classModel.Unsupported.IsEmpty)
             return false;
@@ -462,11 +462,11 @@ public partial class ClassModelManager : IDisposable
         return false;
     }
 
-    private bool IsCycleDetected(Dictionary<string, ClassModel> classModelTable, List<string> visitedClasses, ClassModel classModel, ExpressionType variableType)
+    private bool IsCycleDetected(ClassModelTable classModelTable, List<ClassName> visitedClasses, ClassModel classModel, ExpressionType variableType)
     {
         if (!variableType.IsSimple)
         {
-            string VisitedClassName = variableType.Name;
+            ClassName VisitedClassName = variableType.TypeName;
             if (visitedClasses.Contains(VisitedClassName))
             {
                 classModel.Unsupported.IsPartOfCycle = true;
@@ -476,7 +476,7 @@ public partial class ClassModelManager : IDisposable
             Debug.Assert(classModelTable.ContainsKey(VisitedClassName));
 
             ClassModel VisitedClassModel = classModelTable[VisitedClassName];
-            List<string> NewVisitedClasses = new();
+            List<ClassName> NewVisitedClasses = new();
             NewVisitedClasses.AddRange(visitedClasses);
             NewVisitedClasses.Add(VisitedClassName);
 

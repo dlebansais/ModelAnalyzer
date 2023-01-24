@@ -80,7 +80,7 @@ public class ClassModelAnalyzer : DiagnosticAnalyzer
         if (classModel.Unsupported.IsEmpty)
             return;
 
-        Logger.Log(LogLevel.Warning, $"Class '{classModel.Name}': reporting unsupported elements.");
+        Logger.Log(LogLevel.Warning, $"Class '{classModel.ClassName}': reporting unsupported elements.");
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(), classDeclaration.Identifier.ValueText));
     }
 }

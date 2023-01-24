@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents an unsupported local variable.
@@ -11,6 +12,7 @@ internal class UnsupportedLocal : IUnsupportedLocal
     public IVariableName Name => new LocalName() { Text = "*" };
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 
     /// <inheritdoc/>

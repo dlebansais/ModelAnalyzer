@@ -83,10 +83,14 @@ internal class Program
 
     private static void ProcessData(byte[] data)
     {
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto };
+        Settings.Converters.Add(new ClassNameConverter());
+        Settings.Converters.Add(new ClassModelTableConverter());
+
         int Offset = 0;
         while (Converter.TryDecodeString(data, ref Offset, out string JsonString))
         {
-            ModelExchange? ModelExchange = JsonConvert.DeserializeObject<ModelExchange>(JsonString, new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto });
+            ModelExchange? ModelExchange = JsonConvert.DeserializeObject<ModelExchange>(JsonString, Settings);
             if (ModelExchange is not null)
             {
                 Log($"Class model list decoded");
@@ -99,7 +103,7 @@ internal class Program
     {
         List<VerificationResult> VerificationResultList = new();
 
-        foreach (KeyValuePair<string, ClassModel> Entry in modelExchange.ClassModelTable)
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in modelExchange.ClassModelTable)
         {
             ClassModel ClassModel = Entry.Value;
 
@@ -112,9 +116,9 @@ internal class Program
             SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
     }
 
-    private static VerificationResult ProcessClassModel(Dictionary<string, ClassModel> classModelTable, ClassModel classModel)
+    private static VerificationResult ProcessClassModel(ClassModelTable classModelTable, ClassModel classModel)
     {
-        string ClassName = classModel.Name;
+        ClassName ClassName = classModel.ClassName;
         VerificationResult VerificationResult;
 
         try
@@ -155,7 +159,11 @@ internal class Program
         {
             Log($"Client channel opened");
 
-            string JsonString = JsonConvert.SerializeObject(verificationResult, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+            JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+            Settings.Converters.Add(new ClassNameConverter());
+            Settings.Converters.Add(new ClassModelTableConverter());
+
+            string JsonString = JsonConvert.SerializeObject(verificationResult, Settings);
             byte[] EncodedString = Converter.EncodeString(JsonString);
 
             if (EncodedString.Length <= ToClientChannel.GetFreeLength())

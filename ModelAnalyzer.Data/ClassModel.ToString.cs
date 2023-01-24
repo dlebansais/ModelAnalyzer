@@ -25,7 +25,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendClassName(StringBuilder builder)
     {
-        builder.AppendLine(Name);
+        builder.AppendLine(ClassName.Text);
     }
 
     private void AppendProperties(StringBuilder builder)
@@ -237,7 +237,7 @@ internal partial record ClassModel : IClassModel
         List<string> NamePath;
 
         if (statement.ClassName is not null)
-            NamePath = new List<string>() { statement.ClassName };
+            NamePath = statement.ClassName.ToNamePath();
         else
             NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);
 
@@ -274,7 +274,7 @@ internal partial record ClassModel : IClassModel
     {
         Debug.Assert(expressionType != ExpressionType.Other);
 
-        string NameString = expressionType.Name;
+        string NameString = expressionType.TypeName.ToString();
         string NullableString = expressionType.IsNullable ? "?" : string.Empty;
 
         return $"{NameString}{NullableString}";

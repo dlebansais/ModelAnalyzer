@@ -166,7 +166,7 @@ public partial class VerifierTest
         TExpression Zero = new() { Value = invariantTestValue };
         TExpression AssignmentSource = new() { Value = assignmentValue };
 
-        string ClassName = "Test";
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
         Field TestField = new()
         {
@@ -220,7 +220,7 @@ public partial class VerifierTest
 
         ClassModel ClassModel = new ClassModel()
         {
-            Name = ClassName,
+            ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),
             MethodTable = MethodTable.AsReadOnly(),
@@ -236,7 +236,7 @@ public partial class VerifierTest
         {
             MaxDepth = maxDepth,
             MaxDuration = TimeSpan.MaxValue,
-            ClassModelTable = new Dictionary<string, ClassModel>() { { ClassName, ClassModel } },
+            ClassModelTable = new ClassModelTable() { { ClassName, ClassModel } },
             ClassName = ClassName,
             PropertyTable = ReadOnlyPropertyTable.Empty,
             FieldTable = TestFieldTable.AsReadOnly(),

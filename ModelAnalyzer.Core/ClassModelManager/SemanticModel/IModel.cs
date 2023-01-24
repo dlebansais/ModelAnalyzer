@@ -24,7 +24,13 @@ public interface IModel
     bool GetClassType(IdentifierNameSyntax identifierName, List<ClassDeclarationSyntax> classDeclarationList, bool isNullable, out ExpressionType classType);
 
     /// <summary>
+    /// Gets the class name from a class declaration.
+    /// </summary>
+    /// <param name="classDeclaration">The class declaration.</param>
+    ClassName ClassDeclarationToClassName(ClassDeclarationSyntax classDeclaration);
+
+    /// <summary>
     /// Gets or sets the table of class models after the first phase or parsing.
     /// </summary>
-    Dictionary<string, IClassModel> Phase1ClassModelTable { get; set; }
+    Dictionary<ClassName, IClassModel> Phase1ClassModelTable { get; set; }
 }

@@ -17,7 +17,7 @@ internal class ObjectManager
     public ObjectManager(SolverContext context)
     {
         Context = context;
-        RootInstanceExpr = Context.CreateReferenceValue("this", 1);
+        RootInstanceExpr = Context.CreateReferenceValue(ClassName.FromSimpleString("this"), 1);
         ObjectIndex = 2;
     }
 
@@ -39,7 +39,7 @@ internal class ObjectManager
     /// <summary>
     /// Gets the class models.
     /// </summary>
-    required public Dictionary<string, ClassModel> ClassModelTable { get; init; }
+    required public ClassModelTable ClassModelTable { get; init; }
 
     /// <summary>
     /// Gets or sets the table of aliases.
@@ -196,10 +196,15 @@ internal class ObjectManager
             Result = CreateObjectInitializer(NewObject.ObjectType);
         else if (variableInitializer is LiteralNullExpression LiteralNull)
             Result = CreateNullInitializer(variableType);
-        else
+        else if (variableType.IsSimple)
         {
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType](variableInitializer);
+        }
+        else
+        {
+            Debug.Assert(variableInitializer is null);
+            Result = CreateNullInitializer(variableType);
         }
 
         return Result;
@@ -241,7 +246,7 @@ internal class ObjectManager
     public IExprSet<IExprCapsule> CreateObjectInitializer(ExpressionType expressionType)
     {
         ClassModel TypeClassModel = TypeToModel(expressionType);
-        IRefExprCapsule ReferenceResult = Context.CreateReferenceValue(TypeClassModel.Name, ObjectIndex++);
+        IRefExprCapsule ReferenceResult = Context.CreateReferenceValue(TypeClassModel.ClassName, ObjectIndex++);
 
         List<IExprSet<IExprCapsule>> VariableSetList = new();
 
@@ -299,7 +304,7 @@ internal class ObjectManager
     public IExprSet<IExprCapsule> CreateReferenceConstant(VariableAlias alias, ExpressionType variableType)
     {
         ClassModel ReferenceClassModel = TypeToModel(variableType);
-        IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(ReferenceClassModel.Name, alias.ToString());
+        IRefExprCapsule ReferenceResult = Context.CreateReferenceConstant(ReferenceClassModel.ClassName, alias.ToString());
         Instance Reference = new() { ClassModel = ReferenceClassModel, Expr = ReferenceResult };
         List<IExprSet<IExprCapsule>> VariableSetList = new();
 
@@ -369,8 +374,8 @@ internal class ObjectManager
 
         if (owner is not null)
         {
-            string ClassName = owner.Expr.ClassName;
-            Debug.Assert(ClassName != string.Empty);
+            ClassName ClassName = owner.Expr.ClassName;
+            Debug.Assert(ClassName != ClassName.Empty);
 
             string OwnerText = $"{ClassName}#{owner.Expr.Index}:${localName.Text}";
 
@@ -437,7 +442,7 @@ internal class ObjectManager
     {
         Debug.Assert(!type.IsSimple);
 
-        string ClassName = type.Name;
+        ClassName ClassName = type.TypeName;
 
         Debug.Assert(ClassModelTable.ContainsKey(ClassName));
 
