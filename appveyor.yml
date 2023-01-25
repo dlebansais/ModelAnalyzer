@@ -34,8 +34,8 @@ before_build:
   - echo Can restore this line by removing echo when fixed .\packages\CSharp-Format.%csharp-format_version%\lib\net48\CSharp-Format.exe --mode coverage
 
 configuration:
-  - Release
   - Debug
+  - Release
 
 build:
   project: $(APPVEYOR_PROJECT_NAME).sln
