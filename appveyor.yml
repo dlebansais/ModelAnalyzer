@@ -68,7 +68,7 @@ before_test:
     printf ":failed\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt""\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt""\n" >> runtests2.bat
-    printf "dir FOO\n" >> runtests2.bat
+    printf "copy FOO ""C:/""\n" >> runtests2.bat
     printf "goto end\n" >> runtests2.bat
     printf ":success\n" >> runtests2.bat
     printf "dir .\n" >> runtests2.bat
