@@ -13,9 +13,9 @@ public static class Timeouts
     public static readonly TimeSpan VerifierProcessLaunchTimeout = TimeSpan.FromSeconds(5);
 
     /// <summary>
-    /// The timeout waiting for verification acknowledge.
+    /// The timeout waiting for verification acknowledge. TODO: add an ack when there is no more incoming results, otherwise we always wait for the timeout even in case of success.
     /// </summary>
-    public static readonly TimeSpan VerificationAcknowledgeTimeout = TimeSpan.FromSeconds(30);
+    public static readonly TimeSpan VerificationAcknowledgeTimeout = TimeSpan.FromSeconds(10);
 
     /// <summary>
     /// The timeout waiting for new data to verify.

@@ -411,8 +411,9 @@ internal partial class Verifier : IDisposable
         {
             Log($"Violation of {AssertionType} for class {ClassName}");
 
-            string MethodName = HostMethod is not null ? HostMethod.Name.Text : string.Empty;
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = MethodName, ErrorIndex = index, ErrorText = text };
+            string AssertionMethodName = HostMethod is not null ? HostMethod.Name.Text : string.Empty;
+            ClassName AssertionClassName = HostMethod is not null ? HostMethod.ClassName : ClassName;
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = AssertionClassName, MethodName = AssertionMethodName, ErrorIndex = index, ErrorText = text };
 
             string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
             Log(ModelString);
