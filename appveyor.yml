@@ -61,7 +61,6 @@ before_test:
     printf "call runtests.bat Verification\n" >> runtests1.bat
   - |-
     printf "call runtests.bat Core\n" > runtests2.bat
-    printf "dir ""C:/Users/appveyor/AppData/Local/Temp/1""\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt""\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt""\n" >> runtests2.bat
   - |-
