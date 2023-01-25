@@ -64,16 +64,11 @@ before_test:
     printf "if ERRORLEVEL 1 goto failed\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt""\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt""\n" >> runtests2.bat
-    printf "goto success\n" >> runtests2.bat
+    printf "exit /b 0\n" >> runtests2.bat
     printf ":failed\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/analyzer.txt""\n" >> runtests2.bat
     printf "if exist ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt"" appveyor PushArtifact ""C:/Users/appveyor/AppData/Local/Temp/1/verifier.txt""\n" >> runtests2.bat
-    printf "copy FOO ""C:/""\n" >> runtests2.bat
-    printf "goto end\n" >> runtests2.bat
-    printf ":success\n" >> runtests2.bat
-    printf "dir .\n" >> runtests2.bat
-    printf "goto end\n" >> runtests2.bat
-    printf ":end\n" >> runtests2.bat
+    printf "exit /b 1\n" >> runtests2.bat
   - |-
     printf ".\packages\OpenCover.%opencover_version%\Tools\OpenCover.Console.exe -register:user -returntargetcode -target:\x25\x31 -filter:""+[%APPVEYOR_PROJECT_NAME%.Core]* +[%APPVEYOR_PROJECT_NAME%.Data]* +[%APPVEYOR_PROJECT_NAME%.Verification]*"" -mergeoutput -output:""Coverage-%APPVEYOR_PROJECT_NAME%"".xml\n" > opencover.bat
 
