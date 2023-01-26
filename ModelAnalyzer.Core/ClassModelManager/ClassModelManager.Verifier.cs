@@ -218,7 +218,10 @@ public partial class ClassModelManager : IDisposable
         Debug.Assert(ErrorIndex >= 0);
 
         if (ErrorIndex < InvariantList.Count)
-            InvariantViolations.Add(new InvariantViolation() { Invariant = InvariantList[ErrorIndex] });
+        {
+            InvariantViolation NewInvariantViolation = new() { Invariant = InvariantList[ErrorIndex] };
+            InvariantViolations.Add(NewInvariantViolation);
+        }
 
         return oldClassModel with { InvariantViolations = InvariantViolations.AsReadOnly() };
     }
@@ -232,7 +235,10 @@ public partial class ClassModelManager : IDisposable
         Debug.Assert(ErrorIndex >= 0);
 
         if (ErrorIndex < RequireList.Count)
-            RequireViolations.Add(new RequireViolation() { Method = method, Require = RequireList[ErrorIndex] });
+        {
+            RequireViolation NewRequireViolation = new() { Method = method, Require = RequireList[ErrorIndex] };
+            RequireViolations.Add(NewRequireViolation);
+        }
 
         return oldClassModel with { RequireViolations = RequireViolations.AsReadOnly() };
     }
@@ -246,7 +252,10 @@ public partial class ClassModelManager : IDisposable
         Debug.Assert(ErrorIndex >= 0);
 
         if (ErrorIndex < EnsureList.Count)
-            EnsureViolations.Add(new EnsureViolation() { Method = method, Ensure = EnsureList[ErrorIndex] });
+        {
+            EnsureViolation NewEnsureViolation = new() { Method = method, Ensure = EnsureList[ErrorIndex] };
+            EnsureViolations.Add(NewEnsureViolation);
+        }
 
         return oldClassModel with { EnsureViolations = EnsureViolations.AsReadOnly() };
     }
@@ -255,7 +264,7 @@ public partial class ClassModelManager : IDisposable
     {
         Debug.Assert(verificationResult.ErrorIndex < 0);
 
-        AssumeViolation NewViolation = new AssumeViolation() { Method = method, Text = verificationResult.ErrorText };
+        AssumeViolation NewViolation = new() { Method = method, Text = verificationResult.ErrorText };
         List<IAssumeViolation> AssumeViolations = new() { NewViolation };
 
         ClassModel NewModel = oldClassModel with { AssumeViolations = AssumeViolations.AsReadOnly() };

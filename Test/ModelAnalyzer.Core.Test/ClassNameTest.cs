@@ -59,6 +59,15 @@ public class ClassNameTest
         Assert.That(TestName1.Namespace[1], Is.EqualTo(NamespaceString1));
         Assert.That(TestName1.Text, Is.EqualTo(TestString));
         Assert.That(TestName1.ToString(), Is.EqualTo($"{NamespaceString0}.{NamespaceString1}.{TestString}"));
+
+        ClassName TestName2 = TestName0;
+
+        Assert.That(TestName0.Equals(TestName1), Is.False);
+        Assert.That(TestName0.Equals(TestName2), Is.True);
+        Assert.That(TestName0 == TestName1, Is.False);
+        Assert.That(TestName0 == TestName2, Is.True);
+        Assert.That(TestName0 != TestName1, Is.True);
+        Assert.That(TestName0 != TestName2, Is.False);
     }
 
     [Test]
