@@ -223,7 +223,9 @@ public partial class ClassModelManager : IDisposable
             InvariantViolations.Add(NewInvariantViolation);
         }
 
-        return oldClassModel with { InvariantViolations = InvariantViolations.AsReadOnly() };
+        ClassModel NewClassModel = oldClassModel with { InvariantViolations = InvariantViolations.AsReadOnly() };
+
+        return NewClassModel;
     }
 
     private static ClassModel WithFilledRequireViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
@@ -240,7 +242,9 @@ public partial class ClassModelManager : IDisposable
             RequireViolations.Add(NewRequireViolation);
         }
 
-        return oldClassModel with { RequireViolations = RequireViolations.AsReadOnly() };
+        ClassModel NewClassModel = oldClassModel with { RequireViolations = RequireViolations.AsReadOnly() };
+
+        return NewClassModel;
     }
 
     private static ClassModel WithFilledEnsureViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
@@ -257,7 +261,9 @@ public partial class ClassModelManager : IDisposable
             EnsureViolations.Add(NewEnsureViolation);
         }
 
-        return oldClassModel with { EnsureViolations = EnsureViolations.AsReadOnly() };
+        ClassModel NewClassModel = oldClassModel with { EnsureViolations = EnsureViolations.AsReadOnly() };
+
+        return NewClassModel;
     }
 
     private static ClassModel WithFilledAssumeViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method? method)
@@ -267,9 +273,9 @@ public partial class ClassModelManager : IDisposable
         AssumeViolation NewViolation = new() { Method = method, Text = verificationResult.ErrorText };
         List<IAssumeViolation> AssumeViolations = new() { NewViolation };
 
-        ClassModel NewModel = oldClassModel with { AssumeViolations = AssumeViolations.AsReadOnly() };
+        ClassModel NewClassModel = oldClassModel with { AssumeViolations = AssumeViolations.AsReadOnly() };
 
-        return NewModel;
+        return NewClassModel;
     }
 
     private void ScheduleAsynchronousVerification()
