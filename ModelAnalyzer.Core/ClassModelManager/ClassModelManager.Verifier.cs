@@ -54,35 +54,45 @@ public partial class ClassModelManager : IDisposable
 
         Thread.Sleep(DelayBeforeReadingVerificationResult);
 
-        TimeSpan Timeout = Timeouts.VerificationAcknowledgeTimeout;
         Stopwatch Watch = new();
         Watch.Start();
 
-        for (; ;)
+        while (!GetVerifiedModel(Watch, ref classModel))
         {
-            if (Watch.Elapsed >= Timeout)
-            {
-                Log($"Verification loop ended on timeout.");
-                return classModel;
-            }
-
-            CheckVerificationStatus(ClassName, out bool IsFound, out bool IsVerified, out IReadOnlyList<IInvariantViolation> InvariantViolations, out IReadOnlyList<IRequireViolation> RequireViolations, out IReadOnlyList<IEnsureViolation> EnsureViolations, out IReadOnlyList<IAssumeViolation> AssumeViolations);
-
-            if (!IsFound)
-            {
-                Log($"Class '{ClassName}' no longer in the list of models.");
-                return classModel;
-            }
-
-            if (IsVerified)
-            {
-                Log($"Verification loop completed, class {ClassName} verified, invariant violation: {InvariantViolations.Count}, require violation: {RequireViolations.Count}, ensure violation: {EnsureViolations.Count}, assume violation: {AssumeViolations.Count}.");
-                return ((ClassModel)classModel) with { InvariantViolations = InvariantViolations, RequireViolations = RequireViolations, EnsureViolations = EnsureViolations, AssumeViolations = AssumeViolations };
-            }
-
             UpdateVerificationEvents();
             Thread.Sleep(TimeSpan.FromMilliseconds(100));
         }
+
+        return classModel;
+    }
+
+    private bool GetVerifiedModel(Stopwatch watch, ref IClassModel classModel)
+    {
+        if (watch.Elapsed >= Timeouts.VerificationAcknowledgeTimeout)
+        {
+            Log($"Verification loop ended on timeout.");
+            return true;
+        }
+
+        ClassName ClassName = classModel.ClassName;
+
+        CheckVerificationStatus(ClassName, out bool IsFound, out bool IsVerified, out IReadOnlyList<IInvariantViolation> InvariantViolations, out IReadOnlyList<IRequireViolation> RequireViolations, out IReadOnlyList<IEnsureViolation> EnsureViolations, out IReadOnlyList<IAssumeViolation> AssumeViolations);
+
+        if (!IsFound)
+        {
+            Log($"Class '{ClassName}' no longer in the list of models.");
+            return true;
+        }
+
+        if (IsVerified)
+        {
+            Log($"Verification loop completed, class {ClassName} verified, invariant violation: {InvariantViolations.Count}, require violation: {RequireViolations.Count}, ensure violation: {EnsureViolations.Count}, assume violation: {AssumeViolations.Count}.");
+
+            classModel = ((ClassModel)classModel) with { InvariantViolations = InvariantViolations, RequireViolations = RequireViolations, EnsureViolations = EnsureViolations, AssumeViolations = AssumeViolations };
+            return true;
+        }
+
+        return false;
     }
 
     private void CheckVerificationStatus(ClassName className, out bool isFound, out bool isVerified, out IReadOnlyList<IInvariantViolation> invariantViolations, out IReadOnlyList<IRequireViolation> requireViolations, out IReadOnlyList<IEnsureViolation> ensureViolations, out IReadOnlyList<IAssumeViolation> assumeViolations)
