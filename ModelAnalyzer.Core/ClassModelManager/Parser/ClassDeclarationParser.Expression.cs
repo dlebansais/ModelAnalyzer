@@ -331,7 +331,7 @@ internal partial class ClassDeclarationParser
                 break;
             }
 
-        PrivateFunctionCallExpression NewExpression = new() { ClassName = IsStatic ? ClassName : null, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        PrivateFunctionCallExpression NewExpression = new() { ClassName = IsStatic ? ClassName : ClassName.Empty, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddFunctionCallEntry(parsingContext, NewExpression);
 
         return NewExpression;
@@ -347,7 +347,7 @@ internal partial class ClassDeclarationParser
         {
             if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
             {
-                NewExpression = new PublicFunctionCallExpression { ClassName = null, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewExpression = new PublicFunctionCallExpression { ClassName = ClassName.Empty, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
             }
         }

@@ -228,7 +228,7 @@ internal partial record ClassModel : IClassModel
 
     private void AppendPrivateMethodCallStatement(StringBuilder builder, PrivateMethodCallStatement statement, int indentation)
     {
-        string StaticString = statement.ClassName is null ? string.Empty : $"{statement.ClassName}.";
+        string StaticString = statement.ClassName == ClassName.Empty ? string.Empty : $"{statement.ClassName}.";
         AppendStatementText(builder, $"{StaticString}{statement.Name.Text}({string.Join(", ", statement.ArgumentList)})", indentation);
     }
 
@@ -236,7 +236,7 @@ internal partial record ClassModel : IClassModel
     {
         List<string> NamePath;
 
-        if (statement.ClassName is not null)
+        if (statement.ClassName != ClassName.Empty)
             NamePath = statement.ClassName.ToNamePath();
         else
             NamePath = statement.VariablePath.ConvertAll(item => item.Name.Text);

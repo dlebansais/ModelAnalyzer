@@ -345,23 +345,45 @@ public partial class ClassModelManager : IDisposable
         if (Context.VerificationState.IsVerificationRequestSent)
         {
             ModelExchange ModelExchange = Context.VerificationState.ModelExchange;
-
-            JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
-            Settings.Converters.Add(new ClassNameConverter());
-            Settings.Converters.Add(new ClassModelTableConverter());
-
-            string JSonString = JsonConvert.SerializeObject(ModelExchange, Settings);
-            byte[] EncodedString = Converter.EncodeString(JSonString);
-
-            if (EncodedString.Length <= channel.GetFreeLength())
-            {
-                channel.Write(EncodedString);
-
-                Log($"Data send {EncodedString.Length} bytes.");
-            }
-            else
-                Log($"Unable to send data, buffer full.");
+            SendData(channel, ModelExchange);
         }
+    }
+
+    private void SendData(Channel channel, ModelExchange modelExchange)
+    {
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+        Settings.Converters.Add(new ClassNameConverter());
+        Settings.Converters.Add(new ClassModelTableConverter());
+
+        string JSonString = JsonConvert.SerializeObject(modelExchange, Settings);
+        byte[] EncodedString = Converter.EncodeString(JSonString);
+
+        if (EncodedString.Length <= channel.GetFreeLength())
+        {
+            TimeSpan Timeout = Timeouts.VerificationBusyTimeout;
+            Stopwatch Watch = new();
+            Watch.Start();
+
+            for (; ;)
+            {
+                if (channel.GetUsedLength() <= EncodedString.Length * 5)
+                    break;
+
+                if (Watch.Elapsed >= Timeout)
+                {
+                    Log("Ignoring the busy state.");
+                    break;
+                }
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(100));
+            }
+
+            channel.Write(EncodedString);
+
+            Log($"Data send {EncodedString.Length} bytes.");
+        }
+        else
+            Log($"Unable to send data, buffer full.");
     }
 
     private Channel FromServerChannel;

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -20,13 +21,18 @@ internal class ClassNameConverter : JsonConverter<ClassName>
     /// <inheritdoc/>
     public override ClassName? ReadJson(JsonReader reader, Type objectType, ClassName? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        if (reader.Value is string StringValue)
+        Debug.Assert(reader.Value is string);
+
+        string StringValue = (string)reader.Value!;
+
+        if (StringValue == string.Empty)
+            return ClassName.Empty;
+        else
         {
             string[] Splitted = StringValue.Split('.');
+            Debug.Assert(Splitted.Length >= 1);
 
-            if (Splitted.Length == 0)
-                return ClassName.Empty;
-            else if (Splitted.Length == 1)
+            if (Splitted.Length == 1)
                 return ClassName.FromSimpleString(Splitted[0]);
             else
             {
@@ -36,7 +42,5 @@ internal class ClassNameConverter : JsonConverter<ClassName>
                 return new ClassName() { Namespace = Namespace, Text = Splitted.Last() };
             }
         }
-        else
-            return null;
     }
 }

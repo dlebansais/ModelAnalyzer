@@ -11,7 +11,7 @@ internal interface ICall
     /// <summary>
     /// Gets the name of the class for a static method.
     /// </summary>
-    ClassName? ClassName { get; }
+    ClassName ClassName { get; }
 
     /// <summary>
     /// Gets the function or method name.

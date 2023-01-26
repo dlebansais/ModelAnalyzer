@@ -16,7 +16,7 @@ public class RequireViolationUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Boolean_0
+class {ForSynchronousTestOnly}_RequireViolation_Boolean_0
 {{
     bool X;
 
@@ -37,7 +37,7 @@ class {ForSynchronousTestOnly}_Boolean_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Boolean_1
+class {ForSynchronousTestOnly}_RequireViolation_Boolean_1
 {{
     bool X;
 
@@ -58,7 +58,7 @@ class {ForSynchronousTestOnly}_Boolean_1
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Integer_0
+class {ForSynchronousTestOnly}_RequireViolation_Integer_0
 {{
     int X;
 
@@ -79,7 +79,7 @@ class {ForSynchronousTestOnly}_Integer_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Integer_1
+class {ForSynchronousTestOnly}_RequireViolation_Integer_1
 {{
     int X;
 
@@ -100,7 +100,7 @@ class {ForSynchronousTestOnly}_Integer_1
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_FloatingPoint_0
+class {ForSynchronousTestOnly}_RequireViolation_FloatingPoint_0
 {{
     double X;
 
@@ -121,7 +121,7 @@ class {ForSynchronousTestOnly}_FloatingPoint_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_FloatingPoint_1
+class {ForSynchronousTestOnly}_RequireViolation_FloatingPoint_1
 {{
     double X;
 

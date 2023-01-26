@@ -16,7 +16,7 @@ public class AssumeViolationUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Integer_0
+class {ForSynchronousTestOnly}_AssumeViolation_Integer_0
 {{
     public int X {{ get; set; }}
 
@@ -38,7 +38,7 @@ class {ForSynchronousTestOnly}_Integer_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_Integer_1|]
+class [|{ForSynchronousTestOnly}_AssumeViolation_Integer_1|]
 {{
     int X;
 
@@ -57,7 +57,7 @@ class [|{ForSynchronousTestOnly}_Integer_1|]
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_Integer_2
+class {ForSynchronousTestOnly}_AssumeViolation_Integer_2
 {{
     public int X {{ get; set; }}
 
@@ -79,7 +79,7 @@ class {ForSynchronousTestOnly}_Integer_2
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_Integer_3|]
+class [|{ForSynchronousTestOnly}_AssumeViolation_Integer_3|]
 {{
     int X;
 

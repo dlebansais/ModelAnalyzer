@@ -21,7 +21,7 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     }
 
     /// <inheritdoc/>
-    required public ClassName? ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>
     required public List<IVariable> VariablePath { get; init; }
@@ -46,7 +46,7 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     {
         List<string> NamePath;
 
-        if (ClassName is not null)
+        if (ClassName != ClassName.Empty)
             NamePath = ClassName.ToNamePath();
         else
             NamePath = VariablePath.ConvertAll(item => item.Name.Text);

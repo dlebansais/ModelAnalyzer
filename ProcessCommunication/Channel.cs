@@ -164,6 +164,28 @@ public class Channel : IDisposable
     }
 
     /// <summary>
+    /// Gets the number of used bytes in the channel.
+    /// </summary>
+    public int GetUsedLength()
+    {
+        if (Accessor is null)
+            throw new InvalidOperationException();
+
+        int EndOfBuffer = Capacity;
+        Accessor.Read(EndOfBuffer, out int Head);
+        Accessor.Read(EndOfBuffer + sizeof(int), out int Tail);
+
+        int Length;
+
+        if (Head >= Tail)
+            Length = Head - Tail;
+        else
+            Length = EndOfBuffer - Tail + Head;
+
+        return Length;
+    }
+
+    /// <summary>
     /// Writes data to the channel.
     /// </summary>
     /// <param name="data">The data to write.</param>

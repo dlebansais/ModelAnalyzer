@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Miscellaneous.Test;
 using ModelAnalyzer;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 /// <summary>
@@ -43,6 +44,40 @@ class Program_CoreClass_0
     return false;
   }
 "));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModel_Json()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClass_Json
+{
+    public int X { get; set; }
+    double Y;
+    bool Z() => false;
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+        string JsonString;
+        ClassModelTable? Result;
+
+        ClassModel ClassModel = (ClassModel)TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
+        ClassModelTable Table0 = new();
+        Table0.Add(ClassModel.ClassName, ClassModel);
+
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+        Settings.Converters.Add(new ClassModelTableConverter());
+
+        JsonString = JsonConvert.SerializeObject(Table0, Settings);
+
+        Result = JsonConvert.DeserializeObject<ClassModelTable>(JsonString, Settings);
+
+        Assert.That(Result, Is.Not.Null);
+        Assert.That(Result!.Count, Is.EqualTo(1));
     }
 
     [Test]

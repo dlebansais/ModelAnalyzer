@@ -248,6 +248,17 @@ internal class ObjectManager
         ClassModel TypeClassModel = TypeToModel(expressionType);
         IRefExprCapsule ReferenceResult = Context.CreateReferenceValue(TypeClassModel.ClassName, ObjectIndex++);
 
+        return CreateObjectInitializer(expressionType, ReferenceResult);
+    }
+
+    public IExprSet<IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
+    {
+        return CreateObjectInitializer(expressionType, Context.Null);
+    }
+
+    public IExprSet<IExprCapsule> CreateObjectInitializer(ExpressionType expressionType, IRefExprCapsule referenceResult)
+    {
+        ClassModel TypeClassModel = TypeToModel(expressionType);
         List<IExprSet<IExprCapsule>> VariableSetList = new();
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
@@ -264,24 +275,7 @@ internal class ObjectManager
             VariableSetList.Add(FieldExpressions);
         }
 
-        ExprSet<IExprCapsule> Result = new(ReferenceResult, VariableSetList);
-
-        return Result;
-    }
-
-    public IExprSet<IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
-    {
-        ClassModel TypeClassModel = TypeToModel(expressionType);
-        List<IExprSet<IExprCapsule>> PropertySetList = new();
-
-        foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
-        {
-            Property Property = Entry.Value;
-            IExprSet<IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, variableInitializer: null);
-            PropertySetList.Add(PropertyExpressions);
-        }
-
-        ExprSet<IExprCapsule> Result = new(Context.Null, PropertySetList);
+        ExprSet<IExprCapsule> Result = new(referenceResult, VariableSetList);
 
         return Result;
     }

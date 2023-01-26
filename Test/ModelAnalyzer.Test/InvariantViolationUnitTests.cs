@@ -16,7 +16,7 @@ public class InvariantViolationUnitTests
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_0
+class {ForSynchronousTestOnly}_InvariantViolation_0
 {{
     int X;
 }}
@@ -31,7 +31,7 @@ class {ForSynchronousTestOnly}_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_1
+class {ForSynchronousTestOnly}_InvariantViolation_1
 {{
     int X;
 }}
@@ -46,7 +46,7 @@ class {ForSynchronousTestOnly}_1
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_2
+class {ForSynchronousTestOnly}_InvariantViolation_2
 {{
     int X;
 
@@ -66,7 +66,7 @@ class {ForSynchronousTestOnly}_2
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_3
+class {ForSynchronousTestOnly}_InvariantViolation_3
 {{
     int X;
 
@@ -86,7 +86,7 @@ class {ForSynchronousTestOnly}_3
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_4
+class {ForSynchronousTestOnly}_InvariantViolation_4
 {{
     int X;
 
@@ -109,7 +109,7 @@ class {ForSynchronousTestOnly}_4
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_5
+class {ForSynchronousTestOnly}_InvariantViolation_5
 {{
     int X;
 
@@ -132,7 +132,7 @@ class {ForSynchronousTestOnly}_5
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_6
+class {ForSynchronousTestOnly}_InvariantViolation_6
 {{
     int X;
 
@@ -155,7 +155,7 @@ class {ForSynchronousTestOnly}_6
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_7
+class {ForSynchronousTestOnly}_InvariantViolation_7
 {{
     int X;
 
@@ -175,7 +175,7 @@ class {ForSynchronousTestOnly}_7
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_8
+class {ForSynchronousTestOnly}_InvariantViolation_8
 {{
     bool X;
 
@@ -196,7 +196,7 @@ class {ForSynchronousTestOnly}_8
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_9
+class {ForSynchronousTestOnly}_InvariantViolation_9
 {{
     int X;
 
@@ -217,7 +217,7 @@ class {ForSynchronousTestOnly}_9
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class {ForSynchronousTestOnly}_10
+class {ForSynchronousTestOnly}_InvariantViolation_10
 {{
     double X;
 

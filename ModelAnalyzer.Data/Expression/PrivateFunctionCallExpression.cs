@@ -21,7 +21,7 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     }
 
     /// <inheritdoc/>
-    required public ClassName? ClassName { get; init; }
+    required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>
     required public MethodName Name { get; init; }
@@ -41,7 +41,7 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     /// <inheritdoc/>
     public override string ToString()
     {
-        string StaticString = ClassName is null ? string.Empty : $"{ClassName}.";
+        string StaticString = ClassName == ClassName.Empty ? string.Empty : $"{ClassName}.";
         string ArgumentString = string.Join(", ", ArgumentList);
 
         return $"{StaticString}{Name.Text}({ArgumentString})";

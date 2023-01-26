@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -12,8 +13,7 @@ internal class ClassModelTableConverter : JsonConverter<ClassModelTable>
     /// <inheritdoc/>
     public override void WriteJson(JsonWriter writer, ClassModelTable? value, JsonSerializer serializer)
     {
-        if (value is null)
-            return;
+        Debug.Assert(value is not null);
 
         JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
         Settings.Converters.Add(new ClassNameConverter());
@@ -27,26 +27,21 @@ internal class ClassModelTableConverter : JsonConverter<ClassModelTable>
     /// <inheritdoc/>
     public override ClassModelTable? ReadJson(JsonReader reader, Type objectType, ClassModelTable? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        if (reader.Value is string StringValue)
-        {
-            JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
-            Settings.Converters.Add(new ClassNameConverter());
+        Debug.Assert(reader.Value is string);
 
-            List<KeyValuePair<ClassName, ClassModel>>? EntryList = JsonConvert.DeserializeObject<List<KeyValuePair<ClassName, ClassModel>>>(StringValue, Settings);
+        string StringValue = (string)reader.Value!;
+        JsonSerializerSettings Settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
+        Settings.Converters.Add(new ClassNameConverter());
 
-            if (EntryList is not null)
-            {
-                ClassModelTable Result = new();
+        List<KeyValuePair<ClassName, ClassModel>>? EntryList = JsonConvert.DeserializeObject<List<KeyValuePair<ClassName, ClassModel>>>(StringValue, Settings);
 
-                foreach (KeyValuePair<ClassName, ClassModel> Entry in EntryList)
-                    Result.Add(Entry.Key, Entry.Value);
+        Debug.Assert(EntryList is not null);
 
-                return Result;
-            }
-            else
-                return null;
-        }
-        else
-            return null;
+        ClassModelTable Result = new();
+
+        foreach (KeyValuePair<ClassName, ClassModel> Entry in EntryList!)
+            Result.Add(Entry.Key, Entry.Value);
+
+        return Result;
     }
 }

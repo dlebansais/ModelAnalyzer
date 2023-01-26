@@ -718,6 +718,48 @@ using System;
 
 class Program_Verifier_Integer20_1
 {
+    int Z;
+
+    public int ReadY()
+    {
+        return 0;
+    }
+}
+// Invariant: Z == 0
+// Invariant: Z != 0
+
+class Program_Verifier_Integer20_2
+{
+    Program_Verifier_Integer20_1? X;
+
+    public void Write()
+    {
+        int N;
+
+        X = new Program_Verifier_Integer20_1();
+        N = X.ReadY();
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer20_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger20, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsError, Is.True);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.InvariantError));
+    }
+
+    private const string FunctionCallSourceCodeInteger21 = @"
+using System;
+
+class Program_Verifier_Integer21_1
+{
     public static int Read(int n)
     {
         return n + 1;
@@ -725,19 +767,19 @@ class Program_Verifier_Integer20_1
     // Ensure: Result == n + 1
 }
 
-class Program_Verifier_Integer20_2
+class Program_Verifier_Integer21_2
 {
     public int Read2(int n)
     // Require: n == -1
     {
-        return Program_Verifier_Integer20_1.Read(n);
+        return Program_Verifier_Integer21_1.Read(n);
     }
     // Ensure: Result == 0
 
     public int Read1(int n)
     // Require: n != 0
     {
-        return Program_Verifier_Integer20_1.Read(n);
+        return Program_Verifier_Integer21_1.Read(n);
     }
     // Ensure: Result != 1
 }
@@ -745,9 +787,9 @@ class Program_Verifier_Integer20_2
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Integer20_Success()
+    public void Verifier_Integer21_Success()
     {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger20, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(FunctionCallSourceCodeInteger21, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
