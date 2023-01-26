@@ -14,7 +14,9 @@ internal class ClassNameConverter : JsonConverter<ClassName>
     /// <inheritdoc/>
     public override void WriteJson(JsonWriter writer, ClassName? value, JsonSerializer serializer)
     {
-        string? StringValue = value?.ToString();
+        Debug.Assert(value is not null);
+
+        string StringValue = value!.ToString();
         writer.WriteValue(StringValue);
     }
 

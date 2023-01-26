@@ -63,6 +63,40 @@ public class ClassNameTest
 
     [Test]
     [Category("Core")]
+    public void ClassNameTest_IdenticalPath()
+    {
+        string TestString0 = "test0";
+        string TestString1 = "test1";
+        string NamespaceString = "namespace";
+
+        ClassName TestName0 = new() { Namespace = new List<string>() { NamespaceString }, Text = TestString0 };
+
+        Assert.That(TestName0.Namespace.Count, Is.EqualTo(1));
+        Assert.That(TestName0.Namespace[0], Is.EqualTo(NamespaceString));
+        Assert.That(TestName0.Text, Is.EqualTo(TestString0));
+        Assert.That(TestName0.ToString(), Is.EqualTo($"{NamespaceString}.{TestString0}"));
+
+        ClassName TestName1 = new() { Namespace = new List<string>() { NamespaceString }, Text = TestString1 };
+
+        Assert.That(TestName1.Namespace.Count, Is.EqualTo(1));
+        Assert.That(TestName1.Namespace[0], Is.EqualTo(NamespaceString));
+        Assert.That(TestName1.Text, Is.EqualTo(TestString1));
+        Assert.That(TestName1.ToString(), Is.EqualTo($"{NamespaceString}.{TestString1}"));
+
+        ClassName TestName2 = TestName0;
+
+        Assert.That(TestName0.Equals(TestName1), Is.False);
+        Assert.That(TestName0.Equals(TestName2), Is.True);
+        Assert.That(TestName0 == TestName1, Is.False);
+        Assert.That(TestName0 == TestName2, Is.True);
+        Assert.That(TestName0 != TestName1, Is.True);
+        Assert.That(TestName0 != TestName2, Is.False);
+
+        Assert.That(TestName0.Equals(string.Empty), Is.False);
+    }
+
+    [Test]
+    [Category("Core")]
     public void ClassNameTest_Json()
     {
         string TestString = "test";

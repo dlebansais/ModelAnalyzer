@@ -255,9 +255,12 @@ public partial class ClassModelManager : IDisposable
     {
         Debug.Assert(verificationResult.ErrorIndex < 0);
 
-        List<IAssumeViolation> AssumeViolations = new() { new AssumeViolation() { Method = method, Text = verificationResult.ErrorText } };
+        AssumeViolation NewViolation = new AssumeViolation() { Method = method, Text = verificationResult.ErrorText };
+        List<IAssumeViolation> AssumeViolations = new() { NewViolation };
 
-        return oldClassModel with { AssumeViolations = AssumeViolations.AsReadOnly() };
+        ClassModel NewModel = oldClassModel with { AssumeViolations = AssumeViolations.AsReadOnly() };
+
+        return NewModel;
     }
 
     private void ScheduleAsynchronousVerification()
