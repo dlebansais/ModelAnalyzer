@@ -14,6 +14,9 @@ internal class RemainderExpression : Expression, IBinaryExpression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType() => ExpressionType.Integer;
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the left expression.
     /// </summary>

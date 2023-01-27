@@ -16,6 +16,9 @@ internal class LiteralFloatingPointValueExpression : Expression, ILiteralExpress
     public override ExpressionType GetExpressionType() => ExpressionType.FloatingPoint;
 
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     public double Value { get; set; }
 
     /// <inheritdoc/>

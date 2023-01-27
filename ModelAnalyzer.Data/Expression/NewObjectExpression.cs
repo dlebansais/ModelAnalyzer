@@ -15,6 +15,9 @@ internal class NewObjectExpression : Expression, ILiteralExpression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType() => ObjectType;
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the variable.
     /// </summary>

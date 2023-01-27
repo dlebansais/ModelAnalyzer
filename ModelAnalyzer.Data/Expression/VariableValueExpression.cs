@@ -23,6 +23,9 @@ internal class VariableValueExpression : Expression
         return VariablePath.Last().Type;
     }
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the variable path.
     /// </summary>

@@ -15,7 +15,7 @@ internal record VerificationResult
         ErrorType = VerificationErrorType.Unknown,
         ClassName = ClassName.Empty,
         MethodName = string.Empty,
-        ErrorIndex = -1,
+        LocationId = LocationId.None,
         ErrorText = string.Empty,
     };
 
@@ -35,9 +35,9 @@ internal record VerificationResult
     required public string MethodName { get; init; }
 
     /// <summary>
-    /// Gets the index of the clause with error.
+    /// Gets the location the clause with error.
     /// </summary>
-    required public int ErrorIndex { get; init; }
+    required public LocationId LocationId { get; init; }
 
     /// <summary>
     /// Gets the text of the expression with error.

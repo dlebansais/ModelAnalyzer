@@ -143,8 +143,9 @@ internal class Program
         }
         catch (Exception exception)
         {
+            // TODO: include this case in tests
             Logger.LogException(exception);
-            VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = -1 };
+            VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.Exception, ClassName = ClassName, MethodName = string.Empty, LocationId = LocationId.None };
         }
 
         return VerificationResult;

@@ -21,6 +21,9 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     }
 
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>

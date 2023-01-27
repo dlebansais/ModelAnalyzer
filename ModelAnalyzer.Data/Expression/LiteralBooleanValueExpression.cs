@@ -15,6 +15,9 @@ internal class LiteralBooleanValueExpression : Expression, ILiteralExpression<bo
     public override ExpressionType GetExpressionType() => ExpressionType.Boolean;
 
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     public bool Value { get; set; }
 
     /// <inheritdoc/>

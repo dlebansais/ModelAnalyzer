@@ -15,6 +15,9 @@ internal class EqualityExpression : Expression, IBinaryExpression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType() => ExpressionType.Boolean;
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the left expression.
     /// </summary>

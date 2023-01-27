@@ -235,7 +235,7 @@ internal partial class Verifier : IDisposable
                 if (verificationContext.Solver.Check() == Status.SATISFIABLE)
                 {
                     Log($"Invariant violation for class {ClassName}");
-                    VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, ErrorIndex = i };
+                    VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, LocationId = ((Expression)Invariant.BooleanExpression).LocationId };
 
                     string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
                     Log(ModelString);
@@ -319,16 +319,16 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < HostMethod.RequireList.Count; i++)
         {
             Require Require = HostMethod.RequireList[i];
-            IExpression AssertionExpression = Require.BooleanExpression;
+            Expression AssertionExpression = (Expression)Require.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
 
             if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
-            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType))
+            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, AssertionExpression, ErrorType))
                 return false;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType, keepNormal: true))
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, AssertionExpression, ErrorType, keepNormal: true))
                 return false;
         }
 
@@ -344,16 +344,16 @@ internal partial class Verifier : IDisposable
         for (int i = 0; i < HostMethod.EnsureList.Count; i++)
         {
             Ensure Ensure = HostMethod.EnsureList[i];
-            IExpression AssertionExpression = Ensure.BooleanExpression;
+            Expression AssertionExpression = (Expression)Ensure.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.EnsureError;
 
             if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType, keepNormal))
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, AssertionExpression, ErrorType, keepNormal))
                 return false;
 
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, i, AssertionExpression.ToString(), ErrorType))
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, AssertionExpression, ErrorType))
                 return false;
         }
 
@@ -361,7 +361,7 @@ internal partial class Verifier : IDisposable
     }
 
     // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
-    private bool AddMethodAssertionNormal(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, int index, string text, VerificationErrorType errorType, bool keepNormal)
+    private bool AddMethodAssertionNormal(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, Expression assertionExpression, VerificationErrorType errorType, bool keepNormal)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
@@ -381,7 +381,7 @@ internal partial class Verifier : IDisposable
         if (verificationContext.Solver.Check() != Status.SATISFIABLE)
         {
             Log($"Inconsistent {AssertionType} state for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, ErrorIndex = index, ErrorText = text };
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, LocationId = assertionExpression.LocationId, ErrorText = assertionExpression.ToString() };
 
             Result = false;
         }
@@ -392,7 +392,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, int index, string text, VerificationErrorType errorType)
+    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, Expression assertionExpression, VerificationErrorType errorType)
     {
         Method? HostMethod = verificationContext.HostMethod;
         string AssertionType = VerificationErrorTypeToText(errorType);
@@ -413,7 +413,7 @@ internal partial class Verifier : IDisposable
 
             string AssertionMethodName = HostMethod is not null ? HostMethod.Name.Text : string.Empty;
             ClassName AssertionClassName = HostMethod is not null ? HostMethod.ClassName : ClassName;
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = AssertionClassName, MethodName = AssertionMethodName, ErrorIndex = index, ErrorText = text };
+            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = AssertionClassName, MethodName = AssertionMethodName, LocationId = assertionExpression.LocationId, ErrorText = assertionExpression.ToString() };
 
             string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
             Log(ModelString);

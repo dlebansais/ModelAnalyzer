@@ -15,6 +15,9 @@ internal class LiteralNullExpression : Expression, ILiteralExpression
     public override ExpressionType GetExpressionType() => ExpressionType.Null;
 
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         return "null";

@@ -14,4 +14,9 @@ internal abstract class Expression : IExpression
     /// Gets the expression type.
     /// </summary>
     public abstract ExpressionType GetExpressionType();
+
+    /// <summary>
+    /// Gets or sets the location Id.
+    /// </summary>
+    public abstract LocationId LocationId { get; set; }
 }

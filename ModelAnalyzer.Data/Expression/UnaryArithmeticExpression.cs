@@ -14,6 +14,9 @@ internal class UnaryArithmeticExpression : Expression, IUnaryExpression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType() => Operand.GetExpressionType();
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the unary arithmetic operator.
     /// </summary>

@@ -221,17 +221,18 @@ public partial class ClassModelManager : IDisposable
 
     private static ClassModel WithFilledInvariantViolationLists(ClassModel oldClassModel, VerificationResult verificationResult)
     {
-        int ErrorIndex = verificationResult.ErrorIndex;
+        LocationId LocationId = verificationResult.LocationId;
         List<IInvariantViolation> InvariantViolations = new();
         IReadOnlyList<Invariant> InvariantList = oldClassModel.InvariantList;
 
-        Debug.Assert(ErrorIndex >= 0);
+        Debug.Assert(LocationId != LocationId.None);
 
-        if (ErrorIndex < InvariantList.Count)
-        {
-            InvariantViolation NewInvariantViolation = new() { Invariant = InvariantList[ErrorIndex] };
-            InvariantViolations.Add(NewInvariantViolation);
-        }
+        foreach (Invariant Invariant in InvariantList)
+            if (((Expression)Invariant.BooleanExpression).LocationId == LocationId)
+            {
+                InvariantViolation NewInvariantViolation = new() { Invariant = Invariant };
+                InvariantViolations.Add(NewInvariantViolation);
+            }
 
         ClassModel NewClassModel = oldClassModel with { InvariantViolations = InvariantViolations.AsReadOnly() };
 
@@ -240,17 +241,18 @@ public partial class ClassModelManager : IDisposable
 
     private static ClassModel WithFilledRequireViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
     {
-        int ErrorIndex = verificationResult.ErrorIndex;
+        LocationId LocationId = verificationResult.LocationId;
         List<IRequireViolation> RequireViolations = new();
         List<Require> RequireList = method.RequireList;
 
-        Debug.Assert(ErrorIndex >= 0);
+        Debug.Assert(LocationId != LocationId.None);
 
-        if (ErrorIndex < RequireList.Count)
-        {
-            RequireViolation NewRequireViolation = new() { Method = method, Require = RequireList[ErrorIndex] };
-            RequireViolations.Add(NewRequireViolation);
-        }
+        foreach (Require Require in RequireList)
+            if (((Expression)Require.BooleanExpression).LocationId == LocationId)
+            {
+                RequireViolation NewRequireViolation = new() { Method = method, Require = Require };
+                RequireViolations.Add(NewRequireViolation);
+            }
 
         ClassModel NewClassModel = oldClassModel with { RequireViolations = RequireViolations.AsReadOnly() };
 
@@ -259,17 +261,18 @@ public partial class ClassModelManager : IDisposable
 
     private static ClassModel WithFilledEnsureViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
     {
-        int ErrorIndex = verificationResult.ErrorIndex;
+        LocationId LocationId = verificationResult.LocationId;
         List<IEnsureViolation> EnsureViolations = new();
         List<Ensure> EnsureList = method.EnsureList;
 
-        Debug.Assert(ErrorIndex >= 0);
+        Debug.Assert(LocationId != LocationId.None);
 
-        if (ErrorIndex < EnsureList.Count)
-        {
-            EnsureViolation NewEnsureViolation = new() { Method = method, Ensure = EnsureList[ErrorIndex] };
-            EnsureViolations.Add(NewEnsureViolation);
-        }
+        foreach (Ensure Ensure in EnsureList)
+            if (((Expression)Ensure.BooleanExpression).LocationId == LocationId)
+            {
+                EnsureViolation NewEnsureViolation = new() { Method = method, Ensure = Ensure };
+                EnsureViolations.Add(NewEnsureViolation);
+            }
 
         ClassModel NewClassModel = oldClassModel with { EnsureViolations = EnsureViolations.AsReadOnly() };
 
@@ -278,7 +281,8 @@ public partial class ClassModelManager : IDisposable
 
     private static ClassModel WithFilledAssumeViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method? method)
     {
-        Debug.Assert(verificationResult.ErrorIndex < 0);
+        // TODO: copy this info in NewViolation.
+        Debug.Assert(verificationResult.LocationId != LocationId.None);
 
         AssumeViolation NewViolation = new() { Method = method, Text = verificationResult.ErrorText };
         List<IAssumeViolation> AssumeViolations = new() { NewViolation };

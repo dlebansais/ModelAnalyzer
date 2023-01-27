@@ -63,69 +63,15 @@ internal partial class ClassDeclarationParser
             SyntaxToken OperatorToken = binaryExpression.OperatorToken;
 
             if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
-                NewExpression = new BinaryArithmeticExpression { Left = Left, Operator = BinaryArithmeticOperator, Right = Right };
+                NewExpression = CreateBinaryArithmeticExpression(Left, BinaryArithmeticOperator, Right);
             else if (OperatorToken.IsKind(SyntaxKind.PercentToken))
                 NewExpression = TryParseRemainderExpression(parsingContext, Left, Right, OperatorToken, ref location);
             else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
-                NewExpression = new BinaryLogicalExpression { Left = Left, Operator = BinaryLogicalOperator, Right = Right };
+                NewExpression = CreateBinaryLogicalExpression(Left, BinaryLogicalOperator, Right);
             else if (IsSupportedEqualityOperator(OperatorToken, out EqualityOperator EqualityOperator))
-                NewExpression = new EqualityExpression { Left = Left, Operator = EqualityOperator, Right = Right };
+                NewExpression = CreateEqualityExpression(Left, EqualityOperator, Right);
             else if (IsSupportedComparisonOperator(OperatorToken, out ComparisonOperator ComparisonOperator))
-                NewExpression = new ComparisonExpression { Left = Left, Operator = ComparisonOperator, Right = Right };
-            else
-            {
-                Log($"Unsupported operator '{OperatorToken.ValueText}'.");
-
-                Debug.Assert(parsingContext.LocationContext is not null);
-
-                location = parsingContext.LocationContext!.GetLocation(OperatorToken);
-            }
-        }
-        else
-            isErrorReported = true;
-
-        return NewExpression;
-    }
-
-    private Expression? TryParseRemainderExpression(ParsingContext parsingContext, Expression left, Expression right, SyntaxToken operatorToken, ref Location location)
-    {
-        Debug.Assert(parsingContext.LocationContext is not null);
-
-        Expression? NewExpression = null;
-
-        if (left.GetExpressionType() != ExpressionType.Integer)
-        {
-            Log($"'{left}' must be an integer.");
-
-            location = parsingContext.LocationContext!.GetLocation(operatorToken);
-        }
-        else if (right.GetExpressionType() != ExpressionType.Integer)
-        {
-            Log($"'{right}' must be an integer.");
-
-            location = parsingContext.LocationContext!.GetLocation(operatorToken);
-        }
-        else
-        {
-            NewExpression = new RemainderExpression { Left = left, Right = right };
-        }
-
-        return NewExpression;
-    }
-
-    private Expression? TryParsePrefixUnaryExpression(ParsingContext parsingContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
-    {
-        Expression? NewExpression = null;
-        Expression? OperandExpression = ParseExpression(parsingContext, prefixUnaryExpression.Operand);
-
-        if (OperandExpression is Expression Operand)
-        {
-            SyntaxToken OperatorToken = prefixUnaryExpression.OperatorToken;
-
-            if (IsSupportedUnaryArithmeticOperator(OperatorToken, out UnaryArithmeticOperator UnaryArithmeticOperator))
-                NewExpression = new UnaryArithmeticExpression { Operator = UnaryArithmeticOperator, Operand = Operand };
-            else if (IsSupportedUnaryLogicalOperator(OperatorToken, out UnaryLogicalOperator UnaryLogicalOperator))
-                NewExpression = new UnaryLogicalExpression { Operator = UnaryLogicalOperator, Operand = Operand };
+                NewExpression = CreateComparisonExpression(Left, ComparisonOperator, Right);
             else
             {
                 Log($"Unsupported operator '{OperatorToken.ValueText}'.");
@@ -155,60 +101,41 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsSupportedUnaryArithmeticOperator(SyntaxToken token, out UnaryArithmeticOperator arithmeticOperator)
+    private Expression CreateBinaryArithmeticExpression(Expression left, BinaryArithmeticOperator binaryArithmeticOperator, Expression right)
     {
-        SyntaxKind OperatorKind = token.Kind();
+        Expression NewExpression = new BinaryArithmeticExpression { Left = left, Operator = binaryArithmeticOperator, Right = right };
 
-        if (OperatorSyntaxKind.UnaryArithmetic.ContainsKey(OperatorKind))
-        {
-            arithmeticOperator = OperatorSyntaxKind.UnaryArithmetic[OperatorKind];
-            return true;
-        }
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
 
-        arithmeticOperator = default;
-        return false;
+        return NewExpression;
     }
 
-    private bool IsSupportedUnaryLogicalOperator(SyntaxToken token, out UnaryLogicalOperator logicalOperator)
+    private Expression? TryParseRemainderExpression(ParsingContext parsingContext, Expression left, Expression right, SyntaxToken operatorToken, ref Location location)
     {
-        SyntaxKind OperatorKind = token.Kind();
+        Debug.Assert(parsingContext.LocationContext is not null);
 
-        if (OperatorSyntaxKind.UnaryLogical.ContainsKey(OperatorKind))
+        Expression? NewExpression = null;
+
+        if (left.GetExpressionType() != ExpressionType.Integer)
         {
-            logicalOperator = OperatorSyntaxKind.UnaryLogical[OperatorKind];
-            return true;
+            Log($"'{left}' must be an integer.");
+
+            location = parsingContext.LocationContext!.GetLocation(operatorToken);
+        }
+        else if (right.GetExpressionType() != ExpressionType.Integer)
+        {
+            Log($"'{right}' must be an integer.");
+
+            location = parsingContext.LocationContext!.GetLocation(operatorToken);
+        }
+        else
+        {
+            NewExpression = new RemainderExpression { Left = left, Right = right };
+
+            Debug.Assert(NewExpression.LocationId != LocationId.None);
         }
 
-        logicalOperator = default;
-        return false;
-    }
-
-    private bool IsSupportedEqualityOperator(SyntaxToken token, out EqualityOperator equalityOperator)
-    {
-        SyntaxKind OperatorKind = token.Kind();
-
-        if (OperatorSyntaxKind.Equality.ContainsKey(OperatorKind))
-        {
-            equalityOperator = OperatorSyntaxKind.Equality[OperatorKind];
-            return true;
-        }
-
-        equalityOperator = default;
-        return false;
-    }
-
-    private bool IsSupportedComparisonOperator(SyntaxToken token, out ComparisonOperator comparisonOperator)
-    {
-        SyntaxKind OperatorKind = token.Kind();
-
-        if (OperatorSyntaxKind.Comparison.ContainsKey(OperatorKind))
-        {
-            comparisonOperator = OperatorSyntaxKind.Comparison[OperatorKind];
-            return true;
-        }
-
-        comparisonOperator = default;
-        return false;
+        return NewExpression;
     }
 
     private bool IsSupportedBinaryLogicalOperator(SyntaxToken token, out BinaryLogicalOperator logicalOperator)
@@ -225,6 +152,135 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
+    private Expression CreateBinaryLogicalExpression(Expression left, BinaryLogicalOperator binaryLogicalOperator, Expression right)
+    {
+        Expression NewExpression = new BinaryLogicalExpression { Left = left, Operator = binaryLogicalOperator, Right = right };
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        return NewExpression;
+    }
+
+    private bool IsSupportedEqualityOperator(SyntaxToken token, out EqualityOperator equalityOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (OperatorSyntaxKind.Equality.ContainsKey(OperatorKind))
+        {
+            equalityOperator = OperatorSyntaxKind.Equality[OperatorKind];
+            return true;
+        }
+
+        equalityOperator = default;
+        return false;
+    }
+
+    private Expression CreateEqualityExpression(Expression left, EqualityOperator equalityOperator, Expression right)
+    {
+        Expression NewExpression = new EqualityExpression { Left = left, Operator = equalityOperator, Right = right };
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        return NewExpression;
+    }
+
+    private bool IsSupportedComparisonOperator(SyntaxToken token, out ComparisonOperator comparisonOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (OperatorSyntaxKind.Comparison.ContainsKey(OperatorKind))
+        {
+            comparisonOperator = OperatorSyntaxKind.Comparison[OperatorKind];
+            return true;
+        }
+
+        comparisonOperator = default;
+        return false;
+    }
+
+    private Expression CreateComparisonExpression(Expression left, ComparisonOperator comparisonOperator, Expression right)
+    {
+        Expression NewExpression = new ComparisonExpression { Left = left, Operator = comparisonOperator, Right = right };
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        return NewExpression;
+    }
+
+    private Expression? TryParsePrefixUnaryExpression(ParsingContext parsingContext, PrefixUnaryExpressionSyntax prefixUnaryExpression, ref bool isErrorReported, ref Location location)
+    {
+        Expression? NewExpression = null;
+        Expression? OperandExpression = ParseExpression(parsingContext, prefixUnaryExpression.Operand);
+
+        if (OperandExpression is Expression Operand)
+        {
+            SyntaxToken OperatorToken = prefixUnaryExpression.OperatorToken;
+
+            if (IsSupportedUnaryArithmeticOperator(OperatorToken, out UnaryArithmeticOperator UnaryArithmeticOperator))
+                NewExpression = CreateUnaryArithmeticExpression(UnaryArithmeticOperator, Operand);
+            else if (IsSupportedUnaryLogicalOperator(OperatorToken, out UnaryLogicalOperator UnaryLogicalOperator))
+                NewExpression = CreateUnaryLogicalExpression(UnaryLogicalOperator, Operand);
+            else
+            {
+                Log($"Unsupported operator '{OperatorToken.ValueText}'.");
+
+                Debug.Assert(parsingContext.LocationContext is not null);
+
+                location = parsingContext.LocationContext!.GetLocation(OperatorToken);
+            }
+        }
+        else
+            isErrorReported = true;
+
+        return NewExpression;
+    }
+
+    private bool IsSupportedUnaryArithmeticOperator(SyntaxToken token, out UnaryArithmeticOperator arithmeticOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (OperatorSyntaxKind.UnaryArithmetic.ContainsKey(OperatorKind))
+        {
+            arithmeticOperator = OperatorSyntaxKind.UnaryArithmetic[OperatorKind];
+            return true;
+        }
+
+        arithmeticOperator = default;
+        return false;
+    }
+
+    private Expression CreateUnaryArithmeticExpression(UnaryArithmeticOperator unaryArithmeticOperator, Expression operand)
+    {
+        Expression NewExpression = new UnaryArithmeticExpression { Operator = unaryArithmeticOperator, Operand = operand };
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        return NewExpression;
+    }
+
+    private bool IsSupportedUnaryLogicalOperator(SyntaxToken token, out UnaryLogicalOperator logicalOperator)
+    {
+        SyntaxKind OperatorKind = token.Kind();
+
+        if (OperatorSyntaxKind.UnaryLogical.ContainsKey(OperatorKind))
+        {
+            logicalOperator = OperatorSyntaxKind.UnaryLogical[OperatorKind];
+            return true;
+        }
+
+        logicalOperator = default;
+        return false;
+    }
+
+    private Expression CreateUnaryLogicalExpression(UnaryLogicalOperator unaryLogicalOperator, Expression operand)
+    {
+        Expression NewExpression = new UnaryLogicalExpression { Operator = unaryLogicalOperator, Operand = operand };
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        return NewExpression;
+    }
+
     private Expression? TryParseVariableValueExpression(ParsingContext parsingContext, IdentifierNameSyntax identifierName)
     {
         Expression? NewExpression = null;
@@ -233,6 +289,9 @@ internal partial class ClassDeclarationParser
         if (TryFindVariableByName(parsingContext, VariableName, out IVariable Variable))
         {
             VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = new List<IVariable>() { Variable }, PathLocation = identifierName.GetLocation() };
+
+            Debug.Assert(NewVariableValueExpression.LocationId != LocationId.None);
+
             NewExpression = NewVariableValueExpression;
         }
         else
@@ -251,6 +310,9 @@ internal partial class ClassDeclarationParser
                 VariablePath.Add(LastProperty);
 
                 VariableValueExpression NewVariableValueExpression = new VariableValueExpression { VariablePath = VariablePath, PathLocation = PathLocation };
+
+                Debug.Assert(NewVariableValueExpression.LocationId != LocationId.None);
+
                 NewExpression = NewVariableValueExpression;
             }
 
@@ -259,7 +321,7 @@ internal partial class ClassDeclarationParser
 
     private Expression? TryParseLiteralValueExpression(LiteralExpressionSyntax literalExpression)
     {
-        Expression? NewExpression = null;
+        Expression NewExpression;
         string LiteralValue = literalExpression.Token.Text;
 
         if (LiteralValue == "true")
@@ -267,13 +329,18 @@ internal partial class ClassDeclarationParser
         else if (LiteralValue == "false")
             NewExpression = new LiteralBooleanValueExpression { Value = false };
         else if (LiteralValue == "null")
-            NewExpression = new LiteralNullExpression();
+            NewExpression = new LiteralNullExpression { LocationId = LocationId.CreateNew() };
         else if (int.TryParse(LiteralValue, out int IntegerValue))
             NewExpression = new LiteralIntegerValueExpression { Value = IntegerValue };
         else if (double.TryParse(LiteralValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double FloatingPointValue))
             NewExpression = new LiteralFloatingPointValueExpression { Value = FloatingPointValue };
         else
+        {
             Log($"Failed to parse literal value '{LiteralValue}'.");
+            return null;
+        }
+
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
 
         return NewExpression;
     }
@@ -334,6 +401,8 @@ internal partial class ClassDeclarationParser
         PrivateFunctionCallExpression NewExpression = new() { ClassName = IsStatic ? ClassName : ClassName.Empty, Name = FunctionName, ReturnType = ReturnType, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
         AddFunctionCallEntry(parsingContext, NewExpression);
 
+        Debug.Assert(NewExpression.LocationId != LocationId.None);
+
         return NewExpression;
     }
 
@@ -349,6 +418,8 @@ internal partial class ClassDeclarationParser
             {
                 NewExpression = new PublicFunctionCallExpression { ClassName = ClassName.Empty, VariablePath = VariablePath, Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
+
+                Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
         }
         else if (TryParseTypeName(parsingContext, memberAccessExpression, out ClassModel ClassModel, out LastName, out PathLocation))
@@ -357,6 +428,8 @@ internal partial class ClassDeclarationParser
             {
                 NewExpression = new PublicFunctionCallExpression { ClassName = ClassModel.ClassName, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, ReturnType = CalledMethod.ReturnType, NameLocation = PathLocation, ArgumentList = argumentList };
                 AddFunctionCallEntry(parsingContext, NewExpression);
+
+                Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
         }
 
@@ -393,7 +466,11 @@ internal partial class ClassDeclarationParser
 
         if (!HasArguments && !HasInitializer)
             if (IsTypeSupported(parsingContext, objectCreationExpression.Type, out ExpressionType ObjectType))
+            {
                 NewExpression = new NewObjectExpression() { ObjectType = ObjectType };
+
+                Debug.Assert(NewExpression.LocationId != LocationId.None);
+            }
 
         return NewExpression;
     }

@@ -15,6 +15,9 @@ internal class LiteralIntegerValueExpression : Expression, ILiteralExpression<in
     public override ExpressionType GetExpressionType() => ExpressionType.Integer;
 
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     public int Value { get; set; }
 
     /// <inheritdoc/>

@@ -27,6 +27,9 @@ internal class BinaryArithmeticExpression : Expression, IBinaryExpression
         return ExpressionType.Integer;
     }
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the left expression.
     /// </summary>

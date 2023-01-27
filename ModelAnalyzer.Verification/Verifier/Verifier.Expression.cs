@@ -393,7 +393,7 @@ internal partial class Verifier : IDisposable
         if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
         {
             IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, binaryArithmeticExpression, VerificationErrorType.AssumeError))
             {
                 resultExprSet = Context.ZeroSet;
                 return false;
@@ -415,7 +415,7 @@ internal partial class Verifier : IDisposable
         bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IExprSet<IIntExprCapsule> Right);
 
         IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
-        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, index: -1, remainderExpression.ToString(), VerificationErrorType.AssumeError))
+        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, remainderExpression, VerificationErrorType.AssumeError))
         {
             resultExprSet = Context.ZeroSet;
             return false;

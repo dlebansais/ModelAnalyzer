@@ -14,6 +14,9 @@ internal class UnaryLogicalExpression : Expression, IUnaryExpression
     /// <inheritdoc/>
     public override ExpressionType GetExpressionType() => ExpressionType.Boolean;
 
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the logical operator.
     /// </summary>
