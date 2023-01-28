@@ -29,4 +29,7 @@ internal class PrivateMethodCallStatement : Statement, IMethodCallStatement, IPr
 
     /// <inheritdoc/>
     required public ClassName CallerClassName { get; init; }
+
+    /// <inheritdoc/>
+    public bool IsStatic { get => ClassName != ClassName.Empty; }
 }

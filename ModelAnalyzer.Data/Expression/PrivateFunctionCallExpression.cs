@@ -45,6 +45,9 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     required public ClassName CallerClassName { get; init; }
 
     /// <inheritdoc/>
+    public bool IsStatic { get => ClassName != ClassName.Empty; }
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         string StaticString = ClassName == ClassName.Empty ? string.Empty : $"{ClassName}.";

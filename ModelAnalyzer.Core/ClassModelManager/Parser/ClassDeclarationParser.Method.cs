@@ -287,7 +287,7 @@ internal partial class ClassDeclarationParser
     {
         ClassModel? Result = null;
 
-        if (call.ClassName != ClassName.Empty)
+        if (call.IsStatic)
             Result = GetClassModel(parsingContext, call.ClassName);
         else if (call is IPublicCall AsPublicCall)
         {

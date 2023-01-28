@@ -33,4 +33,9 @@ internal interface ICall
     /// Gets the name of the class where the caller is found.
     /// </summary>
     ClassName CallerClassName { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the call is to a static method or function.
+    /// </summary>
+    bool IsStatic { get; }
 }
