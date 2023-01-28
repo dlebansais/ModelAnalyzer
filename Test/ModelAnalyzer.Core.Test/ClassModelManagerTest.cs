@@ -18,7 +18,7 @@ using ProcessCommunication;
 /// <summary>
 /// Tests for the <see cref="ClassModelManager"/> class.
 /// </summary>
-public class ClassModelManagerTest
+public partial class ClassModelManagerTest
 {
     [Test]
     [Category("Core")]
@@ -218,6 +218,19 @@ class Program_CoreClassModelManager_7
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, DuplicateVerificationWithUpdate);
     }
 
+    private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
     [Test]
     [Category("Core")]
     public void ClassModelManager_VerificationWithErrorAndUpdate()
@@ -234,6 +247,21 @@ class Program_CoreClassModelManager_8
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithErrorAndUpdate);
+    }
+
+    private void VerificationWithErrorAndUpdate(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+
+        Manager.GetVerifiedModel(ClassModel);
     }
 
     [Test]
@@ -253,6 +281,20 @@ class Program_CoreClassModelManager_9
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithAutoStart);
     }
 
+    private void UpdateWithAutoStart(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
+
+        Manager.GetVerifiedModel(ClassModel);
+    }
+
     [Test]
     [Category("Core")]
     public void ClassModelManager_UpdateWithBlockedClientChannel()
@@ -268,424 +310,6 @@ class Program_CoreClassModelManager_10
         using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
         TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedClientChannel);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithBlockedServerChannel()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_11
-{
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerChannel);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithBlockedServerProcess()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_12
-{
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerProcess);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithCorruptedResult()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_13
-{
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithCorruptedResult);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithClassDisappeared()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_14
-{
-    int X;
-}
-// Invariant: X > 0
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_15
-{
-    int X;
-}
-// Invariant: X > 0
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithClassDisappeared);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithLittleCapacity()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_16
-{
-    int X;
-}
-// Invariant: X > 0
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithLittleCapacity);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_VerificationWithResult()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_17
-{
-    int X;
-
-    public int Read()
-    {
-        X = 1;
-        return X;
-    }
-    // Ensure: Result == 0
-}
-// Invariant: X == 0
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithResult);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_VerificationWithContradictoryRequire()
-    {
-        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_18
-{
-    int X;
-
-    public void Write1(int x)
-    {
-        X = x;
-    }
-
-    public void Write2(int x)
-    // Require: x == 0
-    // Require: x != 0
-    {
-        X = x;
-    }
-}
-").First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithContradictoryRequire);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithInvariantDisappeared()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_19
-{
-    int X;
-}
-// Invariant: X > 0
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_19
-{
-    int X;
-}
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantDisappeared);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithInvariantStillThere()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_20
-{
-    int X;
-}
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_20
-{
-    int X;
-}
-// Invariant: X > 0
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantStillThere);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithRequireDisappeared()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_21
-{
-    int X;
-
-    public void Write(int x)
-    // Require: x == 0
-    // Require: x != 0
-    {
-        X = x;
-    }
-}
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_21
-{
-    int X;
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-}
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireDisappeared);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithRequireStillThere()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_22
-{
-    int X;
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-}
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_22
-{
-    int X;
-
-    public void Write(int x)
-    // Require: x == 0
-    // Require: x != 0
-    {
-        X = x;
-    }
-}
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireStillThere);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithEnsureDisappeared()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_23
-{
-    public int X { get; set; }
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-    // Ensure: X == 0
-}
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_23
-{
-    int X;
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-}
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureDisappeared);
-    }
-
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_UpdateWithEnsureStillThere()
-    {
-        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_24
-{
-    int X;
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-}
-").First();
-
-        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
-using System;
-
-class Program_CoreClassModelManager_24
-{
-    public int X { get; set; }
-
-    public void Write(int x)
-    {
-        X = x;
-    }
-    // Ensure: X == 0
-}
-",
-isClassNameRepeated: true).First();
-
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
-
-        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureStillThere);
-    }
-
-    private void RemoveClasses(ClassModelManager manager, List<ClassName> existingClassNameList)
-    {
-        manager.RemoveMissingClasses(existingClassNameList);
-    }
-
-    private void DuplicateVerificationWithUpdate(List<ClassDeclarationSyntax> classDeclarationList)
-    {
-        IClassModel ClassModel;
-        MadeUpSemanticModel SemanticModel = new();
-
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
-
-        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
-        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
-
-        Manager.GetVerifiedModel(ClassModel);
-    }
-
-    private void VerificationWithErrorAndUpdate(List<ClassDeclarationSyntax> classDeclarationList)
-    {
-        ClassDeclarationSyntax ClassDeclaration = classDeclarationList[0];
-        IClassModel ClassModel;
-        MadeUpSemanticModel SemanticModel = new();
-
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
-
-        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
-
-        Manager.GetVerifiedModel(ClassModel);
-    }
-
-    private void UpdateWithAutoStart(List<ClassDeclarationSyntax> classDeclarationList)
-    {
-        IClassModel ClassModel;
-        MadeUpSemanticModel SemanticModel = new();
-
-        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
-
-        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
-
-        Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
-
-        Manager.GetVerifiedModel(ClassModel);
     }
 
     private void UpdateWithBlockedClientChannel(List<ClassDeclarationSyntax> classDeclarationList)
@@ -707,6 +331,23 @@ isClassNameRepeated: true).First();
         Manager.GetVerifiedModel(ClassModel);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithBlockedServerChannel()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_11
+{
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerChannel);
+    }
+
     private void UpdateWithBlockedServerChannel(List<ClassDeclarationSyntax> classDeclarationList)
     {
         IClassModel ClassModel;
@@ -724,6 +365,23 @@ isClassNameRepeated: true).First();
         Assert.That(ClassModel.Unsupported.IsEmpty, Is.True);
 
         Manager.GetVerifiedModel(ClassModel);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithBlockedServerProcess()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_12
+{
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithBlockedServerProcess);
     }
 
     private void UpdateWithBlockedServerProcess(List<ClassDeclarationSyntax> classDeclarationList)
@@ -783,6 +441,23 @@ isClassNameRepeated: true).First();
         Extractor.Reset();
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithCorruptedResult()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_13
+{
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithCorruptedResult);
+    }
+
     private void UpdateWithCorruptedResult(List<ClassDeclarationSyntax> classDeclarationList)
     {
         IClassModel ClassModel;
@@ -804,6 +479,35 @@ isClassNameRepeated: true).First();
         Channel.Write(EmptyPacketBytes);
 
         Manager.GetVerifiedModel(ClassModel);
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithClassDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_14
+{
+    int X;
+}
+// Invariant: X > 0
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_15
+{
+    int X;
+}
+// Invariant: X > 0
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithClassDisappeared);
     }
 
     private void UpdateWithClassDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
@@ -830,6 +534,25 @@ isClassNameRepeated: true).First();
         Assert.That(ClassModel1.InvariantViolations.Count, Is.EqualTo(1));
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithLittleCapacity()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_16
+{
+    int X;
+}
+// Invariant: X > 0
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, UpdateWithLittleCapacity);
+    }
+
     private void UpdateWithLittleCapacity(List<ClassDeclarationSyntax> classDeclarationList)
     {
         IClassModel ClassModel;
@@ -854,6 +577,32 @@ isClassNameRepeated: true).First();
         Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(0));
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_VerificationWithResult()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_17
+{
+    int X;
+
+    public int Read()
+    {
+        X = 1;
+        return X;
+    }
+    // Ensure: Result == 0
+}
+// Invariant: X == 0
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithResult);
+    }
+
     private void VerificationWithResult(List<ClassDeclarationSyntax> classDeclarationList)
     {
         IClassModel ClassModel;
@@ -865,6 +614,36 @@ isClassNameRepeated: true).First();
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_VerificationWithContradictoryRequire()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_18
+{
+    int X;
+
+    public void Write1(int x)
+    {
+        X = x;
+    }
+
+    public void Write2(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithContradictoryRequire);
     }
 
     private void VerificationWithContradictoryRequire(List<ClassDeclarationSyntax> classDeclarationList)
@@ -885,11 +664,72 @@ isClassNameRepeated: true).First();
         Assert.That(RequireViolation.Require, Is.Not.Null);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithInvariantDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_19
+{
+    int X;
+}
+// Invariant: X > 0
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_19
+{
+    int X;
+}
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantDisappeared);
+    }
+
     private void UpdateWithInvariantDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
         UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithInvariantStillThere()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_20
+{
+    int X;
+    int Y;
+}
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_20
+{
+    int X;
+    int Y;
+}
+// Invariant: X == 0
+// Invariant: Y > 0
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithInvariantStillThere);
     }
 
     private void UpdateWithInvariantStillThere(List<ClassDeclarationSyntax> classDeclarationList)
@@ -899,11 +739,91 @@ isClassNameRepeated: true).First();
         Assert.That(ClassModel.InvariantViolations.Count, Is.EqualTo(1));
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithRequireDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_21
+{
+    int X;
+
+    public void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_21
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireDisappeared);
+    }
+
     private void UpdateWithRequireDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
         UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithRequireStillThere()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_22
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+}
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_22
+{
+    int X;
+
+    public void Write(int x)
+    // Require: x == 0
+    // Require: x != 0
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithRequireStillThere);
     }
 
     private void UpdateWithRequireStillThere(List<ClassDeclarationSyntax> classDeclarationList)
@@ -918,6 +838,45 @@ isClassNameRepeated: true).First();
         Assert.That(RequireViolation.Require, Is.Not.Null);
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithEnsureDisappeared()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_23
+{
+    public int X { get; set; }
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == 0
+}
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_23
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+}
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureDisappeared);
+    }
+
     private void UpdateWithEnsureDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
     {
         UpdateWithReadingDelayAdded(classDeclarationList, out IClassModel ClassModel);
@@ -925,11 +884,55 @@ isClassNameRepeated: true).First();
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(0));
     }
 
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_UpdateWithEnsureStillThere()
+    {
+        ClassDeclarationSyntax ClassDeclaration0 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_24
+{
+    int X;
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+}
+").First();
+
+        ClassDeclarationSyntax ClassDeclaration1 = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_24
+{
+    public int X { get; set; }
+
+    public void Write(int x)
+    {
+        X = x;
+    }
+    // Ensure: X == 0
+}
+",
+isClassNameRepeated: true).First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration0);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration0, ClassDeclaration1 }, TokenReplacement, UpdateWithEnsureStillThere);
+    }
+
     private void UpdateWithEnsureStillThere(List<ClassDeclarationSyntax> classDeclarationList)
     {
         UpdateWithReadingUnchangedDelay(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.EnsureViolations.Count, Is.EqualTo(1));
+    }
+
+    private void RemoveClasses(ClassModelManager manager, List<ClassName> existingClassNameList)
+    {
+        manager.RemoveMissingClasses(existingClassNameList);
     }
 
     private void UpdateWithReadingDelayAdded(List<ClassDeclarationSyntax> classDeclarationList, out IClassModel classModel)
@@ -988,37 +991,101 @@ isClassNameRepeated: true).First();
 
     [Test]
     [Category("Core")]
-    public void ClassModelManager_Dispose()
+    public void ClassModelManager_RequireViolationInPrivateStaticFunction()
     {
-        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
-        {
-        }
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_25
+{
+    static double NotUsed(double d)
+    {
+        return d;
+    }
+
+    static double Write(double d)
+    // Require: d >= 0
+    {
+        return d;
+    }
+    // Ensure: Result >= 0
+
+    public double TestWrite(double d)
+    {
+        return Write(d);
+    }
+    // Ensure: Result >= 0
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, RequireViolationInPrivateStaticFunction);
+    }
+
+    private void RequireViolationInPrivateStaticFunction(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
+
+        Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+
+        IRequireViolation RequireViolation = ClassModel.RequireViolations.First();
+        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Write"));
+        Assert.That(RequireViolation.Text, Is.EqualTo("d >= 0"));
+        Assert.That(RequireViolation.Expression, Is.Not.Null);
     }
 
     [Test]
     [Category("Core")]
-    public void ClassModelManager_DoubleDispose()
+    public void ClassModelManager_RequireViolationInPrivateStaticMethod()
     {
-        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
-        {
-            TestObject.Dispose();
-        }
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_26
+{
+    static void NotUsed(double d)
+    {
     }
 
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_FakeFinalize()
+    static void Write(double d)
+    // Require: d >= 0
     {
-        using (ClassModelManagerExtended TestObject = new ClassModelManagerExtended())
-        {
-            TestObject.FakeFinalize();
-        }
     }
 
-    [Test]
-    [Category("Core")]
-    public void ClassModelManager_Destructor()
+    public void TestWrite(double d)
     {
-        using ClassModelManagerContainer Container = new();
+        Write(d);
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, RequireViolationInPrivateStaticMethod);
+    }
+
+    private void RequireViolationInPrivateStaticMethod(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
+
+        Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+
+        IRequireViolation RequireViolation = ClassModel.RequireViolations.First();
+        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Write"));
+        Assert.That(RequireViolation.Text, Is.EqualTo("d >= 0"));
+        Assert.That(RequireViolation.Statement, Is.Not.Null);
     }
 }
