@@ -126,6 +126,7 @@ internal partial class ClassDeclarationParser
 
         Log($"Parsing declaration of class '{ClassName}', phase two");
 
+        LocationId.Reset();
         ParsingContext ParsingContext = new() { ClassDeclarationList = ClassDeclarationList, ClassName = ClassName, SemanticModel = SemanticModel };
 
         if (IsClassDeclarationSupported(ClassDeclaration))

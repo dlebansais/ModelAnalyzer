@@ -23,5 +23,14 @@ internal record LocationId
         return new LocationId() { Id = ++GlobalId };
     }
 
+    /// <summary>
+    /// Resets the ID seed.
+    /// </summary>
+    public static void Reset()
+    {
+        // TODO: replace with a correct system in which expressions and statements keep their location ID properly.
+        GlobalId = 0;
+    }
+
     private static long GlobalId = 0;
 }
