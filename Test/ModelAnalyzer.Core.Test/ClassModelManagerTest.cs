@@ -1089,4 +1089,21 @@ class Program_CoreClassModelManager_26
         Assert.That(RequireViolation.Text, Is.EqualTo("d >= 0"));
         Assert.That(RequireViolation.Statement, Is.Not.Null);
     }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_EmptyClassList()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_27
+{
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ToClassModel(new List<ClassDeclarationSyntax>(), TokenReplacement);
+    }
 }
