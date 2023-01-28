@@ -94,6 +94,9 @@ public partial class ClassModelManager : IDisposable
     /// <exception cref="ArgumentException">Empty class name.</exception>
     public IDictionary<ClassDeclarationSyntax, IClassModel> GetClassModels(CompilationContext compilationContext, List<ClassDeclarationSyntax> classDeclarationList, IModel semanticModel)
     {
+        if (classDeclarationList.Count == 0)
+            return new Dictionary<ClassDeclarationSyntax, IClassModel>();
+
         string ClassNames = string.Empty;
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
