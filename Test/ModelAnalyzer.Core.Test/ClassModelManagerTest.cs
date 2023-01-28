@@ -998,12 +998,12 @@ using System;
 
 class Program_CoreClassModelManager_25
 {
-    static double NotUsed(double d)
+    static double Other(double d)
     {
         return d;
     }
 
-    static double Write(double d)
+    static double Read(double d)
     // Require: d >= 0
     {
         return d;
@@ -1012,7 +1012,7 @@ class Program_CoreClassModelManager_25
 
     public double TestWrite(double d)
     {
-        return Write(d);
+        return Other(d) + Read(d);
     }
     // Ensure: Result >= 0
 }
@@ -1036,7 +1036,7 @@ class Program_CoreClassModelManager_25
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
 
         IRequireViolation RequireViolation = ClassModel.RequireViolations.First();
-        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Write"));
+        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Read"));
         Assert.That(RequireViolation.Text, Is.EqualTo("d >= 0"));
         Assert.That(RequireViolation.Expression, Is.Not.Null);
     }
@@ -1050,7 +1050,7 @@ using System;
 
 class Program_CoreClassModelManager_26
 {
-    static void NotUsed(double d)
+    static void Other(double d)
     {
     }
 
@@ -1061,6 +1061,7 @@ class Program_CoreClassModelManager_26
 
     public void TestWrite(double d)
     {
+        Other(d);
         Write(d);
     }
 }
