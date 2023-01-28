@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a call to a function as an expression.
 /// </summary>
-internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpression
+internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpression, IPrivateCall
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -27,7 +27,7 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>
-    required public MethodName Name { get; init; }
+    required public MethodName MethodName { get; init; }
 
     /// <summary>
     /// Gets the function return type.
@@ -42,11 +42,14 @@ internal class PrivateFunctionCallExpression : Expression, IFunctionCallExpressi
     required public List<Argument> ArgumentList { get; init; }
 
     /// <inheritdoc/>
+    required public ClassName CallerClassName { get; init; }
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         string StaticString = ClassName == ClassName.Empty ? string.Empty : $"{ClassName}.";
         string ArgumentString = string.Join(", ", ArgumentList);
 
-        return $"{StaticString}{Name.Text}({ArgumentString})";
+        return $"{StaticString}{MethodName.Text}({ArgumentString})";
     }
 }

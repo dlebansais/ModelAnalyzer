@@ -1,7 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// Represents data exchanged between the class model manager and the verifier.

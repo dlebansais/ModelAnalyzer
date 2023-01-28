@@ -8,6 +8,9 @@ using System.Diagnostics;
 [DebuggerDisplay("{DestinationName.Text} = {Expression}")]
 internal class AssignmentStatement : Statement
 {
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the destination variable name.
     /// </summary>

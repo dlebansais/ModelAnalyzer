@@ -39,8 +39,8 @@ public class RequireViolationAnalyzer : Analyzer
         foreach (IRequireViolation RequireViolation in classModel.RequireViolations)
         {
             string MethodName = RequireViolation.Method.Name.Text;
-            string RequireText = RequireViolation.Require.Text;
-            Location Location = RequireViolation.Require.Location;
+            string RequireText = RequireViolation.Text;
+            Location Location = RequireViolation.NameLocation;
 
             Logger.Log(LogLevel.Error, $"Method '{MethodName}': reporting require '{RequireText}' violated.");
             context.ReportDiagnostic(Diagnostic.Create(Rule, Location, MethodName, RequireText));

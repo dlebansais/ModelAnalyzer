@@ -11,4 +11,9 @@ internal interface IPublicCall
     /// Gets the variable path.
     /// </summary>
     List<IVariable> VariablePath { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the call is to a static method or function.
+    /// </summary>
+    bool IsStatic { get; }
 }

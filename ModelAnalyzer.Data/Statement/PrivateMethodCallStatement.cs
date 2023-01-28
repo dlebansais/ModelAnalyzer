@@ -9,13 +9,16 @@ using Newtonsoft.Json;
 /// Represents a call to a method statement.
 /// </summary>
 [DebuggerDisplay("{Name.Text}({string.Join(\", \", ArgumentList)})")]
-internal class PrivateMethodCallStatement : Statement, IMethodCallStatement
+internal class PrivateMethodCallStatement : Statement, IMethodCallStatement, IPrivateCall
 {
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <inheritdoc/>
     required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>
-    required public MethodName Name { get; init; }
+    required public MethodName MethodName { get; init; }
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -23,4 +26,7 @@ internal class PrivateMethodCallStatement : Statement, IMethodCallStatement
 
     /// <inheritdoc/>
     required public List<Argument> ArgumentList { get; init; }
+
+    /// <inheritdoc/>
+    required public ClassName CallerClassName { get; init; }
 }

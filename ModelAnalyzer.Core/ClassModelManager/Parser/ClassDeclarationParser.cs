@@ -73,6 +73,16 @@ internal partial class ClassDeclarationParser
     public Unsupported Unsupported { get; private set; } = new();
 
     /// <summary>
+    /// Gets the list of method call statements.
+    /// </summary>
+    public List<MethodCallStatementEntry> MethodCallStatementList { get; private set; } = new();
+
+    /// <summary>
+    /// Gets the list of function call expressions.
+    /// </summary>
+    public List<FunctionCallStatementEntry> FunctionCallExpressionList { get; private set; } = new();
+
+    /// <summary>
     /// Parses the class declaration, first phase.
     /// </summary>
     public void ParsePhase1()
@@ -135,6 +145,8 @@ internal partial class ClassDeclarationParser
             FieldTable = ParsingContext.FieldTable.AsReadOnly();
             MethodTable = ParsingContext.MethodTable.AsReadOnly();
             InvariantList = ParsingContext.InvariantList.AsReadOnly();
+            MethodCallStatementList = ParsingContext.MethodCallStatementList;
+            FunctionCallExpressionList = ParsingContext.FunctionCallExpressionList;
         }
         else
         {
@@ -610,11 +622,15 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryParseLastNameAsMethod(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out Method method)
+    private bool TryParseLastNameAsMethod(ParsingContext parsingContext, List<IVariable> variablePath, string lastName, out ClassName className, out Method method)
     {
         if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
+        {
+            className = ClassModel.ClassName;
             return TryParseLastNameAsMethod(parsingContext, ClassModel, lastName, out method);
+        }
 
+        className = null!;
         method = null!;
         return false;
     }

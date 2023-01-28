@@ -9,6 +9,9 @@ using System.Diagnostics;
 [DebuggerDisplay("if ({Condition}) then ...")]
 internal class ConditionalStatement : Statement
 {
+    /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
     /// <summary>
     /// Gets the condition.
     /// </summary>

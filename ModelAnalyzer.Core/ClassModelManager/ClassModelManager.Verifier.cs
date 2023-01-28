@@ -182,7 +182,7 @@ public partial class ClassModelManager : IDisposable
     {
         ClassModelTable ClassModelTable = Context.VerificationState.ModelExchange.ClassModelTable;
         ClassModel OldClassModel = ClassModelTable[className];
-        ClassModel NewClassModel = WithFilledViolationLists(OldClassModel, verificationResult);
+        ClassModel NewClassModel = WithFilledViolationLists(ClassModelTable, MethodCallStatementList, FunctionCallExpressionList, OldClassModel, verificationResult);
         ClassModelTable[className] = NewClassModel;
 
         Dictionary<ClassName, VerificationResult> VerificationResultTable = new(Context.VerificationState.VerificationResultTable);
@@ -195,7 +195,7 @@ public partial class ClassModelManager : IDisposable
         Context.VerificationState = Context.VerificationState with { VerificationResultTable = VerificationResultTable };
     }
 
-    private static ClassModel WithFilledViolationLists(ClassModel oldClassModel, VerificationResult verificationResult)
+    private static ClassModel WithFilledViolationLists(ClassModelTable classModelTable, List<MethodCallStatementEntry> methodCallStatementList, List<FunctionCallStatementEntry> functionCallExpressionList, ClassModel oldClassModel, VerificationResult verificationResult)
     {
         string MethodName = verificationResult.MethodName;
         Method? SelectedMethod = null;
@@ -209,8 +209,8 @@ public partial class ClassModelManager : IDisposable
 
         if (verificationResult.ErrorType == VerificationErrorType.InvariantError)
             return WithFilledInvariantViolationLists(oldClassModel, verificationResult);
-        else if (verificationResult.ErrorType == VerificationErrorType.RequireError && SelectedMethod is not null)
-            return WithFilledRequireViolationLists(oldClassModel, verificationResult, SelectedMethod);
+        else if (verificationResult.ErrorType == VerificationErrorType.RequireError)
+            return WithFilledRequireViolationLists(classModelTable, methodCallStatementList, functionCallExpressionList, oldClassModel, verificationResult);
         else if (verificationResult.ErrorType == VerificationErrorType.EnsureError && SelectedMethod is not null)
             return WithFilledEnsureViolationLists(oldClassModel, verificationResult, SelectedMethod);
         else if (verificationResult.ErrorType == VerificationErrorType.AssumeError)
@@ -239,24 +239,85 @@ public partial class ClassModelManager : IDisposable
         return NewClassModel;
     }
 
-    private static ClassModel WithFilledRequireViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
+    private static ClassModel WithFilledRequireViolationLists(ClassModelTable classModelTable, List<MethodCallStatementEntry> methodCallStatementList, List<FunctionCallStatementEntry> functionCallExpressionList, ClassModel oldClassModel, VerificationResult verificationResult)
     {
         LocationId LocationId = verificationResult.LocationId;
         List<IRequireViolation> RequireViolations = new();
-        List<Require> RequireList = method.RequireList;
+        RequireViolation? NewRequireViolation = null;
 
         Debug.Assert(LocationId != LocationId.None);
 
-        foreach (Require Require in RequireList)
-            if (((Expression)Require.BooleanExpression).LocationId == LocationId)
+        foreach (MethodCallStatementEntry Entry in methodCallStatementList)
+            if (((Statement)Entry.Statement).LocationId == LocationId)
             {
-                RequireViolation NewRequireViolation = new() { Method = method, Require = Require };
-                RequireViolations.Add(NewRequireViolation);
+                Method Method = GetCalledMethod(classModelTable, Entry.Statement);
+                NewRequireViolation = new() { Method = Method, Text = verificationResult.ErrorText, NameLocation = Entry.Statement.NameLocation, Statement = Entry.Statement as IStatement, Expression = null, Require = null };
+                break;
             }
+
+        foreach (FunctionCallStatementEntry Entry in functionCallExpressionList)
+            if (((Expression)Entry.Expression).LocationId == LocationId)
+            {
+                Method Method = GetCalledMethod(classModelTable, Entry.Expression);
+                NewRequireViolation = new() { Method = Method, Text = verificationResult.ErrorText, NameLocation = Entry.Expression.NameLocation, Statement = null, Expression = Entry.Expression as IExpression, Require = null };
+                break;
+            }
+
+        if (NewRequireViolation is null)
+        {
+            string MethodName = verificationResult.MethodName;
+            Method? SelectedMethod = null;
+
+            foreach (var Entry in oldClassModel.MethodTable)
+                if (Entry.Key.Text == MethodName)
+                {
+                    SelectedMethod = Entry.Value;
+                    break;
+                }
+
+            Debug.Assert(SelectedMethod is not null);
+            List<Require> RequireList = SelectedMethod!.RequireList;
+
+            foreach (Require Require in RequireList)
+                if (((Expression)Require.BooleanExpression).LocationId == LocationId)
+                {
+                    NewRequireViolation = new() { Method = SelectedMethod!, Text = verificationResult.ErrorText, NameLocation = Require.Location, Expression = null, Statement = null, Require = Require };
+                    break;
+                }
+        }
+
+        if (NewRequireViolation is not null)
+        {
+            Debug.Assert(NewRequireViolation.Statement is not null || NewRequireViolation.Expression is not null || NewRequireViolation.Require is not null);
+            RequireViolations.Add(NewRequireViolation);
+        }
 
         ClassModel NewClassModel = oldClassModel with { RequireViolations = RequireViolations.AsReadOnly() };
 
         return NewClassModel;
+    }
+
+    private static Method GetCalledMethod(ClassModelTable classModelTable, ICall call)
+    {
+        ClassName CalledClassName = call is IPublicCall ? call.ClassName : call.CallerClassName;
+
+        Debug.Assert(CalledClassName != ClassName.Empty);
+        Debug.Assert(classModelTable.ContainsKey(CalledClassName));
+
+        ClassModel CalledClassModel = classModelTable[CalledClassName];
+        MethodName MethodName = call.MethodName;
+        Method? SelectedMethod = null;
+
+        foreach (var Entry in CalledClassModel.MethodTable)
+            if (Entry.Key == MethodName)
+            {
+                SelectedMethod = Entry.Value;
+                break;
+            }
+
+        Debug.Assert(SelectedMethod is not null);
+
+        return SelectedMethod!;
     }
 
     private static ClassModel WithFilledEnsureViolationLists(ClassModel oldClassModel, VerificationResult verificationResult, Method method)
@@ -419,4 +480,6 @@ public partial class ClassModelManager : IDisposable
     }
 
     private Channel FromServerChannel;
+    private List<MethodCallStatementEntry> MethodCallStatementList = new();
+    private List<FunctionCallStatementEntry> FunctionCallExpressionList = new();
 }

@@ -9,14 +9,15 @@ using Microsoft.CodeAnalysis;
 internal interface ICall
 {
     /// <summary>
-    /// Gets the name of the class for a static method.
+    /// Gets the name of the class containing the called method.
+    /// <see cref="ClassName.Empty"/> for a non-static private call.
     /// </summary>
     ClassName ClassName { get; }
 
     /// <summary>
     /// Gets the function or method name.
     /// </summary>
-    MethodName Name { get; }
+    MethodName MethodName { get; }
 
     /// <summary>
     /// Gets the list of arguments.
@@ -27,4 +28,9 @@ internal interface ICall
     /// Gets the function or method name location.
     /// </summary>
     Location NameLocation { get; }
+
+    /// <summary>
+    /// Gets the name of the class where the caller is found.
+    /// </summary>
+    ClassName CallerClassName { get; }
 }

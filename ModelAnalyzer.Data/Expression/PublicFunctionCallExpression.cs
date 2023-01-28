@@ -30,7 +30,7 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     required public List<IVariable> VariablePath { get; init; }
 
     /// <inheritdoc/>
-    required public MethodName Name { get; init; }
+    required public MethodName MethodName { get; init; }
 
     /// <summary>
     /// Gets the function return type.
@@ -45,11 +45,17 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
     required public List<Argument> ArgumentList { get; init; }
 
     /// <inheritdoc/>
+    required public ClassName CallerClassName { get; init; }
+
+    /// <inheritdoc/>
+    public bool IsStatic { get => VariablePath.Count == 0; }
+
+    /// <inheritdoc/>
     public override string ToString()
     {
         List<string> NamePath;
 
-        if (ClassName != ClassName.Empty)
+        if (IsStatic)
             NamePath = ClassName.ToNamePath();
         else
             NamePath = VariablePath.ConvertAll(item => item.Name.Text);
@@ -57,6 +63,6 @@ internal class PublicFunctionCallExpression : Expression, IFunctionCallExpressio
         string PathString = string.Join(".", NamePath);
         string ArgumentString = string.Join(", ", ArgumentList);
 
-        return $"{PathString}.{Name.Text}({ArgumentString})";
+        return $"{PathString}.{MethodName.Text}({ArgumentString})";
     }
 }

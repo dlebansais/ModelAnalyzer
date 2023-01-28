@@ -115,7 +115,7 @@ internal partial class Verifier : IDisposable
         bool IsExecuted = false;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == methodCallStatement.Name)
+            if (Entry.Key == methodCallStatement.MethodName)
             {
                 Method CalledMethod = Entry.Value;
                 Result = AddPrivateMethodCallExecution(verificationContext, methodCallStatement, CalledMethod);
@@ -146,7 +146,7 @@ internal partial class Verifier : IDisposable
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, ResultLocal = null };
 
-        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+        if (!AddMethodRequires(CallVerificationContext, methodCallStatement.CallerClassName, methodCallStatement.LocationId, checkOpposite: true))
             return false;
 
         if (!AddStatementListExecution(CallVerificationContext, calledMethod.StatementList))
@@ -164,7 +164,7 @@ internal partial class Verifier : IDisposable
         ClassModel ClassModel;
         Instance CalledInstance;
 
-        if (methodCallStatement.ClassName != ClassName.Empty)
+        if (methodCallStatement.IsStatic)
         {
             ClassModel = GetClassModel(verificationContext, methodCallStatement.ClassName);
             CalledInstance = new() { ClassModel = ClassModel, Expr = verificationContext.ObjectManager.Context.Null };
@@ -183,7 +183,7 @@ internal partial class Verifier : IDisposable
         bool IsExecuted = false;
 
         foreach (var Entry in ClassModel.MethodTable)
-            if (Entry.Key == methodCallStatement.Name)
+            if (Entry.Key == methodCallStatement.MethodName)
             {
                 Method CalledMethod = Entry.Value;
                 Result = AddPublicMethodCallExecution(verificationContext, methodCallStatement, CalledInstance, CalledMethod);
@@ -221,7 +221,7 @@ internal partial class Verifier : IDisposable
 
         bool IsStaticCall = calledInstance.Expr == verificationContext.ObjectManager.Context.Null;
 
-        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+        if (!AddMethodRequires(CallVerificationContext, methodCallStatement.CallerClassName, methodCallStatement.LocationId, checkOpposite: true))
             return false;
 
         if (!IsStaticCall)

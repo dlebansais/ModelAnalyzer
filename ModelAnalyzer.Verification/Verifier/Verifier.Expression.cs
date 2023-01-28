@@ -208,7 +208,7 @@ internal partial class Verifier : IDisposable
         resultExpr = null!;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == functionCallExpression.Name)
+            if (Entry.Key == functionCallExpression.MethodName)
             {
                 Method CalledFunction = Entry.Value;
                 Result = BuildPrivateFunctionCallExpression(verificationContext, functionCallExpression, CalledFunction, out resultExpr);
@@ -243,7 +243,7 @@ internal partial class Verifier : IDisposable
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = CallResult };
 
-        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+        if (!AddMethodRequires(CallVerificationContext, functionCallExpression.CallerClassName, functionCallExpression.LocationId, checkOpposite: true))
             return false;
 
         if (!AddStatementListExecution(CallVerificationContext, calledFunction.StatementList))
@@ -265,7 +265,7 @@ internal partial class Verifier : IDisposable
         ClassModel ClassModel;
         Instance CalledInstance;
 
-        if (functionCallExpression.ClassName != ClassName.Empty)
+        if (functionCallExpression.IsStatic)
         {
             ClassModel = GetClassModel(verificationContext, functionCallExpression.ClassName);
             CalledInstance = new() { ClassModel = ClassModel, Expr = verificationContext.ObjectManager.Context.Null };
@@ -282,7 +282,7 @@ internal partial class Verifier : IDisposable
         }
 
         foreach (var Entry in ClassModel.MethodTable)
-            if (Entry.Key == functionCallExpression.Name)
+            if (Entry.Key == functionCallExpression.MethodName)
             {
                 Method CalledFunction = Entry.Value;
                 Result = BuildPublicFunctionCallExpression(verificationContext, functionCallExpression, CalledInstance, CalledFunction, out resultExpr);
@@ -324,7 +324,7 @@ internal partial class Verifier : IDisposable
 
         bool IsStaticCall = calledInstance.Expr == verificationContext.ObjectManager.Context.Null;
 
-        if (!AddMethodRequires(CallVerificationContext, checkOpposite: true))
+        if (!AddMethodRequires(CallVerificationContext, functionCallExpression.CallerClassName, functionCallExpression.LocationId, checkOpposite: true))
             return false;
 
         if (!IsStaticCall)
@@ -393,7 +393,7 @@ internal partial class Verifier : IDisposable
         if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
         {
             IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, binaryArithmeticExpression, VerificationErrorType.AssumeError))
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, binaryArithmeticExpression.LocationId, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
             {
                 resultExprSet = Context.ZeroSet;
                 return false;
@@ -415,7 +415,7 @@ internal partial class Verifier : IDisposable
         bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IExprSet<IIntExprCapsule> Right);
 
         IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
-        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, remainderExpression, VerificationErrorType.AssumeError))
+        if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, remainderExpression.LocationId, remainderExpression.ToString(), VerificationErrorType.AssumeError))
         {
             resultExprSet = Context.ZeroSet;
             return false;

@@ -270,6 +270,9 @@ public partial class ClassModelManager : IDisposable
         foreach (KeyValuePair<ClassName, ClassModel> Entry in PreloadedClasses)
             newClassModelTable.Add(Entry.Key, Entry.Value);
 
+        MethodCallStatementList.Clear();
+        FunctionCallExpressionList.Clear();
+
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
             ClassModel NewClassModel = AddOrUpdateClassModelPhase2(oldClassModelTable, newClassModelTable, classDeclarationList, ClassDeclaration, semanticModel);
@@ -322,6 +325,9 @@ public partial class ClassModelManager : IDisposable
         }
 
         newClassModelTable.Add(ClassName, NewClassModel);
+
+        MethodCallStatementList.AddRange(Parser.MethodCallStatementList);
+        FunctionCallExpressionList.AddRange(Parser.FunctionCallExpressionList);
 
         return NewClassModel;
     }

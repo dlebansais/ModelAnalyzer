@@ -878,6 +878,11 @@ isClassNameRepeated: true).First();
         ClassModel = Manager.GetVerifiedModel(ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+
+        IRequireViolation RequireViolation = ClassModel.RequireViolations.First();
+        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Write2"));
+        Assert.That(RequireViolation.Text, Is.EqualTo("x != 0"));
+        Assert.That(RequireViolation.Require, Is.Not.Null);
     }
 
     private void UpdateWithInvariantDisappeared(List<ClassDeclarationSyntax> classDeclarationList)
@@ -906,6 +911,11 @@ isClassNameRepeated: true).First();
         UpdateWithReadingUnchangedDelay(classDeclarationList, out IClassModel ClassModel);
 
         Assert.That(ClassModel.RequireViolations.Count, Is.EqualTo(1));
+
+        IRequireViolation RequireViolation = ClassModel.RequireViolations.First();
+        Assert.That(RequireViolation.Method.Name.Text, Is.EqualTo("Write"));
+        Assert.That(RequireViolation.Text, Is.EqualTo("x != 0"));
+        Assert.That(RequireViolation.Require, Is.Not.Null);
     }
 
     private void UpdateWithEnsureDisappeared(List<ClassDeclarationSyntax> classDeclarationList)

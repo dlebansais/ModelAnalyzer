@@ -268,7 +268,7 @@ internal partial class Verifier : IDisposable
         Method HostMethod = verificationContext.HostMethod!;
 
         AddMethodParameterStates(verificationContext);
-        if (!AddMethodRequires(verificationContext, checkOpposite: false))
+        if (!AddMethodRequires(verificationContext, ClassName.Empty, LocationId.None, checkOpposite: false))
             return false;
 
         AddMethodLocalStates(verificationContext);
@@ -308,9 +308,10 @@ internal partial class Verifier : IDisposable
         }
     }
 
+    // locationId:    location of the call site
     // checkOpposite: false for a call outside the call (the call is assumed to fulfill the contract)
     //                true for a call from within the class (the call must fulfill the contract)
-    private bool AddMethodRequires(VerificationContext verificationContext, bool checkOpposite)
+    private bool AddMethodRequires(VerificationContext verificationContext, ClassName locationClassName, LocationId locationId, bool checkOpposite)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
@@ -321,14 +322,16 @@ internal partial class Verifier : IDisposable
             Require Require = HostMethod.RequireList[i];
             Expression AssertionExpression = (Expression)Require.BooleanExpression;
             VerificationErrorType ErrorType = VerificationErrorType.RequireError;
+            ClassName LocationClassName = locationClassName != ClassName.Empty ? locationClassName : ClassName;
+            LocationId RequireLocationId = locationId != LocationId.None ? locationId : AssertionExpression.LocationId;
 
             if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
-            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, AssertionExpression, ErrorType))
+            if (checkOpposite && !AddMethodAssertionOpposite(verificationContext, AssertionExpr, LocationClassName, RequireLocationId, AssertionExpression.ToString(), ErrorType))
                 return false;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, AssertionExpression, ErrorType, keepNormal: true))
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, LocationClassName, RequireLocationId, AssertionExpression.ToString(), ErrorType, keepNormal: true))
                 return false;
         }
 
@@ -350,10 +353,10 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, AssertionExpression, out IExprSet<IBoolExprCapsule> AssertionExpr))
                 return false;
 
-            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, AssertionExpression, ErrorType, keepNormal))
+            if (!AddMethodAssertionNormal(verificationContext, AssertionExpr, ClassName.Empty, AssertionExpression.LocationId, AssertionExpression.ToString(), ErrorType, keepNormal))
                 return false;
 
-            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, AssertionExpression, ErrorType))
+            if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, AssertionExpression.LocationId, AssertionExpression.ToString(), ErrorType))
                 return false;
         }
 
@@ -361,7 +364,7 @@ internal partial class Verifier : IDisposable
     }
 
     // keepNormal: true if we keep the contract (for all require, and for ensure after a call from within the class, since we must fulfill the contract. From outside the class, we no longer care)
-    private bool AddMethodAssertionNormal(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, Expression assertionExpression, VerificationErrorType errorType, bool keepNormal)
+    private bool AddMethodAssertionNormal(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, ClassName locationClassName, LocationId locationId, string errorText, VerificationErrorType errorType, bool keepNormal)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
 
@@ -381,7 +384,18 @@ internal partial class Verifier : IDisposable
         if (verificationContext.Solver.Check() != Status.SATISFIABLE)
         {
             Log($"Inconsistent {AssertionType} state for class {ClassName}");
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = ClassName, MethodName = HostMethod.Name.Text, LocationId = assertionExpression.LocationId, ErrorText = assertionExpression.ToString() };
+
+            ClassName AssertionClassName = locationClassName != ClassName.Empty ? locationClassName : ClassName;
+            string AssertionMethodName = HostMethod.Name.Text;
+
+            VerificationResult = VerificationResult.Default with
+            {
+                ErrorType = errorType,
+                ClassName = AssertionClassName,
+                MethodName = AssertionMethodName,
+                LocationId = locationId,
+                ErrorText = errorText,
+            };
 
             Result = false;
         }
@@ -392,7 +406,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, Expression assertionExpression, VerificationErrorType errorType)
+    private bool AddMethodAssertionOpposite(VerificationContext verificationContext, IExprSet<IBoolExprCapsule> assertionExpr, ClassName locationClassName, LocationId locationId, string errorText, VerificationErrorType errorType)
     {
         Method? HostMethod = verificationContext.HostMethod;
         string AssertionType = VerificationErrorTypeToText(errorType);
@@ -411,9 +425,17 @@ internal partial class Verifier : IDisposable
         {
             Log($"Violation of {AssertionType} for class {ClassName}");
 
+            ClassName AssertionClassName = locationClassName != ClassName.Empty ? locationClassName : (HostMethod is not null ? HostMethod.ClassName : ClassName);
             string AssertionMethodName = HostMethod is not null ? HostMethod.Name.Text : string.Empty;
-            ClassName AssertionClassName = HostMethod is not null ? HostMethod.ClassName : ClassName;
-            VerificationResult = VerificationResult.Default with { ErrorType = errorType, ClassName = AssertionClassName, MethodName = AssertionMethodName, LocationId = assertionExpression.LocationId, ErrorText = assertionExpression.ToString() };
+
+            VerificationResult = VerificationResult.Default with
+            {
+                ErrorType = errorType,
+                ClassName = AssertionClassName,
+                MethodName = AssertionMethodName,
+                LocationId = locationId,
+                ErrorText = errorText,
+            };
 
             string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
             Log(ModelString);

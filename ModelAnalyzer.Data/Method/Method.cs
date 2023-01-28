@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents a class method.
 /// </summary>
-[DebuggerDisplay("{Name.Text}()")]
+[DebuggerDisplay("{Name.Text, nq}()")]
 internal class Method : IMethod, INameable<MethodName>
 {
     /// <summary>

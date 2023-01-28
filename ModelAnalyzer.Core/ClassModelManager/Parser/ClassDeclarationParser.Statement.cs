@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -32,7 +31,12 @@ internal partial class ClassDeclarationParser
 
         Expression? Expression = ParseExpression(ExpressionBodyContext, expressionBody);
         if (Expression is not null)
-            StatementList.Add(new ReturnStatement { Expression = Expression });
+        {
+            ReturnStatement NewStatement = new() { Expression = Expression };
+            StatementList.Add(NewStatement);
+
+            Debug.Assert(NewStatement.LocationId != LocationId.None);
+        }
 
         return StatementList;
     }
@@ -153,7 +157,11 @@ internal partial class ClassDeclarationParser
                 if (Expression is not null)
                 {
                     if (IsSourceAndDestinationTypeCompatible(parsingContext, Destination, Expression))
+                    {
                         NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
+
+                        Debug.Assert(NewStatement.LocationId != LocationId.None);
+                    }
                     else
                         Log("Source cannot be assigned to destination.");
                 }
@@ -234,8 +242,18 @@ internal partial class ClassDeclarationParser
                 break;
             }
 
-        PrivateMethodCallStatement NewStatement = new() { ClassName = IsStatic ? ClassName : ClassName.Empty, Name = MethodName, NameLocation = identifierName.GetLocation(), ArgumentList = argumentList };
+        PrivateMethodCallStatement NewStatement = new()
+        {
+            ClassName = IsStatic ? ClassName : ClassName.Empty,
+            MethodName = MethodName,
+            NameLocation = identifierName.GetLocation(),
+            ArgumentList = argumentList,
+            CallerClassName = parsingContext.ClassName,
+        };
+
         AddMethodCallEntry(parsingContext, NewStatement);
+
+        Debug.Assert(NewStatement.LocationId != LocationId.None);
 
         return NewStatement;
     }
@@ -248,18 +266,40 @@ internal partial class ClassDeclarationParser
 
         if (TryParsePropertyPath(parsingContext, memberAccessExpression, out List<IVariable> VariablePath, out LastName, out PathLocation))
         {
-            if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out Method CalledMethod))
+            if (TryParseLastNameAsMethod(parsingContext, VariablePath, LastName, out ClassName CalledClassName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { ClassName = ClassName.Empty, VariablePath = VariablePath, Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement
+                {
+                    ClassName = CalledClassName,
+                    VariablePath = VariablePath,
+                    MethodName = CalledMethod.Name,
+                    NameLocation = PathLocation,
+                    ArgumentList = argumentList,
+                    CallerClassName = parsingContext.ClassName,
+                };
+
                 AddMethodCallEntry(parsingContext, NewStatement);
+
+                Debug.Assert(NewStatement.LocationId != LocationId.None);
             }
         }
         else if (TryParseTypeName(parsingContext, memberAccessExpression, out ClassModel ClassModel, out LastName, out PathLocation))
         {
             if (TryParseLastNameAsMethod(parsingContext, ClassModel, LastName, out Method CalledMethod))
             {
-                NewStatement = new PublicMethodCallStatement { ClassName = ClassModel.ClassName, VariablePath = new List<IVariable>(), Name = CalledMethod.Name, NameLocation = PathLocation, ArgumentList = argumentList };
+                NewStatement = new PublicMethodCallStatement
+                {
+                    ClassName = ClassModel.ClassName,
+                    VariablePath = new List<IVariable>(),
+                    MethodName = CalledMethod.Name,
+                    NameLocation = PathLocation,
+                    ArgumentList = argumentList,
+                    CallerClassName = parsingContext.ClassName,
+                };
+
                 AddMethodCallEntry(parsingContext, NewStatement);
+
+                Debug.Assert(NewStatement.LocationId != LocationId.None);
             }
         }
 
@@ -301,6 +341,8 @@ internal partial class ClassDeclarationParser
                 WhenFalseStatementList = new();
 
             NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+
+            Debug.Assert(NewStatement.LocationId != LocationId.None);
         }
         else
             isErrorReported = true;
@@ -331,14 +373,22 @@ internal partial class ClassDeclarationParser
                     bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariablePath.Count == 1 && VariableValue.VariablePath[0].Name.Text == ResultName.Text;
 
                     if (IsResultReturned || !IsResultInLocals)
+                    {
                         NewStatement = new ReturnStatement { Expression = ReturnExpression };
+
+                        Debug.Assert(NewStatement.LocationId != LocationId.None);
+                    }
                 }
                 else
                     isErrorReported = true;
             }
         }
         else
+        {
             NewStatement = new ReturnStatement() { Expression = null };
+
+            Debug.Assert(NewStatement.LocationId != LocationId.None);
+        }
 
         return NewStatement;
     }

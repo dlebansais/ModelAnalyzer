@@ -12,13 +12,16 @@ using Newtonsoft.Json;
 internal class PublicMethodCallStatement : Statement, IMethodCallStatement, IPublicCall
 {
     /// <inheritdoc/>
+    public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
     required public ClassName ClassName { get; init; }
 
     /// <inheritdoc/>
     required public List<IVariable> VariablePath { get; init; }
 
     /// <inheritdoc/>
-    required public MethodName Name { get; init; }
+    required public MethodName MethodName { get; init; }
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -26,4 +29,10 @@ internal class PublicMethodCallStatement : Statement, IMethodCallStatement, IPub
 
     /// <inheritdoc/>
     required public List<Argument> ArgumentList { get; init; }
+
+    /// <inheritdoc/>
+    required public ClassName CallerClassName { get; init; }
+
+    /// <inheritdoc/>
+    public bool IsStatic { get => VariablePath.Count == 0; }
 }

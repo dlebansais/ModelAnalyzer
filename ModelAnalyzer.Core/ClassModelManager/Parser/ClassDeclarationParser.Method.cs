@@ -308,13 +308,13 @@ internal partial class ClassDeclarationParser
 
         location = methodCall.NameLocation;
 
-        if (IsTargetSelf && methodCall.Name == HostMethod.Name)
+        if (IsTargetSelf && methodCall.MethodName == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == methodCall.Name)
+            if (Entry.Key == methodCall.MethodName)
             {
                 CalledMethod = Entry.Value;
                 break;
@@ -368,13 +368,13 @@ internal partial class ClassDeclarationParser
 
         location = functionCall.NameLocation;
 
-        if (HostMethod is not null && IsTargetSelf && functionCall.Name == HostMethod.Name)
+        if (HostMethod is not null && IsTargetSelf && functionCall.MethodName == HostMethod.Name)
             return false;
 
         Method? CalledMethod = null;
 
         foreach (var Entry in MethodTable)
-            if (Entry.Key == functionCall.Name)
+            if (Entry.Key == functionCall.MethodName)
             {
                 CalledMethod = Entry.Value;
                 break;
