@@ -29,6 +29,7 @@ internal record LocationId
     public static void Reset()
     {
         // TODO: replace with a correct system in which expressions and statements keep their location ID properly.
+        // Until changed, a returned VerificationResult can temporarily be associated to the wrong node.
         GlobalId = 0;
     }
 
