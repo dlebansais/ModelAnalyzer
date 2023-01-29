@@ -1,17 +1,17 @@
 ﻿namespace ModelAnalyzer;
 
 /// <summary>
-/// Represents the context of a parsed function call expression.
+/// Represents the context of a parsed arithmetic expression.
 /// </summary>
-internal class FunctionCallStatementEntry
+internal class ArithmeticExpressionEntry
 {
     /// <summary>
-    /// Gets the parsed statement.
+    /// Gets the parsed expression.
     /// </summary>
-    required public IFunctionCallExpression Expression { get; init; }
+    required public IArithmeticExpression Expression { get; init; }
 
     /// <summary>
-    /// Gets the host method where the statement is found.
+    /// Gets the host method where the expression is found.
     /// </summary>
     required public Method? HostMethod { get; init; }
 

@@ -261,7 +261,7 @@ internal partial class ClassDeclarationParser
                 }
             }
 
-        foreach (FunctionCallStatementEntry Entry in parsingContext.FunctionCallExpressionList)
+        foreach (FunctionCallExpressionEntry Entry in parsingContext.FunctionCallExpressionList)
         {
             bool IsMethodFound = (Entry.HostMethod is Method EntryMethod && parsingContext.HostMethod is Method HostMethod && EntryMethod.Name == HostMethod.Name) ||
                                  (Entry.HostMethod is null && parsingContext.HostMethod is null);

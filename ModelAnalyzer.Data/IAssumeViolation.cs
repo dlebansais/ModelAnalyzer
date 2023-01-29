@@ -1,5 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
+using Microsoft.CodeAnalysis;
+
 /// <summary>
 /// Provides information about a flow check violation.
 /// </summary>
@@ -14,4 +16,9 @@ public interface IAssumeViolation : IAssertionViolation
     /// Gets the error text.
     /// </summary>
     string Text { get; }
+
+    /// <summary>
+    /// Gets the violation location.
+    /// </summary>
+    Location Location { get; }
 }

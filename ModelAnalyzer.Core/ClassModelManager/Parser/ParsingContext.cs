@@ -96,5 +96,10 @@ internal record ParsingContext
     /// <summary>
     /// Gets or sets the list of function call expressions.
     /// </summary>
-    public List<FunctionCallStatementEntry> FunctionCallExpressionList { get; set; } = new();
+    public List<FunctionCallExpressionEntry> FunctionCallExpressionList { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of arithmetic expressions.
+    /// </summary>
+    public List<ArithmeticExpressionEntry> ArithmeticExpressionList { get; set; } = new();
 }

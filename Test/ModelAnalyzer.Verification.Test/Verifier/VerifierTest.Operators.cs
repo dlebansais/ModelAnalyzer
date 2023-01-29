@@ -330,7 +330,7 @@ public partial class VerifierTest
         TestFieldTable.AddItem(TestField);
 
         VariableValueExpression Variable = new() { VariablePath = new List<IVariable>() { TestField }, PathLocation = null! };
-        BinaryArithmeticExpression OperationExpression = new() { Left = Variable, Operator = binaryOperator, Right = Operand };
+        BinaryArithmeticExpression OperationExpression = new() { Left = Variable, Operator = binaryOperator, Right = Operand, Location = null! };
         EqualityExpression VariableEqualZero = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = Zero };
         EqualityExpression VariableEqualOperand = new() { Left = Variable, Operator = EqualityOperator.Equal, Right = OperandResult };
         BinaryLogicalExpression OrExpression = new() { Left = VariableEqualZero, Operator = BinaryLogicalOperator.Or, Right = VariableEqualOperand };

@@ -38,13 +38,13 @@ class {ForSynchronousTestOnly}_AssumeViolation_Integer_0
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_AssumeViolation_Integer_1|]
+class {ForSynchronousTestOnly}_AssumeViolation_Integer_1
 {{
     int X;
 
     public void Remainder(int x, int y)
     {{
-        X = x % y;
+        X = [|x % y|];
     }}
 }}
 ");
@@ -79,13 +79,13 @@ class {ForSynchronousTestOnly}_AssumeViolation_Integer_2
         await VerifyCS.VerifyAnalyzerAsync(@$"
 using System;
 
-class [|{ForSynchronousTestOnly}_AssumeViolation_Integer_3|]
+class {ForSynchronousTestOnly}_AssumeViolation_Integer_3
 {{
     int X;
 
     public void Remainder(int x, int y)
     {{
-        X = x / y;
+        X = [|x / y|];
     }}
 }}
 ");

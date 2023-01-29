@@ -80,7 +80,12 @@ internal partial class ClassDeclarationParser
     /// <summary>
     /// Gets the list of function call expressions.
     /// </summary>
-    public List<FunctionCallStatementEntry> FunctionCallExpressionList { get; private set; } = new();
+    public List<FunctionCallExpressionEntry> FunctionCallExpressionList { get; private set; } = new();
+
+    /// <summary>
+    /// Gets the list of arithmetic expressions.
+    /// </summary>
+    public List<ArithmeticExpressionEntry> ArithmeticExpressionList { get; private set; } = new();
 
     /// <summary>
     /// Parses the class declaration, first phase.
@@ -148,6 +153,7 @@ internal partial class ClassDeclarationParser
             InvariantList = ParsingContext.InvariantList.AsReadOnly();
             MethodCallStatementList = ParsingContext.MethodCallStatementList;
             FunctionCallExpressionList = ParsingContext.FunctionCallExpressionList;
+            ArithmeticExpressionList = ParsingContext.ArithmeticExpressionList;
         }
         else
         {
@@ -166,7 +172,8 @@ internal partial class ClassDeclarationParser
     /// </summary>
     /// <param name="method">The mthod containing the assertion.</param>
     /// <param name="text">The assertion text.</param>
-    public Expression? ParseAssertionText(Method method, string text)
+    /// <param name="callLocation">The assertion location.</param>
+    public Expression? ParseAssertionText(Method method, string text, ICallLocation callLocation)
     {
         CSharpParseOptions Options = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         SyntaxTree SyntaxTree = CSharpSyntaxTree.ParseText($"_ = {text};", Options);
@@ -184,6 +191,7 @@ internal partial class ClassDeclarationParser
             SemanticModel = SemanticModel,
             HostMethod = method,
             LocationContext = LocationContext,
+            CallLocation = callLocation,
         };
         Expression? Expression = ParseExpression(ParsingContext, ExpressionNode);
 

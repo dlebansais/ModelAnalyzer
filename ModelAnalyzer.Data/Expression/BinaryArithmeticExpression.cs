@@ -1,12 +1,13 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
 /// <summary>
 /// Represents a binary arithmetic expression.
 /// </summary>
-internal class BinaryArithmeticExpression : Expression, IBinaryExpression
+internal class BinaryArithmeticExpression : Expression, IBinaryExpression, IArithmeticExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -29,6 +30,10 @@ internal class BinaryArithmeticExpression : Expression, IBinaryExpression
 
     /// <inheritdoc/>
     public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    required public Location Location { get; init; }
 
     /// <summary>
     /// Gets the left expression.

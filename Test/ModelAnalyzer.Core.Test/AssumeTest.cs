@@ -70,6 +70,7 @@ class Program_CoreAssume_1
 
     public void Write(int x, int y)
     {
+        X = x + y;
         X = x / y;
     }
 }
@@ -110,6 +111,7 @@ class Program_CoreAssume_2
         Y = y;
     }
 }
+// Invariant: X + Y >= 0
 // Invariant: X / Y >= 0
 ").First();
 

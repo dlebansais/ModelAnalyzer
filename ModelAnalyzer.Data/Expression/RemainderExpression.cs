@@ -1,11 +1,12 @@
 ﻿namespace ModelAnalyzer;
 
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
 /// <summary>
 /// Represents a integer division remainder expression.
 /// </summary>
-internal class RemainderExpression : Expression, IBinaryExpression
+internal class RemainderExpression : Expression, IBinaryExpression, IArithmeticExpression
 {
     /// <inheritdoc/>
     [JsonIgnore]
@@ -16,6 +17,10 @@ internal class RemainderExpression : Expression, IBinaryExpression
 
     /// <inheritdoc/>
     public override LocationId LocationId { get; set; } = LocationId.CreateNew();
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    required public Location Location { get; init; }
 
     /// <summary>
     /// Gets the left expression.

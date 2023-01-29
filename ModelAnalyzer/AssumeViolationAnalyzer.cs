@@ -39,7 +39,7 @@ public class AssumeViolationAnalyzer : Analyzer
         foreach (IAssumeViolation AssumeViolation in classModel.AssumeViolations)
         {
             string AssumeText = AssumeViolation.Text;
-            Location Location = classDeclaration.Identifier.GetLocation();
+            Location Location = AssumeViolation.Location;
 
             if (AssumeViolation.Method is IMethod Method)
             {

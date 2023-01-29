@@ -275,6 +275,7 @@ public partial class ClassModelManager : IDisposable
 
         MethodCallStatementList.Clear();
         FunctionCallExpressionList.Clear();
+        ArithmeticExpressionList.Clear();
 
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
         {
@@ -331,6 +332,7 @@ public partial class ClassModelManager : IDisposable
 
         MethodCallStatementList.AddRange(Parser.MethodCallStatementList);
         FunctionCallExpressionList.AddRange(Parser.FunctionCallExpressionList);
+        ArithmeticExpressionList.AddRange(Parser.ArithmeticExpressionList);
 
         return NewClassModel;
     }
@@ -360,21 +362,23 @@ public partial class ClassModelManager : IDisposable
             for (int i = 0; i < Method.RequireList.Count; i++)
             {
                 Require Require = Method.RequireList[i];
-                Method.RequireList[i] = FixedRequireClause(classModel, Method, Require);
+                CallRequireLocation CallLocation = new() { ParentRequireList = Method.RequireList, RequireIndex = i };
+                Method.RequireList[i] = FixedRequireClause(classModel, Method, Require, CallLocation);
             }
 
             for (int i = 0; i < Method.EnsureList.Count; i++)
             {
                 Ensure Ensure = Method.EnsureList[i];
-                Method.EnsureList[i] = FixedEnsureClause(classModel, Method, Ensure);
+                CallEnsureLocation CallLocation = new() { ParentEnsureList = Method.EnsureList, EnsureIndex = i };
+                Method.EnsureList[i] = FixedEnsureClause(classModel, Method, Ensure, CallLocation);
             }
         }
     }
 
-    private Require FixedRequireClause(ClassModel classModel, Method method, Require require)
+    private Require FixedRequireClause(ClassModel classModel, Method method, Require require, CallRequireLocation callLocation)
     {
         string Text = require.Text;
-        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text);
+        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text, callLocation);
 
         Debug.Assert(BooleanExpression.GetExpressionType() == ExpressionType.Boolean);
 
@@ -386,10 +390,10 @@ public partial class ClassModelManager : IDisposable
         };
     }
 
-    private Ensure FixedEnsureClause(ClassModel classModel, Method method, Ensure ensure)
+    private Ensure FixedEnsureClause(ClassModel classModel, Method method, Ensure ensure, CallEnsureLocation callLocation)
     {
         string Text = ensure.Text;
-        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text);
+        Expression BooleanExpression = PreloadedClauseTextToExpression(classModel, method, Text, callLocation);
 
         Debug.Assert(BooleanExpression.GetExpressionType() == ExpressionType.Boolean);
 
@@ -401,13 +405,13 @@ public partial class ClassModelManager : IDisposable
         };
     }
 
-    private Expression PreloadedClauseTextToExpression(ClassModel classModel, Method method, string text)
+    private Expression PreloadedClauseTextToExpression(ClassModel classModel, Method method, string text, ICallLocation callLocation)
     {
         MadeUpSemanticModel SemanticModel = new();
         SemanticModel.Phase1ClassModelTable.Add(classModel.ClassName, classModel);
 
         ClassDeclarationParser Parser = new(new List<ClassDeclarationSyntax>(), null!, SemanticModel);
-        Expression? Expression = Parser.ParseAssertionText(method, text);
+        Expression? Expression = Parser.ParseAssertionText(method, text, callLocation);
 
         Debug.Assert(Expression is not null);
 

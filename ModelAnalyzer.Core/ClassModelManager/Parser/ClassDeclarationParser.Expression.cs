@@ -63,7 +63,7 @@ internal partial class ClassDeclarationParser
             SyntaxToken OperatorToken = binaryExpression.OperatorToken;
 
             if (IsSupportedBinaryArithmeticOperator(OperatorToken, out BinaryArithmeticOperator BinaryArithmeticOperator))
-                NewExpression = CreateBinaryArithmeticExpression(Left, BinaryArithmeticOperator, Right);
+                NewExpression = CreateBinaryArithmeticExpression(parsingContext, Left, BinaryArithmeticOperator, Right, location);
             else if (OperatorToken.IsKind(SyntaxKind.PercentToken))
                 NewExpression = TryParseRemainderExpression(parsingContext, Left, Right, OperatorToken, ref location);
             else if (IsSupportedBinaryLogicalOperator(OperatorToken, out BinaryLogicalOperator BinaryLogicalOperator))
@@ -101,11 +101,13 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Expression CreateBinaryArithmeticExpression(Expression left, BinaryArithmeticOperator binaryArithmeticOperator, Expression right)
+    private Expression CreateBinaryArithmeticExpression(ParsingContext parsingContext, Expression left, BinaryArithmeticOperator binaryArithmeticOperator, Expression right, Location location)
     {
-        Expression NewExpression = new BinaryArithmeticExpression { Left = left, Operator = binaryArithmeticOperator, Right = right };
+        BinaryArithmeticExpression NewExpression = new BinaryArithmeticExpression { Left = left, Operator = binaryArithmeticOperator, Right = right, Location = location };
 
         Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+        AddArithmeticExpressionEntry(parsingContext, NewExpression);
 
         return NewExpression;
     }
@@ -114,7 +116,7 @@ internal partial class ClassDeclarationParser
     {
         Debug.Assert(parsingContext.LocationContext is not null);
 
-        Expression? NewExpression = null;
+        RemainderExpression? NewExpression = null;
 
         if (left.GetExpressionType() != ExpressionType.Integer)
         {
@@ -130,12 +132,29 @@ internal partial class ClassDeclarationParser
         }
         else
         {
-            NewExpression = new RemainderExpression { Left = left, Right = right };
+            NewExpression = new RemainderExpression { Left = left, Right = right, Location = location };
 
             Debug.Assert(NewExpression.LocationId != LocationId.None);
+
+            AddArithmeticExpressionEntry(parsingContext, NewExpression);
         }
 
         return NewExpression;
+    }
+
+    private void AddArithmeticExpressionEntry(ParsingContext parsingContext, IArithmeticExpression expression)
+    {
+        Debug.Assert(parsingContext.CallLocation is not null);
+        ICallLocation CallLocation = parsingContext.CallLocation!;
+
+        ArithmeticExpressionEntry NewEntry = new ArithmeticExpressionEntry()
+        {
+            HostMethod = parsingContext.HostMethod,
+            Expression = expression,
+            CallLocation = CallLocation,
+        };
+
+        parsingContext.ArithmeticExpressionList.Add(NewEntry);
     }
 
     private bool IsSupportedBinaryLogicalOperator(SyntaxToken token, out BinaryLogicalOperator logicalOperator)
@@ -408,7 +427,7 @@ internal partial class ClassDeclarationParser
             CallerClassName = parsingContext.ClassName,
         };
 
-        AddFunctionCallEntry(parsingContext, NewExpression);
+        AddFunctionCallExpressionEntry(parsingContext, NewExpression);
 
         Debug.Assert(NewExpression.LocationId != LocationId.None);
 
@@ -436,7 +455,7 @@ internal partial class ClassDeclarationParser
                     CallerClassName = parsingContext.ClassName,
                 };
 
-                AddFunctionCallEntry(parsingContext, NewExpression);
+                AddFunctionCallExpressionEntry(parsingContext, NewExpression);
 
                 Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
@@ -456,7 +475,7 @@ internal partial class ClassDeclarationParser
                     CallerClassName = parsingContext.ClassName,
                 };
 
-                AddFunctionCallEntry(parsingContext, NewExpression);
+                AddFunctionCallExpressionEntry(parsingContext, NewExpression);
 
                 Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
@@ -465,12 +484,12 @@ internal partial class ClassDeclarationParser
         return NewExpression;
     }
 
-    private void AddFunctionCallEntry(ParsingContext parsingContext, IFunctionCallExpression expression)
+    private void AddFunctionCallExpressionEntry(ParsingContext parsingContext, IFunctionCallExpression expression)
     {
         Debug.Assert(parsingContext.CallLocation is not null);
         ICallLocation CallLocation = parsingContext.CallLocation!;
 
-        FunctionCallStatementEntry NewEntry = new FunctionCallStatementEntry()
+        FunctionCallExpressionEntry NewEntry = new FunctionCallExpressionEntry()
         {
             HostMethod = parsingContext.HostMethod,
             Expression = expression,
