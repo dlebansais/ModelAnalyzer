@@ -63,8 +63,8 @@ public class AnalyzerSemanticModel : IModel
     /// <inheritdoc/>
     public ClassName ClassDeclarationToClassName(ClassDeclarationSyntax classDeclaration)
     {
-        // TODO: get the proper namespace using
-        // https://stackoverflow.com/questions/20458457/getting-class-fullname-including-namespace-from-roslyn-classdeclarationsyntax
-        return ClassName.FromSimpleString(classDeclaration.Identifier.ValueText);
+        string Fullname = classDeclaration.GetFullName();
+
+        return ClassName.FromSimpleString(Fullname);
     }
 }
