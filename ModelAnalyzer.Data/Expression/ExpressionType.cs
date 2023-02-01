@@ -113,15 +113,4 @@ public record ExpressionType
 
         return new ExpressionType(TypeName, IsNullable, isArray: false);
     }
-
-    /// <summary>
-    /// Checks whether the provided type is an array of the current type.
-    /// </summary>
-    /// <param name="arrayType">The candidate array type.</param>
-    public bool IsElementTypeOf(ExpressionType arrayType)
-    {
-        Debug.Assert(!IsArray);
-
-        return arrayType.IsArray && TypeName == arrayType.TypeName && IsNullable == arrayType.IsNullable;
-    }
 }

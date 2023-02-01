@@ -602,7 +602,7 @@ internal partial class ClassDeclarationParser
 
         ExpressionType VariableType = variable.Type;
 
-        if (VariableType.IsSimple)
+        if (VariableType.IsSimple || VariableType.IsArray)
             return false;
 
         ClassName ClassName = VariableType.TypeName;

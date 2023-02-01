@@ -276,7 +276,8 @@ internal partial record ClassModel : IClassModel
 
         string NameString = expressionType.TypeName.ToString();
         string NullableString = expressionType.IsNullable ? "?" : string.Empty;
+        string ArrayString = expressionType.IsArray ? "[]" : string.Empty;
 
-        return $"{NameString}{NullableString}";
+        return $"{NameString}{NullableString}{ArrayString}";
     }
 }

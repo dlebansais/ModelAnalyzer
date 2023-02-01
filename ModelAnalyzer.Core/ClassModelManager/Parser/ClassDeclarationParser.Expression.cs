@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,6 +39,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParseFunctionCallExpression(NestedParsingContext, InvocationExpression, ref IsErrorReported);
         else if (expressionNode is ObjectCreationExpressionSyntax ObjectCreationExpression)
             NewExpression = TryParseObjectCreationExpression(NestedParsingContext, ObjectCreationExpression, ref IsErrorReported);
+        else if (expressionNode is ArrayCreationExpressionSyntax ArrayCreationExpression)
+            NewExpression = TryParseArrayCreationExpression(NestedParsingContext, ArrayCreationExpression, ref IsErrorReported);
         else if (expressionNode is ElementAccessExpressionSyntax ElementAccessExpression)
             NewExpression = TryParseElementAccessExpression(NestedParsingContext, ElementAccessExpression, ref IsErrorReported);
         else
@@ -521,6 +524,23 @@ internal partial class ClassDeclarationParser
 
                 Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
+
+        return NewExpression;
+    }
+
+    private NewArrayExpression? TryParseArrayCreationExpression(ParsingContext parsingContext, ArrayCreationExpressionSyntax arrayCreationExpression, ref bool isErrorReported)
+    {
+        NewArrayExpression? NewExpression = null;
+
+        if (IsTypeSupported(parsingContext, arrayCreationExpression.Type, out ExpressionType ArrayType, out int ArraySize))
+        {
+            if (arrayCreationExpression.Initializer is null)
+            {
+                NewExpression = new NewArrayExpression() { ArrayType = ArrayType, ArraySize = ArraySize };
+
+                Debug.Assert(NewExpression.LocationId != LocationId.None);
+            }
+        }
 
         return NewExpression;
     }

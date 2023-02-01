@@ -696,4 +696,96 @@ class Program_CoreStatement_39
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentOfNewArray()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_40
+{
+    double[] X = new double[0];
+
+    public void Write(int x)
+    {
+        double[] Y;
+        bool Z;
+
+        Y = X;
+        Z = Y == new double[1];
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel0.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_40
+  double[] X = new double[0]
+
+  public void Write(int x)
+  {
+    double[] Y
+    bool Z
+
+    Y = X;
+    Z = Y == new double[1];
+  }
+"));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_ComparisonOfElement()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_41
+{
+    double[] X = new double[1];
+
+    public void Write(int x)
+    {
+        double[] Y = new double[1];
+        bool Z;
+
+        Y = X;
+        Z = Y[0] == X[0];
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+
+        string? ClassModelString = ClassModel0.ToString();
+        Assert.That(ClassModelString, Is.EqualTo(@"Program_CoreStatement_41
+  double[] X = new double[1]
+
+  public void Write(int x)
+  {
+    double[] Y = new double[1]
+    bool Z
+
+    Y = X;
+    Z = Y[0] == X[0];
+  }
+"));
+    }
 }

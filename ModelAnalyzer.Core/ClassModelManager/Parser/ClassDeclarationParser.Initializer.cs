@@ -106,19 +106,9 @@ internal partial class ClassDeclarationParser
 
     private bool TryParseArrayCreationNode(ParsingContext parsingContext, ArrayCreationExpressionSyntax arrayCreationExpression, ExpressionType variableType, out ILiteralExpression? initializerExpression)
     {
-        if (IsTypeSupported(parsingContext, arrayCreationExpression.Type, out ExpressionType ArrayType, out int ArraySize))
-        {
-            if (ArrayType == variableType)
-            {
-                if (arrayCreationExpression.Initializer is null)
-                {
-                    initializerExpression = new NewArrayExpression() { ArrayType = ArrayType, ArraySize = ArraySize };
-                    return true;
-                }
-            }
-        }
+        bool IsErrorReported = false;
+        initializerExpression = TryParseArrayCreationExpression(parsingContext, arrayCreationExpression, ref IsErrorReported);
 
-        initializerExpression = null;
-        return false;
+        return initializerExpression is not null;
     }
 }

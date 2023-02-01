@@ -839,4 +839,48 @@ class Program_CoreExpression_FunctionCall_32
         Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel1.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_InvalidMiddleElement()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_FunctionCall_33
+{
+    public int Z { get; set; }
+}
+
+class Program_CoreExpression_FunctionCall_34
+{
+    public int[] Y { get; set; } = new int[0];
+}
+
+class Program_CoreExpression_FunctionCall_35
+{
+    public int ReadX()
+    {
+        Program_CoreExpression_FunctionCall_34 X = new();
+
+        return X.Y.Z.SomeMethod();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(3));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+        IClassModel ClassModel2 = ClassModelList[2];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel2.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel2.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }
