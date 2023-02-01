@@ -175,6 +175,8 @@ internal class ObjectManager
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType](AliasString);
         }
+        else if (variableType.IsArray)
+            Result = CreateArrayConstant(alias, variableType);
         else
             Result = CreateReferenceConstant(alias, variableType);
 
@@ -194,6 +196,8 @@ internal class ObjectManager
 
         if (variableInitializer is NewObjectExpression NewObject)
             Result = CreateObjectInitializer(NewObject.ObjectType);
+        else if (variableInitializer is NewArrayExpression NewArray)
+            Result = CreateArrayInitializer(NewArray.ArrayType, NewArray.ArraySize);
         else if (variableInitializer is LiteralNullExpression LiteralNull)
             Result = CreateNullInitializer(variableType);
         else if (variableType.IsSimple)
@@ -251,6 +255,12 @@ internal class ObjectManager
         return CreateObjectInitializer(expressionType, ReferenceResult);
     }
 
+    public IExprSet<IExprCapsule> CreateArrayInitializer(ExpressionType expressionType, int arraySize)
+    {
+        // TODO
+        return Context.NullSet;
+    }
+
     public IExprSet<IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
     {
         return CreateObjectInitializer(expressionType, Context.Null);
@@ -258,21 +268,29 @@ internal class ObjectManager
 
     public IExprSet<IExprCapsule> CreateObjectInitializer(ExpressionType expressionType, IRefExprCapsule referenceResult)
     {
-        ClassModel TypeClassModel = TypeToModel(expressionType);
         List<IExprSet<IExprCapsule>> VariableSetList = new();
 
-        foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
+        if (expressionType.IsArray)
         {
-            Property Property = Entry.Value;
-            IExprSet<IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, Property.Initializer);
-            VariableSetList.Add(PropertyExpressions);
+            // TODO
         }
-
-        foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
+        else
         {
-            Field Field = Entry.Value;
-            IExprSet<IExprCapsule> FieldExpressions = CreateInitializerExpr(Field.Type, Field.Initializer);
-            VariableSetList.Add(FieldExpressions);
+            ClassModel TypeClassModel = TypeToModel(expressionType);
+
+            foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
+            {
+                Property Property = Entry.Value;
+                IExprSet<IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, Property.Initializer);
+                VariableSetList.Add(PropertyExpressions);
+            }
+
+            foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
+            {
+                Field Field = Entry.Value;
+                IExprSet<IExprCapsule> FieldExpressions = CreateInitializerExpr(Field.Type, Field.Initializer);
+                VariableSetList.Add(FieldExpressions);
+            }
         }
 
         ExprSet<IExprCapsule> Result = new(referenceResult, VariableSetList);
@@ -293,6 +311,12 @@ internal class ObjectManager
     private IExprSet<IArithExprCapsule> CreateFloatingPointConstant(string alias)
     {
         return Context.CreateFloatingPointConstant(alias).ToSingleSet();
+    }
+
+    private IExprSet<IExprCapsule> CreateArrayConstant(VariableAlias alias, ExpressionType variableType)
+    {
+        // TODO
+        return Context.CreateBooleanConstant(alias.ToString()).ToSingleSet();
     }
 
     public IExprSet<IExprCapsule> CreateReferenceConstant(VariableAlias alias, ExpressionType variableType)

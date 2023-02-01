@@ -50,7 +50,7 @@ public class AnalyzerSemanticModel : IModel
                 foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
                     if (ClassDeclaration.Identifier.ValueText == SymbolName)
                     {
-                        classType = new ExpressionType(ClassName.FromSimpleString(SymbolName), isNullable);
+                        classType = new ExpressionType(ClassName.FromSimpleString(SymbolName), isNullable, isArray: false);
                         return true;
                     }
             }

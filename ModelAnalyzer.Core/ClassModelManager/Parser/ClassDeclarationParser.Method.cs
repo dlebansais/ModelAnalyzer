@@ -177,7 +177,7 @@ internal partial class ClassDeclarationParser
             IsMethodSupported = false;
         }
 
-        if (!IsTypeSupported(parsingContext, methodDeclaration.ReturnType, out returnType))
+        if (!IsTypeSupported(parsingContext, methodDeclaration.ReturnType, out returnType, out _))
         {
             LogWarning($"Unsupported method return type.");
 

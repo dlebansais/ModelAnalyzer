@@ -1219,4 +1219,33 @@ class Program_CoreExpression_67
 
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_ArrayElement()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_68
+{
+    public void Write()
+    {
+        int[] X = new int[2];
+        int Y;
+
+        Y = X[0];
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+    }
 }

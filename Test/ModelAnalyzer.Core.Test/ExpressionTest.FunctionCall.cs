@@ -146,7 +146,7 @@ class Program_CoreExpression_FunctionCall_5
 {
     public int Write1(int x)
     {
-        return Write2(x[0]);
+        return Write2(x[0, 0]);
     }
 
     int Write2(int x)

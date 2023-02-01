@@ -283,14 +283,18 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsTypeSupported(ParsingContext parsingContext, TypeSyntax? type, out ExpressionType variableType)
+    private bool IsTypeSupported(ParsingContext parsingContext, TypeSyntax? type, out ExpressionType variableType, out int arraySize)
     {
+        arraySize = -1;
+
         if (type is PredefinedTypeSyntax PredefinedType)
             return IsPredefinedTypeSupported(PredefinedType, out variableType);
         else if (type is NullableTypeSyntax NullableType)
             return IsNullableClassTypeKnown(parsingContext, NullableType, out variableType);
         else if (type is IdentifierNameSyntax IdentifierName)
             return IsClassTypeKnown(parsingContext, IdentifierName, isNullable: false, out variableType);
+        else if (type is ArrayTypeSyntax ArrayType)
+            return IsArrayTypeSupported(parsingContext, ArrayType, out variableType, out arraySize);
         else
         {
             variableType = ExpressionType.Other;
@@ -335,6 +339,44 @@ internal partial class ClassDeclarationParser
         {
             variableType = ClassType;
             return true;
+        }
+
+        variableType = ExpressionType.Other;
+        return false;
+    }
+
+    private bool IsArrayTypeSupported(ParsingContext parsingContext, ArrayTypeSyntax arrayType, out ExpressionType variableType, out int arraySize)
+    {
+        arraySize = -1;
+
+        if (arrayType.RankSpecifiers.Count == 1)
+        {
+            ArrayRankSpecifierSyntax FirstRank = arrayType.RankSpecifiers[0];
+            if (FirstRank.Sizes.Count == 1)
+            {
+                ExpressionSyntax FirstSize = FirstRank.Sizes[0];
+                if (FirstSize is OmittedArraySizeExpressionSyntax)
+                    arraySize = 0;
+                else if (FirstSize is LiteralExpressionSyntax LiteralExpression)
+                {
+                    string LiteralValue = LiteralExpression.Token.Text;
+                    if (int.TryParse(LiteralValue, out int IntegerValue))
+                        arraySize = IntegerValue;
+                }
+
+                if (arraySize >= 0)
+                {
+                    TypeSyntax ElementType = arrayType.ElementType;
+                    if (IsTypeSupported(parsingContext, ElementType, out ExpressionType ArrayElementType, out _))
+                    {
+                        if (!ArrayElementType.IsArray)
+                        {
+                            variableType = ArrayElementType.ToArrayType();
+                            return true;
+                        }
+                    }
+                }
+            }
         }
 
         variableType = ExpressionType.Other;
@@ -454,28 +496,37 @@ internal partial class ClassDeclarationParser
 
         foreach (ArgumentSyntax InvocationArgument in InvocationArgumentList)
         {
-            if (InvocationArgument.NameColon is not null)
-                Log("Named argument not supported.");
-            else if (!InvocationArgument.RefKindKeyword.IsKind(SyntaxKind.None))
-                Log("ref, out or in arguments not supported.");
-            else
-            {
-                ExpressionSyntax ArgumentExpression = InvocationArgument.Expression;
-                LocationContext LocationContext = new(ArgumentExpression);
-                ParsingContext MethodCallParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
+            Argument? NewArgument = TryParseArgument(parsingContext, InvocationArgument, ref isErrorReported);
 
-                Expression? Expression = ParseExpression(MethodCallParsingContext, ArgumentExpression);
-                if (Expression is not null)
-                {
-                    Argument NewArgument = new() { Expression = Expression, Location = InvocationArgument.GetLocation() };
-                    ArgumentList.Add(NewArgument);
-                }
-                else
-                    isErrorReported = true;
-            }
+            if (NewArgument is not null)
+                ArgumentList.Add(NewArgument);
         }
 
         return ArgumentList;
+    }
+
+    private Argument? TryParseArgument(ParsingContext parsingContext, ArgumentSyntax argument, ref bool isErrorReported)
+    {
+        Argument? NewArgument = null;
+
+        if (argument.NameColon is not null)
+            Log("Named argument not supported.");
+        else if (!argument.RefKindKeyword.IsKind(SyntaxKind.None))
+            Log("ref, out or in arguments not supported.");
+        else
+        {
+            ExpressionSyntax ArgumentExpression = argument.Expression;
+            LocationContext LocationContext = new(ArgumentExpression);
+            ParsingContext MethodCallParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
+
+            Expression? Expression = ParseExpression(MethodCallParsingContext, ArgumentExpression);
+            if (Expression is not null)
+                NewArgument = new() { Expression = Expression, Location = argument.GetLocation() };
+            else
+                isErrorReported = true;
+        }
+
+        return NewArgument;
     }
 
     private bool TryParsePropertyPath(ParsingContext parsingContext, MemberAccessExpressionSyntax memberAccessExpression, out List<IVariable> variablePath, out string lastName, out Location pathLocation)

@@ -41,6 +41,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildLiteralValueExpression(verificationContext, Literal, out IExprSet<IExprCapsule> LiteralExpr);
                 ResultExpr = LiteralExpr;
                 break;
+            case ElementAccessExpression ElementAccess:
+                Result = BuildElementAccessExpression(verificationContext, ElementAccess, out IExprSet<IExprCapsule> ElementAccessExpr);
+                ResultExpr = ElementAccessExpr;
+                break;
         }
 
         Debug.Assert(ResultExpr is not null);
@@ -543,6 +547,10 @@ internal partial class Verifier : IDisposable
                 Result = BuildNewObjectExpression(verificationContext, NewObject, out IExprSet<IExprCapsule> NewObjectExpr);
                 ResultExpr = NewObjectExpr;
                 break;
+            case NewArrayExpression NewArray:
+                Result = BuildNewArrayExpression(verificationContext, NewArray, out IExprSet<IExprCapsule> NewArrayExpr);
+                ResultExpr = NewArrayExpr;
+                break;
         }
 
         Debug.Assert(ResultExpr is not null);
@@ -584,6 +592,20 @@ internal partial class Verifier : IDisposable
         resultExpr = verificationContext.ObjectManager.CreateObjectInitializer(newObjectExpression.ObjectType);
 
         return Result;
+    }
+
+    private bool BuildNewArrayExpression(VerificationContext verificationContext, NewArrayExpression newArrayExpression, out IExprSet<IExprCapsule> resultExpr)
+    {
+        // TODO
+        resultExpr = Context.NullSet;
+        return false;
+    }
+
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, ElementAccessExpression elementAccessExpression, out IExprSet<IExprCapsule> resultExpr)
+    {
+        // TODO
+        resultExpr = Context.NullSet;
+        return false;
     }
 
     private static int TemporaryResultIndex;

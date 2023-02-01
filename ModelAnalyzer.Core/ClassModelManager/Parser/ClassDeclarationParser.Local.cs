@@ -52,7 +52,7 @@ internal partial class ClassDeclarationParser
             IsLocalSupported = false;
         }
 
-        if (!IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType LocalType))
+        if (!IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType LocalType, out _))
         {
             LogWarning($"Unsupported local type.");
 

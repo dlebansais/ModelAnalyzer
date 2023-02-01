@@ -41,7 +41,7 @@ internal partial class ClassDeclarationParser
                 IsFieldSupported = false;
             }
 
-        if (!IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType FieldType))
+        if (!IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType FieldType, out _))
         {
             LogWarning($"Unsupported field type.");
 

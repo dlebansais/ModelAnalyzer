@@ -477,9 +477,12 @@ public partial class ClassModelManager : IDisposable
 
     private bool IsCycleDetected(ClassModelTable classModelTable, List<ClassName> visitedClasses, ClassModel classModel, ExpressionType variableType)
     {
-        if (!variableType.IsSimple)
+        ExpressionType Type = ArrayOrElementOfArray(variableType);
+
+        if (!Type.IsSimple)
         {
-            ClassName VisitedClassName = variableType.TypeName;
+            ClassName VisitedClassName = Type.TypeName;
+
             if (visitedClasses.Contains(VisitedClassName))
             {
                 classModel.Unsupported.IsPartOfCycle = true;
@@ -498,6 +501,14 @@ public partial class ClassModelManager : IDisposable
         }
 
         return false;
+    }
+
+    private ExpressionType ArrayOrElementOfArray(ExpressionType variableType)
+    {
+        if (variableType.IsArray)
+            return variableType.ToElementType();
+        else
+            return variableType;
     }
 
     private void Log(string message)

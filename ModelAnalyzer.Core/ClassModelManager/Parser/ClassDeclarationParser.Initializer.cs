@@ -24,6 +24,11 @@ internal partial class ClassDeclarationParser
             if (TryParseNewObjectNode(parsingContext, ImplicitObjectCreationExpression, variableType, out initializerExpression))
                 return true;
         }
+        else if (InitializerValue is ArrayCreationExpressionSyntax ArrayCreationExpression)
+        {
+            if (TryParseArrayCreationNode(parsingContext, ArrayCreationExpression, variableType, out initializerExpression))
+                return true;
+        }
 
         LogWarning("Unsupported variable initializer.");
 
@@ -60,19 +65,6 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool TryParseNewObjectNode(ParsingContext parsingContext, ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpression, ExpressionType variableType, out ILiteralExpression? initializerExpression)
-    {
-        if (implicitObjectCreationExpression.ArgumentList.Arguments.Count == 0 && implicitObjectCreationExpression.Initializer is null)
-        {
-            ExpressionType ObjectType = new ExpressionType(variableType.TypeName, isNullable: false);
-            initializerExpression = new NewObjectExpression() { ObjectType = ObjectType };
-            return true;
-        }
-
-        initializerExpression = null;
-        return false;
-    }
-
     private ILiteralExpression? BooleanInitializer(Expression? expression)
     {
         if (expression is LiteralBooleanValueExpression BooleanExpression)
@@ -97,5 +89,36 @@ internal partial class ClassDeclarationParser
             return FloatingPointExpression;
         else
             return null;
+    }
+
+    private bool TryParseNewObjectNode(ParsingContext parsingContext, ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpression, ExpressionType variableType, out ILiteralExpression? initializerExpression)
+    {
+        if (implicitObjectCreationExpression.ArgumentList.Arguments.Count == 0 && implicitObjectCreationExpression.Initializer is null)
+        {
+            ExpressionType ObjectType = new ExpressionType(variableType.TypeName, isNullable: false, isArray: false);
+            initializerExpression = new NewObjectExpression() { ObjectType = ObjectType };
+            return true;
+        }
+
+        initializerExpression = null;
+        return false;
+    }
+
+    private bool TryParseArrayCreationNode(ParsingContext parsingContext, ArrayCreationExpressionSyntax arrayCreationExpression, ExpressionType variableType, out ILiteralExpression? initializerExpression)
+    {
+        if (IsTypeSupported(parsingContext, arrayCreationExpression.Type, out ExpressionType ArrayType, out int ArraySize))
+        {
+            if (ArrayType == variableType)
+            {
+                if (arrayCreationExpression.Initializer is null)
+                {
+                    initializerExpression = new NewArrayExpression() { ArrayType = ArrayType, ArraySize = ArraySize };
+                    return true;
+                }
+            }
+        }
+
+        initializerExpression = null;
+        return false;
     }
 }

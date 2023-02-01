@@ -49,7 +49,7 @@ public class MadeUpSemanticModel : IModel
         foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
             if (ClassDeclaration.Identifier.ValueText == ClassName.Text)
             {
-                classType = new ExpressionType(ClassName, isNullable);
+                classType = new ExpressionType(ClassName, isNullable, isArray: false);
                 return true;
             }
 

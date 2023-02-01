@@ -38,6 +38,8 @@ internal partial class ClassDeclarationParser
             NewExpression = TryParseFunctionCallExpression(NestedParsingContext, InvocationExpression, ref IsErrorReported);
         else if (expressionNode is ObjectCreationExpressionSyntax ObjectCreationExpression)
             NewExpression = TryParseObjectCreationExpression(NestedParsingContext, ObjectCreationExpression, ref IsErrorReported);
+        else if (expressionNode is ElementAccessExpressionSyntax ElementAccessExpression)
+            NewExpression = TryParseElementAccessExpression(NestedParsingContext, ElementAccessExpression, ref IsErrorReported);
         else
             Log($"Unsupported expression type '{expressionNode.GetType().Name}'.");
 
@@ -513,12 +515,67 @@ internal partial class ClassDeclarationParser
             HasInitializer = true;
 
         if (!HasArguments && !HasInitializer)
-            if (IsTypeSupported(parsingContext, objectCreationExpression.Type, out ExpressionType ObjectType))
+            if (IsTypeSupported(parsingContext, objectCreationExpression.Type, out ExpressionType ObjectType, out _))
             {
                 NewExpression = new NewObjectExpression() { ObjectType = ObjectType };
 
                 Debug.Assert(NewExpression.LocationId != LocationId.None);
             }
+
+        return NewExpression;
+    }
+
+    private Expression? TryParseElementAccessExpression(ParsingContext parsingContext, ElementAccessExpressionSyntax elementAccessExpression, ref bool isErrorReported)
+    {
+        Debug.Assert(parsingContext.LocationContext is not null);
+
+        ElementAccessExpression? NewExpression = null;
+        SeparatedSyntaxList<ArgumentSyntax> Arguments = elementAccessExpression.ArgumentList.Arguments;
+        Location Location = parsingContext.LocationContext!.GetLocation(elementAccessExpression);
+
+        Expression? VariableExpression = ParseExpression(parsingContext, elementAccessExpression.Expression);
+        if (VariableExpression is VariableValueExpression VariableValue)
+        {
+            Expression? ElementIndex = null;
+
+            if (Arguments.Count == 1)
+            {
+                Argument? NewArgument = TryParseArgument(parsingContext, Arguments[0], ref isErrorReported);
+                if (NewArgument is not null)
+                {
+                    if (NewArgument.Expression is LiteralIntegerValueExpression ArgumentIntegerValue)
+                        ElementIndex = ArgumentIntegerValue;
+                    else if (NewArgument.Expression is VariableValueExpression ArgumentVariableValue)
+                    {
+                        if (VariableValue.VariablePath.Count == 1)
+                            ElementIndex = ArgumentVariableValue;
+                    }
+                }
+            }
+
+            if (ElementIndex is not null)
+            {
+                List<IVariable> VariablePath = VariableValue.VariablePath;
+                Location PathLocation = VariableValue.PathLocation;
+
+                NewExpression = new ElementAccessExpression() { VariablePath = VariablePath, PathLocation = PathLocation, ElementIndex = ElementIndex };
+
+                Debug.Assert(NewExpression.LocationId != LocationId.None);
+            }
+            else
+                Location = parsingContext.LocationContext!.GetLocation(elementAccessExpression.ArgumentList);
+        }
+        else
+            Location = parsingContext.LocationContext!.GetLocation(elementAccessExpression.Expression);
+
+        if (NewExpression is null)
+        {
+            if (!isErrorReported)
+            {
+                parsingContext.Unsupported.AddUnsupportedExpression(Location);
+                isErrorReported = true;
+            }
+        }
 
         return NewExpression;
     }

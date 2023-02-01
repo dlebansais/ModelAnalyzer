@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Represents a variable as an expression.
+/// Represents a new object as an expression.
 /// </summary>
 internal class NewObjectExpression : Expression, ILiteralExpression
 {
@@ -19,7 +19,7 @@ internal class NewObjectExpression : Expression, ILiteralExpression
     public override LocationId LocationId { get; set; } = LocationId.CreateNew();
 
     /// <summary>
-    /// Gets the variable.
+    /// Gets the object type.
     /// </summary>
     required public ExpressionType ObjectType { get; init; }
 
