@@ -1222,30 +1222,22 @@ class Program_CoreExpression_67
 
     [Test]
     [Category("Core")]
-    public void Expression_ArrayElement()
+    public void Expression_UnsupportedType()
     {
-        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
 using System;
 
 class Program_CoreExpression_68
 {
-    public void Write()
-    {
-        int[] X = new int[2];
-        int Y;
-
-        Y = X[0];
-    }
+    Tuple<int, int> X;
 }
-");
+").First();
 
-        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
 
-        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
-        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+        IClassModel ClassModel = TestHelper.ToClassModel(ClassDeclaration, TokenReplacement);
 
-        IClassModel ClassModel0 = ClassModelList[0];
-
-        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.True);
+        Assert.That(ClassModel.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel.Unsupported.Fields.Count, Is.EqualTo(1));
     }
 }

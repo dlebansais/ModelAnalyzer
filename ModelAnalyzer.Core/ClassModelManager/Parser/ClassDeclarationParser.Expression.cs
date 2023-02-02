@@ -567,7 +567,7 @@ internal partial class ClassDeclarationParser
                         ElementIndex = ArgumentIntegerValue;
                     else if (NewArgument.Expression is VariableValueExpression ArgumentVariableValue)
                     {
-                        if (VariableValue.VariablePath.Count == 1)
+                        if (ArgumentVariableValue.VariablePath.Count == 1)
                             ElementIndex = ArgumentVariableValue;
                     }
                 }
