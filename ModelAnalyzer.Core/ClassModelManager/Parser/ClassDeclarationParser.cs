@@ -369,11 +369,10 @@ internal partial class ClassDeclarationParser
                     TypeSyntax ElementType = arrayType.ElementType;
                     if (IsTypeSupported(parsingContext, ElementType, out ExpressionType ArrayElementType, out _))
                     {
-                        if (!ArrayElementType.IsArray)
-                        {
-                            variableType = ArrayElementType.ToArrayType();
-                            return true;
-                        }
+                        Debug.Assert(!ArrayElementType.IsArray);
+
+                        variableType = ArrayElementType.ToArrayType();
+                        return true;
                     }
                 }
             }
