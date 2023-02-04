@@ -7,6 +7,5 @@ internal record RefExprCapsule : IRefExprCapsule
     required public Expr Item { get; init; }
     Expr IExprCapsule.Item { get => Item; }
 
-    required public ClassName ClassName { get; init; }
-    required public int Index { get; init; }
+    required public ReferenceIndex Index { get; init; }
 }

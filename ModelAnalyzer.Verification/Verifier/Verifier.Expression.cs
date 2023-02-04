@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 /// <summary>
 /// Represents a code verifier.
@@ -90,8 +91,8 @@ internal partial class Verifier : IDisposable
         {
             ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
 
-            Debug.Assert(resultExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule ReferenceExpr = (IRefExprCapsule)resultExpr.MainExpression;
+            Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
+            IObjectRefExprCapsule ReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
             Instance Reference = new() { ClassModel = ClassModel, Expr = ReferenceExpr };
 
             VerificationContext NewVerificationContext = verificationContext with
@@ -280,8 +281,8 @@ internal partial class Verifier : IDisposable
 
             BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
 
-            Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
+            Debug.Assert(CalledClassExpr.MainExpression is IObjectRefExprCapsule);
+            IObjectRefExprCapsule CalledInstanceExpr = (IObjectRefExprCapsule)CalledClassExpr.MainExpression;
             CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
         }
 
@@ -596,16 +597,72 @@ internal partial class Verifier : IDisposable
 
     private bool BuildNewArrayExpression(VerificationContext verificationContext, NewArrayExpression newArrayExpression, out IExprSet<IExprCapsule> resultExpr)
     {
-        // TODO
-        resultExpr = Context.NullSet;
-        return false;
+        bool Result = true;
+        resultExpr = verificationContext.ObjectManager.CreateArrayInitializer(newArrayExpression.ArrayType, newArrayExpression.ArraySize);
+
+        return Result;
     }
 
     private bool BuildElementAccessExpression(VerificationContext verificationContext, ElementAccessExpression elementAccessExpression, out IExprSet<IExprCapsule> resultExpr)
     {
-        // TODO
-        resultExpr = Context.NullSet;
-        return false;
+        return BuildElementAccessExpression(verificationContext, elementAccessExpression.VariablePath, elementAccessExpression.ElementIndex, out resultExpr);
+    }
+
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, Expression elementIndex, out IExprSet<IExprCapsule> resultExpr)
+    {
+        return BuildElementAccessExpression(verificationContext, variablePath, pathIndex: 0, elementIndex, out resultExpr);
+    }
+
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, Expression elementIndex, out IExprSet<IExprCapsule> resultExpr)
+    {
+        Debug.Assert(pathIndex < variablePath.Count);
+
+        string Name = variablePath[pathIndex].Name.Text;
+        Method? HostMethod = null;
+        IVariableName? VariableName = null;
+        ExpressionType? VariableType = null;
+
+        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+
+        if (pathIndex == 0)
+        {
+            LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        }
+
+        Debug.Assert(VariableName is not null);
+        Debug.Assert(VariableType is not null);
+
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!, VariableType!);
+
+        if (pathIndex + 1 < variablePath.Count)
+        {
+            ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+
+            Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
+            IObjectRefExprCapsule ObjectReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
+            Instance Reference = new() { ClassModel = ClassModel, Expr = ObjectReferenceExpr };
+
+            VerificationContext NewVerificationContext = verificationContext with
+            {
+                Instance = Reference,
+                HostMethod = null,
+                ResultLocal = null,
+            };
+
+            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
+        }
+        else
+        {
+            Debug.Assert(resultExpr.MainExpression is IArrayRefExprCapsule);
+            IReadOnlyExprCollection<IExprCapsule> Expressions = resultExpr.Expressions;
+
+            // TODO: return the proper element from elementIndex, not the first one.
+            IExprSet<IExprCapsule> Element = (IExprSet<IExprCapsule>)Expressions.First();
+            resultExpr = Element;
+            return true;
+        }
     }
 
     private static int TemporaryResultIndex;

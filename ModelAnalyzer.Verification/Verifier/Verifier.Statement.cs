@@ -175,8 +175,8 @@ internal partial class Verifier : IDisposable
 
             BuildVariableValueExpression(verificationContext, methodCallStatement.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
 
-            Debug.Assert(CalledClassExpr.MainExpression is IRefExprCapsule);
-            IRefExprCapsule CalledInstanceExpr = (IRefExprCapsule)CalledClassExpr.MainExpression;
+            Debug.Assert(CalledClassExpr.MainExpression is IObjectRefExprCapsule);
+            IObjectRefExprCapsule CalledInstanceExpr = (IObjectRefExprCapsule)CalledClassExpr.MainExpression;
             CalledInstance = new() { ClassModel = ClassModel, Expr = CalledInstanceExpr };
         }
 

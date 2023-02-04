@@ -283,9 +283,9 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsTypeSupported(ParsingContext parsingContext, TypeSyntax? type, out ExpressionType variableType, out int arraySize)
+    private bool IsTypeSupported(ParsingContext parsingContext, TypeSyntax? type, out ExpressionType variableType, out ArraySize arraySize)
     {
-        arraySize = -1;
+        arraySize = ArraySize.Invalid;
 
         if (type is PredefinedTypeSyntax PredefinedType)
             return IsPredefinedTypeSupported(PredefinedType, out variableType);
@@ -345,9 +345,9 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private bool IsArrayTypeSupported(ParsingContext parsingContext, ArrayTypeSyntax arrayType, out ExpressionType variableType, out int arraySize)
+    private bool IsArrayTypeSupported(ParsingContext parsingContext, ArrayTypeSyntax arrayType, out ExpressionType variableType, out ArraySize arraySize)
     {
-        arraySize = -1;
+        arraySize = ArraySize.Invalid;
 
         if (arrayType.RankSpecifiers.Count == 1)
         {
@@ -356,15 +356,15 @@ internal partial class ClassDeclarationParser
             {
                 ExpressionSyntax FirstSize = FirstRank.Sizes[0];
                 if (FirstSize is OmittedArraySizeExpressionSyntax)
-                    arraySize = 0;
+                    arraySize = ArraySize.Unknown;
                 else if (FirstSize is LiteralExpressionSyntax LiteralExpression)
                 {
                     string LiteralValue = LiteralExpression.Token.Text;
                     if (int.TryParse(LiteralValue, out int IntegerValue))
-                        arraySize = IntegerValue;
+                        arraySize = new ArraySize() { Size = IntegerValue };
                 }
 
-                if (arraySize >= 0)
+                if (arraySize.IsValid)
                 {
                     TypeSyntax ElementType = arrayType.ElementType;
                     if (IsTypeSupported(parsingContext, ElementType, out ExpressionType ArrayElementType, out _))

@@ -26,15 +26,15 @@ internal class NewArrayExpression : Expression, ILiteralExpression
     /// <summary>
     /// Gets the array size.
     /// </summary>
-    required public int ArraySize { get; init; }
+    required public ArraySize ArraySize { get; init; }
 
     /// <inheritdoc/>
     public override string ToString()
     {
         Debug.Assert(ArrayType.IsArray);
         Debug.Assert(!ArrayType.IsNullable);
-        Debug.Assert(ArraySize >= 0);
+        Debug.Assert(ArraySize.IsKnown);
 
-        return $"new {ArrayType.TypeName}[{ArraySize}]";
+        return $"new {ArrayType.TypeName}[{ArraySize.Size}]";
     }
 }

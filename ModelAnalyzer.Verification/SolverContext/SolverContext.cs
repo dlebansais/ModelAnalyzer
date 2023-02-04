@@ -23,7 +23,7 @@ internal partial class SolverContext : IDisposable
         Zero = Context.MkInt(0).Encapsulate();
         False = Context.MkBool(false).Encapsulate();
         True = Context.MkBool(true).Encapsulate();
-        Null = Context.MkInt(0).EncapsulateAsRef(ClassName.Empty, 0);
+        Null = Context.MkInt(0).EncapsulateAsRef(ReferenceIndex.Null);
         ZeroSet = Zero.ToSingleSet();
         FalseSet = False.ToSingleSet();
         NullSet = Null.ToSingleSet();
@@ -107,13 +107,23 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
-    /// Creates a reference constant.
+    /// Creates an object reference constant.
     /// </summary>
     /// <param name="className">The class name.</param>
     /// <param name="name">The constant name.</param>
-    public IRefExprCapsule CreateReferenceConstant(ClassName className, string name)
+    public IObjectRefExprCapsule CreateObjectReferenceConstant(ClassName className, string name)
     {
-        return Context.MkIntConst(name).EncapsulateAsRef(className, 0);
+        return Context.MkIntConst(name).EncapsulateAsObjectRef(className, ReferenceIndex.Null);
+    }
+
+    /// <summary>
+    /// Creates an array reference constant.
+    /// </summary>
+    /// <param name="elementType">The element type.</param>
+    /// <param name="name">The constant name.</param>
+    public IArrayRefExprCapsule CreateArrayReferenceConstant(ExpressionType elementType, string name)
+    {
+        return Context.MkIntConst(name).EncapsulateAsArrayRef(elementType, ReferenceIndex.Null);
     }
 
     /// <summary>
@@ -144,14 +154,27 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
-    /// Creates a reference value.
+    /// Creates an object reference value.
     /// </summary>
     /// <param name="className">The class name.</param>
-    /// <param name="value">The value.</param>
-    public IRefExprCapsule CreateReferenceValue(ClassName className, int value)
+    /// <param name="index">The reference index.</param>
+    public IObjectRefExprCapsule CreateObjectReferenceValue(ClassName className, ReferenceIndex index)
     {
-        Debug.Assert(value > 0);
-        return Context.MkInt(value).EncapsulateAsRef(className, value);
+        Debug.Assert(index != ReferenceIndex.Null);
+        return Context.MkInt(index.Internal).EncapsulateAsObjectRef(className, index);
+    }
+
+    /// <summary>
+    /// Creates an array reference value.
+    /// </summary>
+    /// <param name="elementType">The element type.</param>
+    /// <param name="index">The reference index.</param>
+    public IArrayRefExprCapsule CreateArrayReferenceValue(ExpressionType elementType, ReferenceIndex index)
+    {
+        Debug.Assert(!elementType.IsArray);
+        Debug.Assert(index != ReferenceIndex.Null);
+
+        return Context.MkInt(index.Internal).EncapsulateAsArrayRef(elementType, index);
     }
 
     /// <summary>

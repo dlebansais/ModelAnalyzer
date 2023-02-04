@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +36,12 @@ public class InvariantViolationAnalyzer : Analyzer
         if (ForceSynchronous)
         {
             Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
+
+            // TODO: use some ack frame to wait for the verifier to be ready instead.
+            TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
+            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
             classModel = Manager.GetVerifiedModel(classModel);
+            ClassModelManager.DelayBeforeReadingVerificationResult = OldDelay;
         }
 
         foreach (IInvariantViolation InvariantViolation in classModel.InvariantViolations)

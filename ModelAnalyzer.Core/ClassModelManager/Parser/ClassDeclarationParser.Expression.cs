@@ -532,7 +532,7 @@ internal partial class ClassDeclarationParser
     {
         NewArrayExpression? NewExpression = null;
 
-        if (IsTypeSupported(parsingContext, arrayCreationExpression.Type, out ExpressionType ArrayType, out int ArraySize))
+        if (IsTypeSupported(parsingContext, arrayCreationExpression.Type, out ExpressionType ArrayType, out ArraySize ArraySize))
         {
             if (arrayCreationExpression.Initializer is null)
             {

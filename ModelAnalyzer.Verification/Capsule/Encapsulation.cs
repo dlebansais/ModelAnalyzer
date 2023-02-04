@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
 using Microsoft.Z3;
 
 internal static class Encapsulation
@@ -25,9 +26,21 @@ internal static class Encapsulation
         }
     }
 
-    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, ClassName className, int index)
+    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, ReferenceIndex index)
     {
-        return new RefExprCapsule() { Item = expr, ClassName = className, Index = index };
+        return new RefExprCapsule() { Item = expr, Index = index };
+    }
+
+    public static IObjectRefExprCapsule EncapsulateAsObjectRef(this IntExpr expr, ClassName className, ReferenceIndex index)
+    {
+        return new ObjectRefExprCapsule() { Item = expr, ClassName = className, Index = index };
+    }
+
+    public static IArrayRefExprCapsule EncapsulateAsArrayRef(this IntExpr expr, ExpressionType elementType, ReferenceIndex index)
+    {
+        Debug.Assert(!elementType.IsArray);
+
+        return new ArrayRefExprCapsule() { Item = expr, ElementType = elementType, Index = index };
     }
 
     public static IExprSet<IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
