@@ -7,17 +7,17 @@ using System.Collections.Generic;
 /// </summary>
 /// <typeparam name="T">The specialized Z3 expression type for element expressions.</typeparam>
 internal class ExprArray<T> : IExprBase<IRefExprCapsule, T>
-    where T : IExprCapsule
+    where T : IArrayExprCapsule
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExprArray{T}"/> class.
     /// </summary>
     /// <param name="expr">The expression for the reference that makes the set.</param>
-    /// <param name="elementExpressions">The expressions for elements.</param>
-    public ExprArray(IRefExprCapsule expr, List<T> elementExpressions)
+    /// <param name="elementExpression">The expressions for elements.</param>
+    public ExprArray(IRefExprCapsule expr, T elementExpression)
     {
         MainExpression = expr;
-        OtherExpressions = new ExprCollection<T>(elementExpressions).AsReadOnly();
+        OtherExpressions = new ExprCollection<T>() { elementExpression }.AsReadOnly();
     }
 
     /// <inheritdoc/>
@@ -27,7 +27,7 @@ internal class ExprArray<T> : IExprBase<IRefExprCapsule, T>
     public IReadOnlyExprCollection<T> OtherExpressions { get; }
 
     /// <inheritdoc/>
-    public bool IsSingle { get => OtherExpressions.Count == 0; }
+    public bool IsSingle { get; } = false;
 
     /// <summary>
     /// Converts to a set of expressions.

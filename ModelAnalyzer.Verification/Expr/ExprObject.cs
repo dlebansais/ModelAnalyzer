@@ -31,7 +31,7 @@ internal class ExprObject : IExprBase<IRefExprCapsule, IExprCapsule>
     public IReadOnlyExprCollection<IExprCapsule> OtherExpressions { get; }
 
     /// <inheritdoc/>
-    public bool IsSingle { get => OtherExpressions.Count == 0; }
+    public bool IsSingle { get; } = false;
 
     /// <summary>
     /// Converts to a set of expressions.

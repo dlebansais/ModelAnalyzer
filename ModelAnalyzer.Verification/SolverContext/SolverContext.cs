@@ -180,6 +180,43 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
+    /// Creates an array value.
+    /// </summary>
+    /// <param name="elementType">The element type.</param>
+    /// <param name="arraySize">The array size.</param>
+    public IArrayExprCapsule CreateArrayValue(ExpressionType elementType, ArraySize arraySize)
+    {
+        Debug.Assert(!elementType.IsArray);
+        Debug.Assert(arraySize.IsValid);
+
+        Dictionary<ExpressionType, Sort> DomainTable = new()
+        {
+            { ExpressionType.Boolean, Context.BoolSort },
+            { ExpressionType.Integer, Context.IntSort },
+            { ExpressionType.FloatingPoint, Context.RealSort },
+        };
+
+        Dictionary<ExpressionType, IExprCapsule> DefaultvalueTable = new()
+        {
+            { ExpressionType.Boolean, False },
+            { ExpressionType.Integer, Zero },
+            { ExpressionType.FloatingPoint, Zero },
+        };
+
+        if (elementType.IsSimple)
+        {
+            Debug.Assert(DomainTable.ContainsKey(elementType));
+            Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
+
+            return Context.MkConstArray(DomainTable[elementType], DefaultvalueTable[elementType].Item).Encapsulate();
+        }
+        else
+        {
+            return Context.MkConstArray(Context.IntSort, Zero.Item).Encapsulate();
+        }
+    }
+
+    /// <summary>
     /// Creates an equal expression.
     /// </summary>
     /// <param name="left">The left operand.</param>

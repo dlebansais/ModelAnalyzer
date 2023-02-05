@@ -293,9 +293,10 @@ internal class ObjectManager
         return CreateArrayInitializer(ElementType, arraySize, ReferenceResult).ToExprSet();
     }
 
-    public ExprArray<IExprCapsule> CreateArrayInitializer(ExpressionType elementType, ArraySize arraySize, IRefExprCapsule referenceResult)
+    public ExprArray<IArrayExprCapsule> CreateArrayInitializer(ExpressionType elementType, ArraySize arraySize, IRefExprCapsule referenceResult)
     {
-        ExprArray<IExprCapsule> Result = new(referenceResult, new List<IExprCapsule>());
+        IArrayExprCapsule Array = Context.CreateArrayValue(elementType, arraySize);
+        ExprArray<IArrayExprCapsule> Result = new(referenceResult, Array);
 
         return Result;
     }
@@ -303,7 +304,7 @@ internal class ObjectManager
     public IExprSet<IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
     {
         if (expressionType.IsArray)
-            return CreateArrayInitializer(expressionType, ArraySize.Unknown, Context.Null).ToExprSet();
+            return CreateArrayInitializer(expressionType.ToElementType(), ArraySize.Unknown, Context.Null).ToExprSet();
         else
             return CreateObjectInitializer(expressionType, Context.Null).ToExprSet();
     }
@@ -321,23 +322,6 @@ internal class ObjectManager
     private IExprSet<IArithExprCapsule> CreateFloatingPointConstant(string alias)
     {
         return Context.CreateFloatingPointConstant(alias).ToSingleSet();
-    }
-
-    private ExprArray<IExprCapsule> CreateArrayReferenceConstant(VariableAlias alias, ExpressionType elementType)
-    {
-        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceConstant(elementType, alias.ToString());
-
-        IVariableName ElementBlockName = CreateBlockElementName(ReferenceResult);
-        Variable ElementVariable = new(ElementBlockName, elementType);
-
-        if (!AliasTable.ContainsVariable(ElementVariable))
-            AliasTable.AddVariable(ElementVariable);
-
-        VariableAlias ElementVariableNameAlias = AliasTable.GetAlias(ElementVariable);
-
-        ExprArray<IExprCapsule> Result = new(ReferenceResult, new List<IExprCapsule>());
-
-        return Result;
     }
 
     public ExprObject CreateObjectReferenceConstant(VariableAlias alias, ExpressionType variableType)
@@ -380,6 +364,16 @@ internal class ObjectManager
         }
 
         ExprObject Result = new(ReferenceResult, VariableSetList);
+
+        return Result;
+    }
+
+    private ExprArray<IArrayExprCapsule> CreateArrayReferenceConstant(VariableAlias alias, ExpressionType elementType)
+    {
+        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceConstant(elementType, alias.ToString());
+        IArrayExprCapsule Array = Context.CreateArrayValue(elementType, ArraySize.Unknown);
+
+        ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, Array);
 
         return Result;
     }
@@ -489,11 +483,13 @@ internal class ObjectManager
         return Result;
     }
 
-    public ExprArray<IExprCapsule> CreateArrayNullDefault(ExpressionType variableType)
+    public ExprArray<IArrayExprCapsule> CreateArrayNullDefault(ExpressionType variableType)
     {
         Debug.Assert(variableType.IsArray);
 
-        ExprArray<IExprCapsule> Result = new(Context.Null, new List<IExprCapsule>());
+        // TODO: use something more neutral than integer.
+        IArrayExprCapsule Array = Context.CreateArrayValue(ExpressionType.Integer, ArraySize.Unknown);
+        ExprArray<IArrayExprCapsule> Result = new(Context.Null, Array);
 
         return Result;
     }
