@@ -123,6 +123,8 @@ internal partial class SolverContext : IDisposable
     /// <param name="name">The constant name.</param>
     public IArrayRefExprCapsule CreateArrayReferenceConstant(ExpressionType elementType, string name)
     {
+        Debug.Assert(!elementType.IsArray);
+
         return Context.MkIntConst(name).EncapsulateAsArrayRef(elementType, ReferenceIndex.Null);
     }
 

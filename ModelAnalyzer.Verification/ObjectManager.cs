@@ -163,15 +163,15 @@ internal class ObjectManager
         string AliasString = alias.ToString();
         IExprSet<IExprCapsule> Result;
 
-        Dictionary<ExpressionType, Func<string, IExprSet<IExprCapsule>>> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, CreateBooleanConstant },
-            { ExpressionType.Integer, CreateIntegerConstant },
-            { ExpressionType.FloatingPoint, CreateFloatingPointConstant },
-        };
-
         if (variableType.IsSimple)
         {
+            Dictionary<ExpressionType, Func<string, IExprSet<IExprCapsule>>> SwitchTable = new()
+            {
+                { ExpressionType.Boolean, CreateBooleanConstant },
+                { ExpressionType.Integer, CreateIntegerConstant },
+                { ExpressionType.FloatingPoint, CreateFloatingPointConstant },
+            };
+
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType](AliasString);
         }
@@ -185,13 +185,6 @@ internal class ObjectManager
 
     private IExprSet<IExprCapsule> CreateInitializerExpr(ExpressionType variableType, ILiteralExpression? variableInitializer)
     {
-        Dictionary<ExpressionType, Func<ILiteralExpression?, IExprSet<IExprCapsule>>> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, CreateBooleanInitializer },
-            { ExpressionType.Integer, CreateIntegerInitializer },
-            { ExpressionType.FloatingPoint, CreateFloatingPointInitializer },
-        };
-
         IExprSet<IExprCapsule> Result;
 
         if (variableInitializer is NewObjectExpression NewObject)
@@ -202,6 +195,13 @@ internal class ObjectManager
             Result = CreateNullInitializer(variableType);
         else if (variableType.IsSimple)
         {
+            Dictionary<ExpressionType, Func<ILiteralExpression?, IExprSet<IExprCapsule>>> SwitchTable = new()
+            {
+                { ExpressionType.Boolean, CreateBooleanInitializer },
+                { ExpressionType.Integer, CreateIntegerInitializer },
+                { ExpressionType.FloatingPoint, CreateFloatingPointInitializer },
+            };
+
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType](variableInitializer);
         }
@@ -459,17 +459,17 @@ internal class ObjectManager
 
     public IExprSet<IExprCapsule> GetDefaultExpr(ExpressionType variableType)
     {
-        Dictionary<ExpressionType, IExprSet<IExprCapsule>> SwitchTable = new()
-        {
-            { ExpressionType.Boolean, Context.FalseSet },
-            { ExpressionType.Integer, Context.ZeroSet },
-            { ExpressionType.FloatingPoint, Context.ZeroSet },
-        };
-
         IExprSet<IExprCapsule> Result;
 
         if (variableType.IsSimple)
         {
+            Dictionary<ExpressionType, IExprSet<IExprCapsule>> SwitchTable = new()
+            {
+                { ExpressionType.Boolean, Context.FalseSet },
+                { ExpressionType.Integer, Context.ZeroSet },
+                { ExpressionType.FloatingPoint, Context.ZeroSet },
+            };
+
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType];
         }
