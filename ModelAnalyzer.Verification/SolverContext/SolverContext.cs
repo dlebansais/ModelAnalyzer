@@ -57,17 +57,17 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Gets the zero constant set.
     /// </summary>
-    public IExprSet<IIntExprCapsule> ZeroSet { get; }
+    public IExprBase<IIntExprCapsule, IIntExprCapsule> ZeroSet { get; }
 
     /// <summary>
     /// Gets the false constant set.
     /// </summary>
-    public IExprSet<IBoolExprCapsule> FalseSet { get; }
+    public IExprBase<IBoolExprCapsule, IBoolExprCapsule> FalseSet { get; }
 
     /// <summary>
     /// Gets the null constant set.
     /// </summary>
-    public IExprSet<IRefExprCapsule> NullSet { get; }
+    public IExprBase<IRefExprCapsule, IRefExprCapsule> NullSet { get; }
 
     /// <summary>
     /// Creates a new solver.

@@ -156,12 +156,12 @@ internal class ObjectManager
         }
     }
 
-    private IExprSet<IExprCapsule> CreateVariableExpr(VariableAlias alias, ExpressionType variableType)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableExpr(VariableAlias alias, ExpressionType variableType)
     {
         Debug.Assert(variableType != ExpressionType.Other);
 
         string AliasString = alias.ToString();
-        IExprSet<IExprCapsule> Result;
+        IExprBase<IExprCapsule, IExprCapsule> Result;
 
         if (variableType.IsSimple)
         {
@@ -176,16 +176,16 @@ internal class ObjectManager
             Result = SwitchTable[variableType](AliasString);
         }
         else if (variableType.IsArray)
-            Result = CreateArrayReferenceConstant(alias, variableType.ToElementType()).ToExprSet();
+            Result = CreateArrayReferenceConstant(alias, variableType.ToElementType());
         else
-            Result = CreateObjectReferenceConstant(alias, variableType).ToExprSet();
+            Result = CreateObjectReferenceConstant(alias, variableType);
 
         return Result;
     }
 
-    private IExprSet<IExprCapsule> CreateInitializerExpr(ExpressionType variableType, ILiteralExpression? variableInitializer)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateInitializerExpr(ExpressionType variableType, ILiteralExpression? variableInitializer)
     {
-        IExprSet<IExprCapsule> Result;
+        IExprBase<IExprCapsule, IExprCapsule> Result;
 
         if (variableInitializer is NewObjectExpression NewObject)
             Result = CreateObjectInitializer(NewObject.ObjectType);
@@ -195,7 +195,7 @@ internal class ObjectManager
             Result = CreateNullInitializer(variableType);
         else if (variableType.IsSimple)
         {
-            Dictionary<ExpressionType, Func<ILiteralExpression?, IExprSet<IExprCapsule>>> SwitchTable = new()
+            Dictionary<ExpressionType, Func<ILiteralExpression?, IExprBase<IExprCapsule, IExprCapsule>>> SwitchTable = new()
             {
                 { ExpressionType.Boolean, CreateBooleanInitializer },
                 { ExpressionType.Integer, CreateIntegerInitializer },
@@ -214,7 +214,7 @@ internal class ObjectManager
         return Result;
     }
 
-    private IExprSet<IBoolExprCapsule> CreateBooleanInitializer(ILiteralExpression? variableInitializer)
+    private IExprBase<IBoolExprCapsule, IBoolExprCapsule> CreateBooleanInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralBooleanValueExpression LiteralBoolean)
         {
@@ -225,7 +225,7 @@ internal class ObjectManager
             return Context.FalseSet;
     }
 
-    private IExprSet<IIntExprCapsule> CreateIntegerInitializer(ILiteralExpression? variableInitializer)
+    private IExprBase<IIntExprCapsule, IIntExprCapsule> CreateIntegerInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralIntegerValueExpression LiteralInteger)
         {
@@ -236,7 +236,7 @@ internal class ObjectManager
             return Context.ZeroSet;
     }
 
-    private IExprSet<IArithExprCapsule> CreateFloatingPointInitializer(ILiteralExpression? variableInitializer)
+    private IExprBase<IArithExprCapsule, IArithExprCapsule> CreateFloatingPointInitializer(ILiteralExpression? variableInitializer)
     {
         if (variableInitializer is LiteralFloatingPointValueExpression LiteralFloatingPoint)
         {
@@ -247,33 +247,33 @@ internal class ObjectManager
             return Context.ZeroSet;
     }
 
-    public IExprSet<IExprCapsule> CreateObjectInitializer(ExpressionType expressionType)
+    public IExprBase<IRefExprCapsule, IExprCapsule> CreateObjectInitializer(ExpressionType expressionType)
     {
         ClassModel TypeClassModel = TypeToModel(expressionType);
         IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceValue(TypeClassModel.ClassName, Index.Increment());
 
-        return CreateObjectInitializer(expressionType, ReferenceResult).ToExprSet();
+        return CreateObjectInitializer(expressionType, ReferenceResult);
     }
 
     public ExprObject CreateObjectInitializer(ExpressionType expressionType, IRefExprCapsule referenceResult)
     {
         Debug.Assert(!expressionType.IsArray);
 
-        List<IExprSet<IExprCapsule>> VariableSetList = new();
+        List<IExprBase<IExprCapsule, IExprCapsule>> VariableSetList = new();
 
         ClassModel TypeClassModel = TypeToModel(expressionType);
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
-            IExprSet<IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, Property.Initializer);
+            IExprBase<IExprCapsule, IExprCapsule> PropertyExpressions = CreateInitializerExpr(Property.Type, Property.Initializer);
             VariableSetList.Add(PropertyExpressions);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in TypeClassModel.FieldTable)
         {
             Field Field = Entry.Value;
-            IExprSet<IExprCapsule> FieldExpressions = CreateInitializerExpr(Field.Type, Field.Initializer);
+            IExprBase<IExprCapsule, IExprCapsule> FieldExpressions = CreateInitializerExpr(Field.Type, Field.Initializer);
             VariableSetList.Add(FieldExpressions);
         }
 
@@ -282,7 +282,7 @@ internal class ObjectManager
         return Result;
     }
 
-    public IExprSet<IExprCapsule> CreateArrayInitializer(ExpressionType expressionType, ArraySize arraySize)
+    public IExprBase<IRefExprCapsule, IExprCapsule> CreateArrayInitializer(ExpressionType expressionType, ArraySize arraySize)
     {
         Debug.Assert(expressionType.IsArray);
         Debug.Assert(arraySize.IsKnown);
@@ -290,7 +290,7 @@ internal class ObjectManager
         ExpressionType ElementType = expressionType.ToElementType();
         IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceValue(ElementType, Index.Increment());
 
-        return CreateArrayInitializer(ElementType, arraySize, ReferenceResult).ToExprSet();
+        return CreateArrayInitializer(ElementType, arraySize, ReferenceResult);
     }
 
     public ExprArray<IArrayExprCapsule> CreateArrayInitializer(ExpressionType elementType, ArraySize arraySize, IRefExprCapsule referenceResult)
@@ -301,12 +301,12 @@ internal class ObjectManager
         return Result;
     }
 
-    public IExprSet<IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
+    public IExprBase<IRefExprCapsule, IExprCapsule> CreateNullInitializer(ExpressionType expressionType)
     {
         if (expressionType.IsArray)
-            return CreateArrayInitializer(expressionType.ToElementType(), ArraySize.Unknown, Context.Null).ToExprSet();
+            return CreateArrayInitializer(expressionType.ToElementType(), ArraySize.Unknown, Context.Null);
         else
-            return CreateObjectInitializer(expressionType, Context.Null).ToExprSet();
+            return CreateObjectInitializer(expressionType, Context.Null);
     }
 
     private IExprSet<IBoolExprCapsule> CreateBooleanConstant(string alias)
@@ -329,7 +329,7 @@ internal class ObjectManager
         ClassModel ReferenceClassModel = TypeToModel(variableType);
         IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceConstant(ReferenceClassModel.ClassName, alias.ToString());
         Instance Reference = new() { ClassModel = ReferenceClassModel, Expr = ReferenceResult };
-        List<IExprSet<IExprCapsule>> VariableSetList = new();
+        List<IExprBase<IExprCapsule, IExprCapsule>> VariableSetList = new();
 
         foreach (KeyValuePair<PropertyName, Property> Entry in ReferenceClassModel.PropertyTable)
         {
@@ -343,7 +343,7 @@ internal class ObjectManager
 
             VariableAlias PropertyVariableNameAlias = AliasTable.GetAlias(PropertyVariable);
 
-            IExprSet<IExprCapsule> PropertyExpressions = CreateVariableExpr(PropertyVariableNameAlias, Property.Type);
+            IExprBase<IExprCapsule, IExprCapsule> PropertyExpressions = CreateVariableExpr(PropertyVariableNameAlias, Property.Type);
             VariableSetList.Add(PropertyExpressions);
         }
 
@@ -359,7 +359,7 @@ internal class ObjectManager
 
             VariableAlias FieldVariableNameAlias = AliasTable.GetAlias(FieldVariable);
 
-            IExprSet<IExprCapsule> FieldExpressions = CreateVariableExpr(FieldVariableNameAlias, Field.Type);
+            IExprBase<IExprCapsule, IExprCapsule> FieldExpressions = CreateVariableExpr(FieldVariableNameAlias, Field.Type);
             VariableSetList.Add(FieldExpressions);
         }
 
@@ -441,13 +441,13 @@ internal class ObjectManager
         return Result!;
     }
 
-    public IExprSet<IExprCapsule> GetDefaultExpr(ExpressionType variableType)
+    public IExprBase<IExprCapsule, IExprCapsule> GetDefaultExpr(ExpressionType variableType)
     {
-        IExprSet<IExprCapsule> Result;
+        IExprBase<IExprCapsule, IExprCapsule> Result;
 
         if (variableType.IsSimple)
         {
-            Dictionary<ExpressionType, IExprSet<IExprCapsule>> SwitchTable = new()
+            Dictionary<ExpressionType, IExprBase<IExprCapsule, IExprCapsule>> SwitchTable = new()
             {
                 { ExpressionType.Boolean, Context.FalseSet },
                 { ExpressionType.Integer, Context.ZeroSet },
@@ -458,9 +458,9 @@ internal class ObjectManager
             Result = SwitchTable[variableType];
         }
         else if (variableType.IsArray)
-            Result = CreateArrayNullDefault(variableType).ToExprSet();
+            Result = CreateArrayNullDefault(variableType);
         else
-            Result = CreateObjectNullDefault(variableType).ToExprSet();
+            Result = CreateObjectNullDefault(variableType);
 
         return Result;
     }
@@ -468,13 +468,13 @@ internal class ObjectManager
     public ExprObject CreateObjectNullDefault(ExpressionType variableType)
     {
         ClassModel TypeClassModel = TypeToModel(variableType);
-        List<IExprSet<IExprCapsule>> PropertySetList = new();
+        List<IExprBase<IExprCapsule, IExprCapsule>> PropertySetList = new();
 
         foreach (KeyValuePair<PropertyName, Property> Entry in TypeClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
 
-            IExprSet<IExprCapsule> PropertyExpressions = GetDefaultExpr(Property.Type);
+            IExprBase<IExprCapsule, IExprCapsule> PropertyExpressions = GetDefaultExpr(Property.Type);
             PropertySetList.Add(PropertyExpressions);
         }
 

@@ -655,12 +655,15 @@ internal partial class Verifier : IDisposable
         }
         else
         {
-            Debug.Assert(resultExpr.MainExpression is IArrayRefExprCapsule);
+            Debug.Assert(resultExpr is ExprArray<IArrayExprCapsule>);
+
+            ExprArray<IArrayExprCapsule> ArrayResultExp = (ExprArray<IArrayExprCapsule>)resultExpr;
             IReadOnlyExprCollection<IExprCapsule> OtherExpressions = resultExpr.OtherExpressions;
 
             // TODO: return the proper element from elementIndex, not the first one.
-            IExprBase<IExprCapsule, IExprCapsule> Element = (IExprBase<IExprCapsule, IExprCapsule>)OtherExpressions.First();
-            resultExpr = Element;
+            IArrayExprCapsule Element = (IArrayExprCapsule)OtherExpressions.First();
+
+            // resultExpr = Element;
             return true;
         }
     }

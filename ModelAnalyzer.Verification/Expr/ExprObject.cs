@@ -12,14 +12,17 @@ internal class ExprObject : IExprBase<IRefExprCapsule, IExprCapsule>
     /// </summary>
     /// <param name="expr">The expression for the reference that makes the set.</param>
     /// <param name="propertyExpressions">The expressions for properties.</param>
-    public ExprObject(IRefExprCapsule expr, ICollection<IExprSet<IExprCapsule>> propertyExpressions)
+    public ExprObject(IRefExprCapsule expr, ICollection<IExprBase<IExprCapsule, IExprCapsule>> propertyExpressions)
     {
         MainExpression = expr;
 
         ExprCollection<IExprCapsule> OtherExpressionList = new();
 
-        foreach (IExprSet<IExprCapsule> Item in propertyExpressions)
-            OtherExpressionList.AddRange(Item.AllExpressions);
+        foreach (IExprBase<IExprCapsule, IExprCapsule> Item in propertyExpressions)
+        {
+            OtherExpressionList.Add(Item.MainExpression);
+            OtherExpressionList.AddRange(Item.OtherExpressions);
+        }
 
         OtherExpressions = OtherExpressionList.AsReadOnly();
     }
