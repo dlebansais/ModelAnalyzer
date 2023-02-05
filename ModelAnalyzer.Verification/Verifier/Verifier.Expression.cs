@@ -10,61 +10,61 @@ using System.Linq;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private bool BuildExpression<T>(VerificationContext verificationContext, IExpression expression, out IExprSet<T, T> expr)
+    private bool BuildExpression<T>(VerificationContext verificationContext, IExpression expression, out IExprBase<T, T> expr)
         where T : IExprCapsule
     {
         bool Result = false;
-        IExprSet<IExprCapsule, IExprCapsule>? ResultExpr = null;
+        IExprBase<IExprCapsule, IExprCapsule>? ResultExpr = null;
 
         switch (expression)
         {
             case VariableValueExpression VariableValue:
-                Result = BuildVariableValueExpression(verificationContext, VariableValue, out IExprSet<IExprCapsule, IExprCapsule> VariableValueExpr);
+                Result = BuildVariableValueExpression(verificationContext, VariableValue, out IExprBase<IExprCapsule, IExprCapsule> VariableValueExpr);
                 ResultExpr = VariableValueExpr;
                 break;
             case PrivateFunctionCallExpression PrivateFunctionCall:
-                Result = BuildPrivateFunctionCallExpression(verificationContext, PrivateFunctionCall, out IExprSet<IExprCapsule, IExprCapsule> PrivateFunctionCallExpr);
+                Result = BuildPrivateFunctionCallExpression(verificationContext, PrivateFunctionCall, out IExprBase<IExprCapsule, IExprCapsule> PrivateFunctionCallExpr);
                 ResultExpr = PrivateFunctionCallExpr;
                 break;
             case PublicFunctionCallExpression PublicFunctionCall:
-                Result = BuildPublicFunctionCallExpression(verificationContext, PublicFunctionCall, out IExprSet<IExprCapsule, IExprCapsule> PublicFunctionCallExpr);
+                Result = BuildPublicFunctionCallExpression(verificationContext, PublicFunctionCall, out IExprBase<IExprCapsule, IExprCapsule> PublicFunctionCallExpr);
                 ResultExpr = PublicFunctionCallExpr;
                 break;
             case IBinaryExpression Binary:
-                Result = BuildBinaryExpression(verificationContext, Binary, out IExprSet<IExprCapsule, IExprCapsule> BinaryExpr);
+                Result = BuildBinaryExpression(verificationContext, Binary, out IExprBase<IExprCapsule, IExprCapsule> BinaryExpr);
                 ResultExpr = BinaryExpr;
                 break;
             case IUnaryExpression Unary:
-                Result = BuildUnaryExpression(verificationContext, Unary, out IExprSet<IExprCapsule, IExprCapsule> unaryExpr);
+                Result = BuildUnaryExpression(verificationContext, Unary, out IExprBase<IExprCapsule, IExprCapsule> unaryExpr);
                 ResultExpr = unaryExpr;
                 break;
             case ILiteralExpression Literal:
-                Result = BuildLiteralValueExpression(verificationContext, Literal, out IExprSet<IExprCapsule, IExprCapsule> LiteralExpr);
+                Result = BuildLiteralValueExpression(verificationContext, Literal, out IExprBase<IExprCapsule, IExprCapsule> LiteralExpr);
                 ResultExpr = LiteralExpr;
                 break;
             case ElementAccessExpression ElementAccess:
-                Result = BuildElementAccessExpression(verificationContext, ElementAccess, out IExprSet<IExprCapsule, IExprCapsule> ElementAccessExpr);
+                Result = BuildElementAccessExpression(verificationContext, ElementAccess, out IExprBase<IExprCapsule, IExprCapsule> ElementAccessExpr);
                 ResultExpr = ElementAccessExpr;
                 break;
         }
 
         Debug.Assert(ResultExpr is not null);
 
-        expr = (IExprSet<T, T>)ResultExpr!;
+        expr = (IExprBase<T, T>)ResultExpr!;
         return Result;
     }
 
-    private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, VariableValueExpression variableValueExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         return BuildVariableValueExpression(verificationContext, variableValueExpression.VariablePath, out resultExpr);
     }
 
-    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         return BuildVariableValueExpression(verificationContext, variablePath, pathIndex: 0, out resultExpr);
     }
 
-    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildVariableValueExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         Debug.Assert(pathIndex < variablePath.Count);
 
@@ -207,7 +207,7 @@ internal partial class Verifier : IDisposable
         }
     }
 
-    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         bool Result = false;
         resultExpr = null!;
@@ -225,7 +225,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, Method calledFunction, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildPrivateFunctionCallExpression(VerificationContext verificationContext, PrivateFunctionCallExpression functionCallExpression, Method calledFunction, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
@@ -236,7 +236,7 @@ internal partial class Verifier : IDisposable
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule, IExprCapsule> InitializerExpr))
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
             verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
@@ -262,7 +262,7 @@ internal partial class Verifier : IDisposable
         return true;
     }
 
-    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         bool Result = false;
         resultExpr = null!;
@@ -279,7 +279,7 @@ internal partial class Verifier : IDisposable
         {
             ClassModel = GetLastClassModel(verificationContext, functionCallExpression.VariablePath);
 
-            BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprSet<IExprCapsule, IExprCapsule> CalledClassExpr);
+            BuildVariableValueExpression(verificationContext, functionCallExpression.VariablePath, out IExprBase<IExprCapsule, IExprCapsule> CalledClassExpr);
 
             Debug.Assert(CalledClassExpr.MainExpression is IObjectRefExprCapsule);
             IObjectRefExprCapsule CalledInstanceExpr = (IObjectRefExprCapsule)CalledClassExpr.MainExpression;
@@ -299,7 +299,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, Instance calledInstance, Method calledFunction, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildPublicFunctionCallExpression(VerificationContext verificationContext, PublicFunctionCallExpression functionCallExpression, Instance calledInstance, Method calledFunction, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         resultExpr = verificationContext.ObjectManager.GetDefaultExpr(calledFunction.ReturnType);
         List<Argument> ArgumentList = functionCallExpression.ArgumentList;
@@ -310,7 +310,7 @@ internal partial class Verifier : IDisposable
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule, IExprCapsule> InitializerExpr))
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
             verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
@@ -355,31 +355,31 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildBinaryExpression(VerificationContext verificationContext, IBinaryExpression binaryExpression, out IExprSet<IExprCapsule, IExprCapsule> expr)
+    private bool BuildBinaryExpression(VerificationContext verificationContext, IBinaryExpression binaryExpression, out IExprBase<IExprCapsule, IExprCapsule> expr)
     {
         bool Result = false;
-        IExprSet<IExprCapsule, IExprCapsule>? ResultExpr = null;
+        IExprBase<IExprCapsule, IExprCapsule>? ResultExpr = null;
 
         switch (binaryExpression)
         {
             case BinaryArithmeticExpression BinaryArithmetic:
-                Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic, out IExprSet<IArithExprCapsule, IArithExprCapsule> BinaryArithmeticExpr);
+                Result = BuildBinaryArithmeticExpression(verificationContext, BinaryArithmetic, out IExprBase<IArithExprCapsule, IArithExprCapsule> BinaryArithmeticExpr);
                 ResultExpr = BinaryArithmeticExpr;
                 break;
             case RemainderExpression Remainder:
-                Result = BuildRemainderExpression(verificationContext, Remainder, out IExprSet<IIntExprCapsule, IIntExprCapsule> RemainderExpr);
+                Result = BuildRemainderExpression(verificationContext, Remainder, out IExprBase<IIntExprCapsule, IIntExprCapsule> RemainderExpr);
                 ResultExpr = RemainderExpr;
                 break;
             case BinaryLogicalExpression BinaryLogical:
-                Result = BuildBinaryLogicalExpression(verificationContext, BinaryLogical, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> BinaryLogicalExpr);
+                Result = BuildBinaryLogicalExpression(verificationContext, BinaryLogical, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> BinaryLogicalExpr);
                 ResultExpr = BinaryLogicalExpr;
                 break;
             case EqualityExpression Equality:
-                Result = BuildEqualityExpression(verificationContext, Equality, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> EqualityExpr);
+                Result = BuildEqualityExpression(verificationContext, Equality, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> EqualityExpr);
                 ResultExpr = EqualityExpr;
                 break;
             case ComparisonExpression Comparison:
-                Result = BuildComparisonExpression(verificationContext, Comparison, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> ComparisonExpr);
+                Result = BuildComparisonExpression(verificationContext, Comparison, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> ComparisonExpr);
                 ResultExpr = ComparisonExpr;
                 break;
         }
@@ -390,14 +390,14 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildBinaryArithmeticExpression(VerificationContext verificationContext, BinaryArithmeticExpression binaryArithmeticExpression, out IExprSet<IArithExprCapsule, IArithExprCapsule> resultExprSet)
+    private bool BuildBinaryArithmeticExpression(VerificationContext verificationContext, BinaryArithmeticExpression binaryArithmeticExpression, out IExprBase<IArithExprCapsule, IArithExprCapsule> resultExprSet)
     {
-        bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out IExprSet<IArithExprCapsule, IArithExprCapsule> Left);
-        bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out IExprSet<IArithExprCapsule, IArithExprCapsule> Right);
+        bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out IExprBase<IArithExprCapsule, IArithExprCapsule> Left);
+        bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out IExprBase<IArithExprCapsule, IArithExprCapsule> Right);
 
         if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
         {
-            IExprSet<IBoolExprCapsule, IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
+            IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
             if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, binaryArithmeticExpression.LocationId, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
             {
                 resultExprSet = Context.ZeroSet;
@@ -414,12 +414,12 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildRemainderExpression(VerificationContext verificationContext, RemainderExpression remainderExpression, out IExprSet<IIntExprCapsule, IIntExprCapsule> resultExprSet)
+    private bool BuildRemainderExpression(VerificationContext verificationContext, RemainderExpression remainderExpression, out IExprBase<IIntExprCapsule, IIntExprCapsule> resultExprSet)
     {
-        bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IExprSet<IIntExprCapsule, IIntExprCapsule> Left);
-        bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IExprSet<IIntExprCapsule, IIntExprCapsule> Right);
+        bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IExprBase<IIntExprCapsule, IIntExprCapsule> Left);
+        bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IExprBase<IIntExprCapsule, IIntExprCapsule> Right);
 
-        IExprSet<IBoolExprCapsule, IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
+        IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
         if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, remainderExpression.LocationId, remainderExpression.ToString(), VerificationErrorType.AssumeError))
         {
             resultExprSet = Context.ZeroSet;
@@ -435,10 +435,10 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildBinaryLogicalExpression(VerificationContext verificationContext, BinaryLogicalExpression binaryLogicalExpression, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
+    private bool BuildBinaryLogicalExpression(VerificationContext verificationContext, BinaryLogicalExpression binaryLogicalExpression, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
     {
-        bool ResultLeft = BuildExpression(verificationContext, binaryLogicalExpression.Left, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> Left);
-        bool ResultRight = BuildExpression(verificationContext, binaryLogicalExpression.Right, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> Right);
+        bool ResultLeft = BuildExpression(verificationContext, binaryLogicalExpression.Left, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Left);
+        bool ResultRight = BuildExpression(verificationContext, binaryLogicalExpression.Right, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Right);
 
         Debug.Assert(Left.IsSingle);
         Debug.Assert(Right.IsSingle);
@@ -449,10 +449,10 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildEqualityExpression(VerificationContext verificationContext, EqualityExpression equalityExpression, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
+    private bool BuildEqualityExpression(VerificationContext verificationContext, EqualityExpression equalityExpression, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
     {
-        bool ResultLeft = BuildExpression(verificationContext, equalityExpression.Left, out IExprSet<IExprCapsule, IExprCapsule> Left);
-        bool ResultRight = BuildExpression(verificationContext, equalityExpression.Right, out IExprSet<IExprCapsule, IExprCapsule> Right);
+        bool ResultLeft = BuildExpression(verificationContext, equalityExpression.Left, out IExprBase<IExprCapsule, IExprCapsule> Left);
+        bool ResultRight = BuildExpression(verificationContext, equalityExpression.Right, out IExprBase<IExprCapsule, IExprCapsule> Right);
 
         IBoolExprCapsule ResultExpr = OperatorBuilder.Equality[equalityExpression.Operator](Context, Left.MainExpression, Right.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
@@ -460,10 +460,10 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildComparisonExpression(VerificationContext verificationContext, ComparisonExpression comparisonExpression, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
+    private bool BuildComparisonExpression(VerificationContext verificationContext, ComparisonExpression comparisonExpression, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
     {
-        bool ResultLeft = BuildExpression(verificationContext, comparisonExpression.Left, out IExprSet<IArithExprCapsule, IArithExprCapsule> Left);
-        bool ResultRight = BuildExpression(verificationContext, comparisonExpression.Right, out IExprSet<IArithExprCapsule, IArithExprCapsule> Right);
+        bool ResultLeft = BuildExpression(verificationContext, comparisonExpression.Left, out IExprBase<IArithExprCapsule, IArithExprCapsule> Left);
+        bool ResultRight = BuildExpression(verificationContext, comparisonExpression.Right, out IExprBase<IArithExprCapsule, IArithExprCapsule> Right);
 
         Debug.Assert(Left.IsSingle);
         Debug.Assert(Right.IsSingle);
@@ -474,19 +474,19 @@ internal partial class Verifier : IDisposable
         return ResultLeft && ResultRight;
     }
 
-    private bool BuildUnaryExpression(VerificationContext verificationContext, IUnaryExpression unaryExpression, out IExprSet<IExprCapsule, IExprCapsule> expr)
+    private bool BuildUnaryExpression(VerificationContext verificationContext, IUnaryExpression unaryExpression, out IExprBase<IExprCapsule, IExprCapsule> expr)
     {
         bool Result = false;
-        IExprSet<IExprCapsule, IExprCapsule>? ResultExpr = null;
+        IExprBase<IExprCapsule, IExprCapsule>? ResultExpr = null;
 
         switch (unaryExpression)
         {
             case UnaryArithmeticExpression UnaryArithmetic:
-                Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic, out IExprSet<IArithExprCapsule, IArithExprCapsule> UnaryArithmeticExpr);
+                Result = BuildUnaryArithmeticExpression(verificationContext, UnaryArithmetic, out IExprBase<IArithExprCapsule, IArithExprCapsule> UnaryArithmeticExpr);
                 ResultExpr = UnaryArithmeticExpr;
                 break;
             case UnaryLogicalExpression UnaryLogical:
-                Result = BuildUnaryLogicalExpression(verificationContext, UnaryLogical, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> UnaryLogicalExpr);
+                Result = BuildUnaryLogicalExpression(verificationContext, UnaryLogical, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> UnaryLogicalExpr);
                 ResultExpr = UnaryLogicalExpr;
                 break;
         }
@@ -497,9 +497,9 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildUnaryArithmeticExpression(VerificationContext verificationContext, UnaryArithmeticExpression unaryArithmeticExpression, out IExprSet<IArithExprCapsule, IArithExprCapsule> resultExprSet)
+    private bool BuildUnaryArithmeticExpression(VerificationContext verificationContext, UnaryArithmeticExpression unaryArithmeticExpression, out IExprBase<IArithExprCapsule, IArithExprCapsule> resultExprSet)
     {
-        bool ResultOperand = BuildExpression(verificationContext, unaryArithmeticExpression.Operand, out IExprSet<IArithExprCapsule, IArithExprCapsule> Operand);
+        bool ResultOperand = BuildExpression(verificationContext, unaryArithmeticExpression.Operand, out IExprBase<IArithExprCapsule, IArithExprCapsule> Operand);
 
         Debug.Assert(Operand.IsSingle);
 
@@ -509,9 +509,9 @@ internal partial class Verifier : IDisposable
         return ResultOperand;
     }
 
-    private bool BuildUnaryLogicalExpression(VerificationContext verificationContext, UnaryLogicalExpression unaryLogicalExpression, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
+    private bool BuildUnaryLogicalExpression(VerificationContext verificationContext, UnaryLogicalExpression unaryLogicalExpression, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> resultExprSet)
     {
-        bool ResultOperand = BuildExpression(verificationContext, unaryLogicalExpression.Operand, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> Operand);
+        bool ResultOperand = BuildExpression(verificationContext, unaryLogicalExpression.Operand, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Operand);
 
         Debug.Assert(Operand.IsSingle);
 
@@ -521,35 +521,35 @@ internal partial class Verifier : IDisposable
         return ResultOperand;
     }
 
-    private bool BuildLiteralValueExpression(VerificationContext verificationContext, ILiteralExpression literalExpression, out IExprSet<IExprCapsule, IExprCapsule> expr)
+    private bool BuildLiteralValueExpression(VerificationContext verificationContext, ILiteralExpression literalExpression, out IExprBase<IExprCapsule, IExprCapsule> expr)
     {
         bool Result = false;
-        IExprSet<IExprCapsule, IExprCapsule>? ResultExpr = null;
+        IExprBase<IExprCapsule, IExprCapsule>? ResultExpr = null;
 
         switch (literalExpression)
         {
             case LiteralBooleanValueExpression LiteralBooleanValue:
-                Result = BuildLiteralBooleanValueExpression(LiteralBooleanValue, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> LiteralBooleanValueExpr);
+                Result = BuildLiteralBooleanValueExpression(LiteralBooleanValue, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> LiteralBooleanValueExpr);
                 ResultExpr = LiteralBooleanValueExpr;
                 break;
             case LiteralIntegerValueExpression LiteralIntegerValue:
-                Result = BuildLiteralIntegerValueExpression(LiteralIntegerValue, out IExprSet<IIntExprCapsule, IIntExprCapsule> LiteralIntegerValueExpr);
+                Result = BuildLiteralIntegerValueExpression(LiteralIntegerValue, out IExprBase<IIntExprCapsule, IIntExprCapsule> LiteralIntegerValueExpr);
                 ResultExpr = LiteralIntegerValueExpr;
                 break;
             case LiteralFloatingPointValueExpression LiteralFloatingPointValue:
-                Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue, out IExprSet<IArithExprCapsule, IArithExprCapsule> LiteralFloatingPointValueExpr);
+                Result = BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValue, out IExprBase<IArithExprCapsule, IArithExprCapsule> LiteralFloatingPointValueExpr);
                 ResultExpr = LiteralFloatingPointValueExpr;
                 break;
             case LiteralNullExpression:
-                Result = BuildLiteralNullExpression(out IExprSet<IRefExprCapsule, IRefExprCapsule> LiteralNullExpr);
+                Result = BuildLiteralNullExpression(out IExprBase<IRefExprCapsule, IRefExprCapsule> LiteralNullExpr);
                 ResultExpr = LiteralNullExpr;
                 break;
             case NewObjectExpression NewObject:
-                Result = BuildNewObjectExpression(verificationContext, NewObject, out IExprSet<IExprCapsule, IExprCapsule> NewObjectExpr);
+                Result = BuildNewObjectExpression(verificationContext, NewObject, out IExprBase<IExprCapsule, IExprCapsule> NewObjectExpr);
                 ResultExpr = NewObjectExpr;
                 break;
             case NewArrayExpression NewArray:
-                Result = BuildNewArrayExpression(verificationContext, NewArray, out IExprSet<IExprCapsule, IExprCapsule> NewArrayExpr);
+                Result = BuildNewArrayExpression(verificationContext, NewArray, out IExprBase<IExprCapsule, IExprCapsule> NewArrayExpr);
                 ResultExpr = NewArrayExpr;
                 break;
         }
@@ -560,34 +560,34 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> resultExpr)
+    private bool BuildLiteralBooleanValueExpression(LiteralBooleanValueExpression literalBooleanValueExpression, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> resultExpr)
     {
         IBoolExprCapsule Expr = Context.CreateBooleanValue(literalBooleanValueExpression.Value);
         resultExpr = Expr.ToSingleSet();
         return true;
     }
 
-    private bool BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression, out IExprSet<IIntExprCapsule, IIntExprCapsule> resultExpr)
+    private bool BuildLiteralIntegerValueExpression(LiteralIntegerValueExpression literalIntegerValueExpression, out IExprBase<IIntExprCapsule, IIntExprCapsule> resultExpr)
     {
         IIntExprCapsule Expr = Context.CreateIntegerValue(literalIntegerValueExpression.Value);
         resultExpr = Expr.ToSingleSet();
         return true;
     }
 
-    private bool BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression, out IExprSet<IArithExprCapsule, IArithExprCapsule> resultExpr)
+    private bool BuildLiteralFloatingPointValueExpression(LiteralFloatingPointValueExpression literalFloatingPointValueExpression, out IExprBase<IArithExprCapsule, IArithExprCapsule> resultExpr)
     {
         IArithExprCapsule Expr = Context.CreateFloatingPointValue(literalFloatingPointValueExpression.Value);
         resultExpr = Expr.ToSingleSet();
         return true;
     }
 
-    private bool BuildLiteralNullExpression(out IExprSet<IRefExprCapsule, IRefExprCapsule> resultExpr)
+    private bool BuildLiteralNullExpression(out IExprBase<IRefExprCapsule, IRefExprCapsule> resultExpr)
     {
         resultExpr = Context.NullSet;
         return true;
     }
 
-    private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildNewObjectExpression(VerificationContext verificationContext, NewObjectExpression newObjectExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         bool Result = true;
         resultExpr = verificationContext.ObjectManager.CreateObjectInitializer(newObjectExpression.ObjectType);
@@ -595,7 +595,7 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildNewArrayExpression(VerificationContext verificationContext, NewArrayExpression newArrayExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildNewArrayExpression(VerificationContext verificationContext, NewArrayExpression newArrayExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         bool Result = true;
         resultExpr = verificationContext.ObjectManager.CreateArrayInitializer(newArrayExpression.ArrayType, newArrayExpression.ArraySize);
@@ -603,17 +603,17 @@ internal partial class Verifier : IDisposable
         return Result;
     }
 
-    private bool BuildElementAccessExpression(VerificationContext verificationContext, ElementAccessExpression elementAccessExpression, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, ElementAccessExpression elementAccessExpression, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         return BuildElementAccessExpression(verificationContext, elementAccessExpression.VariablePath, elementAccessExpression.ElementIndex, out resultExpr);
     }
 
-    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, Expression elementIndex, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, Expression elementIndex, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         return BuildElementAccessExpression(verificationContext, variablePath, pathIndex: 0, elementIndex, out resultExpr);
     }
 
-    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, Expression elementIndex, out IExprSet<IExprCapsule, IExprCapsule> resultExpr)
+    private bool BuildElementAccessExpression(VerificationContext verificationContext, List<IVariable> variablePath, int pathIndex, Expression elementIndex, out IExprBase<IExprCapsule, IExprCapsule> resultExpr)
     {
         Debug.Assert(pathIndex < variablePath.Count);
 
@@ -659,7 +659,7 @@ internal partial class Verifier : IDisposable
             IReadOnlyExprCollection<IExprCapsule> OtherExpressions = resultExpr.OtherExpressions;
 
             // TODO: return the proper element from elementIndex, not the first one.
-            IExprSet<IExprCapsule, IExprCapsule> Element = (IExprSet<IExprCapsule, IExprCapsule>)OtherExpressions.First();
+            IExprBase<IExprCapsule, IExprCapsule> Element = (IExprBase<IExprCapsule, IExprCapsule>)OtherExpressions.First();
             resultExpr = Element;
             return true;
         }

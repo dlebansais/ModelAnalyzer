@@ -57,17 +57,17 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Gets the zero constant set.
     /// </summary>
-    public IExprSet<IIntExprCapsule, IIntExprCapsule> ZeroSet { get; }
+    public IExprSet<IIntExprCapsule> ZeroSet { get; }
 
     /// <summary>
     /// Gets the false constant set.
     /// </summary>
-    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> FalseSet { get; }
+    public IExprSet<IBoolExprCapsule> FalseSet { get; }
 
     /// <summary>
     /// Gets the null constant set.
     /// </summary>
-    public IExprSet<IRefExprCapsule, IRefExprCapsule> NullSet { get; }
+    public IExprSet<IRefExprCapsule> NullSet { get; }
 
     /// <summary>
     /// Creates a new solver.
@@ -332,7 +332,7 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operands.</param>
     /// <param name="right">The right operands.</param>
-    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateEqualExprSet(IExprSet<IExprCapsule, IExprCapsule> left, IExprSet<IExprCapsule, IExprCapsule> right)
+    public IExprSet<IBoolExprCapsule> CreateEqualExprSet(IExprBase<IExprCapsule, IExprCapsule> left, IExprBase<IExprCapsule, IExprCapsule> right)
     {
         Debug.Assert(left.OtherExpressions.Count == right.OtherExpressions.Count);
         int Count = left.OtherExpressions.Count;
@@ -357,7 +357,7 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operands.</param>
     /// <param name="right">The right operands.</param>
-    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateNotEqualExprSet(IExprSet<IExprCapsule, IExprCapsule> left, IExprSet<IExprCapsule, IExprCapsule> right)
+    public IExprSet<IBoolExprCapsule> CreateNotEqualExprSet(IExprBase<IExprCapsule, IExprCapsule> left, IExprBase<IExprCapsule, IExprCapsule> right)
     {
         Debug.Assert(left.OtherExpressions.Count == right.OtherExpressions.Count);
         int Count = left.OtherExpressions.Count;
@@ -381,7 +381,7 @@ internal partial class SolverContext : IDisposable
     /// Creates a set of opposites of the provided expressions.
     /// </summary>
     /// <param name="expressionSet">The set of expressions.</param>
-    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateOppositeExprSet(IExprSet<IBoolExprCapsule, IBoolExprCapsule> expressionSet)
+    public IExprSet<IBoolExprCapsule> CreateOppositeExprSet(IExprSet<IBoolExprCapsule> expressionSet)
     {
         int Count = expressionSet.OtherExpressions.Count;
 
@@ -432,7 +432,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="solver">The solver.</param>
     /// <param name="branch">The branch.</param>
     /// <param name="boolExpr">The expressions.</param>
-    public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule, IBoolExprCapsule> boolExpr)
+    public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
     {
         foreach (IBoolExprCapsule Expression in boolExpr.AllExpressions)
         {

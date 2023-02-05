@@ -43,29 +43,29 @@ internal static class Encapsulation
         return new ArrayRefExprCapsule() { Item = expr, ElementType = elementType, Index = index };
     }
 
-    public static IExprSet<IBoolExprCapsule, IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
+    public static IExprSingle<IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
     {
-        return new ExprSet<IBoolExprCapsule>(expr);
+        return new ExprSingle<IBoolExprCapsule>(expr);
     }
 
-    public static IExprSet<IIntExprCapsule, IIntExprCapsule> ToSingleSet(this IIntExprCapsule expr)
+    public static IExprSingle<IIntExprCapsule> ToSingleSet(this IIntExprCapsule expr)
     {
-        return new ExprSet<IIntExprCapsule>(expr);
+        return new ExprSingle<IIntExprCapsule>(expr);
     }
 
-    public static IExprSet<IArithExprCapsule, IArithExprCapsule> ToSingleSet(this IArithExprCapsule expr)
+    public static IExprSingle<IArithExprCapsule> ToSingleSet(this IArithExprCapsule expr)
     {
         switch (expr)
         {
             case IIntExprCapsule Int:
-                return new ExprSet<IIntExprCapsule>(Int);
+                return new ExprSingle<IIntExprCapsule>(Int);
             default:
-                return new ExprSet<IArithExprCapsule>(expr);
+                return new ExprSingle<IArithExprCapsule>(expr);
         }
     }
 
-    public static IExprSet<IRefExprCapsule, IRefExprCapsule> ToSingleSet(this IRefExprCapsule expr)
+    public static IExprSingle<IRefExprCapsule> ToSingleSet(this IRefExprCapsule expr)
     {
-        return new ExprSet<IRefExprCapsule>(expr);
+        return new ExprSingle<IRefExprCapsule>(expr);
     }
 }

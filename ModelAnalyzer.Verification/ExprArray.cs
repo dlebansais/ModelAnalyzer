@@ -1,13 +1,12 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using System.Diagnostics;
 
 /// <summary>
 /// Represents a set of Z3 expressions.
 /// </summary>
 /// <typeparam name="T">The specialized Z3 expression type for element expressions.</typeparam>
-internal class ExprArray<T> : IExprSet<IRefExprCapsule, T>
+internal class ExprArray<T> : IExprBase<IRefExprCapsule, T>
     where T : IExprCapsule
 {
     /// <summary>
@@ -17,22 +16,12 @@ internal class ExprArray<T> : IExprSet<IRefExprCapsule, T>
     /// <param name="elementExpressions">The expressions for elements.</param>
     public ExprArray(IRefExprCapsule expr, List<T> elementExpressions)
     {
-        List<IExprCapsule> ExpressionList = new() { expr };
-        List<T> OtherExpressionList = new();
-
-        for (int i = 0; i < elementExpressions.Count; i++)
-        {
-            T Item = elementExpressions[i];
-            ExpressionList.Add(Item);
-            OtherExpressionList.Add(Item);
-        }
-
-        AllExpressions = new ExprCollection<IExprCapsule>(ExpressionList).AsReadOnly();
-        OtherExpressions = new ExprCollection<T>(OtherExpressionList).AsReadOnly();
+        MainExpression = expr;
+        OtherExpressions = new ExprCollection<T>(elementExpressions).AsReadOnly();
     }
 
     /// <inheritdoc/>
-    public IRefExprCapsule MainExpression { get => (IRefExprCapsule)AllExpressions[0]; }
+    public IRefExprCapsule MainExpression { get; init; }
 
     /// <inheritdoc/>
     public IReadOnlyExprCollection<T> OtherExpressions { get; }
@@ -40,6 +29,16 @@ internal class ExprArray<T> : IExprSet<IRefExprCapsule, T>
     /// <inheritdoc/>
     public bool IsSingle { get => OtherExpressions.Count == 0; }
 
-    /// <inheritdoc/>
-    public IReadOnlyExprCollection<IExprCapsule> AllExpressions { get; }
+    /// <summary>
+    /// Converts to a set of expressions.
+    /// </summary>
+    public IExprSet<IExprCapsule> ToExprSet()
+    {
+        List<IExprCapsule> ExpressionList = new() { MainExpression };
+
+        foreach (T Item in OtherExpressions)
+            ExpressionList.Add(Item);
+
+        return new ExprSet<IExprCapsule>(ExpressionList);
+    }
 }

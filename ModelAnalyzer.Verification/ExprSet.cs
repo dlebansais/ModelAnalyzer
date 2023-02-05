@@ -7,19 +7,9 @@ using System.Diagnostics;
 /// Represents a set of Z3 expressions.
 /// </summary>
 /// <typeparam name="T">The specialized Z3 expression type.</typeparam>
-internal class ExprSet<T> : IExprSet<T, T>
+internal class ExprSet<T> : IExprSet<T>
     where T : IExprCapsule
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ExprSet{T}"/> class.
-    /// </summary>
-    /// <param name="expr">The expression that makes the set.</param>
-    public ExprSet(T expr)
-    {
-        AllExpressions = new ExprCollection<IExprCapsule>() { expr }.AsReadOnly();
-        OtherExpressions = new ExprCollection<T>().AsReadOnly();
-    }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ExprSet{T}"/> class.
     /// </summary>
@@ -28,7 +18,7 @@ internal class ExprSet<T> : IExprSet<T, T>
     {
         Debug.Assert(expressions.Count > 0);
 
-        List<IExprCapsule> ExpressionList = new() { expressions[0] };
+        List<T> ExpressionList = new() { expressions[0] };
         List<T> OtherExpressionList = new();
 
         for (int i = 1; i < expressions.Count; i++)
@@ -38,12 +28,12 @@ internal class ExprSet<T> : IExprSet<T, T>
             OtherExpressionList.Add(Item);
         }
 
-        AllExpressions = new ExprCollection<IExprCapsule>(ExpressionList).AsReadOnly();
+        AllExpressions = new ExprCollection<T>(ExpressionList).AsReadOnly();
         OtherExpressions = new ExprCollection<T>(OtherExpressionList).AsReadOnly();
     }
 
     /// <inheritdoc/>
-    public T MainExpression { get => (T)AllExpressions[0]; }
+    public T MainExpression { get => AllExpressions[0]; }
 
     /// <inheritdoc/>
     public IReadOnlyExprCollection<T> OtherExpressions { get; }
@@ -52,5 +42,5 @@ internal class ExprSet<T> : IExprSet<T, T>
     public bool IsSingle { get => OtherExpressions.Count == 0; }
 
     /// <inheritdoc/>
-    public IReadOnlyExprCollection<IExprCapsule> AllExpressions { get; }
+    public IReadOnlyExprCollection<T> AllExpressions { get; }
 }

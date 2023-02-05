@@ -5,30 +5,27 @@ using System.Collections.Generic;
 /// <summary>
 /// Represents a set of Z3 expressions.
 /// </summary>
-internal class ExprObject : IExprSet<IRefExprCapsule, IExprCapsule>
+internal class ExprObject : IExprBase<IRefExprCapsule, IExprCapsule>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExprObject"/> class.
     /// </summary>
     /// <param name="expr">The expression for the reference that makes the set.</param>
     /// <param name="propertyExpressions">The expressions for properties.</param>
-    public ExprObject(IRefExprCapsule expr, ICollection<IExprSet<IExprCapsule, IExprCapsule>> propertyExpressions)
+    public ExprObject(IRefExprCapsule expr, ICollection<IExprSet<IExprCapsule>> propertyExpressions)
     {
-        ExprCollection<IExprCapsule> ExpressionList = new() { expr };
+        MainExpression = expr;
+
         ExprCollection<IExprCapsule> OtherExpressionList = new();
 
-        foreach (IExprSet<IExprCapsule, IExprCapsule> Item in propertyExpressions)
-        {
-            ExpressionList.AddRange(Item.AllExpressions);
+        foreach (IExprSet<IExprCapsule> Item in propertyExpressions)
             OtherExpressionList.AddRange(Item.AllExpressions);
-        }
 
-        AllExpressions = ExpressionList.AsReadOnly();
         OtherExpressions = OtherExpressionList.AsReadOnly();
     }
 
     /// <inheritdoc/>
-    public IRefExprCapsule MainExpression { get => (IRefExprCapsule)AllExpressions[0]; }
+    public IRefExprCapsule MainExpression { get; init; }
 
     /// <inheritdoc/>
     public IReadOnlyExprCollection<IExprCapsule> OtherExpressions { get; }
@@ -36,6 +33,14 @@ internal class ExprObject : IExprSet<IRefExprCapsule, IExprCapsule>
     /// <inheritdoc/>
     public bool IsSingle { get => OtherExpressions.Count == 0; }
 
-    /// <inheritdoc/>
-    public IReadOnlyExprCollection<IExprCapsule> AllExpressions { get; }
+    /// <summary>
+    /// Converts to a set of expressions.
+    /// </summary>
+    public IExprSet<IExprCapsule> ToExprSet()
+    {
+        List<IExprCapsule> ExpressionList = new() { MainExpression };
+        ExpressionList.AddRange(OtherExpressions);
+
+        return new ExprSet<IExprCapsule>(ExpressionList);
+    }
 }
