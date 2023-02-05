@@ -1,59 +1,56 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 /// <summary>
 /// Represents a set of Z3 expressions.
 /// </summary>
 /// <typeparam name="T">The specialized Z3 expression type.</typeparam>
-internal class ExprSet<T> : IExprSet<T>
+internal class ExprSet<T> : IExprSet<T, T>
     where T : IExprCapsule
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExprSet{T}"/> class.
     /// </summary>
-    /// <param name="expr">The name that makes the set.</param>
+    /// <param name="expr">The expression that makes the set.</param>
     public ExprSet(T expr)
     {
-        ExprCollection<T> ExpressionList = new() { expr };
-        Expressions = ExpressionList.AsReadOnly();
+        AllExpressions = new ExprCollection<IExprCapsule>() { expr }.AsReadOnly();
+        OtherExpressions = new ExprCollection<T>().AsReadOnly();
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExprSet{T}"/> class.
     /// </summary>
-    /// <param name="expressionSets">The list of expressions.</param>
-    public ExprSet(ICollection<IExprSet<T>> expressionSets)
+    /// <param name="expressions">The list of expressions.</param>
+    public ExprSet(List<T> expressions)
     {
-        List<T> ExpressionList = new();
+        Debug.Assert(expressions.Count > 0);
 
-        foreach (IExprSet<T> Item in expressionSets)
-            ExpressionList.AddRange(Item.Expressions);
+        List<IExprCapsule> ExpressionList = new() { expressions[0] };
+        List<T> OtherExpressionList = new();
 
-        Expressions = new ExprCollection<T>(ExpressionList).AsReadOnly();
-    }
+        for (int i = 1; i < expressions.Count; i++)
+        {
+            T Item = expressions[i];
+            ExpressionList.Add(Item);
+            OtherExpressionList.Add(Item);
+        }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ExprSet{T}"/> class.
-    /// </summary>
-    /// <param name="expr">The expression for the reference that makes the set.</param>
-    /// <param name="propertyExpressions">The expressions for properties.</param>
-    public ExprSet(T expr, ICollection<IExprSet<T>> propertyExpressions)
-    {
-        ExprCollection<T> ExpressionList = new() { expr };
-
-        foreach (IExprSet<T> Item in propertyExpressions)
-            ExpressionList.AddRange(Item.Expressions);
-
-        Expressions = ExpressionList.AsReadOnly();
+        AllExpressions = new ExprCollection<IExprCapsule>(ExpressionList).AsReadOnly();
+        OtherExpressions = new ExprCollection<T>(OtherExpressionList).AsReadOnly();
     }
 
     /// <inheritdoc/>
-    public T MainExpression { get => Expressions[0]; }
+    public T MainExpression { get => (T)AllExpressions[0]; }
 
     /// <inheritdoc/>
-    public bool IsSingle { get => Expressions.Count == 1; }
+    public IReadOnlyExprCollection<T> OtherExpressions { get; }
 
     /// <inheritdoc/>
-    public IReadOnlyExprCollection<T> Expressions { get; }
+    public bool IsSingle { get => OtherExpressions.Count == 0; }
+
+    /// <inheritdoc/>
+    public IReadOnlyExprCollection<IExprCapsule> AllExpressions { get; }
 }

@@ -43,17 +43,17 @@ internal static class Encapsulation
         return new ArrayRefExprCapsule() { Item = expr, ElementType = elementType, Index = index };
     }
 
-    public static IExprSet<IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
+    public static IExprSet<IBoolExprCapsule, IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)
     {
         return new ExprSet<IBoolExprCapsule>(expr);
     }
 
-    public static IExprSet<IIntExprCapsule> ToSingleSet(this IIntExprCapsule expr)
+    public static IExprSet<IIntExprCapsule, IIntExprCapsule> ToSingleSet(this IIntExprCapsule expr)
     {
         return new ExprSet<IIntExprCapsule>(expr);
     }
 
-    public static IExprSet<IArithExprCapsule> ToSingleSet(this IArithExprCapsule expr)
+    public static IExprSet<IArithExprCapsule, IArithExprCapsule> ToSingleSet(this IArithExprCapsule expr)
     {
         switch (expr)
         {
@@ -64,7 +64,7 @@ internal static class Encapsulation
         }
     }
 
-    public static IExprSet<IRefExprCapsule> ToSingleSet(this IRefExprCapsule expr)
+    public static IExprSet<IRefExprCapsule, IRefExprCapsule> ToSingleSet(this IRefExprCapsule expr)
     {
         return new ExprSet<IRefExprCapsule>(expr);
     }

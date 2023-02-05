@@ -57,17 +57,17 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Gets the zero constant set.
     /// </summary>
-    public IExprSet<IIntExprCapsule> ZeroSet { get; }
+    public IExprSet<IIntExprCapsule, IIntExprCapsule> ZeroSet { get; }
 
     /// <summary>
     /// Gets the false constant set.
     /// </summary>
-    public IExprSet<IBoolExprCapsule> FalseSet { get; }
+    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> FalseSet { get; }
 
     /// <summary>
     /// Gets the null constant set.
     /// </summary>
-    public IExprSet<IRefExprCapsule> NullSet { get; }
+    public IExprSet<IRefExprCapsule, IRefExprCapsule> NullSet { get; }
 
     /// <summary>
     /// Creates a new solver.
@@ -332,22 +332,22 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operands.</param>
     /// <param name="right">The right operands.</param>
-    public IExprSet<IBoolExprCapsule> CreateEqualExprSet(IExprSet<IExprCapsule> left, IExprSet<IExprCapsule> right)
+    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateEqualExprSet(IExprSet<IExprCapsule, IExprCapsule> left, IExprSet<IExprCapsule, IExprCapsule> right)
     {
-        Debug.Assert(left.Expressions.Count == right.Expressions.Count);
-        int Count = left.Expressions.Count;
-        Debug.Assert(Count > 0);
+        Debug.Assert(left.OtherExpressions.Count == right.OtherExpressions.Count);
+        int Count = left.OtherExpressions.Count;
 
-        List<IExprSet<IBoolExprCapsule>> EqualityExprSetList = new();
+        List<IBoolExprCapsule> EqualityExprList = new();
+        IBoolExprCapsule EqualityExpr = Context.MkEq(left.MainExpression.Item, right.MainExpression.Item).Encapsulate();
+        EqualityExprList.Add(EqualityExpr);
 
         for (int i = 0; i < Count; i++)
         {
-            IBoolExprCapsule EqualityExpr = Context.MkEq(left.Expressions[i].Item, right.Expressions[i].Item).Encapsulate();
-            ExprSet<IBoolExprCapsule> EqualityExprSet = new(EqualityExpr);
-            EqualityExprSetList.Add(EqualityExprSet);
+            EqualityExpr = Context.MkEq(left.OtherExpressions[i].Item, right.OtherExpressions[i].Item).Encapsulate();
+            EqualityExprList.Add(EqualityExpr);
         }
 
-        ExprSet<IBoolExprCapsule> Result = new(EqualityExprSetList);
+        ExprSet<IBoolExprCapsule> Result = new(EqualityExprList);
 
         return Result;
     }
@@ -357,22 +357,22 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operands.</param>
     /// <param name="right">The right operands.</param>
-    public IExprSet<IBoolExprCapsule> CreateNotEqualExprSet(IExprSet<IExprCapsule> left, IExprSet<IExprCapsule> right)
+    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateNotEqualExprSet(IExprSet<IExprCapsule, IExprCapsule> left, IExprSet<IExprCapsule, IExprCapsule> right)
     {
-        Debug.Assert(left.Expressions.Count == right.Expressions.Count);
-        int Count = left.Expressions.Count;
-        Debug.Assert(Count > 0);
+        Debug.Assert(left.OtherExpressions.Count == right.OtherExpressions.Count);
+        int Count = left.OtherExpressions.Count;
 
-        List<IExprSet<IBoolExprCapsule>> EqualityExprSetList = new();
+        List<IBoolExprCapsule> EqualityExprList = new();
+        IBoolExprCapsule EqualityExpr = Context.MkNot(Context.MkEq(left.MainExpression.Item, right.MainExpression.Item)).Encapsulate();
+        EqualityExprList.Add(EqualityExpr);
 
         for (int i = 0; i < Count; i++)
         {
-            IBoolExprCapsule EqualityExpr = Context.MkNot(Context.MkEq(left.Expressions[i].Item, right.Expressions[i].Item)).Encapsulate();
-            ExprSet<IBoolExprCapsule> EqualityExprSet = new(EqualityExpr);
-            EqualityExprSetList.Add(EqualityExprSet);
+            EqualityExpr = Context.MkNot(Context.MkEq(left.OtherExpressions[i].Item, right.OtherExpressions[i].Item)).Encapsulate();
+            EqualityExprList.Add(EqualityExpr);
         }
 
-        ExprSet<IBoolExprCapsule> Result = new(EqualityExprSetList);
+        ExprSet<IBoolExprCapsule> Result = new(EqualityExprList);
 
         return Result;
     }
@@ -381,21 +381,21 @@ internal partial class SolverContext : IDisposable
     /// Creates a set of opposites of the provided expressions.
     /// </summary>
     /// <param name="expressionSet">The set of expressions.</param>
-    public IExprSet<IBoolExprCapsule> CreateOppositeExprSet(IExprSet<IBoolExprCapsule> expressionSet)
+    public IExprSet<IBoolExprCapsule, IBoolExprCapsule> CreateOppositeExprSet(IExprSet<IBoolExprCapsule, IBoolExprCapsule> expressionSet)
     {
-        int Count = expressionSet.Expressions.Count;
-        Debug.Assert(Count > 0);
+        int Count = expressionSet.OtherExpressions.Count;
 
-        List<IExprSet<IBoolExprCapsule>> NotExprSetList = new();
+        List<IBoolExprCapsule> NotExprList = new();
+        IBoolExprCapsule NotExpr = Context.MkNot(expressionSet.MainExpression.Item).Encapsulate();
+        NotExprList.Add(NotExpr);
 
         for (int i = 0; i < Count; i++)
         {
-            IBoolExprCapsule NotExpr = Context.MkNot(expressionSet.Expressions[i].Item).Encapsulate();
-            ExprSet<IBoolExprCapsule> NotExprSet = new(NotExpr);
-            NotExprSetList.Add(NotExprSet);
+            NotExpr = Context.MkNot(expressionSet.OtherExpressions[i].Item).Encapsulate();
+            NotExprList.Add(NotExpr);
         }
 
-        ExprSet<IBoolExprCapsule> Result = new(NotExprSetList);
+        ExprSet<IBoolExprCapsule> Result = new(NotExprList);
 
         return Result;
     }
@@ -432,9 +432,9 @@ internal partial class SolverContext : IDisposable
     /// <param name="solver">The solver.</param>
     /// <param name="branch">The branch.</param>
     /// <param name="boolExpr">The expressions.</param>
-    public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
+    public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule, IBoolExprCapsule> boolExpr)
     {
-        foreach (IBoolExprCapsule Expression in boolExpr.Expressions)
+        foreach (IBoolExprCapsule Expression in boolExpr.AllExpressions)
         {
             BoolExpr Expr;
 

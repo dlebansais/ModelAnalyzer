@@ -54,7 +54,7 @@ internal partial class Verifier : IDisposable
 
     private bool AddAssignmentExecution(VerificationContext verificationContext, AssignmentStatement assignmentStatement)
     {
-        if (!BuildExpression(verificationContext, assignmentStatement.Expression, out IExprSet<IExprCapsule> SourceExpr))
+        if (!BuildExpression(verificationContext, assignmentStatement.Expression, out IExprSet<IExprCapsule, IExprCapsule> SourceExpr))
             return false;
 
         string Name = assignmentStatement.DestinationName.Text;
@@ -79,7 +79,7 @@ internal partial class Verifier : IDisposable
 
     private bool AddConditionalExecution(VerificationContext verificationContext, ConditionalStatement conditionalStatement)
     {
-        if (!BuildExpression(verificationContext, conditionalStatement.Condition, out IExprSet<IBoolExprCapsule> ConditionExpr))
+        if (!BuildExpression(verificationContext, conditionalStatement.Condition, out IExprSet<IBoolExprCapsule, IBoolExprCapsule> ConditionExpr))
             return false;
 
         IBoolExprCapsule TrueBranchExpr;
@@ -138,7 +138,7 @@ internal partial class Verifier : IDisposable
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule> InitializerExpr))
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
             verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
@@ -173,7 +173,7 @@ internal partial class Verifier : IDisposable
         {
             ClassModel = GetLastClassModel(verificationContext, methodCallStatement.VariablePath);
 
-            BuildVariableValueExpression(verificationContext, methodCallStatement.VariablePath, out IExprSet<IExprCapsule> CalledClassExpr);
+            BuildVariableValueExpression(verificationContext, methodCallStatement.VariablePath, out IExprSet<IExprCapsule, IExprCapsule> CalledClassExpr);
 
             Debug.Assert(CalledClassExpr.MainExpression is IObjectRefExprCapsule);
             IObjectRefExprCapsule CalledInstanceExpr = (IObjectRefExprCapsule)CalledClassExpr.MainExpression;
@@ -206,7 +206,7 @@ internal partial class Verifier : IDisposable
             Argument Argument = ArgumentList[Index++];
             Parameter Parameter = Entry.Value;
 
-            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule> InitializerExpr))
+            if (!BuildExpression(verificationContext, Argument.Expression, out IExprSet<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
             verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
@@ -249,7 +249,7 @@ internal partial class Verifier : IDisposable
             Method HostMethod = verificationContext.HostMethod!;
             Local ResultLocal = verificationContext.ResultLocal!;
 
-            if (!BuildExpression(verificationContext, ReturnExpression, out IExprSet<IExprCapsule> ResultInitializerExpr))
+            if (!BuildExpression(verificationContext, ReturnExpression, out IExprSet<IExprCapsule, IExprCapsule> ResultInitializerExpr))
                 return false;
 
             IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultLocal.Name);

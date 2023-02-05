@@ -3,14 +3,21 @@
 /// <summary>
 /// Represents a set of Z3 expressions.
 /// </summary>
-/// <typeparam name="T">The specialized Z3 expression type.</typeparam>
-internal interface IExprSet<out T>
-    where T : IExprCapsule
+/// <typeparam name="TMain">The specialized Z3 expression type for the main expression.</typeparam>
+/// <typeparam name="TOther">The specialized Z3 expression type for other expressions.</typeparam>
+internal interface IExprSet<out TMain, out TOther>
+    where TMain : IExprCapsule
+    where TOther : IExprCapsule
 {
     /// <summary>
     /// Gets the main expression in the set.
     /// </summary>
-    T MainExpression { get; }
+    TMain MainExpression { get; }
+
+    /// <summary>
+    /// Gets the list of other expressions in the set.
+    /// </summary>
+    IReadOnlyExprCollection<TOther> OtherExpressions { get; }
 
     /// <summary>
     /// Gets a value indicating whether the set contains exactly one expression.
@@ -18,7 +25,7 @@ internal interface IExprSet<out T>
     bool IsSingle { get; }
 
     /// <summary>
-    /// Gets the list of expressions in the set.
+    /// Gets the list of all expressions in the set.
     /// </summary>
-    IReadOnlyExprCollection<T> Expressions { get; }
+    IReadOnlyExprCollection<IExprCapsule> AllExpressions { get; }
 }
