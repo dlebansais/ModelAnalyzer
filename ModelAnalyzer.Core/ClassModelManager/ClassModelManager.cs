@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using AnalysisLogger;
 using FileExtractor;
@@ -137,6 +138,17 @@ public partial class ClassModelManager : IDisposable
         return await Task.Run(() =>
         {
             return WaitForVerification(classModel);
+        });
+    }
+
+    /// <summary>
+    /// Waits for the verifier to be ready to receive data.
+    /// </summary>
+    public async void WaitReady()
+    {
+        await Task.Run(() =>
+        {
+            WaitReadySynchronous();
         });
     }
 

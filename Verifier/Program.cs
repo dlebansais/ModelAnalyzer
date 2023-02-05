@@ -51,19 +51,29 @@ internal class Program
             return;
         }
 
-        TimeSpan Timeout = Timeouts.VerificationIdleTimeout;
-        Stopwatch Watch = new();
-        Watch.Start();
+        TimeSpan VerificationIdleTimeout = Timeouts.VerificationIdleTimeout;
+        Stopwatch VerificationIdleWatch = new();
+        VerificationIdleWatch.Start();
 
-        while (Watch.Elapsed < Timeout)
+        Guid LastReceiveChannelGuid = Guid.Empty;
+        TimeSpan ReadyTimeout = Timeouts.ReadyTimeout;
+        Stopwatch ReadyWatch = new();
+
+        while (VerificationIdleWatch.Elapsed < VerificationIdleTimeout)
         {
             byte[]? Data = FromClientChannel.Read();
             if (Data is not null)
             {
                 Log($"Data received {Data.Length} bytes");
 
-                ProcessData(Data);
-                Watch.Restart();
+                ProcessData(Data, ref LastReceiveChannelGuid);
+                VerificationIdleWatch.Restart();
+                ReadyWatch.Restart();
+            }
+            else if (ReadyWatch.Elapsed >= ReadyTimeout)
+            {
+                SendReadyFrame(LastReceiveChannelGuid);
+                ReadyWatch.Restart();
             }
             else
                 Thread.Sleep(TimeSpan.FromMilliseconds(10));
@@ -81,7 +91,7 @@ internal class Program
         Log(LogLevel.Error, args.ErrorContext.Error.Message);
     }
 
-    private static void ProcessData(byte[] data)
+    private static void ProcessData(byte[] data, ref Guid receiveChannelGuid)
     {
         JsonSerializerSettings Settings = new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto };
         Settings.Converters.Add(new ClassNameConverter());
@@ -94,12 +104,12 @@ internal class Program
             if (ModelExchange is not null)
             {
                 Log($"Class model list decoded");
-                ProcessModels(ModelExchange);
+                ProcessModels(ModelExchange, ref receiveChannelGuid);
             }
         }
     }
 
-    private static void ProcessModels(ModelExchange modelExchange)
+    private static void ProcessModels(ModelExchange modelExchange, ref Guid receiveChannelGuid)
     {
         List<VerificationResult> VerificationResultList = new();
 
@@ -113,7 +123,10 @@ internal class Program
         }
 
         foreach (VerificationResult VerificationResult in VerificationResultList)
+        {
             SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
+            receiveChannelGuid = modelExchange.ReceiveChannelGuid;
+        }
     }
 
     private static VerificationResult ProcessClassModel(ClassModelTable classModelTable, ClassModel classModel)
@@ -174,6 +187,31 @@ internal class Program
             }
             else
                 Log("No room for ack");
+
+            ToClientChannel.Close();
+        }
+        else
+            Log($"Failed to open client channel, {ToClientChannel.LastError}");
+    }
+
+    private static void SendReadyFrame(Guid receiveChannelGuid)
+    {
+        Channel ToClientChannel = new(receiveChannelGuid, Mode.Send);
+        ToClientChannel.Open();
+
+        if (ToClientChannel.IsOpen)
+        {
+            Log($"Client channel opened");
+
+            byte[] EncodedString = Converter.EncodeString("{}");
+
+            if (EncodedString.Length <= ToClientChannel.GetFreeLength())
+            {
+                ToClientChannel.Write(EncodedString);
+                Log("Ready sent");
+            }
+            else
+                Log("No room for ready frame");
 
             ToClientChannel.Close();
         }

@@ -26,4 +26,14 @@ public static class Timeouts
     /// The timeout waiting for new data to verify.
     /// </summary>
     public static readonly TimeSpan VerificationIdleTimeout = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// The timeout before sending a new ready frame.
+    /// </summary>
+    public static readonly TimeSpan ReadyTimeout = TimeSpan.FromSeconds(1);
+
+    /// <summary>
+    /// The timeout waiting for new ready frame.
+    /// </summary>
+    public static readonly TimeSpan VerificationReadyTimeout = TimeSpan.FromSeconds(90);
 }

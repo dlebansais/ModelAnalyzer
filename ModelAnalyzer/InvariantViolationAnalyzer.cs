@@ -25,6 +25,11 @@ public class InvariantViolationAnalyzer : Analyzer
 
     public const string ForSynchronousTestOnly = "ClassName_62D72B24_5F04_451F_BC32_ABE6D787701B";
 
+    protected override void BeforeInitialize()
+    {
+        Manager.WaitReady();
+    }
+
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
@@ -37,11 +42,7 @@ public class InvariantViolationAnalyzer : Analyzer
         {
             Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
 
-            // TODO: use some ack frame to wait for the verifier to be ready instead.
-            TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
-            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
             classModel = Manager.GetVerifiedModel(classModel);
-            ClassModelManager.DelayBeforeReadingVerificationResult = OldDelay;
         }
 
         foreach (IInvariantViolation InvariantViolation in classModel.InvariantViolations)

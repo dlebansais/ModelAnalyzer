@@ -23,6 +23,11 @@ public class AssumeViolationAnalyzer : Analyzer
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.ClassDeclaration; }
     protected override bool IsAsyncRunRequested { get => true; }
 
+    protected override void BeforeInitialize()
+    {
+        Manager.WaitReady();
+    }
+
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;
@@ -35,11 +40,7 @@ public class AssumeViolationAnalyzer : Analyzer
         {
             Logger.Log(LogLevel.Warning, "ForceSynchronous mode active");
 
-            // TODO: use some ack frame to wait for the verifier to be ready instead.
-            TimeSpan OldDelay = ClassModelManager.DelayBeforeReadingVerificationResult;
-            ClassModelManager.DelayBeforeReadingVerificationResult = TimeSpan.FromSeconds(10);
             classModel = Manager.GetVerifiedModel(classModel);
-            ClassModelManager.DelayBeforeReadingVerificationResult = OldDelay;
         }
 
         foreach (IAssumeViolation AssumeViolation in classModel.AssumeViolations)

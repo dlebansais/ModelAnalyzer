@@ -23,8 +23,14 @@ public abstract class Analyzer : DiagnosticAnalyzer
         return new DiagnosticDescriptor(id, title, messageFormat, category, diagnosticSeverity, isEnabledByDefault: true, description, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{id}.md");
     }
 
+    protected virtual void BeforeInitialize()
+    {
+    }
+
     public override void Initialize(AnalysisContext context)
     {
+        BeforeInitialize();
+
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, DiagnosticKind);

@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Represents a flow check violation.
@@ -14,5 +15,6 @@ internal class AssumeViolation : IAssumeViolation
     required public string Text { get; init; }
 
     /// <inheritdoc/>
+    [JsonIgnore]
     required public Location Location { get; init; }
 }
