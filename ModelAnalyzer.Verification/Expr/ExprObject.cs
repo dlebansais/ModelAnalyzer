@@ -35,15 +35,4 @@ internal class ExprObject : IExprBase<IRefExprCapsule, IExprCapsule>
 
     /// <inheritdoc/>
     public bool IsSingle { get; } = false;
-
-    /// <summary>
-    /// Converts to a set of expressions.
-    /// </summary>
-    public IExprSet<IExprCapsule> ToExprSet()
-    {
-        List<IExprCapsule> ExpressionList = new() { MainExpression };
-        ExpressionList.AddRange(OtherExpressions);
-
-        return new ExprSet<IExprCapsule>(ExpressionList);
-    }
 }

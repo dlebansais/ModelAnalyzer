@@ -5,4 +5,6 @@ using Microsoft.Z3;
 internal interface IArrayExprCapsule : IExprCapsule
 {
     new ArrayExpr Item { get; }
+
+    ExpressionType ElementType { get; }
 }

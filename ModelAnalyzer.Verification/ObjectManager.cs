@@ -296,7 +296,8 @@ internal class ObjectManager
     public ExprArray<IArrayExprCapsule> CreateArrayInitializer(ExpressionType elementType, ArraySize arraySize, IRefExprCapsule referenceResult)
     {
         IArrayExprCapsule Array = Context.CreateArrayValue(elementType, arraySize);
-        ExprArray<IArrayExprCapsule> Result = new(referenceResult, Array);
+        IIntExprCapsule Size = Context.CreateIntegerValue(arraySize.Size);
+        ExprArray<IArrayExprCapsule> Result = new(referenceResult, Array, Size);
 
         return Result;
     }
@@ -372,8 +373,9 @@ internal class ObjectManager
     {
         IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceConstant(elementType, alias.ToString());
         IArrayExprCapsule Array = Context.CreateArrayValue(elementType, ArraySize.Unknown);
+        IIntExprCapsule Size = Context.CreateIntegerValue(ArraySize.Unknown.Size);
 
-        ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, Array);
+        ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, Array, Size);
 
         return Result;
     }
@@ -489,7 +491,8 @@ internal class ObjectManager
 
         // TODO: use something more neutral than integer.
         IArrayExprCapsule Array = Context.CreateArrayValue(ExpressionType.Integer, ArraySize.Unknown);
-        ExprArray<IArrayExprCapsule> Result = new(Context.Null, Array);
+        IIntExprCapsule Size = Context.CreateIntegerValue(ArraySize.Unknown.Size);
+        ExprArray<IArrayExprCapsule> Result = new(Context.Null, Array, Size);
 
         return Result;
     }

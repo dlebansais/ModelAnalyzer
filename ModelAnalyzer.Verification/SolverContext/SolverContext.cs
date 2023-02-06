@@ -189,13 +189,6 @@ internal partial class SolverContext : IDisposable
         Debug.Assert(!elementType.IsArray);
         Debug.Assert(arraySize.IsValid);
 
-        Dictionary<ExpressionType, Sort> DomainTable = new()
-        {
-            { ExpressionType.Boolean, Context.BoolSort },
-            { ExpressionType.Integer, Context.IntSort },
-            { ExpressionType.FloatingPoint, Context.RealSort },
-        };
-
         Dictionary<ExpressionType, IExprCapsule> DefaultvalueTable = new()
         {
             { ExpressionType.Boolean, False },
@@ -203,17 +196,18 @@ internal partial class SolverContext : IDisposable
             { ExpressionType.FloatingPoint, Zero },
         };
 
+        IExprCapsule DefaultValueExpr;
+
         if (elementType.IsSimple)
         {
-            Debug.Assert(DomainTable.ContainsKey(elementType));
             Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
 
-            return Context.MkConstArray(DomainTable[elementType], DefaultvalueTable[elementType].Item).Encapsulate();
+            DefaultValueExpr = DefaultvalueTable[elementType];
         }
         else
-        {
-            return Context.MkConstArray(Context.IntSort, Zero.Item).Encapsulate();
-        }
+            DefaultValueExpr = Null;
+
+        return Context.MkConstArray(Context.IntSort, DefaultValueExpr.Item).Encapsulate(elementType);
     }
 
     /// <summary>
@@ -461,6 +455,28 @@ internal partial class SolverContext : IDisposable
             return Context.MkAnd(branch.Item, Context.MkNot(expression.Item)).Encapsulate();
         else
             return Context.MkNot(expression.Item).Encapsulate();
+    }
+
+    /// <summary>
+    /// Creates a get element expression.
+    /// </summary>
+    /// <param name="arrayExpr">The array.</param>
+    /// <param name="indexExpr">The index.</param>
+    public IExprCapsule CreateGetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr)
+    {
+        ExpressionType ResultType = arrayExpr.ElementType;
+        IExprCapsule Result;
+
+        if (ResultType == ExpressionType.Boolean)
+            Result = ((BoolExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
+        else if (ResultType == ExpressionType.Integer)
+            Result = ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
+        else if (ResultType == ExpressionType.FloatingPoint)
+            Result = ((ArithExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
+        else
+            Result = ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).EncapsulateAsObjectRef(ResultType.TypeName, ReferenceIndex.Null);
+
+        return Result;
     }
 
     /// <summary>

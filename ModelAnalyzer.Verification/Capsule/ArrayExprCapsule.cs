@@ -6,4 +6,6 @@ internal record ArrayExprCapsule : IArrayExprCapsule
 {
     required public ArrayExpr Item { get; init; }
     Expr IExprCapsule.Item { get => Item; }
+
+    required public ExpressionType ElementType { get; init; }
 }

@@ -657,13 +657,14 @@ internal partial class Verifier : IDisposable
         {
             Debug.Assert(resultExpr is ExprArray<IArrayExprCapsule>);
 
-            ExprArray<IArrayExprCapsule> ArrayResultExp = (ExprArray<IArrayExprCapsule>)resultExpr;
-            IReadOnlyExprCollection<IExprCapsule> OtherExpressions = resultExpr.OtherExpressions;
+            ExprArray<IArrayExprCapsule> ArrayResultExpr = (ExprArray<IArrayExprCapsule>)resultExpr;
+            IArrayExprCapsule ArrayExpr = ArrayResultExpr.ArrayExpression;
 
-            // TODO: return the proper element from elementIndex, not the first one.
-            IArrayExprCapsule Element = (IArrayExprCapsule)OtherExpressions.First();
+            if (!BuildExpression(verificationContext, elementIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr))
+                return false;
 
-            // resultExpr = Element;
+            IExprCapsule ElementExpr = Context.CreateGetElementExpr(ArrayExpr, IndexExpr.MainExpression);
+            resultExpr = new ExprSingle<IExprCapsule>(ElementExpr);
             return true;
         }
     }

@@ -43,9 +43,9 @@ internal static class Encapsulation
         return new ArrayRefExprCapsule() { Item = expr, ElementType = elementType, Index = index };
     }
 
-    public static IArrayExprCapsule Encapsulate(this ArrayExpr expr)
+    public static IArrayExprCapsule Encapsulate(this ArrayExpr expr, ExpressionType elementType)
     {
-        return new ArrayExprCapsule() { Item = expr };
+        return new ArrayExprCapsule() { Item = expr, ElementType = elementType };
     }
 
     public static IExprSingle<IBoolExprCapsule> ToSingleSet(this IBoolExprCapsule expr)

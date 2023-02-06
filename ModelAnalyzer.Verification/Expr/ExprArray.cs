@@ -1,12 +1,10 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
-
 /// <summary>
 /// Represents a set of Z3 expressions.
 /// </summary>
 /// <typeparam name="T">The specialized Z3 expression type for element expressions.</typeparam>
-internal class ExprArray<T> : IExprBase<IRefExprCapsule, T>
+internal class ExprArray<T> : IExprBase<IRefExprCapsule, IExprCapsule>
     where T : IArrayExprCapsule
 {
     /// <summary>
@@ -14,31 +12,36 @@ internal class ExprArray<T> : IExprBase<IRefExprCapsule, T>
     /// </summary>
     /// <param name="expr">The expression for the reference that makes the set.</param>
     /// <param name="elementExpression">The expressions for elements.</param>
-    public ExprArray(IRefExprCapsule expr, T elementExpression)
+    /// <param name="sizeExpr">The expressions for the array size.</param>
+    public ExprArray(IRefExprCapsule expr, T elementExpression, IIntExprCapsule sizeExpr)
     {
         MainExpression = expr;
-        OtherExpressions = new ExprCollection<T>() { elementExpression }.AsReadOnly();
+
+        ExprCollection<IExprCapsule> ExprList = new()
+        {
+            elementExpression,
+            sizeExpr,
+        };
+
+        OtherExpressions = ExprList.AsReadOnly();
     }
 
     /// <inheritdoc/>
     public IRefExprCapsule MainExpression { get; init; }
 
     /// <inheritdoc/>
-    public IReadOnlyExprCollection<T> OtherExpressions { get; }
+    public IReadOnlyExprCollection<IExprCapsule> OtherExpressions { get; }
 
     /// <inheritdoc/>
     public bool IsSingle { get; } = false;
 
     /// <summary>
-    /// Converts to a set of expressions.
+    /// Gets the array expression.
     /// </summary>
-    public IExprSet<IExprCapsule> ToExprSet()
-    {
-        List<IExprCapsule> ExpressionList = new() { MainExpression };
+    public T ArrayExpression { get => (T)OtherExpressions[0]; }
 
-        foreach (T Item in OtherExpressions)
-            ExpressionList.Add(Item);
-
-        return new ExprSet<IExprCapsule>(ExpressionList);
-    }
+    /// <summary>
+    /// Gets the size expression.
+    /// </summary>
+    public IIntExprCapsule SizeExpression { get => (IIntExprCapsule)OtherExpressions[1]; }
 }
