@@ -1129,6 +1129,12 @@ class Program_CoreClassModelManager_28
 
     private void VerificationWithSync(List<ClassDeclarationSyntax> classDeclarationList)
     {
+        VerificationWithSyncManual(classDeclarationList);
+        VerificationWithSyncAuto(classDeclarationList);
+    }
+
+    private void VerificationWithSyncManual(List<ClassDeclarationSyntax> classDeclarationList)
+    {
         IClassModel ClassModel;
         MadeUpSemanticModel SemanticModel = new();
 
@@ -1150,6 +1156,24 @@ class Program_CoreClassModelManager_28
         while (!VerificationContext.VerificationState.IsVerificationRequestSent)
             GetClassModelTask.Wait(TimeSpan.FromMilliseconds(10));
 
+        WaitReadyTask.Wait();
+    }
+
+    private void VerificationWithSyncAuto(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Auto };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
+
+        Task WaitReadyTask = Manager.WaitReady();
+
+        Thread.Sleep(Timeouts.ReadyTimeout + Timeouts.ReadyTimeout);
+
+        ClassModel = Manager.GetVerifiedModel(ClassModel);
         WaitReadyTask.Wait();
     }
 }

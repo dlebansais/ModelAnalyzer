@@ -25,11 +25,6 @@ public class InvariantViolationAnalyzer : Analyzer
 
     public const string ForSynchronousTestOnly = "ClassName_62D72B24_5F04_451F_BC32_ABE6D787701B";
 
-    protected override void BeforeInitialize()
-    {
-        Manager.WaitReady();
-    }
-
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;

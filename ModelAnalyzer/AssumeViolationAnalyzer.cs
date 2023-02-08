@@ -23,11 +23,6 @@ public class AssumeViolationAnalyzer : Analyzer
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.ClassDeclaration; }
     protected override bool IsAsyncRunRequested { get => true; }
 
-    protected override void BeforeInitialize()
-    {
-        Manager.WaitReady();
-    }
-
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
         string ClassName = classDeclaration.Identifier.ValueText;

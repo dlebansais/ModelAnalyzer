@@ -57,11 +57,12 @@ public partial class ClassModelManager : IDisposable
         Stopwatch Watch = new();
         Watch.Start();
 
-        while (!GetVerifiedModel(Watch, ref classModel))
+        do
         {
             UpdateVerificationEvents();
             Thread.Sleep(TimeSpan.FromMilliseconds(100));
         }
+        while (!GetVerifiedModel(Watch, ref classModel));
 
         return classModel;
     }

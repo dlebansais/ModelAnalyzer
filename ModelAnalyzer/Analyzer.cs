@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AnalysisLogger;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,14 +24,8 @@ public abstract class Analyzer : DiagnosticAnalyzer
         return new DiagnosticDescriptor(id, title, messageFormat, category, diagnosticSeverity, isEnabledByDefault: true, description, $"https://github.com/dlebansais/ModelAnalyzer/blob/master/doc/{id}.md");
     }
 
-    protected virtual void BeforeInitialize()
-    {
-    }
-
     public override void Initialize(AnalysisContext context)
     {
-        BeforeInitialize();
-
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, DiagnosticKind);
@@ -70,6 +65,19 @@ public abstract class Analyzer : DiagnosticAnalyzer
 
     private void AnalyzeClasses(SyntaxNodeAnalysisContext context, CompilationUnitSyntax compilationUnit, List<ClassDeclarationSyntax> classDeclarationList)
     {
+        bool ForceSynchronous = false;
+        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
+        {
+            string ClassName = ClassDeclaration.Identifier.ValueText;
+            ForceSynchronous |= ClassName.StartsWith(InvariantViolationAnalyzer.ForSynchronousTestOnly);
+        }
+
+        if (ForceSynchronous)
+        {
+            Task WaitReadyTask = Manager.WaitReady();
+            WaitReadyTask.Wait();
+        }
+
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(compilationUnit, isAsyncRunRequested: IsAsyncRunRequested);
         AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
         IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, classDeclarationList, SemanticModel);

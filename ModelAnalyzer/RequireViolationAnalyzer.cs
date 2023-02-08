@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,11 +23,6 @@ public class RequireViolationAnalyzer : Analyzer
     protected override string Id { get => DiagnosticId; }
     protected override SyntaxKind DiagnosticKind { get => SyntaxKind.ClassDeclaration; }
     protected override bool IsAsyncRunRequested { get => true; }
-
-    protected override void BeforeInitialize()
-    {
-        Manager.WaitReady();
-    }
 
     protected override void ReportDiagnostic(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration, IClassModel classModel)
     {
