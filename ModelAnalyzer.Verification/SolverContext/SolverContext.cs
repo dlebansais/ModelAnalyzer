@@ -80,48 +80,48 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
-    /// Creates a boolean constant.
+    /// Creates a boolean variable.
     /// </summary>
-    /// <param name="name">The constant name.</param>
-    public IBoolExprCapsule CreateBooleanConstant(string name)
+    /// <param name="name">The variable name.</param>
+    public IBoolExprCapsule CreateBooleanVariable(string name)
     {
         return Context.MkBoolConst(name).Encapsulate();
     }
 
     /// <summary>
-    /// Creates an integer constant.
+    /// Creates an integer variable.
     /// </summary>
-    /// <param name="name">The constant name.</param>
-    public IIntExprCapsule CreateIntegerConstant(string name)
+    /// <param name="name">The variable name.</param>
+    public IIntExprCapsule CreateIntegerVariable(string name)
     {
         return Context.MkIntConst(name).Encapsulate();
     }
 
     /// <summary>
-    /// Creates a floating point constant.
+    /// Creates a floating point variable.
     /// </summary>
-    /// <param name="name">The constant name.</param>
-    public IArithExprCapsule CreateFloatingPointConstant(string name)
+    /// <param name="name">The variable name.</param>
+    public IArithExprCapsule CreateFloatingPointVariable(string name)
     {
         return Context.MkRealConst(name).Encapsulate();
     }
 
     /// <summary>
-    /// Creates an object reference constant.
+    /// Creates an object reference variable.
     /// </summary>
     /// <param name="className">The class name.</param>
-    /// <param name="name">The constant name.</param>
-    public IObjectRefExprCapsule CreateObjectReferenceConstant(ClassName className, string name)
+    /// <param name="name">The variable name.</param>
+    public IObjectRefExprCapsule CreateObjectReferenceVariable(ClassName className, string name)
     {
         return Context.MkIntConst(name).EncapsulateAsObjectRef(className, ReferenceIndex.Null);
     }
 
     /// <summary>
-    /// Creates an array reference constant.
+    /// Creates an array reference variable.
     /// </summary>
     /// <param name="elementType">The element type.</param>
-    /// <param name="name">The constant name.</param>
-    public IArrayRefExprCapsule CreateArrayReferenceConstant(ExpressionType elementType, string name)
+    /// <param name="name">The variable name.</param>
+    public IArrayRefExprCapsule CreateArrayReferenceVariable(ExpressionType elementType, string name)
     {
         Debug.Assert(!elementType.IsArray);
 

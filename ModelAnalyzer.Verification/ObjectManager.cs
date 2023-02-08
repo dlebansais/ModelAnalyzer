@@ -167,18 +167,18 @@ internal class ObjectManager
         {
             Dictionary<ExpressionType, Func<string, IExprSet<IExprCapsule>>> SwitchTable = new()
             {
-                { ExpressionType.Boolean, CreateBooleanConstant },
-                { ExpressionType.Integer, CreateIntegerConstant },
-                { ExpressionType.FloatingPoint, CreateFloatingPointConstant },
+                { ExpressionType.Boolean, CreateBooleanVariable },
+                { ExpressionType.Integer, CreateIntegerVariable },
+                { ExpressionType.FloatingPoint, CreateFloatingPointVariable },
             };
 
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType](AliasString);
         }
         else if (variableType.IsArray)
-            Result = CreateArrayReferenceConstant(alias, variableType.ToElementType());
+            Result = CreateArrayReferenceVariable(alias, variableType);
         else
-            Result = CreateObjectReferenceConstant(alias, variableType);
+            Result = CreateObjectReferenceVariable(alias, variableType);
 
         return Result;
     }
@@ -310,25 +310,25 @@ internal class ObjectManager
             return CreateObjectInitializer(expressionType, Context.Null);
     }
 
-    private IExprSet<IBoolExprCapsule> CreateBooleanConstant(string alias)
+    private IExprSet<IBoolExprCapsule> CreateBooleanVariable(string alias)
     {
-        return Context.CreateBooleanConstant(alias).ToSingleSet();
+        return Context.CreateBooleanVariable(alias).ToSingleSet();
     }
 
-    private IExprSet<IIntExprCapsule> CreateIntegerConstant(string alias)
+    private IExprSet<IIntExprCapsule> CreateIntegerVariable(string alias)
     {
-        return Context.CreateIntegerConstant(alias).ToSingleSet();
+        return Context.CreateIntegerVariable(alias).ToSingleSet();
     }
 
-    private IExprSet<IArithExprCapsule> CreateFloatingPointConstant(string alias)
+    private IExprSet<IArithExprCapsule> CreateFloatingPointVariable(string alias)
     {
-        return Context.CreateFloatingPointConstant(alias).ToSingleSet();
+        return Context.CreateFloatingPointVariable(alias).ToSingleSet();
     }
 
-    public ExprObject CreateObjectReferenceConstant(VariableAlias alias, ExpressionType variableType)
+    public ExprObject CreateObjectReferenceVariable(VariableAlias alias, ExpressionType variableType)
     {
         ClassModel ReferenceClassModel = TypeToModel(variableType);
-        IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceConstant(ReferenceClassModel.ClassName, alias.ToString());
+        IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceVariable(ReferenceClassModel.ClassName, alias.ToString());
         Instance Reference = new() { ClassModel = ReferenceClassModel, Expr = ReferenceResult };
         List<IExprBase<IExprCapsule, IExprCapsule>> VariableSetList = new();
 
@@ -369,10 +369,25 @@ internal class ObjectManager
         return Result;
     }
 
-    private ExprArray<IArrayExprCapsule> CreateArrayReferenceConstant(VariableAlias alias, ExpressionType elementType)
+    private ExprArray<IArrayExprCapsule> CreateArrayReferenceVariable(VariableAlias alias, ExpressionType variableType)
     {
-        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceConstant(elementType, alias.ToString());
-        IArrayExprCapsule Array = Context.CreateArrayValue(elementType, ArraySize.Unknown);
+        ExpressionType ElementType = variableType.ToElementType();
+        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceVariable(ElementType, alias.ToString());
+
+        IVariableName ArrayName = CreateArrayName(ReferenceResult);
+        Variable ArrayVariable = new(ArrayName, variableType);
+
+        if (!AliasTable.ContainsVariable(ArrayVariable))
+            AliasTable.AddVariable(ArrayVariable);
+
+        IArrayExprCapsule Array = Context.CreateArrayValue(ElementType, ArraySize.Unknown);
+
+        IVariableName ArraySizeName = CreateArraySizeName(ReferenceResult);
+        Variable ArraySizeVariable = new(ArraySizeName, ExpressionType.Integer);
+
+        if (!AliasTable.ContainsVariable(ArraySizeVariable))
+            AliasTable.AddVariable(ArraySizeVariable);
+
         IIntExprCapsule Size = Context.CreateIntegerValue(ArraySize.Unknown.Size);
 
         ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, Array, Size);
@@ -397,6 +412,25 @@ internal class ObjectManager
         return ResultLocal;
     }
 
+    public static LocalName CreateBlockName(Instance? owner, Method? hostMethod, IVariableName localName)
+    {
+        LocalName Result = null!;
+
+        if (hostMethod is not null)
+        {
+            Result = CreateBlockLocalName(hostMethod, localName);
+        }
+
+        if (owner is not null)
+        {
+            Result = CreateBlockOwnerName(owner, localName);
+        }
+
+        Debug.Assert(Result is not null);
+
+        return Result!;
+    }
+
     public static LocalName CreateBlockLocalName(Method hostMethod, IVariableName localName)
     {
         string LocalBlockText = $"{hostMethod.ClassName}::{hostMethod.Name.Text}-${localName.Text}";
@@ -417,30 +451,18 @@ internal class ObjectManager
         return new LocalName() { Text = OwnerText };
     }
 
-    public static LocalName CreateBlockElementName(IArrayRefExprCapsule expr)
+    public static LocalName CreateArrayName(IArrayRefExprCapsule expr)
     {
         string OwnerText = $"[]{expr.Index}";
 
         return new LocalName() { Text = OwnerText };
     }
 
-    public static LocalName CreateBlockName(Instance? owner, Method? hostMethod, IVariableName localName)
+    public static LocalName CreateArraySizeName(IArrayRefExprCapsule expr)
     {
-        LocalName Result = null!;
+        string OwnerText = $"[]{expr.Index}-Size";
 
-        if (hostMethod is not null)
-        {
-            Result = CreateBlockLocalName(hostMethod, localName);
-        }
-
-        if (owner is not null)
-        {
-            Result = CreateBlockOwnerName(owner, localName);
-        }
-
-        Debug.Assert(Result is not null);
-
-        return Result!;
+        return new LocalName() { Text = OwnerText };
     }
 
     public IExprBase<IExprCapsule, IExprCapsule> GetDefaultExpr(ExpressionType variableType)
