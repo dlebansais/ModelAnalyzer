@@ -144,7 +144,7 @@ public partial class ClassModelManager : IDisposable
     /// <summary>
     /// Waits for the verifier to be ready to receive data.
     /// </summary>
-    public async void WaitReady()
+    public async Task WaitReady()
     {
         await Task.Run(() =>
         {

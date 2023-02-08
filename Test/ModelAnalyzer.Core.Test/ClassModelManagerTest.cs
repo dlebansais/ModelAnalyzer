@@ -1106,4 +1106,50 @@ class Program_CoreClassModelManager_27
 
         TestHelper.ToClassModel(new List<ClassDeclarationSyntax>(), TokenReplacement);
     }
+
+    [Test]
+    [Category("Core")]
+    public void ClassModelManager_VerificationWithSync()
+    {
+        ClassDeclarationSyntax ClassDeclaration = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreClassModelManager_28
+{
+    public void Write()
+    {
+    }
+}
+").First();
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclaration);
+
+        TestHelper.ExecuteClassModelTest(new List<ClassDeclarationSyntax>() { ClassDeclaration }, TokenReplacement, VerificationWithSync);
+    }
+
+    private void VerificationWithSync(List<ClassDeclarationSyntax> classDeclarationList)
+    {
+        IClassModel ClassModel;
+        MadeUpSemanticModel SemanticModel = new();
+
+        using ClassModelManager Manager = new() { Logger = TestInitialization.Logger, StartMode = VerificationProcessStartMode.Manual };
+
+        ClassModel = Manager.GetClassModels(CompilationContext.GetAnother(), classDeclarationList, SemanticModel).First().Value;
+
+        // Wait to be sure the verifier process exited.
+        Thread.Sleep(Timeouts.VerificationIdleTimeout + Timeouts.VerificationIdleTimeout);
+
+        // Wait until the timeout elapses too.
+        Task WaitReadyTask = Manager.WaitReady();
+        WaitReadyTask.Wait();
+
+        WaitReadyTask = Manager.WaitReady();
+        Task<IClassModel> GetClassModelTask = Manager.GetVerifiedModelAsync(ClassModel);
+
+        SynchronizedVerificationContext VerificationContext = (SynchronizedVerificationContext)Manager.GetType().GetField("Context", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(Manager)!;
+        while (!VerificationContext.VerificationState.IsVerificationRequestSent)
+            GetClassModelTask.Wait(TimeSpan.FromMilliseconds(10));
+
+        WaitReadyTask.Wait();
+    }
 }
