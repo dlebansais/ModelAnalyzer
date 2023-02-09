@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 /// <summary>
 /// Represents a code verifier.
@@ -395,9 +394,16 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, binaryArithmeticExpression.Left, out IExprBase<IArithExprCapsule, IArithExprCapsule> Left);
         bool ResultRight = BuildExpression(verificationContext, binaryArithmeticExpression.Right, out IExprBase<IArithExprCapsule, IArithExprCapsule> Right);
 
+        Debug.Assert(Left is IExprSingle<IArithExprCapsule>);
+        Debug.Assert(Right is IExprSingle<IArithExprCapsule>);
+
+        IExprSingle<IArithExprCapsule> LeftSingle = (IExprSingle<IArithExprCapsule>)Left;
+        IExprSingle<IArithExprCapsule> RightSingle = (IExprSingle<IArithExprCapsule>)Right;
+
         if (binaryArithmeticExpression.Operator == BinaryArithmeticOperator.Divide)
         {
-            IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
+            IExprSingle<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(RightSingle, Context.ZeroSet);
+
             if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, binaryArithmeticExpression.LocationId, binaryArithmeticExpression.ToString(), VerificationErrorType.AssumeError))
             {
                 resultExprSet = Context.ZeroSet;
@@ -405,10 +411,7 @@ internal partial class Verifier : IDisposable
             }
         }
 
-        Debug.Assert(Left.IsSingle);
-        Debug.Assert(Right.IsSingle);
-
-        IArithExprCapsule ResultExpr = OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, Left.MainExpression, Right.MainExpression);
+        IArithExprCapsule ResultExpr = OperatorBuilder.BinaryArithmetic[binaryArithmeticExpression.Operator](Context, LeftSingle.MainExpression, RightSingle.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
 
         return ResultLeft && ResultRight;
@@ -419,17 +422,21 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, remainderExpression.Left, out IExprBase<IIntExprCapsule, IIntExprCapsule> Left);
         bool ResultRight = BuildExpression(verificationContext, remainderExpression.Right, out IExprBase<IIntExprCapsule, IIntExprCapsule> Right);
 
-        IExprSet<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(Right, Context.ZeroSet);
+        Debug.Assert(Left is IExprSingle<IIntExprCapsule>);
+        Debug.Assert(Right is IExprSingle<IIntExprCapsule>);
+
+        IExprSingle<IIntExprCapsule> LeftSingle = (IExprSingle<IIntExprCapsule>)Left;
+        IExprSingle<IIntExprCapsule> RightSingle = (IExprSingle<IIntExprCapsule>)Right;
+
+        IExprSingle<IBoolExprCapsule> AssertionExpr = Context.CreateNotEqualExprSet(RightSingle, Context.ZeroSet);
+
         if (!AddMethodAssertionOpposite(verificationContext, AssertionExpr, ClassName.Empty, remainderExpression.LocationId, remainderExpression.ToString(), VerificationErrorType.AssumeError))
         {
             resultExprSet = Context.ZeroSet;
             return false;
         }
 
-        Debug.Assert(Left.IsSingle);
-        Debug.Assert(Right.IsSingle);
-
-        IIntExprCapsule ResultExpr = Context.CreateRemainderExpr(Left.MainExpression.Item, Right.MainExpression.Item);
+        IIntExprCapsule ResultExpr = Context.CreateRemainderExpr(LeftSingle.MainExpression.Item, RightSingle.MainExpression.Item);
         resultExprSet = ResultExpr.ToSingleSet();
 
         return ResultLeft && ResultRight;
@@ -440,8 +447,8 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, binaryLogicalExpression.Left, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Left);
         bool ResultRight = BuildExpression(verificationContext, binaryLogicalExpression.Right, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Right);
 
-        Debug.Assert(Left.IsSingle);
-        Debug.Assert(Right.IsSingle);
+        Debug.Assert(Left is IExprSingle<IBoolExprCapsule>);
+        Debug.Assert(Right is IExprSingle<IBoolExprCapsule>);
 
         IBoolExprCapsule ResultExpr = OperatorBuilder.BinaryLogical[binaryLogicalExpression.Operator](Context, Left.MainExpression, Right.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
@@ -465,8 +472,8 @@ internal partial class Verifier : IDisposable
         bool ResultLeft = BuildExpression(verificationContext, comparisonExpression.Left, out IExprBase<IArithExprCapsule, IArithExprCapsule> Left);
         bool ResultRight = BuildExpression(verificationContext, comparisonExpression.Right, out IExprBase<IArithExprCapsule, IArithExprCapsule> Right);
 
-        Debug.Assert(Left.IsSingle);
-        Debug.Assert(Right.IsSingle);
+        Debug.Assert(Left is IExprSingle<IArithExprCapsule>);
+        Debug.Assert(Right is IExprSingle<IArithExprCapsule>);
 
         IBoolExprCapsule ResultExpr = OperatorBuilder.Comparison[comparisonExpression.Operator](Context, Left.MainExpression, Right.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
@@ -501,7 +508,7 @@ internal partial class Verifier : IDisposable
     {
         bool ResultOperand = BuildExpression(verificationContext, unaryArithmeticExpression.Operand, out IExprBase<IArithExprCapsule, IArithExprCapsule> Operand);
 
-        Debug.Assert(Operand.IsSingle);
+        Debug.Assert(Operand is IExprSingle<IArithExprCapsule>);
 
         IArithExprCapsule ResultExpr = OperatorBuilder.UnaryArithmetic[unaryArithmeticExpression.Operator](Context, Operand.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
@@ -513,7 +520,7 @@ internal partial class Verifier : IDisposable
     {
         bool ResultOperand = BuildExpression(verificationContext, unaryLogicalExpression.Operand, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> Operand);
 
-        Debug.Assert(Operand.IsSingle);
+        Debug.Assert(Operand is IExprSingle<IBoolExprCapsule>);
 
         IBoolExprCapsule ResultExpr = OperatorBuilder.UnaryLogical[unaryLogicalExpression.Operator](Context, Operand.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
@@ -651,7 +658,7 @@ internal partial class Verifier : IDisposable
                 ResultLocal = null,
             };
 
-            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
+            return BuildElementAccessExpression(NewVerificationContext, variablePath, pathIndex + 1, elementIndex, out resultExpr);
         }
         else
         {
@@ -660,8 +667,9 @@ internal partial class Verifier : IDisposable
             ExprArray<IArrayExprCapsule> ArrayResultExpr = (ExprArray<IArrayExprCapsule>)resultExpr;
             IArrayExprCapsule ArrayExpr = ArrayResultExpr.ArrayExpression;
 
-            if (!BuildExpression(verificationContext, elementIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr))
-                return false;
+            // Index is either an int literal or a single variable. This can't possibly fail.
+            bool IndexBuildSuccess = BuildExpression(verificationContext, elementIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr);
+            Debug.Assert(IndexBuildSuccess);
 
             IExprCapsule ElementExpr = Context.CreateGetElementExpr(ArrayExpr, IndexExpr.MainExpression);
             resultExpr = new ExprSingle<IExprCapsule>(ElementExpr);

@@ -32,9 +32,6 @@ internal class ExprArray<T> : IExprBase<IRefExprCapsule, IExprCapsule>
     /// <inheritdoc/>
     public IReadOnlyExprCollection<IExprCapsule> OtherExpressions { get; }
 
-    /// <inheritdoc/>
-    public bool IsSingle { get; } = false;
-
     /// <summary>
     /// Gets the array expression.
     /// </summary>

@@ -481,10 +481,12 @@ internal class ObjectManager
             Debug.Assert(SwitchTable.ContainsKey(variableType));
             Result = SwitchTable[variableType];
         }
-        else if (variableType.IsArray)
-            Result = CreateArrayNullDefault(variableType);
         else
+        {
+            Debug.Assert(!variableType.IsArray);
+
             Result = CreateObjectNullDefault(variableType);
+        }
 
         return Result;
     }
@@ -503,18 +505,6 @@ internal class ObjectManager
         }
 
         ExprObject Result = new(Context.Null, PropertySetList);
-
-        return Result;
-    }
-
-    public ExprArray<IArrayExprCapsule> CreateArrayNullDefault(ExpressionType variableType)
-    {
-        Debug.Assert(variableType.IsArray);
-
-        // TODO: use something more neutral than integer.
-        IArrayExprCapsule Array = Context.CreateArrayValue(ExpressionType.Integer, ArraySize.Unknown);
-        IIntExprCapsule Size = Context.CreateIntegerValue(ArraySize.Unknown.Size);
-        ExprArray<IArrayExprCapsule> Result = new(Context.Null, Array, Size);
 
         return Result;
     }

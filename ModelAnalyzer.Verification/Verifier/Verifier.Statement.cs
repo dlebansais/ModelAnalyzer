@@ -85,7 +85,7 @@ internal partial class Verifier : IDisposable
         IBoolExprCapsule TrueBranchExpr;
         IBoolExprCapsule FalseBranchExpr;
 
-        Debug.Assert(ConditionExpr.IsSingle);
+        Debug.Assert(ConditionExpr is IExprSingle<IBoolExprCapsule>);
 
         TrueBranchExpr = Context.CreateTrueBranchExpr(verificationContext.Branch, ConditionExpr.MainExpression);
         FalseBranchExpr = Context.CreateFalseBranchExpr(verificationContext.Branch, ConditionExpr.MainExpression);

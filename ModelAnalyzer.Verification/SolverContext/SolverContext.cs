@@ -57,17 +57,17 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Gets the zero constant set.
     /// </summary>
-    public IExprBase<IIntExprCapsule, IIntExprCapsule> ZeroSet { get; }
+    public IExprSingle<IIntExprCapsule> ZeroSet { get; }
 
     /// <summary>
     /// Gets the false constant set.
     /// </summary>
-    public IExprBase<IBoolExprCapsule, IBoolExprCapsule> FalseSet { get; }
+    public IExprSingle<IBoolExprCapsule> FalseSet { get; }
 
     /// <summary>
     /// Gets the null constant set.
     /// </summary>
-    public IExprBase<IRefExprCapsule, IRefExprCapsule> NullSet { get; }
+    public IExprSingle<IRefExprCapsule> NullSet { get; }
 
     /// <summary>
     /// Creates a new solver.
@@ -388,22 +388,10 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operands.</param>
     /// <param name="right">The right operands.</param>
-    public IExprSet<IBoolExprCapsule> CreateNotEqualExprSet(IExprBase<IExprCapsule, IExprCapsule> left, IExprBase<IExprCapsule, IExprCapsule> right)
+    public IExprSingle<IBoolExprCapsule> CreateNotEqualExprSet(IExprSingle<IExprCapsule> left, IExprSingle<IExprCapsule> right)
     {
-        Debug.Assert(left.OtherExpressions.Count == right.OtherExpressions.Count);
-        int Count = left.OtherExpressions.Count;
-
-        List<IBoolExprCapsule> EqualityExprList = new();
         IBoolExprCapsule EqualityExpr = Context.MkNot(Context.MkEq(left.MainExpression.Item, right.MainExpression.Item)).Encapsulate();
-        EqualityExprList.Add(EqualityExpr);
-
-        for (int i = 0; i < Count; i++)
-        {
-            EqualityExpr = Context.MkNot(Context.MkEq(left.OtherExpressions[i].Item, right.OtherExpressions[i].Item)).Encapsulate();
-            EqualityExprList.Add(EqualityExpr);
-        }
-
-        ExprSet<IBoolExprCapsule> Result = new(EqualityExprList);
+        ExprSingle<IBoolExprCapsule> Result = new(EqualityExpr);
 
         return Result;
     }
@@ -412,21 +400,10 @@ internal partial class SolverContext : IDisposable
     /// Creates a set of opposites of the provided expressions.
     /// </summary>
     /// <param name="expressionSet">The set of expressions.</param>
-    public IExprSet<IBoolExprCapsule> CreateOppositeExprSet(IExprSet<IBoolExprCapsule> expressionSet)
+    public IExprSingle<IBoolExprCapsule> CreateOppositeExprSet(IExprSingle<IBoolExprCapsule> expressionSet)
     {
-        int Count = expressionSet.OtherExpressions.Count;
-
-        List<IBoolExprCapsule> NotExprList = new();
         IBoolExprCapsule NotExpr = Context.MkNot(expressionSet.MainExpression.Item).Encapsulate();
-        NotExprList.Add(NotExpr);
-
-        for (int i = 0; i < Count; i++)
-        {
-            NotExpr = Context.MkNot(expressionSet.OtherExpressions[i].Item).Encapsulate();
-            NotExprList.Add(NotExpr);
-        }
-
-        ExprSet<IBoolExprCapsule> Result = new(NotExprList);
+        ExprSingle<IBoolExprCapsule> Result = new(NotExpr);
 
         return Result;
     }
@@ -464,17 +441,18 @@ internal partial class SolverContext : IDisposable
     /// <param name="indexExpr">The index.</param>
     public IExprCapsule CreateGetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr)
     {
-        ExpressionType ResultType = arrayExpr.ElementType;
-        IExprCapsule Result;
+        ExpressionType ElementType = arrayExpr.ElementType;
+        Dictionary<ExpressionType, Func<IArrayExprCapsule, IExprCapsule>> CreateTable = new()
+        {
+            { ExpressionType.Boolean, (IArrayExprCapsule arrayExpr) => ((BoolExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
+            { ExpressionType.Integer, (IArrayExprCapsule arrayExpr) => ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
+            { ExpressionType.FloatingPoint, (IArrayExprCapsule arrayExpr) => ((ArithExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
+        };
 
-        if (ResultType == ExpressionType.Boolean)
-            Result = ((BoolExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
-        else if (ResultType == ExpressionType.Integer)
-            Result = ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
-        else if (ResultType == ExpressionType.FloatingPoint)
-            Result = ((ArithExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate();
-        else
-            Result = ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).EncapsulateAsObjectRef(ResultType.TypeName, ReferenceIndex.Null);
+        Debug.Assert(ElementType.IsSimple);
+        Debug.Assert(CreateTable.ContainsKey(ElementType));
+
+        IExprCapsule Result = CreateTable[ElementType](arrayExpr);
 
         return Result;
     }

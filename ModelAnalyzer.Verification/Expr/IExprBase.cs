@@ -18,9 +18,4 @@ internal interface IExprBase<out TMain, out TOther>
     /// Gets the list of other expressions in the set.
     /// </summary>
     IReadOnlyExprCollection<TOther> OtherExpressions { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the set contains exactly one expression.
-    /// </summary>
-    bool IsSingle { get; }
 }

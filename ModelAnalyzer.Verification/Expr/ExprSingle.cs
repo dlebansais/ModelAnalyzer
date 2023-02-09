@@ -25,8 +25,5 @@ internal class ExprSingle<T> : IExprSingle<T>
     public IReadOnlyExprCollection<T> OtherExpressions { get; }
 
     /// <inheritdoc/>
-    public bool IsSingle { get; } = true;
-
-    /// <inheritdoc/>
     public IReadOnlyExprCollection<T> AllExpressions { get; }
 }

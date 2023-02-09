@@ -39,8 +39,5 @@ internal class ExprSet<T> : IExprSet<T>
     public IReadOnlyExprCollection<T> OtherExpressions { get; }
 
     /// <inheritdoc/>
-    public bool IsSingle { get => OtherExpressions.Count == 0; }
-
-    /// <inheritdoc/>
     public IReadOnlyExprCollection<T> AllExpressions { get; }
 }

@@ -32,7 +32,4 @@ internal class ExprObject : IExprBase<IRefExprCapsule, IExprCapsule>
 
     /// <inheritdoc/>
     public IReadOnlyExprCollection<IExprCapsule> OtherExpressions { get; }
-
-    /// <inheritdoc/>
-    public bool IsSingle { get; } = false;
 }
