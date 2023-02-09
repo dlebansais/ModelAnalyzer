@@ -153,14 +153,15 @@ public class Channel : IDisposable
         Accessor.Read(EndOfBuffer, out int Head);
         Accessor.Read(EndOfBuffer + sizeof(int), out int Tail);
 
-        int Length;
+        return GetFreeLength(Head, Tail, Capacity);
+    }
 
-        if (Tail > Head)
-            Length = Tail - Head - 1;
+    private static int GetFreeLength(int head, int tail, int capacity)
+    {
+        if (tail > head)
+            return tail - head - 1;
         else
-            Length = EndOfBuffer - Head + Tail - 1;
-
-        return Length;
+            return capacity - head + tail - 1;
     }
 
     /// <summary>
@@ -175,14 +176,15 @@ public class Channel : IDisposable
         Accessor.Read(EndOfBuffer, out int Head);
         Accessor.Read(EndOfBuffer + sizeof(int), out int Tail);
 
-        int Length;
+        return GetUsedLength(Head, Tail, Capacity);
+    }
 
-        if (Head >= Tail)
-            Length = Head - Tail;
+    private static int GetUsedLength(int head, int tail, int capacity)
+    {
+        if (head >= tail)
+            return head - tail;
         else
-            Length = EndOfBuffer - Tail + Head;
-
-        return Length;
+            return capacity - tail + head;
     }
 
     /// <summary>
@@ -217,7 +219,7 @@ public class Channel : IDisposable
             int SecondCopyLength = Length - FirstCopyLength;
 
             Accessor.WriteArray(Head, data, 0, FirstCopyLength);
-            Accessor.WriteArray(Head + FirstCopyLength, data, FirstCopyLength, SecondCopyLength);
+            Accessor.WriteArray(0, data, FirstCopyLength, SecondCopyLength);
         }
 
         Head += Length;
@@ -226,6 +228,25 @@ public class Channel : IDisposable
 
         // Copy the new head.
         Accessor.Write(EndOfBuffer, Head);
+    }
+
+    /// <summary>
+    /// Gets channel stats for debug purpose.
+    /// </summary>
+    /// <param name="channelName">The channel name.</param>
+    /// <exception cref="InvalidOperationException">The channel is not open.</exception>
+    public string GetStats(string channelName)
+    {
+        if (Accessor is null)
+            throw new InvalidOperationException();
+
+        int EndOfBuffer = Capacity;
+        Accessor.Read(EndOfBuffer, out int Head);
+        Accessor.Read(EndOfBuffer + sizeof(int), out int Tail);
+
+        int FreeLength = GetFreeLength(Head, Tail, Capacity);
+        int UsedLength = GetUsedLength(Head, Tail, Capacity);
+        return $"{channelName} - Head:{Head} Tail:{Tail} Capacity:{Capacity} Free:{FreeLength} Used:{UsedLength}";
     }
 
     /// <inheritdoc/>

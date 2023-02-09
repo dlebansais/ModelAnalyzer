@@ -50,7 +50,7 @@ public partial class ClassModelManager : IDisposable
         if (StartMode == VerificationProcessStartMode.Manual)
             ScheduleAsynchronousVerification();
 
-        Log("Starting the verification loop.");
+        Log($"Starting the verification loop on channel {FromServerChannel.Guid}.");
 
         Thread.Sleep(DelayBeforeReadingVerificationResult);
 
@@ -141,60 +141,15 @@ public partial class ClassModelManager : IDisposable
         }
 
         Log($"{Data.Length} bytes read from verifier.");
+        Log(FromServerChannel.GetStats("From Server"));
 
         int Offset = 0;
         while (Converter.TryDecodeString(Data, ref Offset, out string JsonString))
         {
             Log(JsonString);
 
-            if (JsonString == "{}")
-                HandleReadyFrame();
-            else
-                UpdateVerificationEvents(JsonString);
+            UpdateVerificationEvents(JsonString);
         }
-    }
-
-    private void WaitReadySynchronous()
-    {
-        using Channel ToServerChannel = new Channel(Channel.ClientToServerGuid, Mode.Send);
-
-        TimeSpan Timeout = Timeouts.VerifierProcessLaunchTimeout;
-        Stopwatch Watch = new();
-        Watch.Start();
-
-        while (Watch.Elapsed < Timeout)
-        {
-            ToServerChannel.Open();
-            if (ToServerChannel.IsOpen)
-                break;
-
-            Thread.Sleep(TimeSpan.FromMilliseconds(500));
-        }
-
-        if (ToServerChannel.IsOpen)
-        {
-            Log("Channel opened, waiting for a ready frame.");
-
-            ReadyFrameReceiveCount = 0;
-            TimeSpan VerificationReadyTimeout = Timeouts.VerificationReadyTimeout;
-            Stopwatch VerificationReadyWatch = new();
-            VerificationReadyWatch.Start();
-
-            while (ReadyFrameReceiveCount == 0 && VerificationReadyWatch.Elapsed < VerificationReadyTimeout)
-                Thread.Sleep(TimeSpan.FromMilliseconds(10));
-
-            if (ReadyFrameReceiveCount > 0)
-                Log("Ready frame received.");
-
-            ToServerChannel.Close();
-        }
-        else
-            Log("Could not open the channel.");
-    }
-
-    private void HandleReadyFrame()
-    {
-        Interlocked.Increment(ref ReadyFrameReceiveCount);
     }
 
     private void UpdateVerificationEvents(string jsonString)
@@ -525,6 +480,8 @@ public partial class ClassModelManager : IDisposable
         string JSonString = JsonConvert.SerializeObject(modelExchange, Settings);
         byte[] EncodedString = Converter.EncodeString(JSonString);
 
+        Log(channel.GetStats("To Server"));
+
         if (EncodedString.Length <= channel.GetFreeLength())
         {
             TimeSpan Timeout = Timeouts.VerificationBusyTimeout;
@@ -554,7 +511,6 @@ public partial class ClassModelManager : IDisposable
     }
 
     private Channel FromServerChannel;
-    private int ReadyFrameReceiveCount;
     private List<MethodCallStatementEntry> MethodCallStatementList = new();
     private List<FunctionCallExpressionEntry> FunctionCallExpressionList = new();
     private List<ArithmeticExpressionEntry> ArithmeticExpressionList = new();

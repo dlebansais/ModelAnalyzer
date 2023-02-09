@@ -142,17 +142,6 @@ public partial class ClassModelManager : IDisposable
     }
 
     /// <summary>
-    /// Waits for the verifier to be ready to receive data.
-    /// </summary>
-    public async Task WaitReady()
-    {
-        await Task.Run(() =>
-        {
-            WaitReadySynchronous();
-        });
-    }
-
-    /// <summary>
     /// Removes classes that no longer exist.
     /// </summary>
     /// <param name="existingClassList">The list of existing classes.</param>

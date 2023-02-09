@@ -55,25 +55,16 @@ internal class Program
         Stopwatch VerificationIdleWatch = new();
         VerificationIdleWatch.Start();
 
-        Guid LastReceiveChannelGuid = Guid.Empty;
-        TimeSpan ReadyTimeout = Timeouts.ReadyTimeout;
-        Stopwatch ReadyWatch = new();
-
         while (VerificationIdleWatch.Elapsed < VerificationIdleTimeout)
         {
             byte[]? Data = FromClientChannel.Read();
             if (Data is not null)
             {
                 Log($"Data received {Data.Length} bytes");
+                Log(FromClientChannel.GetStats("From Client"));
 
-                ProcessData(Data, ref LastReceiveChannelGuid);
+                ProcessData(Data);
                 VerificationIdleWatch.Restart();
-                ReadyWatch.Restart();
-            }
-            else if (ReadyWatch.Elapsed >= ReadyTimeout)
-            {
-                SendReadyFrame(LastReceiveChannelGuid);
-                ReadyWatch.Restart();
             }
             else
                 Thread.Sleep(TimeSpan.FromMilliseconds(10));
@@ -91,7 +82,7 @@ internal class Program
         Log(LogLevel.Error, args.ErrorContext.Error.Message);
     }
 
-    private static void ProcessData(byte[] data, ref Guid receiveChannelGuid)
+    private static void ProcessData(byte[] data)
     {
         JsonSerializerSettings Settings = new JsonSerializerSettings() { Error = ErrorHandler, TypeNameHandling = TypeNameHandling.Auto };
         Settings.Converters.Add(new ClassNameConverter());
@@ -104,12 +95,12 @@ internal class Program
             if (ModelExchange is not null)
             {
                 Log($"Class model list decoded");
-                ProcessModels(ModelExchange, ref receiveChannelGuid);
+                ProcessModels(ModelExchange);
             }
         }
     }
 
-    private static void ProcessModels(ModelExchange modelExchange, ref Guid receiveChannelGuid)
+    private static void ProcessModels(ModelExchange modelExchange)
     {
         List<VerificationResult> VerificationResultList = new();
 
@@ -123,10 +114,7 @@ internal class Program
         }
 
         foreach (VerificationResult VerificationResult in VerificationResultList)
-        {
             SendResult(modelExchange.ReceiveChannelGuid, VerificationResult);
-            receiveChannelGuid = modelExchange.ReceiveChannelGuid;
-        }
     }
 
     private static VerificationResult ProcessClassModel(ClassModelTable classModelTable, ClassModel classModel)
@@ -179,6 +167,8 @@ internal class Program
 
             string JsonString = JsonConvert.SerializeObject(verificationResult, Settings);
             byte[] EncodedString = Converter.EncodeString(JsonString);
+
+            Log(ToClientChannel.GetStats("To Client"));
 
             if (EncodedString.Length <= ToClientChannel.GetFreeLength())
             {

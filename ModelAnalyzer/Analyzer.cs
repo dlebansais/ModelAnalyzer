@@ -65,19 +65,6 @@ public abstract class Analyzer : DiagnosticAnalyzer
 
     private void AnalyzeClasses(SyntaxNodeAnalysisContext context, CompilationUnitSyntax compilationUnit, List<ClassDeclarationSyntax> classDeclarationList)
     {
-        bool ForceSynchronous = false;
-        foreach (ClassDeclarationSyntax ClassDeclaration in classDeclarationList)
-        {
-            string ClassName = ClassDeclaration.Identifier.ValueText;
-            ForceSynchronous |= ClassName.StartsWith(InvariantViolationAnalyzer.ForSynchronousTestOnly);
-        }
-
-        if (ForceSynchronous)
-        {
-            Task WaitReadyTask = Manager.WaitReady();
-            WaitReadyTask.Wait();
-        }
-
         CompilationContext CompilationContext = CompilationContextHelper.ToCompilationContext(compilationUnit, isAsyncRunRequested: IsAsyncRunRequested);
         AnalyzerSemanticModel SemanticModel = new(context.SemanticModel);
         IDictionary<ClassDeclarationSyntax, IClassModel> ClassModelTable = Manager.GetClassModels(CompilationContext, classDeclarationList, SemanticModel);
