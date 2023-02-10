@@ -144,4 +144,56 @@ class Program_Verifier_Integer3_2
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
     }
+
+    private const string ArraySourceCodeInteger4 = @"
+using System;
+
+class Program_Verifier_Integer4
+{
+    public void Write()
+    {
+        int[] X = new int[1];
+        int[] Y = new int[1];
+
+        X[0] = 1;
+        Y[0] = 2;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer4_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    private const string ArraySourceCodeInteger5 = @"
+using System;
+
+class Program_Verifier_Integer5
+{
+    public void Write()
+    {
+        int[] X;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer5_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger5, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }

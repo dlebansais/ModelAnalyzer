@@ -196,16 +196,10 @@ internal partial class SolverContext : IDisposable
             { ExpressionType.FloatingPoint, Zero },
         };
 
-        IExprCapsule DefaultValueExpr;
+        Debug.Assert(elementType.IsSimple);
+        Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
 
-        if (elementType.IsSimple)
-        {
-            Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
-
-            DefaultValueExpr = DefaultvalueTable[elementType];
-        }
-        else
-            DefaultValueExpr = Null;
+        IExprCapsule DefaultValueExpr = DefaultvalueTable[elementType];
 
         return Context.MkConstArray(Context.IntSort, DefaultValueExpr.Item).Encapsulate(elementType);
     }
@@ -379,6 +373,8 @@ internal partial class SolverContext : IDisposable
         }
 
         ExprSet<IBoolExprCapsule> Result = new(EqualityExprList);
+        Debug.Assert(Result.MainExpression == Result.AllExpressions[0]);
+        Debug.Assert(Result.OtherExpressions.Count + 1 == Result.AllExpressions.Count);
 
         return Result;
     }

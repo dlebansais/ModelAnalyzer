@@ -216,10 +216,10 @@ internal partial class ClassDeclarationParser
                         isErrorReported = true;
                 }
                 else
-                    Log("Unknown assignment statement destination.");
+                    Log("Unable to parse destination element idnex.");
             }
             else
-                Log("Unknown assignment statement destination.");
+                Log("Unknown destination variable.");
         }
         else
             Log("Unknown assignment statement destination.");

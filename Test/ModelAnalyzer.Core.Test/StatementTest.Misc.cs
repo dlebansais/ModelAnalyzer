@@ -373,7 +373,7 @@ class Program_CoreStatement_11
 {
     void Write(int x, int y)
     {
-        x[0] = y;
+        -x = y;
     }
 
     int[] X;
@@ -829,5 +829,132 @@ class Program_CoreStatement_42
     Y[0] = X[0];
   }
 "));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_UnsupportedElementDestination()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_43_1
+{
+    public int[] Y { get; set; } = new int[1];
+}
+
+class Program_CoreStatement_43_2
+{
+    public void Write()
+    {
+        Program_CoreStatement_43_1 X = new();
+
+        X.Y[0] = 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(2));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+        IClassModel ClassModel1 = ClassModelList[1];
+
+        Assert.That(ClassModel1.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel1.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_UnsupportedElementDestinationIndex()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_44
+{
+    public void Write()
+    {
+        int[] X = new int[1];
+
+        X[GetIndex()] = 0;
+    }
+
+    int GetIndex()
+    {
+        return 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel0.Unsupported.Statements.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentOfNewObjectNoArgumentToElement()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_45
+{
+    public void Write()
+    {
+        int[] X = new int[1];
+
+        X[0] = new Program_CoreStatement_45 { };
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel0.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Statement_AssignmentToNonArrayDestination()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreStatement_46
+{
+    public void Write()
+    {
+        int X;
+
+        X[0] = 0;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList[0]);
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel0.Unsupported.Statements.Count, Is.EqualTo(1));
     }
 }
