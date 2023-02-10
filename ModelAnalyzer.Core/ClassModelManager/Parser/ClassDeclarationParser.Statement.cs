@@ -216,7 +216,7 @@ internal partial class ClassDeclarationParser
                         isErrorReported = true;
                 }
                 else
-                    Log("Unable to parse destination element idnex.");
+                    Log("Unable to parse destination element index.");
             }
             else
                 Log("Unknown destination variable.");
