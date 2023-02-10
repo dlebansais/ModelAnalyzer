@@ -72,7 +72,9 @@ internal partial class Verifier : IDisposable
         IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!);
         Variable Destination = new(VariableBlockName, VariableType!);
 
-        verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
+        // TODO if ElementIndex is not null
+        if (assignmentStatement.DestinationIndex is null)
+            verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
 
         return true;
     }

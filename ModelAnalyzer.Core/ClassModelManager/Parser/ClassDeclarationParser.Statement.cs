@@ -136,53 +136,138 @@ internal partial class ClassDeclarationParser
         AssignmentStatement? NewStatement = null;
 
         if (assignmentExpression.Left is IdentifierNameSyntax IdentifierName)
-        {
-            string DestinationName = IdentifierName.Identifier.ValueText;
-            IVariable? Destination = null;
-
-            if (TryFindPropertyByName(parsingContext, DestinationName, out IProperty PropertyDestination))
-                Destination = PropertyDestination;
-            else if (TryFindFieldByName(parsingContext, DestinationName, out IField FieldDestination))
-                Destination = FieldDestination;
-            else if (TryFindLocalByName(parsingContext, DestinationName, out ILocal LocalDestination))
-                Destination = LocalDestination;
-
-            if (Destination is not null)
-            {
-                ExpressionSyntax SourceExpression = assignmentExpression.Right;
-                LocationContext LocationContext = new(SourceExpression);
-                ParsingContext AssignmentParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
-
-                Expression? Expression = ParseExpression(AssignmentParsingContext, SourceExpression);
-                if (Expression is not null)
-                {
-                    if (IsSourceAndDestinationTypeCompatible(parsingContext, Destination, Expression))
-                    {
-                        NewStatement = new AssignmentStatement { DestinationName = Destination.Name, Expression = Expression };
-
-                        Debug.Assert(NewStatement.LocationId != LocationId.None);
-                    }
-                    else
-                        Log("Source cannot be assigned to destination.");
-                }
-                else
-                    isErrorReported = true;
-            }
-            else
-                Log("Unknown assignment statement destination.");
-        }
+            return TryParseAssignmentToIdentifierStatement(parsingContext, IdentifierName, assignmentExpression.Right, ref isErrorReported);
+        else if (assignmentExpression.Left is ElementAccessExpressionSyntax ElementAccessExpression)
+            return TryParseAssignmentToElementStatement(parsingContext, ElementAccessExpression, assignmentExpression.Right, ref isErrorReported);
         else
             Log("Unsupported assignment statement destination.");
 
         return NewStatement;
     }
 
-    private bool IsSourceAndDestinationTypeCompatible(ParsingContext parsingContext, IVariable destination, Expression source)
+    private Statement? TryParseAssignmentToIdentifierStatement(ParsingContext parsingContext, IdentifierNameSyntax identifierName, ExpressionSyntax rightExpression, ref bool isErrorReported)
+    {
+        AssignmentStatement? NewStatement = null;
+
+        if (TryParseAssignmentDestinationIdentifier(parsingContext, identifierName, out IVariable Destination))
+        {
+            ExpressionSyntax SourceExpression = rightExpression;
+            LocationContext LocationContext = new(SourceExpression);
+            ParsingContext AssignmentParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
+
+            Expression? Expression = ParseExpression(AssignmentParsingContext, SourceExpression);
+            if (Expression is not null)
+            {
+                if (IsSourceAndDestinationTypeCompatible(Destination, Expression))
+                {
+                    NewStatement = new AssignmentStatement
+                    {
+                        DestinationName = Destination.Name,
+                        DestinationIndex = null,
+                        Expression = Expression,
+                    };
+
+                    Debug.Assert(NewStatement.LocationId != LocationId.None);
+                }
+                else
+                    Log("Source cannot be assigned to destination.");
+            }
+            else
+                isErrorReported = true;
+        }
+        else
+            Log("Unknown assignment statement destination.");
+
+        return NewStatement;
+    }
+
+    private Statement? TryParseAssignmentToElementStatement(ParsingContext parsingContext, ElementAccessExpressionSyntax elementAccessExpression, ExpressionSyntax rightExpression, ref bool isErrorReported)
+    {
+        AssignmentStatement? NewStatement = null;
+
+        if (elementAccessExpression.Expression is IdentifierNameSyntax IdentifierName)
+        {
+            if (TryParseAssignmentDestinationIdentifier(parsingContext, IdentifierName, out IVariable Destination))
+            {
+                if (TryParseElementIndex(parsingContext, elementAccessExpression.ArgumentList.Arguments, out Expression ElementIndex, ref isErrorReported))
+                {
+                    ExpressionSyntax SourceExpression = rightExpression;
+                    LocationContext LocationContext = new(SourceExpression);
+                    ParsingContext AssignmentParsingContext = parsingContext with { LocationContext = LocationContext, IsExpressionNested = false };
+
+                    Expression? Expression = ParseExpression(AssignmentParsingContext, SourceExpression);
+                    if (Expression is not null)
+                    {
+                        if (IsSourceAndDestinationArrayTypeCompatible(Destination, Expression))
+                        {
+                            NewStatement = new AssignmentStatement
+                            {
+                                DestinationName = Destination.Name,
+                                DestinationIndex = ElementIndex,
+                                Expression = Expression,
+                            };
+
+                            Debug.Assert(NewStatement.LocationId != LocationId.None);
+                        }
+                        else
+                            Log("Source cannot be assigned to destination.");
+                    }
+                    else
+                        isErrorReported = true;
+                }
+                else
+                    Log("Unknown assignment statement destination.");
+            }
+            else
+                Log("Unknown assignment statement destination.");
+        }
+        else
+            Log("Unknown assignment statement destination.");
+
+        return NewStatement;
+    }
+
+    private bool TryParseAssignmentDestinationIdentifier(ParsingContext parsingContext, IdentifierNameSyntax identifierName, out IVariable destination)
+    {
+        string DestinationName = identifierName.Identifier.ValueText;
+
+        if (TryFindPropertyByName(parsingContext, DestinationName, out IProperty PropertyDestination))
+        {
+            destination = PropertyDestination;
+            return true;
+        }
+        else if (TryFindFieldByName(parsingContext, DestinationName, out IField FieldDestination))
+        {
+            destination = FieldDestination;
+            return true;
+        }
+        else if (TryFindLocalByName(parsingContext, DestinationName, out ILocal LocalDestination))
+        {
+            destination = LocalDestination;
+            return true;
+        }
+
+        destination = null!;
+        return false;
+    }
+
+    private bool IsSourceAndDestinationTypeCompatible(IVariable destination, Expression source)
     {
         ExpressionType DestinationType = destination.Type;
         ExpressionType SourceType = source.GetExpressionType();
 
         return IsSourceAndDestinationTypeCompatible(DestinationType, SourceType);
+    }
+
+    private bool IsSourceAndDestinationArrayTypeCompatible(IVariable destination, Expression source)
+    {
+        ExpressionType DestinationType = destination.Type;
+        ExpressionType SourceType = source.GetExpressionType();
+
+        if (DestinationType.IsArray)
+            return IsSourceAndDestinationTypeCompatible(DestinationType.ToElementType(), SourceType);
+        else
+            return false;
     }
 
     private bool IsSourceAndDestinationTypeCompatible(ExpressionType destinationType, ExpressionType sourceType)

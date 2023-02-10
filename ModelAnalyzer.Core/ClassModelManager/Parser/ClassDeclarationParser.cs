@@ -736,6 +736,33 @@ internal partial class ClassDeclarationParser
         return ClassModel;
     }
 
+    private bool TryParseElementIndex(ParsingContext parsingContext, SeparatedSyntaxList<ArgumentSyntax> arguments, out Expression elementIndex, ref bool isErrorReported)
+    {
+        if (arguments.Count == 1)
+        {
+            Argument? NewArgument = TryParseArgument(parsingContext, arguments[0], ref isErrorReported);
+            if (NewArgument is not null)
+            {
+                if (NewArgument.Expression is LiteralIntegerValueExpression ArgumentIntegerValue)
+                {
+                    elementIndex = ArgumentIntegerValue;
+                    return true;
+                }
+                else if (NewArgument.Expression is VariableValueExpression ArgumentVariableValue)
+                {
+                    if (ArgumentVariableValue.VariablePath.Count == 1)
+                    {
+                        elementIndex = ArgumentVariableValue;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        elementIndex = null!;
+        return false;
+    }
+
     private void Log(string message)
     {
         Logger.Log(message);

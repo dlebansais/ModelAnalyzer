@@ -209,7 +209,10 @@ internal partial record ClassModel : IClassModel
 
     private void AppendAssignmentStatement(StringBuilder builder, AssignmentStatement statement, int indentation)
     {
-        AppendStatementText(builder, $"{statement.DestinationName.Text} = {statement.Expression}", indentation);
+        if (statement.DestinationIndex is not null)
+            AppendStatementText(builder, $"{statement.DestinationName.Text}[{statement.DestinationIndex}] = {statement.Expression}", indentation);
+        else
+            AppendStatementText(builder, $"{statement.DestinationName.Text} = {statement.Expression}", indentation);
     }
 
     private void AppendConditionalStatement(StringBuilder builder, ConditionalStatement statement, int indentation)

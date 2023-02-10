@@ -17,6 +17,11 @@ internal class AssignmentStatement : Statement
     required public IVariableName DestinationName { get; init; }
 
     /// <summary>
+    /// Gets the destination index for an array.
+    /// </summary>
+    required public Expression? DestinationIndex { get; init; }
+
+    /// <summary>
     /// Gets the source expression.
     /// </summary>
     required public Expression Expression { get; init; }

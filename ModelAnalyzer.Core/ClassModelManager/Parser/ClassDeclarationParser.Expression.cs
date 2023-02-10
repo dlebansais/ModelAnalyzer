@@ -549,30 +549,12 @@ internal partial class ClassDeclarationParser
         Debug.Assert(parsingContext.LocationContext is not null);
 
         ElementAccessExpression? NewExpression = null;
-        SeparatedSyntaxList<ArgumentSyntax> Arguments = elementAccessExpression.ArgumentList.Arguments;
         Location Location = parsingContext.LocationContext!.GetLocation(elementAccessExpression);
 
         Expression? VariableExpression = ParseExpression(parsingContext, elementAccessExpression.Expression);
         if (VariableExpression is VariableValueExpression VariableValue)
         {
-            Expression? ElementIndex = null;
-
-            if (Arguments.Count == 1)
-            {
-                Argument? NewArgument = TryParseArgument(parsingContext, Arguments[0], ref isErrorReported);
-                if (NewArgument is not null)
-                {
-                    if (NewArgument.Expression is LiteralIntegerValueExpression ArgumentIntegerValue)
-                        ElementIndex = ArgumentIntegerValue;
-                    else if (NewArgument.Expression is VariableValueExpression ArgumentVariableValue)
-                    {
-                        if (ArgumentVariableValue.VariablePath.Count == 1)
-                            ElementIndex = ArgumentVariableValue;
-                    }
-                }
-            }
-
-            if (ElementIndex is not null)
+            if (TryParseElementIndex(parsingContext, elementAccessExpression.ArgumentList.Arguments, out Expression ElementIndex, ref isErrorReported))
             {
                 List<IVariable> VariablePath = VariableValue.VariablePath;
                 Location PathLocation = VariableValue.PathLocation;

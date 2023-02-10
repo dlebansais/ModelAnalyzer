@@ -344,7 +344,7 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = OperationExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = OperationExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
@@ -476,7 +476,7 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = OperationExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = OperationExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
@@ -860,7 +860,7 @@ public partial class VerifierTest
         TExpression Left = new() { Value = leftValue };
         TExpression Right = new() { Value = rightValue };
         ComparisonExpression Comparison = new() { Left = Left, Operator = comparisonOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = Comparison };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = Comparison };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
@@ -1054,7 +1054,7 @@ public partial class VerifierTest
         LiteralBooleanValueExpression Left = new() { Value = leftValue };
         LiteralBooleanValueExpression Right = new() { Value = rightValue };
         BinaryLogicalExpression LogicalExpression = new() { Left = Left, Operator = binaryOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = LogicalExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = LogicalExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
@@ -1173,7 +1173,7 @@ public partial class VerifierTest
 
         LiteralBooleanValueExpression Operand = new() { Value = operandValue };
         UnaryLogicalExpression LogicalExpression = new() { Operator = unaryOperator, Operand = Operand };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = LogicalExpression };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = LogicalExpression };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
@@ -1357,7 +1357,7 @@ public partial class VerifierTest
         TExpression Left = new() { Value = leftValue };
         TExpression Right = new() { Value = rightValue };
         EqualityExpression Equality = new() { Left = Left, Operator = equalityOperator, Right = Right };
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = Equality };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = Equality };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };

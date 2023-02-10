@@ -154,7 +154,7 @@ public partial class VerifierTest
 
         List<Invariant> InvariantList = new() { TestInvariant };
 
-        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, Expression = AssignmentSource };
+        AssignmentStatement Assignment = new() { DestinationName = TestField.Name, DestinationIndex = null, Expression = AssignmentSource };
 
         string TestMethodName = "Write";
         MethodName MethodName = new() { Text = TestMethodName };
