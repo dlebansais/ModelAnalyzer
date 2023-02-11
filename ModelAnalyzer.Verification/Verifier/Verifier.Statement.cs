@@ -75,6 +75,19 @@ internal partial class Verifier : IDisposable
         // TODO if ElementIndex is not null
         if (assignmentStatement.DestinationIndex is null)
             verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
+        else
+        {
+            if (!BuildExpression(verificationContext, assignmentStatement.DestinationIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr))
+                return false;
+
+            Debug.Assert(IndexExpr is IExprSingle<IIntExprCapsule>);
+            IIntExprCapsule DestinationIndexExpr = ((IExprSingle<IIntExprCapsule>)IndexExpr).MainExpression;
+
+            Debug.Assert(SourceExpr is IExprSingle<IExprCapsule>);
+            IExprCapsule SourceValueExpr = ((IExprSingle<IExprCapsule>)IndexExpr).MainExpression;
+
+            verificationContext.ObjectManager.AssignElement(verificationContext.Branch, Destination, DestinationIndexExpr, SourceValueExpr);
+        }
 
         return true;
     }

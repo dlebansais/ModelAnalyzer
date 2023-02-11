@@ -454,7 +454,31 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
-    /// Adds expressions expression to a solver, conditional to a branch of code.
+    /// Creates a set element expression.
+    /// </summary>
+    /// <param name="arrayExpr">The array.</param>
+    /// <param name="indexExpr">The index.</param>
+    /// <param name="valueExpr">The value.</param>
+    public IArrayExprCapsule CreateSetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr, IExprCapsule valueExpr)
+    {
+        ExpressionType ElementType = arrayExpr.ElementType;
+        Dictionary<ExpressionType, Func<IArrayExprCapsule, IExprCapsule, IArrayExprCapsule>> CreateTable = new()
+        {
+            { ExpressionType.Boolean, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.Boolean) },
+            { ExpressionType.Integer, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.Integer) },
+            { ExpressionType.FloatingPoint, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.FloatingPoint) },
+        };
+
+        Debug.Assert(ElementType.IsSimple);
+        Debug.Assert(CreateTable.ContainsKey(ElementType));
+
+        IArrayExprCapsule Result = CreateTable[ElementType](arrayExpr, valueExpr);
+
+        return Result;
+    }
+
+    /// <summary>
+    /// Adds boolean expressions to a solver, conditional to a branch of code.
     /// </summary>
     /// <param name="solver">The solver.</param>
     /// <param name="branch">The branch.</param>

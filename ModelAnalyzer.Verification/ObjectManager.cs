@@ -102,6 +102,30 @@ internal class ObjectManager
         Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(DestinationExpr, sourceExpr));
     }
 
+    public void AssignElement(IBoolExprCapsule? branch, Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
+    {
+        VariableAlias DestinationNameAlias;
+        IExprBase<IExprCapsule, IExprCapsule> DestinationExpr;
+
+        DestinationNameAlias = AliasTable.GetAlias(destination);
+        DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
+
+        Debug.Assert(DestinationExpr is ExprArray<IArrayExprCapsule>);
+        ExprArray<IArrayExprCapsule> OriginalDestinationArrayExpr = (ExprArray<IArrayExprCapsule>)DestinationExpr;
+
+        Context.CreateSetElementExpr(OriginalDestinationArrayExpr.ArrayExpression, destinationIndexExpr, sourceExpr);
+
+        AliasTable.IncrementAlias(destination);
+
+        DestinationNameAlias = AliasTable.GetAlias(destination);
+        DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
+
+        Debug.Assert(DestinationExpr is ExprArray<IArrayExprCapsule>);
+        ExprArray<IArrayExprCapsule> ModifiedDestinationArrayExpr = (ExprArray<IArrayExprCapsule>)DestinationExpr;
+
+        Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(ModifiedDestinationArrayExpr, OriginalDestinationArrayExpr));
+    }
+
     public void BeginBranch(out AliasTable beginAliasTable)
     {
         beginAliasTable = AliasTable.Clone();
