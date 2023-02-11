@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 /// <summary>
@@ -9,9 +8,9 @@ using System.Diagnostics;
 internal class CallStatementLocation : ICallLocation
 {
     /// <summary>
-    /// Gets the list of statements.
+    /// Gets the parent block.
     /// </summary>
-    required public List<Statement> ParentStatementList { get; init; }
+    required public BlockScope ParentBlock { get; init; }
 
     /// <summary>
     /// Gets the index of the statement in the list.
@@ -22,8 +21,8 @@ internal class CallStatementLocation : ICallLocation
     public void RemoveCall()
     {
         Debug.Assert(StatementIndex >= 0);
-        Debug.Assert(StatementIndex < ParentStatementList.Count);
+        Debug.Assert(StatementIndex < ParentBlock.StatementList.Count);
 
-        ParentStatementList.RemoveAt(StatementIndex);
+        ParentBlock.StatementList.RemoveAt(StatementIndex);
     }
 }

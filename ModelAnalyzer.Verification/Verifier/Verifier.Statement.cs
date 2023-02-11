@@ -9,9 +9,9 @@ using System.Diagnostics;
 /// </summary>
 internal partial class Verifier : IDisposable
 {
-    private bool AddStatementListExecution(VerificationContext verificationContext, List<Statement> statementList)
+    private bool AddStatementListExecution(VerificationContext verificationContext, BlockScope block)
     {
-        foreach (Statement Statement in statementList)
+        foreach (Statement Statement in block.StatementList)
             if (!AddStatementExecution(verificationContext, Statement))
                 return false;
 
@@ -43,6 +43,10 @@ internal partial class Verifier : IDisposable
                 break;
             case ReturnStatement Return:
                 Result = AddReturnExecution(verificationContext, Return);
+                IsAdded = true;
+                break;
+            case ForLoopStatement ForLoop:
+                Result = AddForLoopExecution(verificationContext, ForLoop);
                 IsAdded = true;
                 break;
         }
@@ -107,15 +111,15 @@ internal partial class Verifier : IDisposable
 
         verificationContext.ObjectManager.BeginBranch(out AliasTable BeforeWhenTrue);
 
-        VerificationContext TrueBranchVerificationContext = verificationContext with { Branch = TrueBranchExpr };
-        bool TrueBranchResult = AddStatementListExecution(TrueBranchVerificationContext, conditionalStatement.WhenTrueStatementList);
+        VerificationContext TrueBranchVerificationContext = verificationContext with { Branch = TrueBranchExpr, HostBlock = conditionalStatement.WhenTrueBlock };
+        bool TrueBranchResult = AddStatementListExecution(TrueBranchVerificationContext, conditionalStatement.WhenTrueBlock);
 
         // For the else branch, start alias indexes from what they are at the end of the if branch.
         verificationContext.ObjectManager.EndBranch(BeforeWhenTrue, out List<VariableAlias> AliasesOnlyWhenTrue, out AliasTable WhenTrueAliasTable);
 
         AliasTable BeforeWhenFalse = WhenTrueAliasTable;
-        VerificationContext FalseBranchVerificationContext = verificationContext with { Branch = FalseBranchExpr };
-        bool FalseBranchResult = AddStatementListExecution(FalseBranchVerificationContext, conditionalStatement.WhenFalseStatementList);
+        VerificationContext FalseBranchVerificationContext = verificationContext with { Branch = FalseBranchExpr, HostBlock = conditionalStatement.WhenFalseBlock };
+        bool FalseBranchResult = AddStatementListExecution(FalseBranchVerificationContext, conditionalStatement.WhenFalseBlock);
 
         verificationContext.ObjectManager.EndBranch(BeforeWhenFalse, out List<VariableAlias> AliasesOnlyWhenFalse, out AliasTable WhenFalseAliasTable);
 
@@ -159,12 +163,12 @@ internal partial class Verifier : IDisposable
             verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
-        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, ResultLocal = null };
+        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultLocal = null };
 
         if (!AddMethodRequires(CallVerificationContext, methodCallStatement.CallerClassName, methodCallStatement.LocationId, checkOpposite: true))
             return false;
 
-        if (!AddStatementListExecution(CallVerificationContext, calledMethod.StatementList))
+        if (!AddStatementListExecution(CallVerificationContext, calledMethod.RootBlock))
             return false;
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
@@ -231,6 +235,7 @@ internal partial class Verifier : IDisposable
         {
             Instance = calledInstance,
             HostMethod = calledMethod,
+            HostBlock = calledMethod.RootBlock,
             ResultLocal = null,
         };
 
@@ -273,6 +278,12 @@ internal partial class Verifier : IDisposable
             verificationContext.ObjectManager.Assign(verificationContext.Branch, ResultLocalVariable, ResultInitializerExpr);
         }
 
+        return true;
+    }
+
+    private bool AddForLoopExecution(VerificationContext verificationContext, ForLoopStatement forLoopStatement)
+    {
+        // TODO
         return true;
     }
 }

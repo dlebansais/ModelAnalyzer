@@ -113,12 +113,14 @@ internal partial record ClassModel : IClassModel
         AppendIndentation(builder, indentation: 0);
         builder.AppendLine("{");
 
-        AppendLocals(builder, method.LocalTable);
+        BlockScope RootBlock = method.RootBlock;
 
-        if (method.LocalTable.Count > 0 && method.StatementList.Count > 0)
+        AppendLocals(builder, RootBlock.LocalTable);
+
+        if (RootBlock.LocalTable.Count > 0 && RootBlock.StatementList.Count > 0)
             builder.AppendLine();
 
-        AppendStatements(builder, method.StatementList, 0);
+        AppendStatements(builder, RootBlock, 0);
 
         AppendIndentation(builder, indentation: 0);
         builder.AppendLine("}");
@@ -153,26 +155,26 @@ internal partial record ClassModel : IClassModel
         builder.AppendLine($"    {TypeString} {local.Name.Text}{InitializerString}");
     }
 
-    private void AppendBlock(StringBuilder builder, List<Statement> statementList, int indentation)
+    private void AppendBlock(StringBuilder builder, BlockScope block, int indentation)
     {
-        if (statementList.Count > 1)
+        if (block.StatementList.Count > 1)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("{");
         }
 
-        AppendStatements(builder, statementList, indentation);
+        AppendStatements(builder, block, indentation);
 
-        if (statementList.Count > 1)
+        if (block.StatementList.Count > 1)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("}");
         }
     }
 
-    private void AppendStatements(StringBuilder builder, List<Statement> statementList, int indentation)
+    private void AppendStatements(StringBuilder builder, BlockScope block, int indentation)
     {
-        foreach (Statement Item in statementList)
+        foreach (Statement Item in block.StatementList)
             AppendStatement(builder, Item, indentation + 1);
     }
 
@@ -202,6 +204,10 @@ internal partial record ClassModel : IClassModel
                 AppendReturnStatement(builder, Return, indentation);
                 IsHandled = true;
                 break;
+            case ForLoopStatement ForLoop:
+                AppendForLoopStatement(builder, ForLoop, indentation);
+                IsHandled = true;
+                break;
         }
 
         Debug.Assert(IsHandled);
@@ -219,13 +225,13 @@ internal partial record ClassModel : IClassModel
     {
         AppendIndentation(builder, indentation);
         builder.AppendLine($"if ({statement.Condition})");
-        AppendBlock(builder, statement.WhenTrueStatementList, indentation);
+        AppendBlock(builder, statement.WhenTrueBlock, indentation);
 
-        if (statement.WhenFalseStatementList.Count > 0)
+        if (statement.WhenFalseBlock.StatementList.Count > 0)
         {
             AppendIndentation(builder, indentation);
             builder.AppendLine("else");
-            AppendBlock(builder, statement.WhenFalseStatementList, indentation);
+            AppendBlock(builder, statement.WhenFalseBlock, indentation);
         }
     }
 
@@ -253,6 +259,18 @@ internal partial record ClassModel : IClassModel
             AppendStatementText(builder, "return", indentation);
         else
             AppendStatementText(builder, $"return {statement.Expression}", indentation);
+    }
+
+    private void AppendForLoopStatement(StringBuilder builder, ForLoopStatement statement, int indentation)
+    {
+        AppendIndentation(builder, indentation);
+
+        string IndexName = statement.LocalIndex.Name.Text;
+        ILiteralExpression? Initializer = statement.LocalIndex.Initializer;
+        string InitializerString = Initializer is not null ? $" = {Initializer}" : string.Empty;
+
+        builder.AppendLine($"for (int {IndexName}{InitializerString}; {statement.ContinueCondition}; {IndexName}++)");
+        AppendBlock(builder, statement.Block, indentation);
     }
 
     private void AppendStatementText(StringBuilder builder, string text, int indentation)

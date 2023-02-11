@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// <summary>
 /// Represents an assignment statement.
 /// </summary>
-[DebuggerDisplay("{DestinationName.Text} = {Expression}")]
+[DebuggerDisplay("{DestinationName.Text, nq}{(DestinationIndex is null ? \"\" : $\"[{DestinationIndex}]\"), nq} = {Expression}")]
 internal class AssignmentStatement : Statement
 {
     /// <inheritdoc/>

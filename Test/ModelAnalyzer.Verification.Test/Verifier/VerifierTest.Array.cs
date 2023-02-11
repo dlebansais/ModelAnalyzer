@@ -199,4 +199,37 @@ class Program_Verifier_Integer5
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
     }
+
+    private const string ArraySourceCodeInteger6 = @"
+using System;
+
+class Program_Verifier_Integer6
+{
+    public double[] Read()
+    {
+        double[] X = new double[10];
+
+        for (int i = 0; i < X.Length; i++)
+        {
+            X[i] = i * 1.5;
+        }
+        // Invariant: X[i] == i * 1.5
+
+        return X;
+    }
+    // TODO Ensure: ∀i X[i] == i * 1.5
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer6_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger6, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }

@@ -16,6 +16,11 @@ internal class MethodCallStatementEntry
     required public Method HostMethod { get; init; }
 
     /// <summary>
+    /// Gets the block where the statement is found.
+    /// </summary>
+    required public BlockScope ParentBlock { get; init; }
+
+    /// <summary>
     /// Gets the call location.
     /// </summary>
     required public ICallLocation CallLocation { get; init; }

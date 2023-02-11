@@ -35,7 +35,6 @@ internal partial class ClassDeclarationParser
 
     private void AddLocal(ParsingContext parsingContext, LocalTable localTable, LocalDeclarationStatementSyntax localDeclarationStatement)
     {
-        VariableDeclarationSyntax Declaration = localDeclarationStatement.Declaration;
         bool IsLocalSupported = true;
 
         if (localDeclarationStatement.AttributeLists.Count > 0)
@@ -52,15 +51,21 @@ internal partial class ClassDeclarationParser
             IsLocalSupported = false;
         }
 
-        if (!IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType LocalType, out _))
+        VariableDeclarationSyntax Declaration = localDeclarationStatement.Declaration;
+        AddLocal(parsingContext, localTable, Declaration, IsLocalSupported);
+    }
+
+    private void AddLocal(ParsingContext parsingContext, LocalTable localTable, VariableDeclarationSyntax declaration, bool isLocalSupported)
+    {
+        if (!IsTypeSupported(parsingContext, declaration.Type, out ExpressionType LocalType, out _))
         {
             LogWarning($"Unsupported local type.");
 
-            IsLocalSupported = false;
+            isLocalSupported = false;
         }
 
-        foreach (VariableDeclaratorSyntax Variable in Declaration.Variables)
-            AddLocal(parsingContext, localTable, Variable, IsLocalSupported, LocalType);
+        foreach (VariableDeclaratorSyntax Variable in declaration.Variables)
+            AddLocal(parsingContext, localTable, Variable, isLocalSupported, LocalType);
     }
 
     private void AddLocal(ParsingContext parsingContext, LocalTable localTable, VariableDeclaratorSyntax variable, bool isLocalSupported, ExpressionType localType)
@@ -118,11 +123,11 @@ internal partial class ClassDeclarationParser
 
     private bool TryFindLocalByName(ParsingContext parsingContext, string localName, out ILocal local)
     {
-        Debug.Assert(parsingContext.HostMethod is not null);
+        Debug.Assert(parsingContext.HostBlock is not null);
 
-        Method HostMethod = parsingContext.HostMethod!;
+        BlockScope HostBlock = parsingContext.HostBlock!;
 
-        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
+        foreach (KeyValuePair<LocalName, Local> Entry in HostBlock.LocalTable)
             if (Entry.Value.Name.Text == localName)
             {
                 local = Entry.Value;

@@ -92,6 +92,7 @@ Arrays are supported, with the following restrictions:
 + The type must be one of the predefined types (`bool`, `int` and `double`). Arrays of arrays are not supported, nor are multidimensional arrays.
 + An array can only be indexed with a literal integer constant (ex: `0`), with a local or a parameter, or with a field or a property of the same class (ex: `i`).
 + When creating a new array, the array size must be a literal integer constant (ex: `1`) and array initializers are not supported.
++ Only element access (ex: `Foo[i]`) as source or destination, and length (Ex: `Foo.Length`) are supported.
  
 ## Method contract
 

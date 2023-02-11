@@ -59,6 +59,11 @@ internal record ParsingContext
     public Method? HostMethod { get; set; }
 
     /// <summary>
+    /// Gets or sets the block within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.
+    /// </summary>
+    public BlockScope? HostBlock { get; set; }
+
+    /// <summary>
     /// Gets or sets the list of invariants.
     /// </summary>
     public List<Invariant> InvariantList { get; set; } = new();

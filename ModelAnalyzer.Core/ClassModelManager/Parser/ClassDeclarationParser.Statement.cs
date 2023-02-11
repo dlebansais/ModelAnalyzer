@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
@@ -10,22 +11,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 internal partial class ClassDeclarationParser
 {
-    private List<Statement> ParseStatements(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
+    private BlockScope ParseStatements(ParsingContext parsingContext, MethodDeclarationSyntax methodDeclaration)
     {
-        List<Statement> StatementList = new();
+        BlockScope NewBlock = null!;
 
         if (methodDeclaration.ExpressionBody is ArrowExpressionClauseSyntax ArrowExpressionClause)
-            StatementList = ParseMethodExpressionBody(parsingContext, ArrowExpressionClause.Expression);
+            NewBlock = ParseMethodExpressionBody(parsingContext, ArrowExpressionClause.Expression);
 
         if (methodDeclaration.Body is BlockSyntax Block)
-            StatementList = ParseMethodBlock(parsingContext, Block);
+            NewBlock = ParseMethodBlock(parsingContext, Block);
 
-        return StatementList;
+        return NewBlock;
     }
 
-    private List<Statement> ParseMethodExpressionBody(ParsingContext parsingContext, ExpressionSyntax expressionBody)
+    private BlockScope ParseMethodExpressionBody(ParsingContext parsingContext, ExpressionSyntax expressionBody)
     {
-        List<Statement> StatementList = new();
+        BlockScope NewBlock = new() { LocalTable = new LocalTable().AsReadOnly(), StatementList = new List<Statement>() };
         LocationContext LocationContext = new(expressionBody);
         ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext, CallLocation = new CallExpressionBodyLocation() };
 
@@ -33,22 +34,25 @@ internal partial class ClassDeclarationParser
         if (Expression is not null)
         {
             ReturnStatement NewStatement = new() { Expression = Expression };
-            StatementList.Add(NewStatement);
+            NewBlock.StatementList.Add(NewStatement);
 
             Debug.Assert(NewStatement.LocationId != LocationId.None);
         }
 
-        return StatementList;
+        return NewBlock;
     }
 
-    private List<Statement> ParseMethodBlock(ParsingContext parsingContext, BlockSyntax block)
+    private BlockScope ParseMethodBlock(ParsingContext parsingContext, BlockSyntax block)
     {
         return ParseBlockStatements(parsingContext, block, isMainBlock: true);
     }
 
-    private List<Statement> ParseBlockStatements(ParsingContext parsingContext, BlockSyntax block, bool isMainBlock)
+    private BlockScope ParseBlockStatements(ParsingContext parsingContext, BlockSyntax block, bool isMainBlock)
     {
-        List<Statement> StatementList = new();
+        Debug.Assert(parsingContext.HostBlock is not null);
+        BlockScope HostBlock = parsingContext.HostBlock!;
+
+        BlockScope NewBlock = new() { LocalTable = HostBlock.LocalTable, StatementList = new List<Statement>() };
 
         for (int StatementIndex = 0; StatementIndex < block.Statements.Count; StatementIndex++)
         {
@@ -56,35 +60,40 @@ internal partial class ClassDeclarationParser
 
             if (Item is not LocalDeclarationStatementSyntax)
             {
-                CallStatementLocation CallLocation = new() { ParentStatementList = StatementList, StatementIndex = StatementIndex };
+                CallStatementLocation CallLocation = new() { ParentBlock = NewBlock, StatementIndex = StatementIndex };
                 ParsingContext BlockContext = parsingContext with { CallLocation = CallLocation };
 
                 Statement? NewStatement = ParseStatement(BlockContext, Item, isMainBlock && Item == block.Statements.Last());
                 if (NewStatement is not null)
-                    StatementList.Add(NewStatement);
+                    NewBlock.StatementList.Add(NewStatement);
             }
         }
 
-        return StatementList;
+        return NewBlock;
     }
 
-    private List<Statement> ParseStatementOrBlock(ParsingContext parsingContext, StatementSyntax node)
+    private BlockScope ParseStatementOrBlock(ParsingContext parsingContext, StatementSyntax node)
     {
-        List<Statement> StatementList = new();
+        BlockScope NewBlock;
 
         if (node is BlockSyntax Block)
-            StatementList = ParseBlockStatements(parsingContext, Block, isMainBlock: false);
+            NewBlock = ParseBlockStatements(parsingContext, Block, isMainBlock: false);
         else
         {
-            CallStatementLocation CallLocation = new() { ParentStatementList = StatementList, StatementIndex = 0 };
+            Debug.Assert(parsingContext.HostBlock is not null);
+            BlockScope HostBlock = parsingContext.HostBlock!;
+
+            NewBlock = new() { LocalTable = HostBlock.LocalTable, StatementList = new List<Statement>() };
+
+            CallStatementLocation CallLocation = new() { ParentBlock = NewBlock, StatementIndex = 0 };
             ParsingContext SingleStatementContext = parsingContext with { CallLocation = CallLocation };
 
             Statement? NewStatement = ParseStatement(SingleStatementContext, node, isLastStatement: false);
             if (NewStatement is not null)
-                StatementList.Add(NewStatement);
+                NewBlock.StatementList.Add(NewStatement);
         }
 
-        return StatementList;
+        return NewBlock;
     }
 
     private Statement? ParseStatement(ParsingContext parsingContext, StatementSyntax statementNode, bool isLastStatement)
@@ -98,6 +107,8 @@ internal partial class ClassDeclarationParser
             NewStatement = TryParseIfStatement(parsingContext, IfStatement, ref IsErrorReported);
         else if (statementNode is ReturnStatementSyntax ReturnStatement && isLastStatement)
             NewStatement = TryParseReturnStatement(parsingContext, ReturnStatement, ref IsErrorReported);
+        else if (statementNode is ForStatementSyntax ForStatement)
+            NewStatement = TryParseForStatement(parsingContext, ForStatement, ref IsErrorReported);
         else
             Log($"Unsupported statement type '{statementNode.GetType().Name}'.");
 
@@ -400,6 +411,7 @@ internal partial class ClassDeclarationParser
         MethodCallStatementEntry NewEntry = new()
         {
             HostMethod = parsingContext.HostMethod!,
+            ParentBlock = parsingContext.HostBlock!,
             Statement = statement,
             CallLocation = CallLocation,
         };
@@ -417,15 +429,15 @@ internal partial class ClassDeclarationParser
         Expression? Condition = ParseExpression(ConditionParsingContext, ConditionExpression);
         if (Condition is not null)
         {
-            List<Statement> WhenTrueStatementList = ParseStatementOrBlock(parsingContext, ifStatement.Statement);
-            List<Statement> WhenFalseStatementList;
+            BlockScope WhenTrueBlock = ParseStatementOrBlock(parsingContext, ifStatement.Statement);
+            BlockScope WhenFalseBlock;
 
             if (ifStatement.Else is ElseClauseSyntax ElseClause)
-                WhenFalseStatementList = ParseStatementOrBlock(parsingContext, ElseClause.Statement);
+                WhenFalseBlock = ParseStatementOrBlock(parsingContext, ElseClause.Statement);
             else
-                WhenFalseStatementList = new();
+                WhenFalseBlock = new() { LocalTable = parsingContext.HostBlock!.LocalTable, StatementList = new List<Statement>() };
 
-            NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueStatementList = WhenTrueStatementList, WhenFalseStatementList = WhenFalseStatementList };
+            NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueBlock = WhenTrueBlock, WhenFalseBlock = WhenFalseBlock };
 
             Debug.Assert(NewStatement.LocationId != LocationId.None);
         }
@@ -438,8 +450,9 @@ internal partial class ClassDeclarationParser
     private Statement? TryParseReturnStatement(ParsingContext parsingContext, ReturnStatementSyntax returnStatement, ref bool isErrorReported)
     {
         Debug.Assert(parsingContext.HostMethod is not null);
-
         Method HostMethod = parsingContext.HostMethod!;
+        Debug.Assert(parsingContext.HostBlock is not null);
+        BlockScope HostBlock = parsingContext.HostBlock!;
         ReturnStatement? NewStatement = null;
 
         if (returnStatement.Expression is ExpressionSyntax ResultExpression)
@@ -454,7 +467,7 @@ internal partial class ClassDeclarationParser
                 if (ReturnExpression is not null)
                 {
                     LocalName ResultName = new LocalName() { Text = Ensure.ResultKeyword };
-                    bool IsResultInLocals = HostMethod.LocalTable.ContainsItem(ResultName);
+                    bool IsResultInLocals = HostBlock.LocalTable.ContainsItem(ResultName);
                     bool IsResultReturned = ReturnExpression is VariableValueExpression VariableValue && VariableValue.VariablePath.Count == 1 && VariableValue.VariablePath[0].Name.Text == ResultName.Text;
 
                     if (IsResultReturned || !IsResultInLocals)
@@ -476,5 +489,103 @@ internal partial class ClassDeclarationParser
         }
 
         return NewStatement;
+    }
+
+    private Statement? TryParseForStatement(ParsingContext parsingContext, ForStatementSyntax forStatement, ref bool isErrorReported)
+    {
+        ForLoopStatement? NewStatement = null;
+
+        if (TryParseForStatementInit(parsingContext, forStatement, out Local LocalIndex))
+        {
+            if (forStatement.Condition is not null)
+            {
+                BlockScope HostBlock = parsingContext.HostBlock!;
+
+                LocalTable ForLoopLocalTable = new();
+                foreach (KeyValuePair<LocalName, Local> Entry in HostBlock.LocalTable)
+                    ForLoopLocalTable.AddItem(Entry.Value);
+                ForLoopLocalTable.AddItem(LocalIndex);
+
+                BlockScope ForLoopBlock = new() { LocalTable = ForLoopLocalTable.AsReadOnly(), StatementList = new List<Statement>() };
+
+                LocationContext LocationContext = new(forStatement.Condition);
+                ParsingContext ForLoopParsingContext = parsingContext with { LocationContext = LocationContext, HostBlock = ForLoopBlock, IsExpressionNested = false };
+
+                Expression? ContinueCondition = ParseExpression(ForLoopParsingContext, forStatement.Condition);
+                if (ContinueCondition is not null)
+                {
+                    if (TryParseForStatementIncrementor(ForLoopParsingContext, forStatement, LocalIndex, ref isErrorReported))
+                    {
+                        ForLoopBlock = ParseStatementOrBlock(ForLoopParsingContext, forStatement.Statement);
+
+                        NewStatement = new ForLoopStatement
+                        {
+                            LocalIndex = LocalIndex,
+                            ContinueCondition = ContinueCondition,
+                            Block = ForLoopBlock,
+                        };
+
+                        Debug.Assert(NewStatement.LocationId != LocationId.None);
+                    }
+                }
+                else
+                    isErrorReported = true;
+            }
+        }
+
+        return NewStatement;
+    }
+
+    private bool TryParseForStatementInit(ParsingContext parsingContext, ForStatementSyntax forStatement, out Local localIndex)
+    {
+        if (forStatement.Declaration is VariableDeclarationSyntax Declaration)
+        {
+            // TODO: handle nested blocks with local scope
+            LocalTable ForLocalTable = new LocalTable();
+            AddLocal(parsingContext, ForLocalTable, Declaration, isLocalSupported: true);
+
+            if (ForLocalTable.List.Count == 1)
+            {
+                KeyValuePair<LocalName, Local> IndexEntry = ForLocalTable.List[0];
+                Local LocalIndex = IndexEntry.Value;
+
+                if (LocalIndex.Type == ExpressionType.Integer)
+                {
+                    if (forStatement.Initializers.Count == 0)
+                    {
+                        localIndex = LocalIndex;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        localIndex = null!;
+        return false;
+    }
+
+    private bool TryParseForStatementIncrementor(ParsingContext parsingContext, ForStatementSyntax forStatement, Local localIndex, ref bool isErrorReported)
+    {
+        SeparatedSyntaxList<ExpressionSyntax> Incrementors = forStatement.Incrementors;
+
+        if (Incrementors.Count == 1)
+        {
+            ExpressionSyntax Incrementor = Incrementors[0];
+            if (Incrementor is PostfixUnaryExpressionSyntax PostfixUnaryExpression)
+            {
+                if (PostfixUnaryExpression.OperatorToken.IsKind(SyntaxKind.PlusPlusToken))
+                {
+                    if (PostfixUnaryExpression.Operand is IdentifierNameSyntax IdentifierName)
+                    {
+                        if (IdentifierName.Identifier.ValueText == localIndex.Name.Text)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

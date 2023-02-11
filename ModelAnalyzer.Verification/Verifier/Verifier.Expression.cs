@@ -98,6 +98,7 @@ internal partial class Verifier : IDisposable
             {
                 Instance = Reference,
                 HostMethod = null,
+                HostBlock = null,
                 ResultLocal = null,
             };
 
@@ -170,10 +171,10 @@ internal partial class Verifier : IDisposable
 
     private void LookupLocal(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
     {
-        if (verificationContext.HostMethod is null)
+        if (verificationContext.HostBlock is null)
             return;
 
-        ReadOnlyLocalTable LocalTable = verificationContext.HostMethod.LocalTable;
+        ReadOnlyLocalTable LocalTable = verificationContext.HostBlock.LocalTable;
 
         foreach (KeyValuePair<LocalName, Local> Entry in LocalTable)
             if (Entry.Key.Text == name)
@@ -245,12 +246,12 @@ internal partial class Verifier : IDisposable
         Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
         verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
 
-        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, ResultLocal = CallResult };
+        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultLocal = CallResult };
 
         if (!AddMethodRequires(CallVerificationContext, functionCallExpression.CallerClassName, functionCallExpression.LocationId, checkOpposite: true))
             return false;
 
-        if (!AddStatementListExecution(CallVerificationContext, calledFunction.StatementList))
+        if (!AddStatementListExecution(CallVerificationContext, calledFunction.RootBlock))
             return false;
 
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
@@ -323,6 +324,7 @@ internal partial class Verifier : IDisposable
         {
             Instance = calledInstance,
             HostMethod = calledFunction,
+            HostBlock = calledFunction.RootBlock,
             ResultLocal = CallResult,
         };
 
@@ -655,6 +657,7 @@ internal partial class Verifier : IDisposable
             {
                 Instance = Reference,
                 HostMethod = null,
+                HostBlock = null,
                 ResultLocal = null,
             };
 

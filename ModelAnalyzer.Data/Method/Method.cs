@@ -53,14 +53,9 @@ internal class Method : IMethod, INameable<MethodName>
     required public List<Require> RequireList { get; init; }
 
     /// <summary>
-    /// Gets the method local variables.
+    /// Gets the method root block.
     /// </summary>
-    required public ReadOnlyLocalTable LocalTable { get; init; }
-
-    /// <summary>
-    /// Gets the method statements.
-    /// </summary>
-    required public List<Statement> StatementList { get; init; }
+    required public BlockScope RootBlock { get; init; }
 
     /// <summary>
     /// Gets or sets the Result local variable.
@@ -79,7 +74,7 @@ internal class Method : IMethod, INameable<MethodName>
     public IList<IRequire> GetRequires() => new List<IRequire>(RequireList);
 
     /// <inheritdoc/>
-    public IList<ILocal> GetLocals() => new List<ILocal>(LocalTable.Table.List.ConvertAll(entry => entry.Value));
+    public IList<ILocal> GetLocals() => new List<ILocal>(RootBlock.LocalTable.Table.List.ConvertAll(entry => entry.Value));
 
     /// <inheritdoc/>
     public IList<IEnsure> GetEnsures() => new List<IEnsure>(EnsureList);

@@ -43,6 +43,7 @@ internal partial class ClassDeclarationParser
             {
                 Method TemporaryMethod;
                 ParsingContext MethodParsingContext;
+                BlockScope TemporaryRootBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() };
 
                 TemporaryMethod = new Method
                 {
@@ -54,19 +55,18 @@ internal partial class ClassDeclarationParser
                     ParameterTable = ReadOnlyParameterTable.Empty,
                     ReturnType = ReturnType,
                     RequireList = new List<Require>(),
-                    LocalTable = ReadOnlyLocalTable.Empty,
-                    StatementList = new List<Statement>(),
+                    RootBlock = TemporaryRootBlock,
                     EnsureList = new List<Ensure>(),
                 };
-                MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod };
+                MethodParsingContext = parsingContext with { HostMethod = TemporaryMethod, HostBlock = TemporaryRootBlock };
 
                 ReadOnlyParameterTable ParameterTable = ParseParameters(MethodParsingContext, methodDeclaration).AsReadOnly();
 
                 List<Require> RequireList;
                 ReadOnlyLocalTable LocalTable;
                 Local? ResultLocal;
-                List<Statement> StatementList;
                 List<Ensure> EnsureList;
+                BlockScope RootBlock;
 
                 if (parsingContext.IsMethodParsingFirstPassDone)
                 {
@@ -80,16 +80,15 @@ internal partial class ClassDeclarationParser
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = new List<Require>(),
-                        LocalTable = ReadOnlyLocalTable.Empty,
-                        StatementList = new List<Statement>(),
+                        RootBlock = TemporaryRootBlock,
                         EnsureList = new List<Ensure>(),
                     };
                     MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod };
 
                     RequireList = ParseRequires(MethodParsingContext, methodDeclaration);
-
                     LocalTable = ParseLocals(MethodParsingContext, methodDeclaration).AsReadOnly();
 
+                    TemporaryRootBlock = TemporaryRootBlock with { LocalTable = LocalTable };
                     TemporaryMethod = new Method
                     {
                         Name = MethodName,
@@ -100,13 +99,12 @@ internal partial class ClassDeclarationParser
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = RequireList,
-                        LocalTable = LocalTable,
-                        StatementList = new List<Statement>(),
+                        RootBlock = TemporaryRootBlock,
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, IsFieldAllowed = true, IsLocalAllowed = true };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, HostBlock = TemporaryRootBlock, IsFieldAllowed = true, IsLocalAllowed = true };
 
-                    StatementList = ParseStatements(MethodParsingContext, methodDeclaration);
+                    RootBlock = ParseStatements(MethodParsingContext, methodDeclaration);
                     ResultLocal = FindOrCreateResultLocal(LocalTable, ReturnType);
 
                     TemporaryMethod = new Method
@@ -119,22 +117,20 @@ internal partial class ClassDeclarationParser
                         ParameterTable = ParameterTable,
                         ReturnType = ReturnType,
                         RequireList = RequireList,
-                        LocalTable = LocalTable,
+                        RootBlock = RootBlock,
                         ResultLocal = ResultLocal,
-                        StatementList = StatementList,
                         EnsureList = new List<Ensure>(),
                     };
-                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod };
+                    MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, HostBlock = TemporaryRootBlock };
 
                     EnsureList = ParseEnsures(MethodParsingContext, methodDeclaration);
                 }
                 else
                 {
                     RequireList = new List<Require>();
-                    LocalTable = ReadOnlyLocalTable.Empty;
                     ResultLocal = null;
-                    StatementList = new List<Statement>();
                     EnsureList = new List<Ensure>();
+                    RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() };
                 }
 
                 Method NewMethod = new Method
@@ -147,9 +143,8 @@ internal partial class ClassDeclarationParser
                     ParameterTable = ParameterTable,
                     ReturnType = ReturnType,
                     RequireList = RequireList,
-                    LocalTable = LocalTable,
+                    RootBlock = RootBlock,
                     ResultLocal = ResultLocal,
-                    StatementList = StatementList,
                     EnsureList = EnsureList,
                 };
 

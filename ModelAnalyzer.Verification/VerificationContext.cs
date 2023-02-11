@@ -44,6 +44,11 @@ internal record VerificationContext
     public Method? HostMethod { get; set; }
 
     /// <summary>
+    /// Gets or sets the block within which parsing is taking place. This is null when parsing properties, fields or invariant clauses for instance.
+    /// </summary>
+    public BlockScope? HostBlock { get; set; }
+
+    /// <summary>
     /// Gets or sets the local variable that represents the value returned by a method. This is either a local declared in the method or one made up by the parser.
     /// </summary>
     public Local? ResultLocal { get; set; }

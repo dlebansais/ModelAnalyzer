@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Represents a call to a method statement.
 /// </summary>
-[DebuggerDisplay("{Name.Text}({string.Join(\", \", ArgumentList)})")]
+[DebuggerDisplay("{MethodName.Text}({string.Join(\", \", ArgumentList)})")]
 internal class PrivateMethodCallStatement : Statement, IMethodCallStatement, IPrivateCall
 {
     /// <inheritdoc/>

@@ -661,6 +661,8 @@ internal partial class ClassDeclarationParser
     {
         if (GetLastClassModel(parsingContext, variablePath, out ClassModel ClassModel))
             return TryParseLastNameAsProperty(parsingContext, ClassModel, lastName, out property);
+        else if (GetLastArrayLength(variablePath, lastName, out property))
+            return true;
 
         property = null!;
         return false;
@@ -716,7 +718,7 @@ internal partial class ClassDeclarationParser
         IVariable LastVariable = variablePath.Last();
         ExpressionType VariableType = LastVariable.Type;
 
-        if (!VariableType.IsSimple)
+        if (!VariableType.IsArray && !VariableType.IsSimple)
         {
             classModel = GetClassModel(parsingContext, VariableType.TypeName);
             return true;
@@ -734,6 +736,23 @@ internal partial class ClassDeclarationParser
 
         ClassModel ClassModel = (ClassModel)Phase1ClassModelTable[className];
         return ClassModel;
+    }
+
+    public static bool GetLastArrayLength(List<IVariable> variablePath, string lastName, out Property property)
+    {
+        Debug.Assert(variablePath.Count >= 1);
+
+        IVariable LastVariable = variablePath.Last();
+        ExpressionType VariableType = LastVariable.Type;
+
+        if (VariableType.IsArray && lastName == "Length")
+        {
+            property = Property.ArrayLengthProperty;
+            return true;
+        }
+
+        property = null!;
+        return false;
     }
 
     private bool TryParseElementIndex(ParsingContext parsingContext, SeparatedSyntaxList<ArgumentSyntax> arguments, out Expression elementIndex, ref bool isErrorReported)

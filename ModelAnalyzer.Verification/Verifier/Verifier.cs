@@ -257,7 +257,7 @@ internal partial class Verifier : IDisposable
 
     private bool AddMethodCallStateWithInit(VerificationContext verificationContext, Method hostMethod)
     {
-        VerificationContext LocalVerificationContext = verificationContext with { HostMethod = hostMethod };
+        VerificationContext LocalVerificationContext = verificationContext with { HostMethod = hostMethod, HostBlock = hostMethod.RootBlock };
         Local? ResultLocal = FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType);
         VerificationContext StatementVerificationContext = LocalVerificationContext with { ResultLocal = ResultLocal };
 
@@ -276,7 +276,7 @@ internal partial class Verifier : IDisposable
 
         AddMethodLocalStates(verificationContext);
 
-        if (!AddStatementListExecution(verificationContext, HostMethod.StatementList))
+        if (!AddStatementListExecution(verificationContext, HostMethod.RootBlock))
             return false;
 
         if (!AddMethodEnsures(verificationContext, keepNormal: false))
@@ -301,10 +301,9 @@ internal partial class Verifier : IDisposable
     private void AddMethodLocalStates(VerificationContext verificationContext)
     {
         Debug.Assert(verificationContext.HostMethod is not null);
-
         Method HostMethod = verificationContext.HostMethod!;
 
-        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.LocalTable)
+        foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.RootBlock.LocalTable)
         {
             Local Local = Entry.Value;
             verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);

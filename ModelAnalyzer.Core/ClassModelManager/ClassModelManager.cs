@@ -465,7 +465,7 @@ public partial class ClassModelManager : IDisposable
                     return true;
             }
 
-            foreach (KeyValuePair<LocalName, Local> LocalEntry in Method.LocalTable)
+            foreach (KeyValuePair<LocalName, Local> LocalEntry in Method.RootBlock.LocalTable)
             {
                 Local Local = LocalEntry.Value;
                 if (IsCycleDetected(classModelTable, visitedClasses, classModel, Local.Type))

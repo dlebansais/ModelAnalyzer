@@ -1,6 +1,5 @@
 ﻿namespace ModelAnalyzer;
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 /// <summary>
@@ -20,10 +19,10 @@ internal class ConditionalStatement : Statement
     /// <summary>
     /// Gets statements when the condition is true.
     /// </summary>
-    required public List<Statement> WhenTrueStatementList { get; init; }
+    required public BlockScope WhenTrueBlock { get; init; }
 
     /// <summary>
     /// Gets statements when the condition is false.
     /// </summary>
-    required public List<Statement> WhenFalseStatementList { get; init; }
+    required public BlockScope WhenFalseBlock { get; init; }
 }
