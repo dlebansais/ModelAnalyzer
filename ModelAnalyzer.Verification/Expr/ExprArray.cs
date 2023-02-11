@@ -36,4 +36,9 @@ internal class ExprArray<T> : IExprBase<IRefExprCapsule, IExprCapsule>
     /// Gets the array expression.
     /// </summary>
     public T ArrayExpression { get => (T)OtherExpressions[0]; }
+
+    /// <summary>
+    /// Gets the size expression.
+    /// </summary>
+    public IIntExprCapsule SizeExpression { get => (IIntExprCapsule)OtherExpressions[1]; }
 }

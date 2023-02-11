@@ -672,7 +672,11 @@ internal partial class Verifier : IDisposable
             Debug.Assert(IndexBuildSuccess);
 
             IExprCapsule ElementExpr = Context.CreateGetElementExpr(ArrayExpr, IndexExpr.MainExpression);
-            resultExpr = new ExprSingle<IExprCapsule>(ElementExpr);
+
+            Debug.Assert(ElementExpr is ISimpleExprCapsule);
+
+            resultExpr = ((ISimpleExprCapsule)ElementExpr).ToSingle();
+
             return true;
         }
     }

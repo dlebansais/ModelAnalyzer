@@ -104,26 +104,57 @@ internal class ObjectManager
 
     public void AssignElement(IBoolExprCapsule? branch, Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
     {
-        VariableAlias DestinationNameAlias;
-        IExprBase<IExprCapsule, IExprCapsule> DestinationExpr;
+        ExprArray<IArrayExprCapsule> DestinationWithStoredElementExpr = CreateDestinationWithStoredElement(destination, destinationIndexExpr, sourceExpr);
+        ExprArray<IArrayExprCapsule> DestinationWithNewAliasElement = CreateDestinationWithNewAliasElement(destination);
 
-        DestinationNameAlias = AliasTable.GetAlias(destination);
-        DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
+        Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(DestinationWithNewAliasElement, DestinationWithStoredElementExpr));
+    }
 
-        Debug.Assert(DestinationExpr is ExprArray<IArrayExprCapsule>);
-        ExprArray<IArrayExprCapsule> OriginalDestinationArrayExpr = (ExprArray<IArrayExprCapsule>)DestinationExpr;
+    private ExprArray<IArrayExprCapsule> CreateDestinationWithStoredElement(Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
+    {
+        VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
 
-        Context.CreateSetElementExpr(OriginalDestinationArrayExpr.ArrayExpression, destinationIndexExpr, sourceExpr);
+        ExpressionType ElementType = destination.Type.ToElementType();
+        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceVariable(ElementType, DestinationNameAlias.ToString());
+
+        IVariableName ArrayContainerName = CreateArrayContainerName(destination);
+        Variable ArrayContainerVariable = new(ArrayContainerName, destination.Type);
+        VariableAlias ArrayContainerAlias = AliasTable.GetAlias(ArrayContainerVariable);
+        IArrayExprCapsule Array = Context.CreateArrayContainerVariable(ElementType, ArrayContainerAlias.ToString());
+
+        IArrayExprCapsule ArrayWithStore = Context.CreateSetElementExpr(Array, destinationIndexExpr, sourceExpr);
+
+        IVariableName ArraySizeName = CreateArraySizeName(destination);
+        Variable ArraySizeVariable = new(ArraySizeName, ExpressionType.Integer);
+        VariableAlias ArraySizeAlias = AliasTable.GetAlias(ArraySizeVariable);
+        IIntExprCapsule Size = Context.CreateIntegerVariable(ArraySizeAlias.ToString());
+
+        ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, ArrayWithStore, Size);
+        return Result;
+    }
+
+    private ExprArray<IArrayExprCapsule> CreateDestinationWithNewAliasElement(Variable destination)
+    {
+        ExpressionType ElementType = destination.Type.ToElementType();
 
         AliasTable.IncrementAlias(destination);
+        VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
+        IArrayRefExprCapsule ModifiedReferenceResult = Context.CreateArrayReferenceVariable(ElementType, DestinationNameAlias.ToString());
 
-        DestinationNameAlias = AliasTable.GetAlias(destination);
-        DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
+        IVariableName ArrayContainerName = CreateArrayContainerName(destination);
+        Variable ArrayContainerVariable = new(ArrayContainerName, destination.Type);
+        AliasTable.IncrementAlias(ArrayContainerVariable);
+        VariableAlias ArrayContainerAlias = AliasTable.GetAlias(ArrayContainerVariable);
+        IArrayExprCapsule ModifiedArray = Context.CreateArrayContainerVariable(ElementType, ArrayContainerAlias.ToString());
 
-        Debug.Assert(DestinationExpr is ExprArray<IArrayExprCapsule>);
-        ExprArray<IArrayExprCapsule> ModifiedDestinationArrayExpr = (ExprArray<IArrayExprCapsule>)DestinationExpr;
+        IVariableName ArraySizeName = CreateArraySizeName(destination);
+        Variable ArraySizeVariable = new(ArraySizeName, ExpressionType.Integer);
+        AliasTable.IncrementAlias(ArraySizeVariable);
+        VariableAlias ArraySizeAlias = AliasTable.GetAlias(ArraySizeVariable);
+        IIntExprCapsule ModifiedSize = Context.CreateIntegerVariable(ArraySizeAlias.ToString());
 
-        Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(ModifiedDestinationArrayExpr, OriginalDestinationArrayExpr));
+        ExprArray<IArrayExprCapsule> Result = new(ModifiedReferenceResult, ModifiedArray, ModifiedSize);
+        return Result;
     }
 
     public void BeginBranch(out AliasTable beginAliasTable)
@@ -398,21 +429,24 @@ internal class ObjectManager
         ExpressionType ElementType = variableType.ToElementType();
         IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceVariable(ElementType, alias.ToString());
 
-        IVariableName ArrayName = CreateArrayName(ReferenceResult);
-        Variable ArrayVariable = new(ArrayName, variableType);
+        IVariableName ArrayContainerName = CreateArrayContainerName(alias.Variable);
+        Variable ArrayContainerVariable = new(ArrayContainerName, variableType);
 
-        if (!AliasTable.ContainsVariable(ArrayVariable))
-            AliasTable.AddVariable(ArrayVariable);
+        if (!AliasTable.ContainsVariable(ArrayContainerVariable))
+            AliasTable.AddVariable(ArrayContainerVariable);
 
-        IArrayExprCapsule Array = Context.CreateArrayValue(ElementType, ArraySize.Unknown);
+        VariableAlias ArrayContainerAlias = AliasTable.GetAlias(ArrayContainerVariable);
+        IArrayExprCapsule Array = Context.CreateArrayContainerVariable(ElementType, ArrayContainerAlias.ToString());
 
-        IVariableName ArraySizeName = CreateArraySizeName(ReferenceResult);
+        IVariableName ArraySizeName = CreateArraySizeName(alias.Variable);
         Variable ArraySizeVariable = new(ArraySizeName, ExpressionType.Integer);
 
         if (!AliasTable.ContainsVariable(ArraySizeVariable))
             AliasTable.AddVariable(ArraySizeVariable);
 
-        IIntExprCapsule Size = Context.CreateIntegerValue(ArraySize.Unknown.Size);
+        VariableAlias ArraySizeAlias = AliasTable.GetAlias(ArraySizeVariable);
+
+        IIntExprCapsule Size = Context.CreateIntegerVariable(ArraySizeAlias.ToString());
 
         ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, Array, Size);
 
@@ -470,21 +504,21 @@ internal class ObjectManager
 
         Debug.Assert(ClassName != ClassName.Empty);
 
-        string OwnerText = $"{ClassName}#{ObjectExpr.Index}:${localName.Text}";
+        string OwnerText = $"{ClassName}#{ObjectExpr.Index.Internal}:${localName.Text}";
 
         return new LocalName() { Text = OwnerText };
     }
 
-    public static LocalName CreateArrayName(IArrayRefExprCapsule expr)
+    public static LocalName CreateArrayContainerName(IVariable variable)
     {
-        string OwnerText = $"[]{expr.Index}";
+        string OwnerText = $"{variable.Name.Text}[]-Container";
 
         return new LocalName() { Text = OwnerText };
     }
 
-    public static LocalName CreateArraySizeName(IArrayRefExprCapsule expr)
+    public static LocalName CreateArraySizeName(IVariable variable)
     {
-        string OwnerText = $"[]{expr.Index}-Size";
+        string OwnerText = $"{variable.Name.Text}[]-Size";
 
         return new LocalName() { Text = OwnerText };
     }

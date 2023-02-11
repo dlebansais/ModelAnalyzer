@@ -129,6 +129,29 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
+    /// Creates an array container variable.
+    /// </summary>
+    /// <param name="elementType">The element type.</param>
+    /// <param name="name">The variable name.</param>
+    public IArrayExprCapsule CreateArrayContainerVariable(ExpressionType elementType, string name)
+    {
+        Dictionary<ExpressionType, Sort> DomainTable = new()
+        {
+            { ExpressionType.Boolean, Context.BoolSort },
+            { ExpressionType.Integer, Context.IntSort },
+            { ExpressionType.FloatingPoint, Context.RealSort },
+        };
+
+        Debug.Assert(!elementType.IsArray);
+        Debug.Assert(elementType.IsSimple);
+        Debug.Assert(DomainTable.ContainsKey(elementType));
+
+        Sort Domain = DomainTable[elementType];
+
+        return Context.MkArrayConst(name, Context.IntSort, Domain).Encapsulate(elementType);
+    }
+
+    /// <summary>
     /// Creates a boolean value.
     /// </summary>
     /// <param name="value">The value.</param>
@@ -187,21 +210,19 @@ internal partial class SolverContext : IDisposable
     public IArrayExprCapsule CreateArrayValue(ExpressionType elementType, ArraySize arraySize)
     {
         Debug.Assert(!elementType.IsArray);
+        Debug.Assert(elementType.IsSimple);
         Debug.Assert(arraySize.IsValid);
 
-        Dictionary<ExpressionType, IExprCapsule> DefaultvalueTable = new()
+        Dictionary<ExpressionType, Func<Expr>> DefaultvalueTable = new()
         {
-            { ExpressionType.Boolean, False },
-            { ExpressionType.Integer, Zero },
-            { ExpressionType.FloatingPoint, Zero },
+            { ExpressionType.Boolean, () => Context.MkBool(false) },
+            { ExpressionType.Integer, () => Context.MkInt(0) },
+            { ExpressionType.FloatingPoint, () => Context.MkReal(0) },
         };
 
-        Debug.Assert(elementType.IsSimple);
         Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
 
-        IExprCapsule DefaultValueExpr = DefaultvalueTable[elementType];
-
-        return Context.MkConstArray(Context.IntSort, DefaultValueExpr.Item).Encapsulate(elementType);
+        return Context.MkConstArray(Context.IntSort, DefaultvalueTable[elementType]()).Encapsulate(elementType);
     }
 
     /// <summary>

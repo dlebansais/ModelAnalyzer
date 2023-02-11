@@ -72,7 +72,6 @@ internal partial class Verifier : IDisposable
         IVariableName VariableBlockName = ObjectManager.CreateBlockName(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!);
         Variable Destination = new(VariableBlockName, VariableType!);
 
-        // TODO if ElementIndex is not null
         if (assignmentStatement.DestinationIndex is null)
             verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
         else
@@ -84,7 +83,7 @@ internal partial class Verifier : IDisposable
             IIntExprCapsule DestinationIndexExpr = ((IExprSingle<IIntExprCapsule>)IndexExpr).MainExpression;
 
             Debug.Assert(SourceExpr is IExprSingle<IExprCapsule>);
-            IExprCapsule SourceValueExpr = ((IExprSingle<IExprCapsule>)IndexExpr).MainExpression;
+            IExprCapsule SourceValueExpr = ((IExprSingle<IExprCapsule>)SourceExpr).MainExpression;
 
             verificationContext.ObjectManager.AssignElement(verificationContext.Branch, Destination, DestinationIndexExpr, SourceValueExpr);
         }

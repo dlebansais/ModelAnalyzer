@@ -150,14 +150,17 @@ using System;
 
 class Program_Verifier_Integer4
 {
-    public void Write()
+    public double Read()
     {
-        int[] X = new int[1];
-        int[] Y = new int[1];
+        double[] X = new double[1];
+        double[] Y = new double[1];
 
-        X[0] = 1;
-        Y[0] = 2;
+        X[0] = 1.0;
+        Y[0] = 2.0;
+
+        return X[0] + Y[0];
     }
+    // Ensure: Result == 3.0
 }
 ";
 
