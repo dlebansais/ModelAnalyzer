@@ -514,18 +514,21 @@ internal partial class ClassDeclarationParser
                 Expression? ContinueCondition = ParseExpression(ForLoopParsingContext, forStatement.Condition);
                 if (ContinueCondition is not null)
                 {
-                    if (TryParseForStatementIncrementor(ForLoopParsingContext, forStatement, LocalIndex, ref isErrorReported))
+                    if (ContinueCondition.GetExpressionType() == ExpressionType.Boolean)
                     {
-                        ForLoopBlock = ParseStatementOrBlock(ForLoopParsingContext, forStatement.Statement);
-
-                        NewStatement = new ForLoopStatement
+                        if (TryParseForStatementIncrementor(ForLoopParsingContext, forStatement, LocalIndex, ref isErrorReported))
                         {
-                            LocalIndex = LocalIndex,
-                            ContinueCondition = ContinueCondition,
-                            Block = ForLoopBlock,
-                        };
+                            ForLoopBlock = ParseStatementOrBlock(ForLoopParsingContext, forStatement.Statement);
 
-                        Debug.Assert(NewStatement.LocationId != LocationId.None);
+                            NewStatement = new ForLoopStatement
+                            {
+                                LocalIndex = LocalIndex,
+                                ContinueCondition = ContinueCondition,
+                                Block = ForLoopBlock,
+                            };
+
+                            Debug.Assert(NewStatement.LocationId != LocationId.None);
+                        }
                     }
                 }
                 else
@@ -540,7 +543,7 @@ internal partial class ClassDeclarationParser
     {
         if (forStatement.Declaration is VariableDeclarationSyntax Declaration)
         {
-            // TODO: handle nested blocks with local scope
+            // TODO: special check of index
             LocalTable ForLocalTable = new LocalTable();
             AddLocal(parsingContext, ForLocalTable, Declaration, isLocalSupported: true);
 
@@ -551,11 +554,8 @@ internal partial class ClassDeclarationParser
 
                 if (LocalIndex.Type == ExpressionType.Integer)
                 {
-                    if (forStatement.Initializers.Count == 0)
-                    {
-                        localIndex = LocalIndex;
-                        return true;
-                    }
+                    localIndex = LocalIndex;
+                    return true;
                 }
             }
         }

@@ -37,14 +37,8 @@ internal partial record ClassModel : IClassModel
     private void AppendProperty(StringBuilder builder, Property property)
     {
         string TypeString = ExpressionTypeToString(property.Type);
-
-        string InitializerString;
         ILiteralExpression? Initializer = property.Initializer;
-
-        if (Initializer is not null)
-            InitializerString = $" = {Initializer}";
-        else
-            InitializerString = string.Empty;
+        string InitializerString = Initializer is not null ? $" = {Initializer}" : string.Empty;
 
         builder.AppendLine($"  public {TypeString} {property.Name.Text} {{ get; set; }}{InitializerString}");
     }
@@ -61,14 +55,8 @@ internal partial record ClassModel : IClassModel
     private void AppendField(StringBuilder builder, Field field)
     {
         string TypeString = ExpressionTypeToString(field.Type);
-
-        string InitializerString;
         ILiteralExpression? Initializer = field.Initializer;
-
-        if (Initializer is not null)
-            InitializerString = $" = {Initializer}";
-        else
-            InitializerString = string.Empty;
+        string InitializerString = Initializer is not null ? $" = {Initializer}" : string.Empty;
 
         builder.AppendLine($"  {TypeString} {field.Name.Text}{InitializerString}");
     }
@@ -143,14 +131,8 @@ internal partial record ClassModel : IClassModel
     private void AppendLocal(StringBuilder builder, Local local)
     {
         string TypeString = ExpressionTypeToString(local.Type);
-
-        string InitializerString;
         ILiteralExpression? Initializer = local.Initializer;
-
-        if (Initializer is not null)
-            InitializerString = $" = {Initializer}";
-        else
-            InitializerString = string.Empty;
+        string InitializerString = Initializer is not null ? $" = {Initializer}" : string.Empty;
 
         builder.AppendLine($"    {TypeString} {local.Name.Text}{InitializerString}");
     }
