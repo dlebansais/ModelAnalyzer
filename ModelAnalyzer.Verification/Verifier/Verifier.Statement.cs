@@ -76,8 +76,9 @@ internal partial class Verifier : IDisposable
             verificationContext.ObjectManager.Assign(verificationContext.Branch, Destination, SourceExpr);
         else
         {
-            if (!BuildExpression(verificationContext, assignmentStatement.DestinationIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr))
-                return false;
+            // Index is either an int literal or a single variable. This can't possibly fail.
+            bool IndexBuildSuccess = BuildExpression(verificationContext, assignmentStatement.DestinationIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr);
+            Debug.Assert(IndexBuildSuccess);
 
             Debug.Assert(IndexExpr is IExprSingle<IIntExprCapsule>);
             IIntExprCapsule DestinationIndexExpr = ((IExprSingle<IIntExprCapsule>)IndexExpr).MainExpression;
