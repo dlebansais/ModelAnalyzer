@@ -160,7 +160,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr, greaterThanOrEqualInitializer: false);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultLocal = null };
@@ -228,7 +228,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr, greaterThanOrEqualInitializer: false);
         }
 
         VerificationContext CallVerificationContext = verificationContext with
@@ -283,7 +283,29 @@ internal partial class Verifier : IDisposable
 
     private bool AddForLoopExecution(VerificationContext verificationContext, ForLoopStatement forLoopStatement)
     {
-        // TODO
-        return true;
+        VerificationContext ForLoopVerificationContext = verificationContext with { HostBlock = forLoopStatement.Block };
+
+        Debug.Assert(verificationContext.HostMethod is not null);
+        Method HostMethod = verificationContext.HostMethod!;
+
+        return AddForLoopExecution(ForLoopVerificationContext, HostMethod, forLoopStatement);
+    }
+
+    private bool AddForLoopExecution(VerificationContext verificationContext, Method hostMethod, ForLoopStatement forLoopStatement)
+    {
+        Local LocalIndex = forLoopStatement.LocalIndex;
+        verificationContext.ObjectManager.CreateVariable(owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, greaterThanOrEqualInitializer: true, initWithDefault: false);
+
+        if (!BuildExpression(verificationContext, forLoopStatement.ContinueCondition, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> ContinueConditionExpr))
+            return false;
+
+        Debug.Assert(ContinueConditionExpr is IExprSingle<IBoolExprCapsule>);
+        IExprSingle<IBoolExprCapsule> BoolExpr = (IExprSingle<IBoolExprCapsule>)ContinueConditionExpr;
+
+        verificationContext.ObjectManager.AddExpressionToSolver(verificationContext.Branch, BoolExpr);
+
+        bool ForLoopResult = AddStatementListExecution(verificationContext, forLoopStatement.Block);
+
+        return ForLoopResult;
     }
 }

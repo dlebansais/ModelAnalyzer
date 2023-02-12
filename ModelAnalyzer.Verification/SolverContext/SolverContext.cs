@@ -401,6 +401,20 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
+    /// Creates a set of greater than or equal to expressions.
+    /// </summary>
+    /// <param name="left">The left operands.</param>
+    /// <param name="right">The right operands.</param>
+    public IExprSet<IBoolExprCapsule> CreateGreaterThanOrEqualToExprSet(IExprSingle<IArithExprCapsule> left, IExprSingle<IArithExprCapsule> right)
+    {
+        IBoolExprCapsule EqualityExpr = Context.MkGe(left.MainExpression.Item, right.MainExpression.Item).Encapsulate();
+
+        ExprSingle<IBoolExprCapsule> Result = new(EqualityExpr);
+
+        return Result;
+    }
+
+    /// <summary>
     /// Creates a set of not equal expressions.
     /// </summary>
     /// <param name="left">The left operands.</param>

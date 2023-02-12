@@ -182,13 +182,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, greaterThanOrEqualInitializer: false, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, greaterThanOrEqualInitializer: false, initWithDefault: true);
         }
     }
 
@@ -294,7 +294,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
+            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, greaterThanOrEqualInitializer: false, initWithDefault: false);
         }
     }
 
@@ -306,7 +306,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.RootBlock.LocalTable)
         {
             Local Local = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
+            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, greaterThanOrEqualInitializer: false, initWithDefault: true);
         }
     }
 

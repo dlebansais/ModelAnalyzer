@@ -46,7 +46,7 @@ internal class ObjectManager
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
 
-    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool greaterThanOrEqualInitializer, bool initWithDefault)
     {
         IExprBase<IExprCapsule, IExprCapsule>? InitializerExpr;
 
@@ -55,15 +55,15 @@ internal class ObjectManager
         else
             InitializerExpr = null;
 
-        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr, greaterThanOrEqualInitializer);
     }
 
-    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr, bool greaterThanOrEqualInitializer)
     {
-        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr, greaterThanOrEqualInitializer);
     }
 
-    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr, bool greaterThanOrEqualInitializer)
     {
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
@@ -75,7 +75,22 @@ internal class ObjectManager
 
         if (initializerExpr is not null)
         {
-            IExprSet<IBoolExprCapsule> InitExpr = Context.CreateEqualExprSet(VariableExpr, initializerExpr);
+            IExprSet<IBoolExprCapsule> InitExpr;
+
+            if (greaterThanOrEqualInitializer)
+            {
+                Debug.Assert(VariableExpr is IExprSingle<IArithExprCapsule>);
+                Debug.Assert(initializerExpr is IExprSingle<IArithExprCapsule>);
+
+                IExprSingle<IArithExprCapsule> LeftSingle = (IExprSingle<IArithExprCapsule>)VariableExpr;
+                IExprSingle<IArithExprCapsule> RightSingle = (IExprSingle<IArithExprCapsule>)initializerExpr;
+
+                IBoolExprCapsule ComparisonExpr = Context.CreateGreaterThanEqualToExpr(LeftSingle.MainExpression.Item, RightSingle.MainExpression.Item);
+                InitExpr = ComparisonExpr.ToSingleSet();
+            }
+            else
+                InitExpr = Context.CreateEqualExprSet(VariableExpr, initializerExpr);
+
             Context.AddToSolver(Solver, branch, InitExpr);
         }
 
@@ -587,6 +602,11 @@ internal class ObjectManager
         Debug.Assert(ClassModelTable.ContainsKey(ClassName));
 
         return ClassModelTable[ClassName];
+    }
+
+    public void AddExpressionToSolver(IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
+    {
+        Context.AddToSolver(Solver, branch, boolExpr);
     }
 
     private ReferenceIndex Index;
