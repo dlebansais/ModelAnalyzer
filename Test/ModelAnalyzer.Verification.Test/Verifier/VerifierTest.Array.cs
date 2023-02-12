@@ -205,19 +205,13 @@ using System;
 
 class Program_Verifier_Integer6
 {
-    public double[] Read()
+    public int Read()
     {
         double[] X = new double[10];
 
-        for (int i = 0; i < X.Length; i++)
-        {
-            X[i] = i * 1.5;
-        }
-        // Invariant: X[i] == i * 1.5
-
-        return X;
+        return X.Length;
     }
-    // TODO Ensure: ∀i X[i] == i * 1.5
+    // Ensure: Result == 10
 }
 ";
 
@@ -231,5 +225,33 @@ class Program_Verifier_Integer6
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    private const string ArraySourceCodeInteger7 = @"
+using System;
+
+class Program_Verifier_Integer7
+{
+    public int Read()
+    {
+        double[] X = new double[10];
+
+        return X.Length;
+    }
+    // Ensure: Result == 0
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer7_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger7, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.False);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
 }

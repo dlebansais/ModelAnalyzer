@@ -88,21 +88,33 @@ internal partial class Verifier : IDisposable
 
         if (pathIndex + 1 < variablePath.Count)
         {
-            ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
-
-            Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
-            IObjectRefExprCapsule ReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
-            Instance Reference = new() { ClassModel = ClassModel, Expr = ReferenceExpr };
-
-            VerificationContext NewVerificationContext = verificationContext with
+            if (pathIndex + 2 == variablePath.Count && VariableType!.IsArray)
             {
-                Instance = Reference,
-                HostMethod = null,
-                HostBlock = null,
-                ResultLocal = null,
-            };
+                Debug.Assert(variablePath[pathIndex + 1].Name.Text == "Length");
+                Debug.Assert(resultExpr is ExprArray<IArrayExprCapsule>);
 
-            return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
+                ExprArray<IArrayExprCapsule> ArrayExpr = (ExprArray<IArrayExprCapsule>)resultExpr;
+                resultExpr = ArrayExpr.SizeExpression.ToSingleSet();
+                return true;
+            }
+            else
+            {
+                ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+
+                Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
+                IObjectRefExprCapsule ReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
+                Instance Reference = new() { ClassModel = ClassModel, Expr = ReferenceExpr };
+
+                VerificationContext NewVerificationContext = verificationContext with
+                {
+                    Instance = Reference,
+                    HostMethod = null,
+                    HostBlock = null,
+                    ResultLocal = null,
+                };
+
+                return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
+            }
         }
         else
             return true;

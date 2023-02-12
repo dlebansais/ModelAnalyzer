@@ -409,4 +409,64 @@ class Program_CoreExpression_Array_15
         Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
         Assert.That(ClassModel0.Unsupported.Expressions.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_ArrayUnsupportedMethod()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_Array_16
+{
+    public int Read()
+    {
+        double[] X = new double[1];
+
+        return X.GetHashCode();
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel0.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    [Category("Core")]
+    public void Expression_ArrayUnsupportedProperty()
+    {
+        List<ClassDeclarationSyntax> ClassDeclarationList = TestHelper.FromSourceCode(@"
+using System;
+
+class Program_CoreExpression_Array_17
+{
+    public int Read()
+    {
+        double[] X = new double[1];
+
+        return X.LongLength;
+    }
+}
+");
+
+        using TokenReplacement TokenReplacement = TestHelper.BeginReplaceToken(ClassDeclarationList.First());
+
+        List<IClassModel> ClassModelList = TestHelper.ToClassModel(ClassDeclarationList, TokenReplacement);
+
+        Assert.That(ClassModelList.Count, Is.EqualTo(1));
+
+        IClassModel ClassModel0 = ClassModelList[0];
+
+        Assert.That(ClassModel0.Unsupported.IsEmpty, Is.False);
+        Assert.That(ClassModel0.Unsupported.Expressions.Count, Is.EqualTo(1));
+    }
 }
