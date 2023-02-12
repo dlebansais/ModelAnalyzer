@@ -10,7 +10,7 @@ using Verification.Test;
 /// </summary>
 public partial class VerifierTest
 {
-    private const string ForLoopSourceCodeBoolean1 = @"
+    private const string ForLoopSourceCode1 = @"
 using System;
 
 class Program_Verifier_Loop1
@@ -33,13 +33,45 @@ class Program_Verifier_Loop1
 
     [Test]
     [Category("Verification")]
-    public void Verifier_Boolean1_Success()
+    public void Verifier_ForLoop1_Success()
     {
-        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCodeBoolean1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCode1, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
+
+    private const string ForLoopSourceCode2 = @"
+using System;
+
+class Program_Verifier_Loop1
+{
+    public double[] Read()
+    {
+        double[] X = new double[10];
+
+        for (int i = 0; (10 / i) == 0; i++)
+        {
+            X[i] = i * 1.5;
+        }
+
+        return X;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ForLoop2_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCode2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.False);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
     }
 }
