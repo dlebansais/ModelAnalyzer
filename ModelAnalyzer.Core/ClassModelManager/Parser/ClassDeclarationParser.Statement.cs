@@ -543,19 +543,29 @@ internal partial class ClassDeclarationParser
     {
         if (forStatement.Declaration is VariableDeclarationSyntax Declaration)
         {
-            // TODO: special check of index
-            LocalTable ForLocalTable = new LocalTable();
-            AddLocal(parsingContext, ForLocalTable, Declaration, isLocalSupported: true);
-
-            if (ForLocalTable.List.Count == 1)
+            if (IsTypeSupported(parsingContext, Declaration.Type, out ExpressionType LocalType, out _))
             {
-                KeyValuePair<LocalName, Local> IndexEntry = ForLocalTable.List[0];
-                Local LocalIndex = IndexEntry.Value;
-
-                if (LocalIndex.Type == ExpressionType.Integer)
+                if (LocalType == ExpressionType.Integer)
                 {
-                    localIndex = LocalIndex;
-                    return true;
+                    if (Declaration.Variables.Count == 1)
+                    {
+                        VariableDeclaratorSyntax VariableDeclarator = Declaration.Variables[0];
+
+                        Debug.Assert(parsingContext.HostBlock is not null);
+                        BlockScope HostBlock = parsingContext.HostBlock!;
+
+                        LocalTable ForLocalTable = new LocalTable();
+
+                        foreach (KeyValuePair<LocalName, Local> Entry in HostBlock.LocalTable)
+                            ForLocalTable.AddItem(Entry.Value);
+
+                        if (AddLocal(parsingContext, ForLocalTable, VariableDeclarator, isLocalSupported: true, LocalType))
+                        {
+                            KeyValuePair<LocalName, Local> IndexEntry = ForLocalTable.List[ForLocalTable.List.Count - 1];
+                            localIndex = IndexEntry.Value;
+                            return true;
+                        }
+                    }
                 }
             }
         }

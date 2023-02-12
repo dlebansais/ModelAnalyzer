@@ -68,57 +68,62 @@ internal partial class ClassDeclarationParser
             AddLocal(parsingContext, localTable, Variable, isLocalSupported, LocalType);
     }
 
-    private void AddLocal(ParsingContext parsingContext, LocalTable localTable, VariableDeclaratorSyntax variable, bool isLocalSupported, ExpressionType localType)
+    private bool AddLocal(ParsingContext parsingContext, LocalTable localTable, VariableDeclaratorSyntax variable, bool isLocalSupported, ExpressionType localType)
     {
         string LocalName = variable.Identifier.ValueText;
         LocalName Name = new() { Text = LocalName };
         bool IsErrorReported = false;
 
         // Ignore duplicate names, the compiler will catch them.
-        if (!localTable.ContainsItem(Name))
+        if (localTable.ContainsItem(Name))
+            return false;
+
+        bool IsLocalSupported = isLocalSupported; // Initialize with the result of previous checks (type etc.)
+        ILiteralExpression? Initializer = null;
+
+        if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
         {
-            bool IsLocalSupported = isLocalSupported; // Initialize with the result of previous checks (type etc.)
-            ILiteralExpression? Initializer = null;
-
-            if (variable.Initializer is EqualsValueClauseSyntax EqualsValueClause)
+            if (!TryParseInitializerNode(parsingContext, EqualsValueClause, localType, out Initializer))
             {
-                if (!TryParseInitializerNode(parsingContext, EqualsValueClause, localType, out Initializer))
-                {
-                    IsLocalSupported = false;
-                    IsErrorReported = true;
-                }
-            }
-
-            if (TryFindPropertyByName(parsingContext, LocalName, out _))
-            {
-                LogWarning($"Local '{LocalName}' is already the name of a property.");
-
                 IsLocalSupported = false;
+                IsErrorReported = true;
             }
-            else if (TryFindFieldByName(parsingContext, LocalName, out _))
-            {
-                LogWarning($"Local '{LocalName}' is already the name of a field.");
+        }
 
-                IsLocalSupported = false;
-            }
-            else if (TryFindParameterByName(parsingContext, LocalName, out _))
-            {
-                LogWarning($"Local '{LocalName}' is already the name of a parameter.");
+        if (TryFindPropertyByName(parsingContext, LocalName, out _))
+        {
+            LogWarning($"Local '{LocalName}' is already the name of a property.");
 
-                IsLocalSupported = false;
-            }
+            IsLocalSupported = false;
+        }
+        else if (TryFindFieldByName(parsingContext, LocalName, out _))
+        {
+            LogWarning($"Local '{LocalName}' is already the name of a field.");
 
-            if (IsLocalSupported)
-            {
-                Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer };
-                localTable.AddItem(NewLocal);
-            }
-            else if (!IsErrorReported)
+            IsLocalSupported = false;
+        }
+        else if (TryFindParameterByName(parsingContext, LocalName, out _))
+        {
+            LogWarning($"Local '{LocalName}' is already the name of a parameter.");
+
+            IsLocalSupported = false;
+        }
+
+        if (!IsLocalSupported)
+        {
+            if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
                 parsingContext.Unsupported.AddUnsupportedLocal(Location);
             }
+
+            return false;
         }
+
+        Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer };
+        localTable.AddItem(NewLocal);
+
+        return true;
     }
 
     private bool TryFindLocalByName(ParsingContext parsingContext, string localName, out ILocal local)
