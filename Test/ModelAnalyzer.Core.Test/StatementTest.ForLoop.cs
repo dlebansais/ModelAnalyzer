@@ -490,8 +490,11 @@ class Program_CoreForLoopStatement_17
 {
     public void Write()
     {
+        int X;
+
         for (int i = 0; i < 1; i++)
         {
+            X = 2;
             i = 2;
         }
     }

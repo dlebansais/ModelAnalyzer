@@ -52,7 +52,7 @@ internal partial class ClassDeclarationParser
         Debug.Assert(parsingContext.HostBlock is not null);
         BlockScope HostBlock = parsingContext.HostBlock!;
 
-        BlockScope NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = parsingContext.HostBlock?.IndexLocal, StatementList = new List<Statement>() };
+        BlockScope NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, StatementList = new List<Statement>() };
 
         for (int StatementIndex = 0; StatementIndex < block.Statements.Count; StatementIndex++)
         {
@@ -83,7 +83,7 @@ internal partial class ClassDeclarationParser
             Debug.Assert(parsingContext.HostBlock is not null);
             BlockScope HostBlock = parsingContext.HostBlock!;
 
-            NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = parsingContext.HostBlock?.IndexLocal, StatementList = new List<Statement>() };
+            NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, StatementList = new List<Statement>() };
 
             CallStatementLocation CallLocation = new() { ParentBlock = NewBlock, StatementIndex = 0 };
             ParsingContext SingleStatementContext = parsingContext with { CallLocation = CallLocation };
@@ -162,7 +162,10 @@ internal partial class ClassDeclarationParser
 
         if (TryParseAssignmentDestinationIdentifier(parsingContext, identifierName, out IVariable Destination))
         {
-            if (parsingContext.HostBlock is null || parsingContext.HostBlock.IndexLocal is not Local IndexLocal || IndexLocal.Name.Text != Destination.Name.Text)
+            Debug.Assert(parsingContext.HostBlock is not null);
+            BlockScope HostBlock = parsingContext.HostBlock!;
+
+            if (HostBlock.IndexLocal is not Local IndexLocal || IndexLocal.Name.Text != Destination.Name.Text)
             {
                 ExpressionSyntax SourceExpression = rightExpression;
                 LocationContext LocationContext = new(SourceExpression);
