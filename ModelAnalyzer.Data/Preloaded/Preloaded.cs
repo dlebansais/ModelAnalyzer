@@ -164,7 +164,7 @@ internal static class Preloaded
                 Initializer = null,
             };
 
-        BlockScope NewBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() };
+        BlockScope NewBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() };
         Method NewMethod = new()
         {
             Name = new MethodName() { Text = preloadedMethod.Name },

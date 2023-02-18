@@ -230,9 +230,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateEqualExpr(Expr left, Expr right)
+    public IBoolExprCapsule CreateEqualExpr(IExprCapsule left, IExprCapsule right)
     {
-        return Context.MkEq(left, right).Encapsulate();
+        return Context.MkEq(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -240,9 +240,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateNotEqualExpr(Expr left, Expr right)
+    public IBoolExprCapsule CreateNotEqualExpr(IExprCapsule left, IExprCapsule right)
     {
-        return Context.MkNot(Context.MkEq(left, right)).Encapsulate();
+        return Context.MkNot(Context.MkEq(left.Item, right.Item)).Encapsulate();
     }
 
     /// <summary>
@@ -250,9 +250,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IArithExprCapsule CreateAddExpr(ArithExpr left, ArithExpr right)
+    public IArithExprCapsule CreateAddExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkAdd(left, right).Encapsulate();
+        return Context.MkAdd(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -260,9 +260,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IArithExprCapsule CreateSubtractExpr(ArithExpr left, ArithExpr right)
+    public IArithExprCapsule CreateSubtractExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkSub(left, right).Encapsulate();
+        return Context.MkSub(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -270,9 +270,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IArithExprCapsule CreateMultiplyExpr(ArithExpr left, ArithExpr right)
+    public IArithExprCapsule CreateMultiplyExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkMul(left, right).Encapsulate();
+        return Context.MkMul(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -280,9 +280,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IArithExprCapsule CreateDivideExpr(ArithExpr left, ArithExpr right)
+    public IArithExprCapsule CreateDivideExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkDiv(left, right).Encapsulate();
+        return Context.MkDiv(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -290,18 +290,18 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IIntExprCapsule CreateRemainderExpr(IntExpr left, IntExpr right)
+    public IIntExprCapsule CreateRemainderExpr(IIntExprCapsule left, IIntExprCapsule right)
     {
-        return Context.MkMod(left, right).Encapsulate();
+        return Context.MkMod(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
     /// Creates the - expression.
     /// </summary>
     /// <param name="operand">The operand.</param>
-    public IArithExprCapsule CreateNegateExpr(ArithExpr operand)
+    public IArithExprCapsule CreateNegateExpr(IArithExprCapsule operand)
     {
-        return Context.MkUnaryMinus(operand).Encapsulate();
+        return Context.MkUnaryMinus(operand.Item).Encapsulate();
     }
 
     /// <summary>
@@ -309,9 +309,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateOrExpr(BoolExpr left, BoolExpr right)
+    public IBoolExprCapsule CreateOrExpr(IBoolExprCapsule left, IBoolExprCapsule right)
     {
-        return Context.MkOr(left, right).Encapsulate();
+        return Context.MkOr(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -319,18 +319,18 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateAndExpr(BoolExpr left, BoolExpr right)
+    public IBoolExprCapsule CreateAndExpr(IBoolExprCapsule left, IBoolExprCapsule right)
     {
-        return Context.MkAnd(left, right).Encapsulate();
+        return Context.MkAnd(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
     /// Creates the not expression.
     /// </summary>
     /// <param name="operand">The operand.</param>
-    public IBoolExprCapsule CreateNotExpr(BoolExpr operand)
+    public IBoolExprCapsule CreateNotExpr(IBoolExprCapsule operand)
     {
-        return Context.MkNot(operand).Encapsulate();
+        return Context.MkNot(operand.Item).Encapsulate();
     }
 
     /// <summary>
@@ -338,9 +338,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateGreaterThanExpr(ArithExpr left, ArithExpr right)
+    public IBoolExprCapsule CreateGreaterThanExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkGt(left, right).Encapsulate();
+        return Context.MkGt(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -348,9 +348,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateGreaterThanEqualToExpr(ArithExpr left, ArithExpr right)
+    public IBoolExprCapsule CreateGreaterThanEqualToExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkGe(left, right).Encapsulate();
+        return Context.MkGe(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -358,9 +358,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateLesserThanExpr(ArithExpr left, ArithExpr right)
+    public IBoolExprCapsule CreateLesserThanExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkLt(left, right).Encapsulate();
+        return Context.MkLt(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -368,9 +368,9 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="left">The left operand.</param>
     /// <param name="right">The right operand.</param>
-    public IBoolExprCapsule CreateLesserThanEqualToExpr(ArithExpr left, ArithExpr right)
+    public IBoolExprCapsule CreateLesserThanEqualToExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkLe(left, right).Encapsulate();
+        return Context.MkLe(left.Item, right.Item).Encapsulate();
     }
 
     /// <summary>

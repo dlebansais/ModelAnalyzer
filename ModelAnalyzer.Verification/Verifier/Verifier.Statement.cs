@@ -294,7 +294,8 @@ internal partial class Verifier : IDisposable
     private bool AddForLoopExecution(VerificationContext verificationContext, Method hostMethod, ForLoopStatement forLoopStatement)
     {
         Local LocalIndex = forLoopStatement.LocalIndex;
-        verificationContext.ObjectManager.CreateVariable(owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, greaterThanOrEqualInitializer: true, initWithDefault: false);
+        verificationContext.IndexLocal = LocalIndex;
+        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = verificationContext.ObjectManager.CreateVariable(owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, greaterThanOrEqualInitializer: true, initWithDefault: false);
 
         if (!BuildExpression(verificationContext, forLoopStatement.ContinueCondition, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> ContinueConditionExpr))
             return false;

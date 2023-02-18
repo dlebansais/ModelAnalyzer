@@ -194,8 +194,8 @@ public partial class VerifierTest
         ConditionalStatement Conditional = new()
         {
             Condition = VariableEqualZero,
-            WhenTrueBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = whenTrue ? new List<Statement>() { Assignment } : new List<Statement>() },
-            WhenFalseBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = whenTrue ? new List<Statement>() : new List<Statement>() { Assignment } },
+            WhenTrueBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = whenTrue ? new List<Statement>() { Assignment } : new List<Statement>() },
+            WhenFalseBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = whenTrue ? new List<Statement>() : new List<Statement>() { Assignment } },
         };
 
         string TestMethodName = "Write";
@@ -209,7 +209,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new() { Conditional } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Conditional } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };

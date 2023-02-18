@@ -85,7 +85,7 @@ internal class ObjectManager
                 IExprSingle<IArithExprCapsule> LeftSingle = (IExprSingle<IArithExprCapsule>)VariableExpr;
                 IExprSingle<IArithExprCapsule> RightSingle = (IExprSingle<IArithExprCapsule>)initializerExpr;
 
-                IBoolExprCapsule ComparisonExpr = Context.CreateGreaterThanEqualToExpr(LeftSingle.MainExpression.Item, RightSingle.MainExpression.Item);
+                IBoolExprCapsule ComparisonExpr = Context.CreateGreaterThanEqualToExpr(LeftSingle.MainExpression, RightSingle.MainExpression);
                 InitExpr = ComparisonExpr.ToSingleSet();
             }
             else
@@ -137,12 +137,12 @@ internal class ObjectManager
         VariableAlias ArrayContainerAlias = AliasTable.GetAlias(ArrayContainerVariable);
         IArrayExprCapsule Array = Context.CreateArrayContainerVariable(ElementType, ArrayContainerAlias.ToString());
 
-        IArrayExprCapsule ArrayWithStore = Context.CreateSetElementExpr(Array, destinationIndexExpr, sourceExpr);
-
         IVariableName ArraySizeName = CreateArraySizeName(destination);
         Variable ArraySizeVariable = new(ArraySizeName, ExpressionType.Integer);
         VariableAlias ArraySizeAlias = AliasTable.GetAlias(ArraySizeVariable);
         IIntExprCapsule Size = Context.CreateIntegerVariable(ArraySizeAlias.ToString());
+
+        IArrayExprCapsule ArrayWithStore = Context.CreateSetElementExpr(Array, destinationIndexExpr, sourceExpr);
 
         ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, ArrayWithStore, Size);
         return Result;

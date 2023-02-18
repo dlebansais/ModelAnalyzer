@@ -37,7 +37,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() },
             ReturnType = ExpressionType.Void,
         };
 
@@ -56,7 +56,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() },
             ReturnType = ExpressionType.Void,
         };
 
@@ -86,7 +86,7 @@ public class CallSequenceTest
             ParameterTable = ReadOnlyParameterTable.Empty,
             EnsureList = new(),
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, StatementList = new List<Statement>() },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() },
             ReturnType = ExpressionType.Void,
         };
 

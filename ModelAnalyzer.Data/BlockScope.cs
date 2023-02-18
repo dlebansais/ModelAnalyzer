@@ -13,6 +13,11 @@ internal record BlockScope
     required public ReadOnlyLocalTable LocalTable { get; init; }
 
     /// <summary>
+    /// Gets the index local variable if this is a for loop block.
+    /// </summary>
+    required public Local? IndexLocal { get; init; }
+
+    /// <summary>
     /// Gets the block statements.
     /// </summary>
     required public List<Statement> StatementList { get; init; }

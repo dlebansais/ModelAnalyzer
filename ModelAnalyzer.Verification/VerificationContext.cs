@@ -54,6 +54,11 @@ internal record VerificationContext
     public Local? ResultLocal { get; set; }
 
     /// <summary>
+    /// Gets or sets the local variable that represents the index of the current loop.
+    /// </summary>
+    public Local? IndexLocal { get; set; }
+
+    /// <summary>
     /// Gets or sets the execution branch. Null if not within some conditional statement.
     /// </summary>
     public IBoolExprCapsule? Branch { get; set; }

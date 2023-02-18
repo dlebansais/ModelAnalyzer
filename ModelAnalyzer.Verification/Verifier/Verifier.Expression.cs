@@ -450,7 +450,7 @@ internal partial class Verifier : IDisposable
             return false;
         }
 
-        IIntExprCapsule ResultExpr = Context.CreateRemainderExpr(LeftSingle.MainExpression.Item, RightSingle.MainExpression.Item);
+        IIntExprCapsule ResultExpr = Context.CreateRemainderExpr(LeftSingle.MainExpression, RightSingle.MainExpression);
         resultExprSet = ResultExpr.ToSingleSet();
 
         return ResultLeft && ResultRight;
