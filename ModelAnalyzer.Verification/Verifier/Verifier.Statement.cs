@@ -160,7 +160,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr, greaterThanOrEqualInitializer: false);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultLocal = null };
@@ -228,7 +228,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr, greaterThanOrEqualInitializer: false);
+            verificationContext.ObjectManager.CreateVariable(owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with
@@ -295,15 +295,12 @@ internal partial class Verifier : IDisposable
     {
         Local LocalIndex = forLoopStatement.LocalIndex;
         verificationContext.IndexLocal = LocalIndex;
-        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = verificationContext.ObjectManager.CreateVariable(owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, greaterThanOrEqualInitializer: true, initWithDefault: false);
+        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = verificationContext.ObjectManager.CreateVariable(owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, initWithDefault: false);
+
+        verificationContext.ObjectManager.InitializeIndexRun(hostMethod, verificationContext.Branch, LocalIndex, VariableExpr);
 
         if (!BuildExpression(verificationContext, forLoopStatement.ContinueCondition, out IExprBase<IBoolExprCapsule, IBoolExprCapsule> ContinueConditionExpr))
             return false;
-
-        Debug.Assert(ContinueConditionExpr is IExprSingle<IBoolExprCapsule>);
-        IExprSingle<IBoolExprCapsule> BoolExpr = (IExprSingle<IBoolExprCapsule>)ContinueConditionExpr;
-
-        verificationContext.ObjectManager.AddExpressionToSolver(verificationContext.Branch, BoolExpr);
 
         bool ForLoopResult = AddStatementListExecution(verificationContext, forLoopStatement.Block);
 

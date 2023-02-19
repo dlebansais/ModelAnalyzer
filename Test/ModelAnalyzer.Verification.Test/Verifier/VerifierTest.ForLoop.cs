@@ -26,7 +26,7 @@ class Program_Verifier_Loop1
 
         return X;
     }
-    // TODO Ensure: Result[2] == 3
+    // TODO Ensure: (Result[2] == 3) && (Result[4] == 6)
     // TODO Ensure: ∀i Result[i] == i * 1.5
 }
 ";
@@ -46,7 +46,7 @@ class Program_Verifier_Loop1
     private const string ForLoopSourceCode2 = @"
 using System;
 
-class Program_Verifier_Loop1
+class Program_Verifier_Loop2
 {
     public double[] Read()
     {
@@ -67,6 +67,38 @@ class Program_Verifier_Loop1
     public void Verifier_ForLoop2_Error()
     {
         Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCode2, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.False);
+        Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
+    }
+
+    private const string ForLoopSourceCode3 = @"
+using System;
+
+class Program_Verifier_Loop3
+{
+    public double[] Read()
+    {
+        double[] X = new double[10];
+
+        for (int i = 0; i < 10; i++)
+        {
+            X[i] = (10 / i);
+        }
+
+        return X;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ForLoop3_Error()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCode3, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
 
         TestObject.Verify();
 
