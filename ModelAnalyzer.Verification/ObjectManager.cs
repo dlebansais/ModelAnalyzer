@@ -105,13 +105,13 @@ internal class ObjectManager
 
     public void AssignElement(IBoolExprCapsule? branch, Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
     {
-        ExprArray<IArrayExprCapsule> DestinationWithStoredElementExpr = CreateDestinationWithStoredElement(destination, destinationIndexExpr, sourceExpr);
+        ExprArray<IArrayExprCapsule> DestinationWithStoredElementExpr = CreateDestinationWithStoredElement(branch, destination, destinationIndexExpr, sourceExpr);
         ExprArray<IArrayExprCapsule> DestinationWithNewAliasElement = CreateDestinationWithNewAliasElement(destination);
 
         Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(DestinationWithNewAliasElement, DestinationWithStoredElementExpr));
     }
 
-    private ExprArray<IArrayExprCapsule> CreateDestinationWithStoredElement(Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
+    private ExprArray<IArrayExprCapsule> CreateDestinationWithStoredElement(IBoolExprCapsule? branch, Variable destination, IIntExprCapsule destinationIndexExpr, IExprCapsule sourceExpr)
     {
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
 
@@ -128,7 +128,8 @@ internal class ObjectManager
         VariableAlias ArraySizeAlias = AliasTable.GetAlias(ArraySizeVariable);
         IIntExprCapsule Size = Context.CreateIntegerVariable(ArraySizeAlias.ToString());
 
-        IArrayExprCapsule ArrayWithStore = Context.CreateSetElementExpr(Array, destinationIndexExpr, sourceExpr);
+        Context.CreateSetElementExpr(Array, destinationIndexExpr, sourceExpr, out IArrayExprCapsule ArrayWithStore, out IBoolExprCapsule ArraySetter);
+        Context.AddToSolver(Solver, branch, ArraySetter.ToSingleSet());
 
         ExprArray<IArrayExprCapsule> Result = new(ReferenceResult, ArrayWithStore, Size);
         return Result;

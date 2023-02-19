@@ -480,22 +480,20 @@ internal partial class SolverContext : IDisposable
     /// <param name="arrayExpr">The array.</param>
     /// <param name="indexExpr">The index.</param>
     /// <param name="valueExpr">The value.</param>
-    public IArrayExprCapsule CreateSetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr, IExprCapsule valueExpr)
+    /// <param name="arrayStoreExpr">The new array upon return.</param>
+    /// <param name="arraySetterExpr">The new array setter upon return.</param>
+    public void CreateSetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr, IExprCapsule valueExpr, out IArrayExprCapsule arrayStoreExpr, out IBoolExprCapsule arraySetterExpr)
     {
         ExpressionType ElementType = arrayExpr.ElementType;
-        Dictionary<ExpressionType, Func<IArrayExprCapsule, IExprCapsule, IArrayExprCapsule>> CreateTable = new()
-        {
-            { ExpressionType.Boolean, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.Boolean) },
-            { ExpressionType.Integer, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.Integer) },
-            { ExpressionType.FloatingPoint, (IArrayExprCapsule arrayExpr, IExprCapsule valueExpr) => Context.MkStore(arrayExpr.Item, indexExpr.Item, valueExpr.Item).Encapsulate(ExpressionType.FloatingPoint) },
-        };
-
         Debug.Assert(ElementType.IsSimple);
-        Debug.Assert(CreateTable.ContainsKey(ElementType));
 
-        IArrayExprCapsule Result = CreateTable[ElementType](arrayExpr, valueExpr);
+        Symbol s_j = Context.MkSymbol("j");
+        Expr j = Context.MkIntConst(s_j);
+        ArrayExpr StoreExpr = Context.MkLambda(new Sort[] { Context.IntSort }, new Symbol[] { s_j }, Context.MkITE(Context.MkEq(indexExpr.Item, j), valueExpr.Item, arrayExpr.Item[j]));
+        BoolExpr SetterExpr = Context.MkEq(StoreExpr[indexExpr.Item], valueExpr.Item);
 
-        return Result;
+        arrayStoreExpr = StoreExpr.Encapsulate(ElementType);
+        arraySetterExpr = SetterExpr.Encapsulate();
     }
 
     /// <summary>
