@@ -258,8 +258,8 @@ internal partial class Verifier : IDisposable
     private bool AddMethodCallStateWithInit(VerificationContext verificationContext, Method hostMethod)
     {
         VerificationContext LocalVerificationContext = verificationContext with { HostMethod = hostMethod, HostBlock = hostMethod.RootBlock };
-        Local? ResultLocal = FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType);
-        VerificationContext StatementVerificationContext = LocalVerificationContext with { ResultLocal = ResultLocal };
+        CodeVariable? ResultVariable = FindOrCreateResultLocal(LocalVerificationContext, hostMethod.ReturnType);
+        VerificationContext StatementVerificationContext = LocalVerificationContext with { ResultVariable = ResultVariable };
 
         return AddMethodCallState(StatementVerificationContext);
     }

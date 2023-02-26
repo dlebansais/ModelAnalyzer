@@ -743,8 +743,7 @@ internal class ObjectManager
 
         ExpressionType ElementType = variableType.ToElementType();
 
-        // TODO create an agnostic "variable" type, base of Local, property etc.
-        Local ResultLocal = new(new LocalName() { Text = Ensure.ResultKeyword }, ElementType) { Initializer = null, MethodName = null! };
+        Local ResultLocal = new(new LocalName() { Text = Ensure.ResultKeyword }, ElementType) { Initializer = null, MethodName = methodName };
         LocalTable LocalTable = new();
         LocalTable.AddItem(ResultLocal);
 

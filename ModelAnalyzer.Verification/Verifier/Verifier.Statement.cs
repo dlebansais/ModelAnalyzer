@@ -173,7 +173,7 @@ internal partial class Verifier : IDisposable
             CreateVariable(verificationContext, owner: null, calledMethod, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
-        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultLocal = null };
+        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultVariable = null };
 
         if (!AddMethodRequires(CallVerificationContext, methodCallStatement.CallerClassName, methodCallStatement.LocationId, checkOpposite: true))
             return false;
@@ -246,7 +246,7 @@ internal partial class Verifier : IDisposable
             Instance = calledInstance,
             HostMethod = calledMethod,
             HostBlock = calledMethod.RootBlock,
-            ResultLocal = null,
+            ResultVariable = null,
         };
 
         bool IsStaticCall = calledInstance.Expr == verificationContext.ObjectManager.Context.Null;
@@ -274,16 +274,16 @@ internal partial class Verifier : IDisposable
         if (ReturnExpression is not null)
         {
             Debug.Assert(verificationContext.HostMethod is not null);
-            Debug.Assert(verificationContext.ResultLocal is not null);
+            Debug.Assert(verificationContext.ResultVariable is not null);
 
             Method HostMethod = verificationContext.HostMethod!;
-            Local ResultLocal = verificationContext.ResultLocal!;
+            CodeVariable ResultVariable = verificationContext.ResultVariable!;
 
             if (!BuildExpression(verificationContext, ReturnExpression, out IExprBase<IExprCapsule, IExprCapsule> ResultInitializerExpr))
                 return false;
 
-            IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultLocal.Name);
-            Variable ResultLocalVariable = new(ResultLocalBlockName, ResultLocal.Type);
+            IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultVariable.Name);
+            Variable ResultLocalVariable = new(ResultLocalBlockName, ResultVariable.Type);
 
             verificationContext.ObjectManager.Assign(owner: null, HostMethod, verificationContext.Branch, ResultLocalVariable, ResultInitializerExpr);
         }

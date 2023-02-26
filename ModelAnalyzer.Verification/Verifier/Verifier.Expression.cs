@@ -108,7 +108,7 @@ internal partial class Verifier : IDisposable
                     Instance = Reference,
                     HostMethod = null,
                     HostBlock = null,
-                    ResultLocal = null,
+                    ResultVariable = null,
                 };
 
                 return BuildVariableValueExpression(NewVerificationContext, variablePath, pathIndex + 1, out resultExpr);
@@ -195,12 +195,12 @@ internal partial class Verifier : IDisposable
                 return;
             }
 
-        if (verificationContext.ResultLocal is Local ResultLocal && name == Ensure.ResultKeyword)
+        if (verificationContext.ResultVariable is CodeVariable ResultVariable && name == Ensure.ResultKeyword)
         {
             Debug.Assert(hostMethod is null);
             Debug.Assert(variable is null);
 
-            variable = ResultLocal;
+            variable = ResultVariable;
             hostMethod = verificationContext.HostMethod;
 
             Debug.Assert(hostMethod is not null);
@@ -242,12 +242,11 @@ internal partial class Verifier : IDisposable
             CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
-        // TODO create an agnostic "variable" type, base of Local, property etc.
-        LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new(CallResultName, calledFunction.ReturnType) { Initializer = null, MethodName = null! };
+        CodeVariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
+        CodeVariable CallResult = new(CallResultName, calledFunction.ReturnType);
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
-        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultLocal = CallResult };
+        VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultVariable = CallResult };
 
         if (!AddMethodRequires(CallVerificationContext, functionCallExpression.CallerClassName, functionCallExpression.LocationId, checkOpposite: true))
             return false;
@@ -317,9 +316,8 @@ internal partial class Verifier : IDisposable
             CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
-        // TODO create an agnostic "variable" type, base of Local, property etc.
-        LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new(CallResultName, calledFunction.ReturnType) { Initializer = null, MethodName = null! };
+        CodeVariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
+        CodeVariable CallResult = new(CallResultName, calledFunction.ReturnType);
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with
@@ -327,7 +325,7 @@ internal partial class Verifier : IDisposable
             Instance = calledInstance,
             HostMethod = calledFunction,
             HostBlock = calledFunction.RootBlock,
-            ResultLocal = CallResult,
+            ResultVariable = CallResult,
         };
 
         bool IsStaticCall = calledInstance.Expr == verificationContext.ObjectManager.Context.Null;
@@ -659,7 +657,7 @@ internal partial class Verifier : IDisposable
                 Instance = Reference,
                 HostMethod = null,
                 HostBlock = null,
-                ResultLocal = null,
+                ResultVariable = null,
             };
 
             return BuildElementAccessExpression(NewVerificationContext, variablePath, pathIndex + 1, elementIndex, out resultExpr);
