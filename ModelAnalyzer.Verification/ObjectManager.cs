@@ -53,33 +53,33 @@ internal class ObjectManager
     /// </summary>
     public Dictionary<VariableAlias, Method> ArrayGetterTable { get; } = new();
 
-    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariable variable, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
         IExprBase<IExprCapsule, IExprCapsule>? InitializerExpr;
 
         if (variableInitializer is not null || initWithDefault)
-            InitializerExpr = CreateInitializerExpr(variableType, variableInitializer);
+            InitializerExpr = CreateInitializerExpr(variable.Type, variableInitializer);
         else
             InitializerExpr = null;
 
-        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch: null, InitializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variable, branch: null, InitializerExpr);
     }
 
-    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariable variable, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
     {
-        return CreateVariableInternal(owner, hostMethod, variableName, variableType, branch, initializerExpr);
+        return CreateVariableInternal(owner, hostMethod, variable, branch, initializerExpr);
     }
 
-    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariable variable, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
-        Variable Variable = new(VariableBlockName, variableType);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
+        Variable Variable = new(VariableBlockName, variable.Type);
 
         // Increment for parameters of methods called several times.
         AliasTable.AddOrIncrement(Variable);
 
         VariableAlias VariableNameAlias = AliasTable.GetAlias(Variable);
-        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(owner, hostMethod, VariableNameAlias, variableType);
+        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(owner, hostMethod, VariableNameAlias, variable.Type);
 
         if (initializerExpr is not null)
         {
@@ -90,12 +90,12 @@ internal class ObjectManager
         return VariableExpr;
     }
 
-    public IExprBase<IExprCapsule, IExprCapsule> CreateValueExpr(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    public IExprBase<IExprCapsule, IExprCapsule> CreateValueExpr(Instance? owner, Method? hostMethod, IVariable variable)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
-        Variable Variable = new(VariableBlockName, variableType);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
+        Variable Variable = new(VariableBlockName, variable.Type);
         VariableAlias VariableAlias = AliasTable.GetAlias(Variable);
-        IExprBase<IExprCapsule, IExprCapsule> ResultExprSet = CreateVariableExpr(owner, hostMethod, VariableAlias, variableType);
+        IExprBase<IExprCapsule, IExprCapsule> ResultExprSet = CreateVariableExpr(owner, hostMethod, VariableAlias, variable.Type);
 
         return ResultExprSet;
     }
@@ -668,20 +668,20 @@ internal class ObjectManager
         ArrayGetterTable.Add(alias, NewMethod);
     }
 
-    public Method GetArrayGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    public Method GetArrayGetter(Instance? owner, Method? hostMethod, IVariable variable)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
-        Variable Variable = new(VariableBlockName, variableType);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
+        Variable Variable = new(VariableBlockName, variable.Type);
         VariableAlias VariableNameAlias = AliasTable.GetAlias(Variable);
 
         Debug.Assert(ArrayGetterTable.ContainsKey(VariableNameAlias));
         return ArrayGetterTable[VariableNameAlias];
     }
 
-    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, LiteralIntegerValueExpression literalIntegerValue, Expression newValueExpression)
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, LiteralIntegerValueExpression literalIntegerValue, Expression newValueExpression)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
-        Variable Variable = new(VariableBlockName, variableType);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
+        Variable Variable = new(VariableBlockName, variable.Type);
 
         VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
         Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
@@ -697,13 +697,13 @@ internal class ObjectManager
         VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { Parameter } };
         EqualityExpression Equality = new() { Left = VariableValue, Operator = EqualityOperator.Equal, Right = literalIntegerValue };
 
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variableType, Parameter, Equality, newValueExpression, OldMethod);
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, Parameter, Equality, newValueExpression, OldMethod);
     }
 
-    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, Expression continueCondition, Expression newValueExpression)
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, Expression continueCondition, Expression newValueExpression)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
-        Variable Variable = new(VariableBlockName, variableType);
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
+        Variable Variable = new(VariableBlockName, variable.Type);
 
         VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
         Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
@@ -716,7 +716,7 @@ internal class ObjectManager
         Parameter Parameter = new() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer };
         ParameterTable.AddItem(Parameter);
 
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variableType, Parameter, continueCondition, newValueExpression, OldMethod);
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, Parameter, continueCondition, newValueExpression, OldMethod);
     }
 
     public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
@@ -734,7 +734,8 @@ internal class ObjectManager
 
         ExpressionType ElementType = variableType.ToElementType();
 
-        Local ResultLocal = new() { Name = new LocalName() { Text = Ensure.ResultKeyword }, Initializer = null, Type = ElementType };
+        // TODO create an agnostic "variable" type, base of Local, property etc.
+        Local ResultLocal = new() { Name = new LocalName() { Text = Ensure.ResultKeyword }, Initializer = null, Type = ElementType, MethodName = null! };
         LocalTable LocalTable = new();
         LocalTable.AddItem(ResultLocal);
 

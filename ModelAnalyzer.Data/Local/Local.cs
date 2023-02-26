@@ -21,4 +21,7 @@ internal class Local : ILocal, INameable<LocalName>
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
+
+    /// <inheritdoc/>
+    required public MethodName MethodName { get; init; }
 }

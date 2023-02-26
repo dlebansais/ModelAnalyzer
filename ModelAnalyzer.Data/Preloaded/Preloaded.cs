@@ -148,6 +148,8 @@ internal static class Preloaded
             EnsureList.Add(NewEnsure);
         }
 
+        MethodName MethodName = new MethodName() { Text = preloadedMethod.Name };
+
         ExpressionType ReturnType = ConvertTypeName(preloadedMethod.ReturnTypeName);
         Debug.Assert(ReturnType != ExpressionType.Other);
         Debug.Assert(ReturnType.IsSimple);
@@ -162,12 +164,13 @@ internal static class Preloaded
                 Name = new LocalName() { Text = "Result" },
                 Type = ReturnType,
                 Initializer = null,
+                MethodName = MethodName,
             };
 
         BlockScope NewBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new List<Statement>() };
         Method NewMethod = new()
         {
-            Name = new MethodName() { Text = preloadedMethod.Name },
+            Name = MethodName,
             ClassName = className,
             AccessModifier = AccessModifier.Public,
             IsStatic = true,

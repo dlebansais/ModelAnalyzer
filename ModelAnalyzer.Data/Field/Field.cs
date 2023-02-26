@@ -21,4 +21,7 @@ internal class Field : IField, INameable<FieldName>
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
+
+    /// <inheritdoc/>
+    required public ClassName ClassName { get; init; }
 }

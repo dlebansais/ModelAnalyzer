@@ -85,13 +85,13 @@ internal partial class ClassDeclarationParser
 
         if (IsPropertySupported)
         {
-            Property NewProperty = new Property { Name = Name, Type = PropertyType, Initializer = Initializer };
+            Property NewProperty = new Property { Name = Name, Type = PropertyType, Initializer = Initializer, ClassName = parsingContext.ClassName };
             propertyTable.AddItem(NewProperty);
         }
         else if (!IsErrorReported)
         {
             Location Location = propertyDeclaration.Identifier.GetLocation();
-            parsingContext.Unsupported.AddUnsupportedProperty(Location);
+            parsingContext.Unsupported.AddUnsupportedProperty(Location, parsingContext.ClassName);
         }
     }
 

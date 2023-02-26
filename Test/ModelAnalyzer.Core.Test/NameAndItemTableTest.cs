@@ -42,9 +42,10 @@ public class NameAndItemTableTest
     [Category("Core")]
     public void NameAndItemTable_ReadOnlyFieldTable()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldTable TestTable = new();
         FieldName TestFieldName = new FieldName() { Text = "*" };
-        Field TestField = new Field() { Name = TestFieldName, Type = ExpressionType.Other, Initializer = null };
+        Field TestField = new Field() { Name = TestFieldName, Type = ExpressionType.Other, Initializer = null, ClassName = ClassName };
 
         TestTable.AddItem(TestField);
 

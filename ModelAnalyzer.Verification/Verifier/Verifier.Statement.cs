@@ -63,26 +63,24 @@ internal partial class Verifier : IDisposable
 
         string Name = assignmentStatement.DestinationName.Text;
         Method? HostMethod = null;
-        IVariableName? VariableName = null;
-        ExpressionType? VariableType = null;
+        IVariable? Variable = null;
 
-        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-        LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-        LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupProperty(verificationContext, Name, ref HostMethod, ref Variable);
+        LookupField(verificationContext, Name, ref HostMethod, ref Variable);
+        LookupLocal(verificationContext, Name, ref HostMethod, ref Variable);
 
-        Debug.Assert(VariableName is not null);
-        Debug.Assert(VariableType is not null);
+        Debug.Assert(Variable is not null);
 
         Instance? Owner = HostMethod is null ? verificationContext.Instance : null;
-        IVariableName VariableBlockName = ObjectManager.CreateBlockName(Owner, HostMethod, VariableName!);
-        Variable Destination = new(VariableBlockName, VariableType!);
+        IVariableName VariableBlockName = ObjectManager.CreateBlockName(Owner, HostMethod, Variable!.Name);
+        Variable Destination = new(VariableBlockName, Variable!.Type);
 
         if (assignmentStatement.DestinationIndex is null)
             verificationContext.ObjectManager.Assign(verificationContext.Instance, HostMethod, verificationContext.Branch, Destination, SourceExpr);
         else
         {
             if (assignmentStatement.DestinationIndex is LiteralIntegerValueExpression LiteralIntegerValue)
-                verificationContext.ObjectManager.GenerateModifiedGetter(Owner, HostMethod, VariableName!, VariableType!, LiteralIntegerValue, assignmentStatement.Expression);
+                verificationContext.ObjectManager.GenerateModifiedGetter(Owner, HostMethod, Variable!, LiteralIntegerValue, assignmentStatement.Expression);
 
             if (assignmentStatement.DestinationIndex is VariableValueExpression VariableValue)
             {
@@ -98,10 +96,10 @@ internal partial class Verifier : IDisposable
                 Debug.Assert(VariableValue.VariablePath.Count == 1);
                 Debug.Assert(VariableValue.VariablePath[0].Name.Text == IndexLocal.Name.Text);
 
-                verificationContext.ObjectManager.GenerateModifiedGetter(Owner, HostMethod, VariableName!, VariableType!, ContinueCondition, assignmentStatement.Expression);
+                verificationContext.ObjectManager.GenerateModifiedGetter(Owner, HostMethod, Variable!, ContinueCondition, assignmentStatement.Expression);
             }
 
-            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(Owner, HostMethod, VariableName!, VariableType!);
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(Owner, HostMethod, Variable!);
             AddArrayGetterMethod(GetterMethod);
         }
 
@@ -172,7 +170,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            CreateVariable(verificationContext, owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledMethod, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledMethod, HostBlock = calledMethod.RootBlock, ResultLocal = null };
@@ -240,7 +238,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            CreateVariable(verificationContext, owner: null, calledMethod, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledMethod, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
         VerificationContext CallVerificationContext = verificationContext with
@@ -307,7 +305,7 @@ internal partial class Verifier : IDisposable
     {
         Local LocalIndex = forLoopStatement.LocalIndex;
         verificationContext.IndexLocal = LocalIndex;
-        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariable(verificationContext, owner: null, hostMethod, LocalIndex.Name, LocalIndex.Type, LocalIndex.Initializer, initWithDefault: false);
+        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariable(verificationContext, owner: null, hostMethod, LocalIndex, LocalIndex.Initializer, initWithDefault: false);
 
         verificationContext.ObjectManager.InitializeIndexRun(hostMethod, verificationContext.Branch, LocalIndex, VariableExpr);
 

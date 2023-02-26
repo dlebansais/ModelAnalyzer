@@ -12,8 +12,9 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_BasicTest()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject = new(TestVariable);
 
@@ -25,8 +26,9 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_Increment()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject = new(TestVariable);
 
@@ -40,8 +42,9 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeNoIncrement()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);
@@ -57,8 +60,9 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeSymetric()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);
@@ -74,8 +78,9 @@ public class AliasNameTest
     [Category("Verification")]
     public void AliasName_MergeOneIncrement()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);

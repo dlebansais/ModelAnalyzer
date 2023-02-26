@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a method name.
 /// </summary>
 [DebuggerDisplay("{Text}")]
-internal record MethodName : IClassMemberName
+public record MethodName : IClassMemberName
 {
     /// <summary>
     /// Gets the method name.

@@ -182,13 +182,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Property, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Field, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -294,7 +294,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            CreateVariable(verificationContext, owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
+            CreateVariable(verificationContext, owner: null, HostMethod, Parameter, variableInitializer: null, initWithDefault: false);
         }
     }
 
@@ -306,7 +306,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.RootBlock.LocalTable)
         {
             Local Local = Entry.Value;
-            CreateVariable(verificationContext, owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, owner: null, HostMethod, Local, Local.Initializer, initWithDefault: true);
         }
     }
 
@@ -483,26 +483,26 @@ internal partial class Verifier : IDisposable
         return ClassModelTable[className];
     }
 
-    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariable variable, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
-        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variableName, variableType, variableInitializer, initWithDefault);
+        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variable, variableInitializer, initWithDefault);
 
-        if (variableType.IsArray)
+        if (variable.Type.IsArray)
         {
-            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variableName, variableType);
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variable);
             AddArrayGetterMethod(GetterMethod);
         }
 
         return Result;
     }
 
-    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariable variable, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
     {
-        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variableName, variableType, branch, initializerExpr);
+        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variable, branch, initializerExpr);
 
-        if (variableType.IsArray)
+        if (variable.Type.IsArray)
         {
-            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variableName, variableType);
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variable);
             AddArrayGetterMethod(GetterMethod);
         }
 

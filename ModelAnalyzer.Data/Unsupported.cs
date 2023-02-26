@@ -41,9 +41,10 @@ internal record Unsupported : IUnsupported
     /// Adds an unsupported property.
     /// </summary>
     /// <param name="location">The property location.</param>
-    public void AddUnsupportedProperty(Location location)
+    /// <param name="className">The property owner class name.</param>
+    public void AddUnsupportedProperty(Location location, ClassName className)
     {
-        UnsupportedProperty NewItem = new UnsupportedProperty { Location = location };
+        UnsupportedProperty NewItem = new UnsupportedProperty { Location = location, ClassName = className };
         InternalProperties.Add(NewItem);
     }
 
@@ -56,9 +57,10 @@ internal record Unsupported : IUnsupported
     /// </summary>
     /// <param name="name">The field name.</param>
     /// <param name="location">The field location.</param>
-    public void AddUnsupportedField(FieldName name, Location location)
+    /// <param name="className">The property owner class name.</param>
+    public void AddUnsupportedField(FieldName name, Location location, ClassName className)
     {
-        UnsupportedField NewItem = new UnsupportedField { Name = name, Location = location };
+        UnsupportedField NewItem = new UnsupportedField { Name = name, Location = location, ClassName = className };
         InternalFields.Add(NewItem);
     }
 
@@ -128,9 +130,10 @@ internal record Unsupported : IUnsupported
     /// Adds an unsupported local.
     /// </summary>
     /// <param name="location">The local location.</param>
-    public void AddUnsupportedLocal(Location location)
+    /// <param name="methodName">The host method name.</param>
+    public void AddUnsupportedLocal(Location location, MethodName methodName)
     {
-        UnsupportedLocal NewItem = new UnsupportedLocal { Location = location };
+        UnsupportedLocal NewItem = new UnsupportedLocal { Location = location, MethodName = methodName };
         InternalLocals.Add(NewItem);
     }
 

@@ -5,4 +5,8 @@
 /// </summary>
 public interface IField : IVariableWithInitializer
 {
+    /// <summary>
+    /// Gets the field owner class name.
+    /// </summary>
+    ClassName ClassName { get; }
 }

@@ -82,13 +82,13 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { Name = Name, Type = fieldType, Initializer = Initializer };
+                Field NewField = new Field { Name = Name, Type = fieldType, Initializer = Initializer, ClassName = parsingContext.ClassName };
                 fieldTable.AddItem(NewField);
             }
             else if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                parsingContext.Unsupported.AddUnsupportedField(Name, Location);
+                parsingContext.Unsupported.AddUnsupportedField(Name, Location, parsingContext.ClassName);
             }
         }
     }

@@ -105,7 +105,7 @@ internal partial class ClassDeclarationParser
                     MethodParsingContext = MethodParsingContext with { HostMethod = TemporaryMethod, HostBlock = TemporaryRootBlock, IsFieldAllowed = true, IsLocalAllowed = true };
 
                     RootBlock = ParseStatements(MethodParsingContext, methodDeclaration);
-                    ResultLocal = FindOrCreateResultLocal(LocalTable, ReturnType);
+                    ResultLocal = FindOrCreateResultLocal(LocalTable, ReturnType, MethodName);
 
                     TemporaryMethod = new Method
                     {
@@ -434,7 +434,7 @@ internal partial class ClassDeclarationParser
         return false;
     }
 
-    private Local? FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType)
+    private Local? FindOrCreateResultLocal(ReadOnlyLocalTable localTable, ExpressionType returnType, MethodName methodName)
     {
         Debug.Assert(returnType != ExpressionType.Other);
 
@@ -448,7 +448,7 @@ internal partial class ClassDeclarationParser
                 if (Entry.Key == ResultName)
                     return Entry.Value;
 
-            ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null };
+            ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null, MethodName = methodName };
         }
         else
             ResultLocal = null;

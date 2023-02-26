@@ -5,4 +5,8 @@
 /// </summary>
 public interface IProperty : IVariableWithInitializer
 {
+    /// <summary>
+    /// Gets the property owner class name.
+    /// </summary>
+    ClassName ClassName { get; }
 }

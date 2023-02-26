@@ -20,4 +20,7 @@ internal class UnsupportedProperty : IUnsupportedProperty
 
     /// <inheritdoc/>
     public ILiteralExpression? Initializer => null;
+
+    /// <inheritdoc/>
+    required public ClassName ClassName { get; init; }
 }

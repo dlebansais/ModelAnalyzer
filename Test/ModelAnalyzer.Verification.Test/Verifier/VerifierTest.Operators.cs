@@ -324,6 +324,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = Zero.GetExpressionType(),
             Initializer = Zero,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -455,6 +456,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = Zero.GetExpressionType(),
             Initializer = Zero,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -838,6 +840,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = ExpressionType.Boolean,
             Initializer = null,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -1031,6 +1034,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = ExpressionType.Boolean,
             Initializer = null,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -1150,6 +1154,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = ExpressionType.Boolean,
             Initializer = null,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -1332,6 +1337,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = ExpressionType.Boolean,
             Initializer = null,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();

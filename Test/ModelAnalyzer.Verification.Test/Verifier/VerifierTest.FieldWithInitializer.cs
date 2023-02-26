@@ -98,6 +98,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = Zero.GetExpressionType(),
             Initializer = Initializer,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();
@@ -235,6 +236,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName1 },
             Type = Zero1.GetExpressionType(),
             Initializer = Initializer,
+            ClassName = ClassName,
         };
 
         Field TestField2 = new()
@@ -242,6 +244,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName2 },
             Type = Zero2.GetExpressionType(),
             Initializer = Initializer,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();

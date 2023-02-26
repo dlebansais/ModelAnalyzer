@@ -13,8 +13,9 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_BasicTest()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
         TestObject.AddVariable(TestVariable);
@@ -27,8 +28,9 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_AddOrIncrement()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
         TestObject.AddVariable(TestVariable);
@@ -42,7 +44,7 @@ public class AliasTableTest
         Assert.That(TestObject.GetAlias(TestVariable), Is.EqualTo(new VariableAlias(TestVariable, 1)));
 
         FieldName TestObjectName2 = new() { Text = "Test2" };
-        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
 
         TestObject.AddOrIncrement(TestVariable2);
@@ -55,8 +57,9 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_Increment()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
         TestObject.AddVariable(TestVariable);
@@ -74,8 +77,9 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_Clone()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         AliasTable TestObject = new();
         TestObject.AddVariable(TestVariable);
@@ -98,14 +102,15 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_AliasDifference()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName1 = new() { Text = "Test1" };
-        Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable1 = new Variable(TestField1.Name, TestField1.Type);
         FieldName TestObjectName2 = new() { Text = "Test2" };
-        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
         FieldName TestObjectName3 = new() { Text = "Test3" };
-        Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable3 = new Variable(TestField3.Name, TestField3.Type);
 
         AliasTable TestObject1 = new();
@@ -145,14 +150,15 @@ public class AliasTableTest
     [Category("Verification")]
     public void AliasTable_Merge()
     {
+        ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName1 = new() { Text = "Test1" };
-        Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField1 = new Field() { Name = TestObjectName1, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable1 = new Variable(TestField1.Name, TestField1.Type);
         FieldName TestObjectName2 = new() { Text = "Test2" };
-        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField2 = new Field() { Name = TestObjectName2, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable2 = new Variable(TestField2.Name, TestField2.Type);
         FieldName TestObjectName3 = new() { Text = "Test3" };
-        Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null };
+        Field TestField3 = new Field() { Name = TestObjectName3, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
         Variable TestVariable3 = new Variable(TestField3.Name, TestField3.Type);
 
         AliasTable TestObject1 = new();

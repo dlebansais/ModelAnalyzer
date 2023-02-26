@@ -1,5 +1,6 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /// <summary>
@@ -11,7 +12,17 @@ internal class Property : IProperty, INameable<PropertyName>
     /// <summary>
     /// Gets the Length property of arrays.
     /// </summary>
-    public static Property ArrayLengthProperty { get; } = new Property() { Name = new PropertyName() { Text = "Length" }, Type = ExpressionType.Integer, Initializer = null };
+    public static Property ArrayLengthProperty { get; } = new Property()
+    {
+        Name = new PropertyName() { Text = "Length" },
+        Type = ExpressionType.Integer,
+        Initializer = null,
+        ClassName = new ClassName()
+        {
+            Namespace = new List<string>() { "System" },
+            Text = "Array",
+        },
+    };
 
     /// <summary>
     /// Gets the property name.
@@ -26,4 +37,7 @@ internal class Property : IProperty, INameable<PropertyName>
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
+
+    /// <inheritdoc/>
+    required public ClassName ClassName { get; init; }
 }

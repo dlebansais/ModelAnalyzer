@@ -5,4 +5,8 @@
 /// </summary>
 public interface ILocal : IVariableWithInitializer
 {
+    /// <summary>
+    /// Gets the local host method name.
+    /// </summary>
+    MethodName MethodName { get; }
 }

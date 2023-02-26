@@ -69,26 +69,24 @@ internal partial class Verifier : IDisposable
 
         string Name = variablePath[pathIndex].Name.Text;
         Method? HostMethod = null;
-        IVariableName? VariableName = null;
-        ExpressionType? VariableType = null;
+        IVariable? Variable = null;
 
-        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupProperty(verificationContext, Name, ref HostMethod, ref Variable);
 
         if (pathIndex == 0)
         {
-            LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-            LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-            LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupField(verificationContext, Name, ref HostMethod, ref Variable);
+            LookupParameter(verificationContext, Name, ref HostMethod, ref Variable);
+            LookupLocal(verificationContext, Name, ref HostMethod, ref Variable);
         }
 
-        Debug.Assert(VariableName is not null);
-        Debug.Assert(VariableType is not null);
+        Debug.Assert(Variable is not null);
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!, VariableType!);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.Instance : null, HostMethod, Variable!);
 
         if (pathIndex + 1 < variablePath.Count)
         {
-            if (pathIndex + 2 == variablePath.Count && VariableType!.IsArray)
+            if (pathIndex + 2 == variablePath.Count && Variable!.Type.IsArray)
             {
                 Debug.Assert(variablePath[pathIndex + 1].Name.Text == "Length");
                 Debug.Assert(resultExpr is ExprArray<IArrayExprCapsule>);
@@ -99,7 +97,7 @@ internal partial class Verifier : IDisposable
             }
             else
             {
-                ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+                ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(Variable!.Type);
 
                 Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
                 IObjectRefExprCapsule ReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
@@ -120,7 +118,7 @@ internal partial class Verifier : IDisposable
             return true;
     }
 
-    private void LookupProperty(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    private void LookupProperty(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariable? variable)
     {
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
             if (Entry.Key.Text == name)
@@ -128,17 +126,15 @@ internal partial class Verifier : IDisposable
                 Property Property = Entry.Value;
 
                 Debug.Assert(hostMethod is null);
-                Debug.Assert(variableName is null);
-                Debug.Assert(variableType is null);
+                Debug.Assert(variable is null);
 
                 hostMethod = null;
-                variableName = Property.Name;
-                variableType = Property.Type;
+                variable = Property;
                 break;
             }
     }
 
-    private void LookupField(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    private void LookupField(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariable? variable)
     {
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
             if (Entry.Key.Text == name)
@@ -146,17 +142,15 @@ internal partial class Verifier : IDisposable
                 Field Field = Entry.Value;
 
                 Debug.Assert(hostMethod is null);
-                Debug.Assert(variableName is null);
-                Debug.Assert(variableType is null);
+                Debug.Assert(variable is null);
 
                 hostMethod = null;
-                variableName = Field.Name;
-                variableType = Field.Type;
+                variable = Field;
                 break;
             }
     }
 
-    private void LookupParameter(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    private void LookupParameter(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariable? variable)
     {
         if (verificationContext.HostMethod is null)
             return;
@@ -169,11 +163,9 @@ internal partial class Verifier : IDisposable
                 Parameter Parameter = Entry.Value;
 
                 Debug.Assert(hostMethod is null);
-                Debug.Assert(variableName is null);
-                Debug.Assert(variableType is null);
+                Debug.Assert(variable is null);
 
-                variableName = Parameter.Name;
-                variableType = Parameter.Type;
+                variable = Parameter;
                 hostMethod = verificationContext.HostMethod;
 
                 Debug.Assert(hostMethod is not null);
@@ -181,7 +173,7 @@ internal partial class Verifier : IDisposable
             }
     }
 
-    private void LookupLocal(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariableName? variableName, ref ExpressionType? variableType)
+    private void LookupLocal(VerificationContext verificationContext, string name, ref Method? hostMethod, ref IVariable? variable)
     {
         if (verificationContext.HostBlock is null)
             return;
@@ -194,11 +186,9 @@ internal partial class Verifier : IDisposable
                 Local Local = Entry.Value;
 
                 Debug.Assert(hostMethod is null);
-                Debug.Assert(variableName is null);
-                Debug.Assert(variableType is null);
+                Debug.Assert(variable is null);
 
-                variableName = Local.Name;
-                variableType = Local.Type;
+                variable = Local;
                 hostMethod = verificationContext.HostMethod;
 
                 Debug.Assert(hostMethod is not null);
@@ -208,11 +198,9 @@ internal partial class Verifier : IDisposable
         if (verificationContext.ResultLocal is Local ResultLocal && name == Ensure.ResultKeyword)
         {
             Debug.Assert(hostMethod is null);
-            Debug.Assert(variableName is null);
-            Debug.Assert(variableType is null);
+            Debug.Assert(variable is null);
 
-            variableName = ResultLocal.Name;
-            variableType = ResultLocal.Type;
+            variable = ResultLocal;
             hostMethod = verificationContext.HostMethod;
 
             Debug.Assert(hostMethod is not null);
@@ -251,12 +239,13 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            CreateVariable(verificationContext, owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
+        // TODO create an agnostic "variable" type, base of Local, property etc.
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
-        CreateVariable(verificationContext, owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
+        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null, MethodName = null! };
+        CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultLocal = CallResult };
 
@@ -269,7 +258,7 @@ internal partial class Verifier : IDisposable
         if (!AddMethodEnsures(CallVerificationContext, keepNormal: true))
             return false;
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult);
 
         return true;
     }
@@ -325,12 +314,13 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            CreateVariable(verificationContext, owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
+        // TODO create an agnostic "variable" type, base of Local, property etc.
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
-        CreateVariable(verificationContext, owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
+        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null, MethodName = null! };
+        CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with
         {
@@ -355,7 +345,7 @@ internal partial class Verifier : IDisposable
             if (!AddClassInvariant(CallVerificationContext))
                 return false;
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult.Name, CallResult.Type);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(owner: null, calledFunction, CallResult);
 
         return true;
     }
@@ -640,27 +630,25 @@ internal partial class Verifier : IDisposable
 
         string Name = variablePath[pathIndex].Name.Text;
         Method? HostMethod = null;
-        IVariableName? VariableName = null;
-        ExpressionType? VariableType = null;
+        IVariable? Variable = null;
 
-        LookupProperty(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+        LookupProperty(verificationContext, Name, ref HostMethod, ref Variable);
 
         if (pathIndex == 0)
         {
-            LookupField(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-            LookupParameter(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
-            LookupLocal(verificationContext, Name, ref HostMethod, ref VariableName, ref VariableType);
+            LookupField(verificationContext, Name, ref HostMethod, ref Variable);
+            LookupParameter(verificationContext, Name, ref HostMethod, ref Variable);
+            LookupLocal(verificationContext, Name, ref HostMethod, ref Variable);
         }
 
-        Debug.Assert(VariableName is not null);
-        Debug.Assert(VariableType is not null);
+        Debug.Assert(Variable is not null);
 
         Instance? Owner = HostMethod is null ? verificationContext.Instance : null;
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(Owner, HostMethod, VariableName!, VariableType!);
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(Owner, HostMethod, Variable!);
 
         if (pathIndex + 1 < variablePath.Count)
         {
-            ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(VariableType!);
+            ClassModel ClassModel = verificationContext.ObjectManager.TypeToModel(Variable!.Type);
 
             Debug.Assert(resultExpr.MainExpression is IObjectRefExprCapsule);
             IObjectRefExprCapsule ObjectReferenceExpr = (IObjectRefExprCapsule)resultExpr.MainExpression;
@@ -678,14 +666,14 @@ internal partial class Verifier : IDisposable
         }
         else
         {
-            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(Owner, HostMethod, VariableName!, VariableType!);
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(Owner, HostMethod, Variable!);
             AddArrayGetterMethod(GetterMethod);
 
             PrivateFunctionCallExpression GetterCallExpression = new()
             {
                 ClassName = GetterMethod.ClassName,
                 MethodName = GetterMethod.Name,
-                ReturnType = VariableType!,
+                ReturnType = Variable!.Type,
                 ArgumentList = new() { new Argument() { Expression = elementIndex, Location = null! } },
                 CallerClassName = GetterMethod.ClassName,
                 NameLocation = null!,

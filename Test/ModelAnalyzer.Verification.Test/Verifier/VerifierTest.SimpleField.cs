@@ -97,6 +97,7 @@ public partial class VerifierTest
             Name = new FieldName { Text = FieldName },
             Type = Zero.GetExpressionType(),
             Initializer = null,
+            ClassName = ClassName,
         };
 
         FieldTable TestFieldTable = new();

@@ -109,18 +109,21 @@ internal partial class ClassDeclarationParser
             IsLocalSupported = false;
         }
 
+        Debug.Assert(parsingContext.HostMethod is not null);
+        Method HostMethod = parsingContext.HostMethod!;
+
         if (!IsLocalSupported)
         {
             if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                parsingContext.Unsupported.AddUnsupportedLocal(Location);
+                parsingContext.Unsupported.AddUnsupportedLocal(Location, HostMethod.Name);
             }
 
             return false;
         }
 
-        Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer };
+        Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer, MethodName = HostMethod.Name };
         localTable.AddItem(NewLocal);
 
         return true;
