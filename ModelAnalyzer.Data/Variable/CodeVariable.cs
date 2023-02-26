@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a variable.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class CodeVariable : IVariable
+internal record CodeVariable : IVariable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CodeVariable"/> class.

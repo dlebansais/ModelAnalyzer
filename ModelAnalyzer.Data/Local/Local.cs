@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a method local variable.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Local : CodeVariable, ILocal, INameable<LocalName>
+internal record Local : CodeVariable, ILocal, INameable<LocalName>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Local"/> class.

@@ -7,7 +7,7 @@ using System.Diagnostics;
 /// Represents a class property.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Property : CodeVariable, IProperty, INameable<PropertyName>
+internal record Property : CodeVariable, IProperty, INameable<PropertyName>
 {
     /// <summary>
     /// Gets the Length property of arrays.

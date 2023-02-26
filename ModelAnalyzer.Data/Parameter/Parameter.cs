@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a method parameter.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Parameter : CodeVariable, IParameter, INameable<ParameterName>
+internal record Parameter : CodeVariable, IParameter, INameable<ParameterName>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Parameter"/> class.

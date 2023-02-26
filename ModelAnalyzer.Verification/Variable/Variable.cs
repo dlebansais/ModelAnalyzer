@@ -1,8 +1,11 @@
 ﻿namespace ModelAnalyzer;
 
+using System.Diagnostics;
+
 /// <summary>
 /// Represents a variable.
 /// </summary>
+[DebuggerDisplay("{Name.Text}")]
 internal record Variable : IVariable
 {
     /// <summary>
@@ -16,13 +19,9 @@ internal record Variable : IVariable
         Type = type;
     }
 
-    /// <summary>
-    /// Gets the variable name.
-    /// </summary>
+    /// <inheritdoc/>
     public IVariableName Name { get; }
 
-    /// <summary>
-    /// Gets the variable type.
-    /// </summary>
+    /// <inheritdoc/>
     public ExpressionType Type { get; }
 }
