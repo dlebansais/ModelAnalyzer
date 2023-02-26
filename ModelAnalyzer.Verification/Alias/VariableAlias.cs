@@ -41,7 +41,7 @@ internal record VariableAlias
     /// <summary>
     /// Return the alias with <see cref="Index"/> incremented.
     /// </summary>
-    public VariableAlias Incremented()
+    public virtual VariableAlias Incremented()
     {
         return new VariableAlias(Variable, Index + 1);
     }

@@ -117,13 +117,13 @@ internal partial class ClassDeclarationParser
             if (!IsErrorReported)
             {
                 Location Location = variable.Identifier.GetLocation();
-                parsingContext.Unsupported.AddUnsupportedLocal(Location, HostMethod.Name);
+                parsingContext.Unsupported.AddUnsupportedLocal(Location, HostMethod.ClassName, HostMethod.Name);
             }
 
             return false;
         }
 
-        Local NewLocal = new(Name, localType) { Initializer = Initializer, MethodName = HostMethod.Name };
+        Local NewLocal = new(Name, localType) { Initializer = Initializer, ClassName = HostMethod.ClassName, MethodName = HostMethod.Name };
         localTable.AddItem(NewLocal);
 
         return true;

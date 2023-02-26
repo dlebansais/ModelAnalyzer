@@ -26,13 +26,13 @@ internal partial class ClassDeclarationParser
             {
                 if (IsParameterSupported(parsingContext, Parameter, out ExpressionType ParameterType))
                 {
-                    Parameter NewParameter = new(ParameterName, ParameterType) { MethodName = HostMethod.Name };
+                    Parameter NewParameter = new(ParameterName, ParameterType) { ClassName = HostMethod.ClassName, MethodName = HostMethod.Name };
                     ParameterTable.AddItem(NewParameter);
                 }
                 else if (!parsingContext.IsMethodParsingFirstPassDone)
                 {
                     Location Location = Parameter.GetLocation();
-                    parsingContext.Unsupported.AddUnsupportedParameter(Location, HostMethod.Name);
+                    parsingContext.Unsupported.AddUnsupportedParameter(Location, HostMethod.ClassName, HostMethod.Name);
                 }
             }
         }

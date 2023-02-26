@@ -129,7 +129,7 @@ internal static class Preloaded
 
         foreach (PreloadedParameter Item in preloadedMethod.Parameters)
         {
-            Parameter NewParameter = CreateParameter(MethodName, Item);
+            Parameter NewParameter = CreateParameter(className, MethodName, Item);
             ParameterTable.AddItem(NewParameter);
         }
 
@@ -161,6 +161,7 @@ internal static class Preloaded
             ResultLocal = new Local(new LocalName() { Text = "Result" }, ReturnType)
             {
                 Initializer = null,
+                ClassName = className,
                 MethodName = MethodName,
             };
 
@@ -186,12 +187,13 @@ internal static class Preloaded
     /// <summary>
     /// Creates a parameter from the preloaded value.
     /// </summary>
+    /// <param name="className">The preloaded class name.</param>
     /// <param name="methodName">The preloaded method name.</param>
     /// <param name="preloadedParameter">The preloaded parameter.</param>
-    private static Parameter CreateParameter(MethodName methodName, PreloadedParameter preloadedParameter)
+    private static Parameter CreateParameter(ClassName className, MethodName methodName, PreloadedParameter preloadedParameter)
     {
         ParameterName ParameterName = new() { Text = preloadedParameter.Name };
-        Parameter NewParameter = new(ParameterName, ConvertTypeName(preloadedParameter.TypeName)) { MethodName = methodName };
+        Parameter NewParameter = new(ParameterName, ConvertTypeName(preloadedParameter.TypeName)) { ClassName = className, MethodName = methodName };
 
         return NewParameter;
     }

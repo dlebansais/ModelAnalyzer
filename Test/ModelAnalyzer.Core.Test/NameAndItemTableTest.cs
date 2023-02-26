@@ -105,10 +105,11 @@ public class NameAndItemTableTest
     [Category("Core")]
     public void NameAndItemTable_ReadOnlyParameterTable()
     {
+        ClassName ClassName = new() { Namespace = new List<string>(), Text = "Test" };
         MethodName MethodName = new() { Text = "Test" };
         ParameterTable TestTable = new();
         ParameterName TestParameterName = new ParameterName() { Text = "*" };
-        Parameter TestParameter = new Parameter(TestParameterName, ExpressionType.Other) { MethodName = MethodName };
+        Parameter TestParameter = new Parameter(TestParameterName, ExpressionType.Other) { ClassName = ClassName, MethodName = MethodName };
 
         TestTable.AddItem(TestParameter);
 

@@ -22,5 +22,8 @@ internal class UnsupportedLocal : IUnsupportedLocal
     public ILiteralExpression? Initializer => null;
 
     /// <inheritdoc/>
+    required public ClassName ClassName { get; init; }
+
+    /// <inheritdoc/>
     required public MethodName MethodName { get; init; }
 }

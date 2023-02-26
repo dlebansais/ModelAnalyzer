@@ -72,8 +72,7 @@ internal partial class Verifier : IDisposable
         Debug.Assert(Variable is not null);
 
         Instance? Owner = HostMethod is null ? verificationContext.Instance : null;
-        IVariableName VariableBlockName = ObjectManager.CreateBlockName(Owner, HostMethod, Variable!.Name);
-        Variable Destination = new(VariableBlockName, Variable!.Type);
+        Variable Destination = ObjectManager.CreateAliasTrackedVariable(Owner, HostMethod, Variable!, Variable!.Type);
 
         if (assignmentStatement.DestinationIndex is null)
             verificationContext.ObjectManager.Assign(verificationContext.Instance, HostMethod, verificationContext.Branch, Destination, SourceExpr);
@@ -133,7 +132,10 @@ internal partial class Verifier : IDisposable
 
         verificationContext.ObjectManager.EndBranch(BeforeWhenFalse, out List<VariableAlias> AliasesOnlyWhenFalse, out AliasTable WhenFalseAliasTable);
 
-        verificationContext.ObjectManager.MergeBranches(verificationContext.Instance, verificationContext.HostMethod, WhenTrueAliasTable, TrueBranchExpr, AliasesOnlyWhenTrue, WhenFalseAliasTable, FalseBranchExpr, AliasesOnlyWhenFalse);
+        Debug.Assert(verificationContext.HostMethod is not null);
+        Method HostMethod = verificationContext.HostMethod!;
+
+        verificationContext.ObjectManager.MergeBranches(verificationContext.Instance, HostMethod, WhenTrueAliasTable, TrueBranchExpr, AliasesOnlyWhenTrue, WhenFalseAliasTable, FalseBranchExpr, AliasesOnlyWhenFalse);
 
         return TrueBranchResult && FalseBranchResult;
     }
@@ -282,8 +284,7 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, ReturnExpression, out IExprBase<IExprCapsule, IExprCapsule> ResultInitializerExpr))
                 return false;
 
-            IVariableName ResultLocalBlockName = ObjectManager.CreateBlockName(owner: null, HostMethod, ResultVariable.Name);
-            Variable ResultLocalVariable = new(ResultLocalBlockName, ResultVariable.Type);
+            Variable ResultLocalVariable = ObjectManager.CreateAliasTrackedVariable(owner: null, HostMethod, ResultVariable, ResultVariable.Type);
 
             verificationContext.ObjectManager.Assign(owner: null, HostMethod, verificationContext.Branch, ResultLocalVariable, ResultInitializerExpr);
         }

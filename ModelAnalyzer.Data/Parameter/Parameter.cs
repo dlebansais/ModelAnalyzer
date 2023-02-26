@@ -25,5 +25,8 @@ internal record Parameter : Variable, IParameter, INameable<ParameterName>
     ParameterName INameable<ParameterName>.Name { get => (ParameterName)Name; }
 
     /// <inheritdoc/>
+    required public ClassName ClassName { get; init; }
+
+    /// <inheritdoc/>
     required public MethodName MethodName { get; init; }
 }

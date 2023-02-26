@@ -70,10 +70,39 @@ internal class ObjectManager
         return CreateVariableInternal(owner, hostMethod, variable, branch, initializerExpr);
     }
 
+    public static Variable CreateAliasTrackedVariable(Instance? owner, Method? hostMethod, IVariable variable, ExpressionType type)
+    {
+        string Text = GetBlockNameText(owner, hostMethod, variable);
+        Variable Result;
+
+        switch (variable)
+        {
+            case Field AsField:
+                Result = new Field(new FieldName() { Text = Text }, type) { ClassName = AsField.ClassName, Initializer = null };
+                break;
+            case Property AsProperty:
+                Result = new Property(new PropertyName() { Text = Text }, type) { ClassName = AsProperty.ClassName, Initializer = null };
+                break;
+            case Parameter AsParameter:
+                Result = new Parameter(new ParameterName() { Text = Text }, type) { ClassName = AsParameter.ClassName, MethodName = AsParameter.MethodName };
+                break;
+            case Local AsLocal:
+                Result = new Local(new LocalName() { Text = Text }, type) { ClassName = AsLocal.ClassName, MethodName = AsLocal.MethodName, Initializer = null };
+                break;
+            default:
+                Result = new Variable(new VariableName() { Text = Text }, type);
+                break;
+        }
+
+        // Base new variable => base input variable
+        Debug.Assert(Result.GetType().Name != typeof(Variable).Name || variable.GetType().Name == typeof(Variable).Name);
+
+        return Result;
+    }
+
     private IExprBase<IExprCapsule, IExprCapsule> CreateVariableInternal(Instance? owner, Method? hostMethod, IVariable variable, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
-        Variable Variable = new(VariableBlockName, variable.Type);
+        Variable Variable = CreateAliasTrackedVariable(owner, hostMethod, variable, variable.Type);
 
         // Increment for parameters of methods called several times.
         AliasTable.AddOrIncrement(Variable);
@@ -92,8 +121,7 @@ internal class ObjectManager
 
     public IExprBase<IExprCapsule, IExprCapsule> CreateValueExpr(Instance? owner, Method? hostMethod, IVariable variable)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
-        Variable Variable = new(VariableBlockName, variable.Type);
+        Variable Variable = CreateAliasTrackedVariable(owner, hostMethod, variable, variable.Type);
         VariableAlias VariableAlias = AliasTable.GetAlias(Variable);
         IExprBase<IExprCapsule, IExprCapsule> ResultExprSet = CreateVariableExpr(owner, hostMethod, VariableAlias, variable.Type);
 
@@ -177,10 +205,10 @@ internal class ObjectManager
         endAliasTable = AliasTable.Clone();
     }
 
-    public void MergeBranches(Instance? owner, Method? hostMethod, AliasTable whenTrueAliasTable, IBoolExprCapsule branchTrue, List<VariableAlias> aliasesOnlyWhenTrue, AliasTable whenFalseAliasTable, IBoolExprCapsule branchFalse, List<VariableAlias> aliasesOnlyWhenFalse)
+    public void MergeBranches(Instance owner, Method hostMethod, AliasTable whenTrueAliasTable, IBoolExprCapsule branchTrue, List<VariableAlias> aliasesOnlyWhenTrue, AliasTable whenFalseAliasTable, IBoolExprCapsule branchFalse, List<VariableAlias> aliasesOnlyWhenFalse)
     {
         // Merge aliases from the if branch (the table currently contains the end of the end branch).
-        AliasTable.Merge(whenTrueAliasTable, out List<Variable> UpdatedNameList);
+        AliasTable.Merge(hostMethod.Name, whenTrueAliasTable, out List<Variable> UpdatedNameList);
 
         AddConditionalAliases(owner, hostMethod, branchTrue, aliasesOnlyWhenFalse);
         AddConditionalAliases(owner, hostMethod, branchFalse, aliasesOnlyWhenTrue);
@@ -404,9 +432,7 @@ internal class ObjectManager
         foreach (KeyValuePair<PropertyName, Property> Entry in ReferenceClassModel.PropertyTable)
         {
             Property Property = Entry.Value;
-
-            IVariableName PropertyBlockName = CreateBlockName(Reference, hostMethod: null, Property.Name);
-            Variable PropertyVariable = new(PropertyBlockName, Property.Type);
+            Variable PropertyVariable = CreateAliasTrackedVariable(Reference, hostMethod: null, Property, Property.Type);
 
             if (!AliasTable.ContainsVariable(PropertyVariable))
                 AliasTable.AddVariable(PropertyVariable);
@@ -420,9 +446,7 @@ internal class ObjectManager
         foreach (KeyValuePair<FieldName, Field> Entry in ReferenceClassModel.FieldTable)
         {
             Field Field = Entry.Value;
-
-            IVariableName FieldBlockName = CreateBlockName(Reference, hostMethod: null, Field.Name);
-            Variable FieldVariable = new(FieldBlockName, Field.Type);
+            Variable FieldVariable = CreateAliasTrackedVariable(Reference, hostMethod: null, Field, Field.Type);
 
             if (!AliasTable.ContainsVariable(FieldVariable))
                 AliasTable.AddVariable(FieldVariable);
@@ -476,40 +500,35 @@ internal class ObjectManager
         Local? ResultLocal = hostMethod.ResultLocal as Local;
         Debug.Assert(ResultLocal is not null);
 
-        LocalName ResultBlockLocalName = CreateBlockName(owner: null, hostMethod, ResultLocal!.Name);
-        Variable ResultLocalVariable = new(ResultBlockLocalName, returnType);
+        Variable ResultLocalVariable = CreateAliasTrackedVariable(owner: null, hostMethod, ResultLocal!, returnType);
 
         AliasTable.AddOrIncrement(ResultLocalVariable);
 
-        return ResultLocal;
+        return ResultLocal!;
     }
 
-    public static LocalName CreateBlockName(Instance? owner, Method? hostMethod, IVariableName localName)
+    public static string GetBlockNameText(Instance? owner, Method? hostMethod, IVariable variable)
     {
-        LocalName Result = null!;
+        string Result = null!;
 
         if (hostMethod is not null)
-        {
-            Result = CreateBlockLocalName(hostMethod, localName);
-        }
+            Result = GetLocalBlockNameText(hostMethod, variable);
 
         if (owner is not null)
-        {
-            Result = CreateBlockOwnerName(owner, localName);
-        }
+            Result = GetOwnerBlockNameText(owner, variable);
 
         Debug.Assert(Result is not null);
 
         return Result!;
     }
 
-    public static LocalName CreateBlockLocalName(Method hostMethod, IVariableName localName)
+    public static string GetLocalBlockNameText(Method hostMethod, IVariable variable)
     {
-        string LocalBlockText = $"{hostMethod.ClassName}::{hostMethod.Name.Text}-${localName.Text}";
-        return new LocalName() { Text = LocalBlockText };
+        string LocalBlockText = $"{hostMethod.ClassName}::{hostMethod.Name.Text}-${variable.Name.Text}";
+        return LocalBlockText;
     }
 
-    public static LocalName CreateBlockOwnerName(Instance owner, IVariableName localName)
+    public static string GetOwnerBlockNameText(Instance owner, IVariable variable)
     {
         Debug.Assert(owner.Expr is IObjectRefExprCapsule);
 
@@ -518,9 +537,9 @@ internal class ObjectManager
 
         Debug.Assert(ClassName != ClassName.Empty);
 
-        string OwnerText = $"{ClassName}#{ObjectExpr.Index.Internal}:${localName.Text}";
+        string OwnerText = $"{ClassName}#{ObjectExpr.Index.Internal}:${variable.Name.Text}";
 
-        return new LocalName() { Text = OwnerText };
+        return OwnerText;
     }
 
     public static LocalName CreateArrayContainerName(IVariable variable)
@@ -585,8 +604,7 @@ internal class ObjectManager
     {
         foreach (KeyValuePair<PropertyName, Property> Entry in reference.ClassModel.PropertyTable)
         {
-            LocalName PropertyBlockLocalName = CreateBlockName(reference, hostMethod: null, Entry.Key);
-            Variable PropertyVariable = new(PropertyBlockLocalName, Entry.Value.Type);
+            Variable PropertyVariable = CreateAliasTrackedVariable(reference, hostMethod: null, Entry.Value, Entry.Value.Type);
 
             AliasTable.IncrementAlias(PropertyVariable);
         }
@@ -605,8 +623,7 @@ internal class ObjectManager
 
     public IExprSingle<IIntExprCapsule> InitializeIndexRun(Method hostMethod, IBoolExprCapsule? branch, Local localIndex, IExprBase<IExprCapsule, IExprCapsule> initIndexExpr)
     {
-        IVariableName IndexBlockName = CreateBlockName(owner: null, hostMethod, localIndex.Name);
-        Variable IndexVariable = new(IndexBlockName, localIndex.Type);
+        Variable IndexVariable = CreateAliasTrackedVariable(owner: null, hostMethod, localIndex, localIndex.Type);
         AliasTable.IncrementAlias(IndexVariable);
 
         VariableAlias VaryingIndexNameAlias = AliasTable.GetAlias(IndexVariable);
@@ -638,7 +655,7 @@ internal class ObjectManager
         MethodName MethodName = new MethodName() { Text = $"{alias}_get" };
         ParameterTable ParameterTable = new();
         ParameterName ParameterName = new() { Text = "i" };
-        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { ClassName = ClassName, MethodName = MethodName };
         ParameterTable.AddItem(Parameter);
 
         Dictionary<ExpressionType, ILiteralExpression> ZeroTable = new()
@@ -673,8 +690,7 @@ internal class ObjectManager
 
     public Method GetArrayGetter(Instance? owner, Method? hostMethod, IVariable variable)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
-        Variable Variable = new(VariableBlockName, variable.Type);
+        Variable Variable = CreateAliasTrackedVariable(owner, hostMethod, variable, variable.Type);
         VariableAlias VariableNameAlias = AliasTable.GetAlias(Variable);
 
         Debug.Assert(ArrayGetterTable.ContainsKey(VariableNameAlias));
@@ -683,8 +699,7 @@ internal class ObjectManager
 
     public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, LiteralIntegerValueExpression literalIntegerValue, Expression newValueExpression)
     {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
-        Variable Variable = new(VariableBlockName, variable.Type);
+        Variable Variable = CreateAliasTrackedVariable(owner, hostMethod, variable, variable.Type);
 
         VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
         Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
@@ -693,43 +708,6 @@ internal class ObjectManager
         AliasTable.IncrementAlias(Variable);
         VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
 
-        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
-
-        ParameterTable ParameterTable = new();
-        ParameterName ParameterName = new() { Text = "i" };
-        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
-        ParameterTable.AddItem(Parameter);
-
-        VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { Parameter } };
-        EqualityExpression Equality = new() { Left = VariableValue, Operator = EqualityOperator.Equal, Right = literalIntegerValue };
-
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, MethodName, Parameter, Equality, newValueExpression, OldMethod);
-    }
-
-    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, Expression continueCondition, Expression newValueExpression)
-    {
-        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variable.Name);
-        Variable Variable = new(VariableBlockName, variable.Type);
-
-        VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
-        Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
-        Method OldMethod = ArrayGetterTable[OldVariableNameAlias];
-
-        AliasTable.IncrementAlias(Variable);
-        VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
-
-        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
-
-        ParameterTable ParameterTable = new();
-        ParameterName ParameterName = new() { Text = "i" };
-        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
-        ParameterTable.AddItem(Parameter);
-
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, MethodName, Parameter, continueCondition, newValueExpression, OldMethod);
-    }
-
-    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, MethodName methodName, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
-    {
         ClassName ClassName = null!;
 
         if (hostMethod is not null)
@@ -738,12 +716,56 @@ internal class ObjectManager
         if (owner is not null)
             ClassName = owner.ClassModel.ClassName;
 
+        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
+
+        ParameterTable ParameterTable = new();
+        ParameterName ParameterName = new() { Text = "i" };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { ClassName = ClassName, MethodName = MethodName };
+        ParameterTable.AddItem(Parameter);
+
+        VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { Parameter } };
+        EqualityExpression Equality = new() { Left = VariableValue, Operator = EqualityOperator.Equal, Right = literalIntegerValue };
+
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, ClassName, MethodName, Parameter, Equality, newValueExpression, OldMethod);
+    }
+
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, Expression continueCondition, Expression newValueExpression)
+    {
+        Variable Variable = CreateAliasTrackedVariable(owner, hostMethod, variable, variable.Type);
+
+        VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
+        Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
+        Method OldMethod = ArrayGetterTable[OldVariableNameAlias];
+
+        AliasTable.IncrementAlias(Variable);
+        VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
+
+        ClassName ClassName = null!;
+
+        if (hostMethod is not null)
+            ClassName = hostMethod.ClassName;
+
+        if (owner is not null)
+            ClassName = owner.ClassModel.ClassName;
+
+        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
+
+        ParameterTable ParameterTable = new();
+        ParameterName ParameterName = new() { Text = "i" };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { ClassName = ClassName, MethodName = MethodName };
+        ParameterTable.AddItem(Parameter);
+
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, ClassName, MethodName, Parameter, continueCondition, newValueExpression, OldMethod);
+    }
+
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, ClassName className, MethodName methodName, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
+    {
         ParameterTable ParameterTable = new();
         ParameterTable.AddItem(parameter);
 
         ExpressionType ElementType = variableType.ToElementType();
 
-        Local ResultLocal = new(new LocalName() { Text = Ensure.ResultKeyword }, ElementType) { Initializer = null, MethodName = methodName };
+        Local ResultLocal = new(new LocalName() { Text = Ensure.ResultKeyword }, ElementType) { Initializer = null, ClassName = className, MethodName = methodName };
         LocalTable LocalTable = new();
         LocalTable.AddItem(ResultLocal);
 
@@ -751,7 +773,7 @@ internal class ObjectManager
         AssignmentStatement AssignWhenTrue = new() { DestinationName = ResultLocal.Name, Expression = newValueExpression, DestinationIndex = null };
         BlockScope WhenTrueBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new List<Statement>() { AssignWhenTrue } };
         Argument Argument = new() { Expression = VariableValue, Location = null! };
-        PrivateFunctionCallExpression FunctionCall = new() { CallerClassName = ClassName, ClassName = ClassName, MethodName = oldMethod.Name, ReturnType = variableType, ArgumentList = new List<Argument>() { Argument }, NameLocation = null! };
+        PrivateFunctionCallExpression FunctionCall = new() { CallerClassName = className, ClassName = className, MethodName = oldMethod.Name, ReturnType = variableType, ArgumentList = new List<Argument>() { Argument }, NameLocation = null! };
         AssignmentStatement AssignWhenFalse = new() { DestinationName = ResultLocal.Name, Expression = FunctionCall, DestinationIndex = null };
         BlockScope WhenFalseBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new List<Statement>() { AssignWhenFalse } };
         ConditionalStatement Conditional = new() { Condition = comparisonExpression, WhenTrueBlock = WhenTrueBlock, WhenFalseBlock = WhenFalseBlock };
@@ -764,7 +786,7 @@ internal class ObjectManager
         Method NewMethod = new()
         {
             Name = methodName,
-            ClassName = ClassName,
+            ClassName = className,
             AccessModifier = AccessModifier.Private,
             IsStatic = false,
             IsPreloaded = false,

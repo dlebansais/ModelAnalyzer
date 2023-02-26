@@ -151,6 +151,7 @@ public class AliasTableTest
     public void AliasTable_Merge()
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
+        MethodName MethodName = new MethodName() { Text = "Test" };
         FieldName TestObjectName1 = new() { Text = "Test1" };
         Field TestField1 = new(TestObjectName1, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable1 = new Variable(TestField1.Name, TestField1.Type);
@@ -181,13 +182,13 @@ public class AliasTableTest
 
         List<Variable> UpdatedVariableList;
 
-        TestObject1.Merge(TestObject2, out UpdatedVariableList);
+        TestObject1.Merge(MethodName, TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(0));
 
         TestObject1.IncrementAlias(TestVariable1);
 
-        TestObject1.Merge(TestObject2, out UpdatedVariableList);
+        TestObject1.Merge(MethodName, TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(1));
         Assert.That(UpdatedVariableList[0], Is.EqualTo(TestVariable1));
@@ -195,7 +196,7 @@ public class AliasTableTest
 
         TestObject2.AddVariable(TestVariable3);
 
-        TestObject1.Merge(TestObject2, out UpdatedVariableList);
+        TestObject1.Merge(MethodName, TestObject2, out UpdatedVariableList);
 
         Assert.That(UpdatedVariableList.Count, Is.EqualTo(1));
         Assert.That(UpdatedVariableList[0], Is.EqualTo(TestVariable1));

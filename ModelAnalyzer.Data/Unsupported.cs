@@ -86,10 +86,11 @@ internal record Unsupported : IUnsupported
     /// Adds an unsupported parameter.
     /// </summary>
     /// <param name="location">The parameter location.</param>
+    /// <param name="className">The parameter host method owner class name.</param>
     /// <param name="methodName">The host method name.</param>
-    public void AddUnsupportedParameter(Location location, MethodName methodName)
+    public void AddUnsupportedParameter(Location location, ClassName className, MethodName methodName)
     {
-        UnsupportedParameter NewItem = new UnsupportedParameter { Location = location, MethodName = methodName };
+        UnsupportedParameter NewItem = new UnsupportedParameter { Location = location, ClassName = className, MethodName = methodName };
         InternalParameters.Add(NewItem);
     }
 
@@ -131,10 +132,11 @@ internal record Unsupported : IUnsupported
     /// Adds an unsupported local.
     /// </summary>
     /// <param name="location">The local location.</param>
+    /// <param name="className">The local host method owner class name.</param>
     /// <param name="methodName">The host method name.</param>
-    public void AddUnsupportedLocal(Location location, MethodName methodName)
+    public void AddUnsupportedLocal(Location location, ClassName className, MethodName methodName)
     {
-        UnsupportedLocal NewItem = new UnsupportedLocal { Location = location, MethodName = methodName };
+        UnsupportedLocal NewItem = new UnsupportedLocal { Location = location, ClassName = className, MethodName = methodName };
         InternalLocals.Add(NewItem);
     }
 

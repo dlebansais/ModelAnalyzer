@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 /// <summary>
 /// Represents a table of aliases.
@@ -22,10 +23,10 @@ internal class AliasTable
     /// </summary>
     /// <param name="table">The table to clone.</param>
     /// <param name="allAliases">The aliases to clone.</param>
-    private AliasTable(Dictionary<Variable, VariableAlias> table, List<VariableAlias> allAliases)
+    private AliasTable(Dictionary<string, VariableAlias> table, List<VariableAlias> allAliases)
         : this()
     {
-        foreach (KeyValuePair<Variable, VariableAlias> Entry in table)
+        foreach (KeyValuePair<string, VariableAlias> Entry in table)
             Table.Add(Entry.Key, Entry.Value);
 
         AllAliases.AddRange(allAliases);
@@ -37,7 +38,7 @@ internal class AliasTable
     /// <param name="variable">The variable.</param>
     public bool ContainsVariable(Variable variable)
     {
-        return Table.ContainsKey(variable);
+        return Table.ContainsKey(variable.Name.Text);
     }
 
     /// <summary>
@@ -48,9 +49,12 @@ internal class AliasTable
     {
         Debug.Assert(!ContainsVariable(variable));
 
-        VariableAlias NewAlias = new VariableAlias(variable);
+        VariableAlias NewAlias = CreateAlias(variable);
 
-        Table.Add(variable, NewAlias);
+        // Base alias => base variable
+        Debug.Assert(NewAlias.GetType().Name != typeof(VariableAlias).Name || variable.GetType().Name == typeof(Variable).Name);
+
+        Table.Add(variable.Name.Text, NewAlias);
         AllAliases.Add(NewAlias);
     }
 
@@ -62,19 +66,45 @@ internal class AliasTable
     public void AddOrIncrement(Variable variable)
     {
         VariableAlias NewAlias;
+        string Key = variable.Name.Text;
 
-        if (Table.ContainsKey(variable))
+        if (Table.ContainsKey(Key))
         {
-            VariableAlias OldAlias = Table[variable];
+            VariableAlias OldAlias = Table[Key];
 
             AllAliases.Remove(OldAlias);
             NewAlias = OldAlias.Incremented();
+
+            Table[Key] = NewAlias;
+            AllAliases.Add(NewAlias);
         }
         else
-            NewAlias = new VariableAlias(variable);
+        {
+            NewAlias = CreateAlias(variable);
 
-        Table[variable] = NewAlias;
-        AllAliases.Add(NewAlias);
+            // Base alias => base variable
+            Debug.Assert(NewAlias.GetType().Name != typeof(VariableAlias).Name || variable.GetType().Name == typeof(Variable).Name);
+
+            Table.Add(Key, NewAlias);
+            AllAliases.Add(NewAlias);
+        }
+    }
+
+    private VariableAlias CreateAlias(Variable variable)
+    {
+        switch (variable)
+        {
+            case Field AsField:
+                return new FieldAlias(AsField);
+            case Property AsProperty:
+                return new PropertyAlias(AsProperty);
+            case Parameter AsParameter:
+                return new ParameterAlias(AsParameter);
+            case Local AsLocal:
+                return new LocalAlias(AsLocal);
+            default:
+                return new VariableAlias(variable);
+        }
     }
 
     /// <summary>
@@ -83,9 +113,11 @@ internal class AliasTable
     /// <param name="variable">The variable.</param>
     public VariableAlias GetAlias(Variable variable)
     {
-        Debug.Assert(ContainsVariable(variable));
+        string Key = variable.Name.Text;
 
-        return Table[variable];
+        Debug.Assert(Table.ContainsKey(Key));
+
+        return Table[Key];
     }
 
     /// <summary>
@@ -94,12 +126,14 @@ internal class AliasTable
     /// <param name="variable">The variable.</param>
     public void IncrementAlias(Variable variable)
     {
-        Debug.Assert(ContainsVariable(variable));
+        string Key = variable.Name.Text;
 
-        VariableAlias OldAlias = Table[variable];
+        Debug.Assert(Table.ContainsKey(Key));
+
+        VariableAlias OldAlias = Table[Key];
         VariableAlias NewAlias = OldAlias.Incremented();
 
-        Table[variable] = NewAlias;
+        Table[Key] = NewAlias;
         AllAliases.Add(NewAlias);
     }
 
@@ -129,36 +163,39 @@ internal class AliasTable
     /// <summary>
     /// Merges two instances.
     /// </summary>
+    /// <param name="methodName">The method where the marge is taking place.</param>
     /// <param name="other">The other instance.</param>
     /// <param name="updatedVariableList">The list of variables for which the alias has been incremented as a result of the merge.</param>
-    public void Merge(AliasTable other, out List<Variable> updatedVariableList)
+    public void Merge(MethodName methodName, AliasTable other, out List<Variable> updatedVariableList)
     {
         updatedVariableList = new();
-        Dictionary<Variable, VariableAlias> UpdatedTable = new();
+        Dictionary<string, VariableAlias> UpdatedTable = new();
+        List<string> KeyList = new();
 
-        foreach (KeyValuePair<Variable, VariableAlias> Entry in Table)
+        foreach (KeyValuePair<string, VariableAlias> Entry in Table)
+            if (other.Table.ContainsKey(Entry.Key))
+                KeyList.Add(Entry.Key);
+
+        foreach (string Key in KeyList)
         {
-            Variable Variable = Entry.Key;
+            Debug.Assert(other.Table.ContainsKey(Key));
 
-            // TODO: separate variables that are outside (ex: in called functions) and inside these two branches
-            if (other.Table.ContainsKey(Variable))
+            Variable Variable = Table[Key].Variable;
+            VariableAlias OtherNameAlias = other.Table[Key];
+            VariableAlias MergedAlias = Table[Key].Merged(OtherNameAlias, out bool IsUpdated);
+
+            if (IsUpdated)
             {
-                VariableAlias OtherNameAlias = other.Table[Variable];
-                VariableAlias MergedAlias = Entry.Value.Merged(OtherNameAlias, out bool IsUpdated);
-
-                if (IsUpdated)
-                {
-                    updatedVariableList.Add(Variable);
-                    UpdatedTable.Add(Variable, MergedAlias);
-                    AllAliases.Add(MergedAlias);
-                }
+                updatedVariableList.Add(Variable);
+                UpdatedTable.Add(Key, MergedAlias);
+                AllAliases.Add(MergedAlias);
             }
         }
 
-        foreach (KeyValuePair<Variable, VariableAlias> Entry in UpdatedTable)
+        foreach (KeyValuePair<string, VariableAlias> Entry in UpdatedTable)
             Table[Entry.Key] = Entry.Value;
     }
 
-    private Dictionary<Variable, VariableAlias> Table;
+    private Dictionary<string, VariableAlias> Table;
     private List<VariableAlias> AllAliases;
 }
