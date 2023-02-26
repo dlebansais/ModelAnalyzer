@@ -139,14 +139,19 @@ internal class AliasTable
         foreach (KeyValuePair<Variable, VariableAlias> Entry in Table)
         {
             Variable Variable = Entry.Key;
-            VariableAlias OtherNameAlias = other.Table[Variable];
-            VariableAlias MergedAlias = Entry.Value.Merged(OtherNameAlias, out bool IsUpdated);
 
-            if (IsUpdated)
+            // TODO: separate variables that are outside (ex: in called functions) and inside these two branches
+            if (other.Table.ContainsKey(Variable))
             {
-                updatedVariableList.Add(Variable);
-                UpdatedTable.Add(Variable, MergedAlias);
-                AllAliases.Add(MergedAlias);
+                VariableAlias OtherNameAlias = other.Table[Variable];
+                VariableAlias MergedAlias = Entry.Value.Merged(OtherNameAlias, out bool IsUpdated);
+
+                if (IsUpdated)
+                {
+                    updatedVariableList.Add(Variable);
+                    UpdatedTable.Add(Variable, MergedAlias);
+                    AllAliases.Add(MergedAlias);
+                }
             }
         }
 

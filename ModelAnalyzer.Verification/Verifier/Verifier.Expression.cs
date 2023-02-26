@@ -251,12 +251,12 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
         Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
-        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
+        CreateVariable(verificationContext, owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultLocal = CallResult };
 
@@ -325,12 +325,12 @@ internal partial class Verifier : IDisposable
             if (!BuildExpression(verificationContext, Argument.Expression, out IExprBase<IExprCapsule, IExprCapsule> InitializerExpr))
                 return false;
 
-            verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
+            CreateVariable(verificationContext, owner: null, calledFunction, Parameter.Name, Parameter.Type, verificationContext.Branch, InitializerExpr);
         }
 
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
         Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null };
-        verificationContext.ObjectManager.CreateVariable(owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
+        CreateVariable(verificationContext, owner: null, calledFunction, CallResult.Name, CallResult.Type, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with
         {
@@ -655,7 +655,8 @@ internal partial class Verifier : IDisposable
         Debug.Assert(VariableName is not null);
         Debug.Assert(VariableType is not null);
 
-        resultExpr = verificationContext.ObjectManager.CreateValueExpr(HostMethod is null ? verificationContext.Instance : null, HostMethod, VariableName!, VariableType!);
+        Instance? Owner = HostMethod is null ? verificationContext.Instance : null;
+        resultExpr = verificationContext.ObjectManager.CreateValueExpr(Owner, HostMethod, VariableName!, VariableType!);
 
         if (pathIndex + 1 < variablePath.Count)
         {
@@ -677,22 +678,20 @@ internal partial class Verifier : IDisposable
         }
         else
         {
-            Debug.Assert(resultExpr is ExprArray<IArrayExprCapsule>);
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(Owner, HostMethod, VariableName!, VariableType!);
+            AddArrayGetterMethod(GetterMethod);
 
-            ExprArray<IArrayExprCapsule> ArrayResultExpr = (ExprArray<IArrayExprCapsule>)resultExpr;
-            IArrayExprCapsule ArrayExpr = ArrayResultExpr.ArrayExpression;
+            PrivateFunctionCallExpression GetterCallExpression = new()
+            {
+                ClassName = GetterMethod.ClassName,
+                MethodName = GetterMethod.Name,
+                ReturnType = VariableType!,
+                ArgumentList = new() { new Argument() { Expression = elementIndex, Location = null! } },
+                CallerClassName = GetterMethod.ClassName,
+                NameLocation = null!,
+            };
 
-            // Index is either an int literal or a single variable. This can't possibly fail.
-            bool IndexBuildSuccess = BuildExpression(verificationContext, elementIndex, out IExprBase<IIntExprCapsule, IIntExprCapsule> IndexExpr);
-            Debug.Assert(IndexBuildSuccess);
-
-            IExprCapsule ElementExpr = Context.CreateGetElementExpr(ArrayExpr, IndexExpr.MainExpression);
-
-            Debug.Assert(ElementExpr is ISimpleExprCapsule);
-
-            resultExpr = ((ISimpleExprCapsule)ElementExpr).ToSingle();
-
-            return true;
+            return BuildPrivateFunctionCallExpression(verificationContext, GetterCallExpression, GetterMethod, out resultExpr);
         }
     }
 

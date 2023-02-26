@@ -43,7 +43,7 @@ internal partial class ClassDeclarationParser
             {
                 Method TemporaryMethod;
                 ParsingContext MethodParsingContext;
-                BlockScope TemporaryRootBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() };
+                BlockScope TemporaryRootBlock = new() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new List<Statement>() };
 
                 TemporaryMethod = new Method
                 {
@@ -130,7 +130,7 @@ internal partial class ClassDeclarationParser
                     RequireList = new List<Require>();
                     ResultLocal = null;
                     EnsureList = new List<Ensure>();
-                    RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new List<Statement>() };
+                    RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new List<Statement>() };
                 }
 
                 Method NewMethod = new Method

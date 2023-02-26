@@ -632,4 +632,49 @@ class Program_Verifier_MiscStatement17
         Assert.That(VerificationResult.IsSuccess, Is.False);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
+
+    private const string MiscStatementSourceCode18 = @"
+using System;
+
+class Program_Verifier_MiscStatement18
+{
+    public int Read(int x)
+    {
+        int Result;
+
+        if (x == 0)
+        {
+            Result = Read2(x);
+        }
+        else
+        {
+            Result = Read3(x);
+        }
+
+        return Result;
+    }
+
+    int Read2(int y)
+    {
+        return 0;
+    }
+
+    int Read3(int z)
+    {
+        return 0;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Statement18_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(MiscStatementSourceCode18, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }

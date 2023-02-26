@@ -62,9 +62,9 @@ internal partial class Verifier : IDisposable
     required public ReadOnlyFieldTable FieldTable { get; init; }
 
     /// <summary>
-    /// Gets the method table.
+    /// Gets or sets the method table.
     /// </summary>
-    required public ReadOnlyMethodTable MethodTable { get; init; }
+    required public ReadOnlyMethodTable MethodTable { get; set; }
 
     /// <summary>
     /// Gets the invariant list.
@@ -182,13 +182,13 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<PropertyName, Property> Entry in verificationContext.PropertyTable)
         {
             Property Property = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Property.Name, Property.Type, Property.Initializer, initWithDefault: true);
         }
 
         foreach (KeyValuePair<FieldName, Field> Entry in verificationContext.FieldTable)
         {
             Field Field = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, verificationContext.Instance, hostMethod: null, Field.Name, Field.Type, Field.Initializer, initWithDefault: true);
         }
     }
 
@@ -294,7 +294,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<ParameterName, Parameter> Entry in HostMethod.ParameterTable)
         {
             Parameter Parameter = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
+            CreateVariable(verificationContext, owner: null, HostMethod, Parameter.Name, Parameter.Type, variableInitializer: null, initWithDefault: false);
         }
     }
 
@@ -306,7 +306,7 @@ internal partial class Verifier : IDisposable
         foreach (KeyValuePair<LocalName, Local> Entry in HostMethod.RootBlock.LocalTable)
         {
             Local Local = Entry.Value;
-            verificationContext.ObjectManager.CreateVariable(owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
+            CreateVariable(verificationContext, owner: null, HostMethod, Local.Name, Local.Type, Local.Initializer, initWithDefault: true);
         }
     }
 
@@ -481,6 +481,43 @@ internal partial class Verifier : IDisposable
         Debug.Assert(ClassModelTable.ContainsKey(className));
 
         return ClassModelTable[className];
+    }
+
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
+    {
+        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variableName, variableType, variableInitializer, initWithDefault);
+
+        if (variableType.IsArray)
+        {
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variableName, variableType);
+            AddArrayGetterMethod(GetterMethod);
+        }
+
+        return Result;
+    }
+
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariable(VerificationContext verificationContext, Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, IBoolExprCapsule? branch, IExprBase<IExprCapsule, IExprCapsule>? initializerExpr)
+    {
+        IExprBase<IExprCapsule, IExprCapsule> Result = verificationContext.ObjectManager.CreateVariable(owner, hostMethod, variableName, variableType, branch, initializerExpr);
+
+        if (variableType.IsArray)
+        {
+            Method GetterMethod = verificationContext.ObjectManager.GetArrayGetter(owner, hostMethod, variableName, variableType);
+            AddArrayGetterMethod(GetterMethod);
+        }
+
+        return Result;
+    }
+
+    private void AddArrayGetterMethod(Method method)
+    {
+        MethodTable NewMethodTable = new();
+        foreach (KeyValuePair<MethodName, Method> Entry in MethodTable)
+            NewMethodTable.AddItem(Entry.Value);
+
+        NewMethodTable.AddItem(method);
+
+        MethodTable = NewMethodTable.AsReadOnly();
     }
 
     private void Log(string message)

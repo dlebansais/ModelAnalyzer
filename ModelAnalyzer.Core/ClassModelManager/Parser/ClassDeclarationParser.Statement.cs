@@ -26,7 +26,7 @@ internal partial class ClassDeclarationParser
 
     private BlockScope ParseMethodExpressionBody(ParsingContext parsingContext, ExpressionSyntax expressionBody)
     {
-        BlockScope NewBlock = new() { LocalTable = new LocalTable().AsReadOnly(), IndexLocal = null, StatementList = new List<Statement>() };
+        BlockScope NewBlock = new() { LocalTable = new LocalTable().AsReadOnly(), IndexLocal = null, ContinueCondition = null, StatementList = new List<Statement>() };
         LocationContext LocationContext = new(expressionBody);
         ParsingContext ExpressionBodyContext = parsingContext with { LocationContext = LocationContext, CallLocation = new CallExpressionBodyLocation() };
 
@@ -52,7 +52,7 @@ internal partial class ClassDeclarationParser
         Debug.Assert(parsingContext.HostBlock is not null);
         BlockScope HostBlock = parsingContext.HostBlock!;
 
-        BlockScope NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, StatementList = new List<Statement>() };
+        BlockScope NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, ContinueCondition = HostBlock.ContinueCondition, StatementList = new List<Statement>() };
 
         for (int StatementIndex = 0; StatementIndex < block.Statements.Count; StatementIndex++)
         {
@@ -83,7 +83,7 @@ internal partial class ClassDeclarationParser
             Debug.Assert(parsingContext.HostBlock is not null);
             BlockScope HostBlock = parsingContext.HostBlock!;
 
-            NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, StatementList = new List<Statement>() };
+            NewBlock = new() { LocalTable = HostBlock.LocalTable, IndexLocal = HostBlock.IndexLocal, ContinueCondition = HostBlock.ContinueCondition, StatementList = new List<Statement>() };
 
             CallStatementLocation CallLocation = new() { ParentBlock = NewBlock, StatementIndex = 0 };
             ParsingContext SingleStatementContext = parsingContext with { CallLocation = CallLocation };
@@ -443,7 +443,7 @@ internal partial class ClassDeclarationParser
             if (ifStatement.Else is ElseClauseSyntax ElseClause)
                 WhenFalseBlock = ParseStatementOrBlock(parsingContext, ElseClause.Statement);
             else
-                WhenFalseBlock = new() { LocalTable = parsingContext.HostBlock!.LocalTable, IndexLocal = parsingContext.HostBlock!.IndexLocal, StatementList = new List<Statement>() };
+                WhenFalseBlock = new() { LocalTable = parsingContext.HostBlock!.LocalTable, IndexLocal = parsingContext.HostBlock!.IndexLocal, ContinueCondition = parsingContext.HostBlock!.ContinueCondition, StatementList = new List<Statement>() };
 
             NewStatement = new ConditionalStatement { Condition = Condition, WhenTrueBlock = WhenTrueBlock, WhenFalseBlock = WhenFalseBlock };
 
@@ -514,7 +514,7 @@ internal partial class ClassDeclarationParser
                     ForLoopLocalTable.AddItem(Entry.Value);
                 ForLoopLocalTable.AddItem(LocalIndex);
 
-                BlockScope ForLoopBlock = new() { LocalTable = ForLoopLocalTable.AsReadOnly(), IndexLocal = LocalIndex, StatementList = new List<Statement>() };
+                BlockScope ForLoopBlock = new() { LocalTable = ForLoopLocalTable.AsReadOnly(), IndexLocal = LocalIndex, ContinueCondition = null, StatementList = new List<Statement>() };
 
                 LocationContext LocationContext = new(forStatement.Condition);
                 ParsingContext ForLoopParsingContext = parsingContext with { LocationContext = LocationContext, HostBlock = ForLoopBlock, IsExpressionNested = false };
@@ -524,6 +524,9 @@ internal partial class ClassDeclarationParser
                 {
                     if (ContinueCondition.GetExpressionType() == ExpressionType.Boolean)
                     {
+                        ForLoopBlock = ForLoopBlock with { ContinueCondition = ContinueCondition };
+                        ForLoopParsingContext = ForLoopParsingContext with { HostBlock = ForLoopBlock };
+
                         if (TryParseForStatementIncrementor(ForLoopParsingContext, forStatement, LocalIndex, ref isErrorReported))
                         {
                             ForLoopBlock = ParseStatementOrBlock(ForLoopParsingContext, forStatement.Statement);

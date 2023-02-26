@@ -18,6 +18,11 @@ internal record BlockScope
     required public Local? IndexLocal { get; init; }
 
     /// <summary>
+    /// Gets the continue condition if this is a for loop block.
+    /// </summary>
+    required public Expression? ContinueCondition { get; init; }
+
+    /// <summary>
     /// Gets the block statements.
     /// </summary>
     required public List<Statement> StatementList { get; init; }

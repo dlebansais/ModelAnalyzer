@@ -357,7 +357,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -488,7 +488,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -871,7 +871,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -1064,7 +1064,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -1182,7 +1182,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };
@@ -1365,7 +1365,7 @@ public partial class VerifierTest
             IsPreloaded = false,
             ParameterTable = ReadOnlyParameterTable.Empty,
             RequireList = new(),
-            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, StatementList = new() { Assignment } },
+            RootBlock = new BlockScope() { LocalTable = ReadOnlyLocalTable.Empty, IndexLocal = null, ContinueCondition = null, StatementList = new() { Assignment } },
             EnsureList = new(),
             ReturnType = ExpressionType.Void,
         };

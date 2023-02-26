@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Z3;
 
 /// <summary>
@@ -46,6 +48,11 @@ internal class ObjectManager
     /// </summary>
     public AliasTable AliasTable { get; set; } = new();
 
+    /// <summary>
+    /// Gets the table of array getters.
+    /// </summary>
+    public Dictionary<VariableAlias, Method> ArrayGetterTable { get; } = new();
+
     public IExprBase<IExprCapsule, IExprCapsule> CreateVariable(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, ILiteralExpression? variableInitializer, bool initWithDefault)
     {
         IExprBase<IExprCapsule, IExprCapsule>? InitializerExpr;
@@ -68,15 +75,15 @@ internal class ObjectManager
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
 
+        // Increment for parameters of methods called several times.
         AliasTable.AddOrIncrement(Variable);
 
         VariableAlias VariableNameAlias = AliasTable.GetAlias(Variable);
-        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(VariableNameAlias, variableType);
+        IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(owner, hostMethod, VariableNameAlias, variableType);
 
         if (initializerExpr is not null)
         {
             IExprSet<IBoolExprCapsule> InitExpr = Context.CreateEqualExprSet(VariableExpr, initializerExpr);
-
             Context.AddToSolver(Solver, branch, InitExpr);
         }
 
@@ -88,17 +95,17 @@ internal class ObjectManager
         IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
         Variable Variable = new(VariableBlockName, variableType);
         VariableAlias VariableAlias = AliasTable.GetAlias(Variable);
-        IExprBase<IExprCapsule, IExprCapsule> ResultExprSet = CreateVariableExpr(VariableAlias, variableType);
+        IExprBase<IExprCapsule, IExprCapsule> ResultExprSet = CreateVariableExpr(owner, hostMethod, VariableAlias, variableType);
 
         return ResultExprSet;
     }
 
-    public void Assign(IBoolExprCapsule? branch, Variable destination, IExprBase<IExprCapsule, IExprCapsule> sourceExpr)
+    public void Assign(Instance? owner, Method? hostMethod, IBoolExprCapsule? branch, Variable destination, IExprBase<IExprCapsule, IExprCapsule> sourceExpr)
     {
         AliasTable.IncrementAlias(destination);
 
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
-        IExprBase<IExprCapsule, IExprCapsule> DestinationExpr = CreateVariableExpr(DestinationNameAlias, destination.Type);
+        IExprBase<IExprCapsule, IExprCapsule> DestinationExpr = CreateVariableExpr(owner, hostMethod, DestinationNameAlias, destination.Type);
 
         Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(DestinationExpr, sourceExpr));
     }
@@ -170,27 +177,27 @@ internal class ObjectManager
         endAliasTable = AliasTable.Clone();
     }
 
-    public void MergeBranches(AliasTable whenTrueAliasTable, IBoolExprCapsule branchTrue, List<VariableAlias> aliasesOnlyWhenTrue, AliasTable whenFalseAliasTable, IBoolExprCapsule branchFalse, List<VariableAlias> aliasesOnlyWhenFalse)
+    public void MergeBranches(Instance? owner, Method? hostMethod, AliasTable whenTrueAliasTable, IBoolExprCapsule branchTrue, List<VariableAlias> aliasesOnlyWhenTrue, AliasTable whenFalseAliasTable, IBoolExprCapsule branchFalse, List<VariableAlias> aliasesOnlyWhenFalse)
     {
         // Merge aliases from the if branch (the table currently contains the end of the end branch).
         AliasTable.Merge(whenTrueAliasTable, out List<Variable> UpdatedNameList);
 
-        AddConditionalAliases(branchTrue, aliasesOnlyWhenFalse);
-        AddConditionalAliases(branchFalse, aliasesOnlyWhenTrue);
+        AddConditionalAliases(owner, hostMethod, branchTrue, aliasesOnlyWhenFalse);
+        AddConditionalAliases(owner, hostMethod, branchFalse, aliasesOnlyWhenTrue);
 
         foreach (Variable Variable in UpdatedNameList)
         {
             ExpressionType VariableType = Variable.Type;
 
             VariableAlias NameAlias = AliasTable.GetAlias(Variable);
-            IExprBase<IExprCapsule, IExprCapsule> DestinationExpr = CreateVariableExpr(NameAlias, VariableType);
+            IExprBase<IExprCapsule, IExprCapsule> DestinationExpr = CreateVariableExpr(owner, hostMethod, NameAlias, VariableType);
 
             VariableAlias WhenTrueNameAlias = whenTrueAliasTable.GetAlias(Variable);
-            IExprBase<IExprCapsule, IExprCapsule> WhenTrueSourceExpr = CreateVariableExpr(WhenTrueNameAlias, VariableType);
+            IExprBase<IExprCapsule, IExprCapsule> WhenTrueSourceExpr = CreateVariableExpr(owner, hostMethod, WhenTrueNameAlias, VariableType);
             IExprSet<IBoolExprCapsule> WhenTrueInitExpr = Context.CreateEqualExprSet(DestinationExpr, WhenTrueSourceExpr);
 
             VariableAlias WhenFalseNameAlias = whenFalseAliasTable.GetAlias(Variable);
-            IExprBase<IExprCapsule, IExprCapsule> WhenFalseSourceExpr = CreateVariableExpr(WhenFalseNameAlias, VariableType);
+            IExprBase<IExprCapsule, IExprCapsule> WhenFalseSourceExpr = CreateVariableExpr(owner, hostMethod, WhenFalseNameAlias, VariableType);
             IExprSet<IBoolExprCapsule> WhenFalseInitExpr = Context.CreateEqualExprSet(DestinationExpr, WhenFalseSourceExpr);
 
             Context.AddToSolver(Solver, branchTrue, WhenTrueInitExpr);
@@ -198,14 +205,14 @@ internal class ObjectManager
         }
     }
 
-    private void AddConditionalAliases(IBoolExprCapsule branch, List<VariableAlias> aliasList)
+    private void AddConditionalAliases(Instance? owner, Method? hostMethod, IBoolExprCapsule branch, List<VariableAlias> aliasList)
     {
         foreach (VariableAlias Alias in aliasList)
         {
             Variable Variable = Alias.Variable;
             ExpressionType VariableType = Variable.Type;
 
-            IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(Alias, VariableType);
+            IExprBase<IExprCapsule, IExprCapsule> VariableExpr = CreateVariableExpr(owner, hostMethod, Alias, VariableType);
             IExprBase<IExprCapsule, IExprCapsule> InitializerExpr = GetDefaultExpr(VariableType);
             IExprSet<IBoolExprCapsule> InitExpr = Context.CreateEqualExprSet(VariableExpr, InitializerExpr);
 
@@ -213,7 +220,7 @@ internal class ObjectManager
         }
     }
 
-    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableExpr(VariableAlias alias, ExpressionType variableType)
+    private IExprBase<IExprCapsule, IExprCapsule> CreateVariableExpr(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType)
     {
         Debug.Assert(variableType != ExpressionType.Other);
 
@@ -233,7 +240,12 @@ internal class ObjectManager
             Result = SwitchTable[variableType](AliasString);
         }
         else if (variableType.IsArray)
+        {
+            if (!ArrayGetterTable.ContainsKey(alias))
+                GenerateArrayGetter(owner, hostMethod, alias, variableType.ToElementType());
+
             Result = CreateArrayReferenceVariable(alias, variableType);
+        }
         else
             Result = CreateObjectReferenceVariable(alias, variableType);
 
@@ -401,7 +413,7 @@ internal class ObjectManager
 
             VariableAlias PropertyVariableNameAlias = AliasTable.GetAlias(PropertyVariable);
 
-            IExprBase<IExprCapsule, IExprCapsule> PropertyExpressions = CreateVariableExpr(PropertyVariableNameAlias, Property.Type);
+            IExprBase<IExprCapsule, IExprCapsule> PropertyExpressions = CreateVariableExpr(Reference, hostMethod: null, PropertyVariableNameAlias, Property.Type);
             VariableSetList.Add(PropertyExpressions);
         }
 
@@ -417,7 +429,7 @@ internal class ObjectManager
 
             VariableAlias FieldVariableNameAlias = AliasTable.GetAlias(FieldVariable);
 
-            IExprBase<IExprCapsule, IExprCapsule> FieldExpressions = CreateVariableExpr(FieldVariableNameAlias, Field.Type);
+            IExprBase<IExprCapsule, IExprCapsule> FieldExpressions = CreateVariableExpr(Reference, hostMethod: null, FieldVariableNameAlias, Field.Type);
             VariableSetList.Add(FieldExpressions);
         }
 
@@ -598,7 +610,7 @@ internal class ObjectManager
         AliasTable.IncrementAlias(IndexVariable);
 
         VariableAlias VaryingIndexNameAlias = AliasTable.GetAlias(IndexVariable);
-        IExprBase<IExprCapsule, IExprCapsule> VaryingIndexExpr = CreateVariableExpr(VaryingIndexNameAlias, localIndex.Type);
+        IExprBase<IExprCapsule, IExprCapsule> VaryingIndexExpr = CreateVariableExpr(owner: null, hostMethod, VaryingIndexNameAlias, localIndex.Type);
 
         Debug.Assert(VaryingIndexExpr is IExprSingle<IIntExprCapsule>);
         Debug.Assert(initIndexExpr is IExprSingle<IIntExprCapsule>);
@@ -611,6 +623,151 @@ internal class ObjectManager
         Context.AddToSolver(Solver, branch, InitExpr);
 
         return VaryingIndexSingle;
+    }
+
+    private void GenerateArrayGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType elementType)
+    {
+        ClassName ClassName = null!;
+
+        if (hostMethod is not null)
+            ClassName = hostMethod.ClassName;
+
+        if (owner is not null)
+            ClassName = owner.ClassModel.ClassName;
+
+        ParameterTable ParameterTable = new();
+        ParameterTable.AddItem(new Parameter() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer });
+
+        Dictionary<ExpressionType, ILiteralExpression> ZeroTable = new()
+        {
+            { ExpressionType.Boolean, new LiteralBooleanValueExpression() { Value = false } },
+            { ExpressionType.Integer, new LiteralIntegerValueExpression() { Value = 0 } },
+            { ExpressionType.FloatingPoint, new LiteralFloatingPointValueExpression() { Value = 0 } },
+        };
+
+        Debug.Assert(ZeroTable.ContainsKey(elementType));
+        ReturnStatement Return = new() { Expression = (Expression)ZeroTable[elementType] };
+
+        BlockScope RootBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new() { Return } };
+
+        Method NewMethod = new()
+        {
+            Name = new MethodName() { Text = $"{alias}_get" },
+            ClassName = ClassName,
+            AccessModifier = AccessModifier.Private,
+            IsStatic = false,
+            IsPreloaded = false,
+            ReturnType = elementType,
+            ParameterTable = new ReadOnlyParameterTable(ParameterTable),
+            RequireList = new(),
+            RootBlock = RootBlock,
+            EnsureList = new(),
+        };
+
+        Debug.Assert(!ArrayGetterTable.ContainsKey(alias));
+        ArrayGetterTable.Add(alias, NewMethod);
+    }
+
+    public Method GetArrayGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType)
+    {
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
+        Variable Variable = new(VariableBlockName, variableType);
+        VariableAlias VariableNameAlias = AliasTable.GetAlias(Variable);
+
+        Debug.Assert(ArrayGetterTable.ContainsKey(VariableNameAlias));
+        return ArrayGetterTable[VariableNameAlias];
+    }
+
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, LiteralIntegerValueExpression literalIntegerValue, Expression newValueExpression)
+    {
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
+        Variable Variable = new(VariableBlockName, variableType);
+
+        VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
+        Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
+        Method OldMethod = ArrayGetterTable[OldVariableNameAlias];
+
+        AliasTable.IncrementAlias(Variable);
+        VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
+
+        ParameterTable ParameterTable = new();
+        Parameter Parameter = new() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer };
+        ParameterTable.AddItem(Parameter);
+
+        VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { Parameter } };
+        EqualityExpression Equality = new() { Left = VariableValue, Operator = EqualityOperator.Equal, Right = literalIntegerValue };
+
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variableType, Parameter, Equality, newValueExpression, OldMethod);
+    }
+
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariableName variableName, ExpressionType variableType, Expression continueCondition, Expression newValueExpression)
+    {
+        IVariableName VariableBlockName = CreateBlockName(owner, hostMethod, variableName);
+        Variable Variable = new(VariableBlockName, variableType);
+
+        VariableAlias OldVariableNameAlias = AliasTable.GetAlias(Variable);
+        Debug.Assert(ArrayGetterTable.ContainsKey(OldVariableNameAlias));
+        Method OldMethod = ArrayGetterTable[OldVariableNameAlias];
+
+        AliasTable.IncrementAlias(Variable);
+        VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
+
+        ParameterTable ParameterTable = new();
+        Parameter Parameter = new() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer };
+        ParameterTable.AddItem(Parameter);
+
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variableType, Parameter, continueCondition, newValueExpression, OldMethod);
+    }
+
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
+    {
+        ClassName ClassName = null!;
+
+        if (hostMethod is not null)
+            ClassName = hostMethod.ClassName;
+
+        if (owner is not null)
+            ClassName = owner.ClassModel.ClassName;
+
+        ParameterTable ParameterTable = new();
+        ParameterTable.AddItem(parameter);
+
+        ExpressionType ElementType = variableType.ToElementType();
+
+        Local ResultLocal = new() { Name = new LocalName() { Text = Ensure.ResultKeyword }, Initializer = null, Type = ElementType };
+        LocalTable LocalTable = new();
+        LocalTable.AddItem(ResultLocal);
+
+        VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { parameter } };
+        AssignmentStatement AssignWhenTrue = new() { DestinationName = ResultLocal.Name, Expression = newValueExpression, DestinationIndex = null };
+        BlockScope WhenTrueBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new List<Statement>() { AssignWhenTrue } };
+        Argument Argument = new() { Expression = VariableValue, Location = null! };
+        PrivateFunctionCallExpression FunctionCall = new() { CallerClassName = ClassName, ClassName = ClassName, MethodName = oldMethod.Name, ReturnType = variableType, ArgumentList = new List<Argument>() { Argument }, NameLocation = null! };
+        AssignmentStatement AssignWhenFalse = new() { DestinationName = ResultLocal.Name, Expression = FunctionCall, DestinationIndex = null };
+        BlockScope WhenFalseBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new List<Statement>() { AssignWhenFalse } };
+        ConditionalStatement Conditional = new() { Condition = comparisonExpression, WhenTrueBlock = WhenTrueBlock, WhenFalseBlock = WhenFalseBlock };
+
+        VariableValueExpression ResultExpression = new() { VariablePath = new List<IVariable>() { ResultLocal }, PathLocation = Location.None, LocationId = null! };
+        ReturnStatement Return = new() { Expression = ResultExpression };
+
+        BlockScope RootBlock = new() { IndexLocal = null, ContinueCondition = null, LocalTable = new(), StatementList = new() { Conditional, Return } };
+
+        Method NewMethod = new()
+        {
+            Name = new MethodName() { Text = $"{alias}_get" },
+            ClassName = ClassName,
+            AccessModifier = AccessModifier.Private,
+            IsStatic = false,
+            IsPreloaded = false,
+            ReturnType = ElementType,
+            ParameterTable = new ReadOnlyParameterTable(ParameterTable),
+            RequireList = new(),
+            RootBlock = RootBlock,
+            EnsureList = new(),
+        };
+
+        Debug.Assert(!ArrayGetterTable.ContainsKey(alias));
+        ArrayGetterTable.Add(alias, NewMethod);
     }
 
     private ReferenceIndex Index;
