@@ -11,8 +11,8 @@ internal record Variable : IVariable
     /// <summary>
     /// Initializes a new instance of the <see cref="Variable"/> class.
     /// </summary>
-    /// <param name="name">The variable name.</param>
-    /// <param name="type">The variable type.</param>
+    /// <param name="name">The field name.</param>
+    /// <param name="type">The field type.</param>
     public Variable(IVariableName name, ExpressionType type)
     {
         Name = name;

@@ -277,7 +277,7 @@ internal partial class Verifier : IDisposable
             Debug.Assert(verificationContext.ResultVariable is not null);
 
             Method HostMethod = verificationContext.HostMethod!;
-            CodeVariable ResultVariable = verificationContext.ResultVariable!;
+            Variable ResultVariable = verificationContext.ResultVariable!;
 
             if (!BuildExpression(verificationContext, ReturnExpression, out IExprBase<IExprCapsule, IExprCapsule> ResultInitializerExpr))
                 return false;

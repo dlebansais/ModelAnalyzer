@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents the name of a variable.
 /// </summary>
 [DebuggerDisplay("{Text}")]
-internal class CodeVariableName : IVariableName
+internal class VariableName : IVariableName
 {
     /// <inheritdoc/>
     required public string Text { get; init; }

@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// Represents a class field.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal record Field : CodeVariable, IField, INameable<FieldName>
+internal record Field : Variable, IField, INameable<FieldName>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Field"/> class.

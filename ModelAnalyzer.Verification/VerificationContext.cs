@@ -51,7 +51,7 @@ internal record VerificationContext
     /// <summary>
     /// Gets or sets the variable that represents the value returned by a method. This is either a local declared in the method or one made up by the parser.
     /// </summary>
-    public CodeVariable? ResultVariable { get; set; }
+    public Variable? ResultVariable { get; set; }
 
     /// <summary>
     /// Gets or sets the local variable that represents the index of the current loop.

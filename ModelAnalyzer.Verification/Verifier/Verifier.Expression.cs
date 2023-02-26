@@ -195,7 +195,7 @@ internal partial class Verifier : IDisposable
                 return;
             }
 
-        if (verificationContext.ResultVariable is CodeVariable ResultVariable && name == Ensure.ResultKeyword)
+        if (verificationContext.ResultVariable is Variable ResultVariable && name == Ensure.ResultKeyword)
         {
             Debug.Assert(hostMethod is null);
             Debug.Assert(variable is null);
@@ -242,8 +242,8 @@ internal partial class Verifier : IDisposable
             CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
-        CodeVariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
-        CodeVariable CallResult = new(CallResultName, calledFunction.ReturnType);
+        VariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
+        Variable CallResult = new(CallResultName, calledFunction.ReturnType);
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultVariable = CallResult };
@@ -316,8 +316,8 @@ internal partial class Verifier : IDisposable
             CreateVariable(verificationContext, owner: null, calledFunction, Parameter, verificationContext.Branch, InitializerExpr);
         }
 
-        CodeVariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
-        CodeVariable CallResult = new(CallResultName, calledFunction.ReturnType);
+        VariableName CallResultName = new() { Text = CreateTemporaryResultLocal() };
+        Variable CallResult = new(CallResultName, calledFunction.ReturnType);
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with
