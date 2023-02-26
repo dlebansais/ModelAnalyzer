@@ -17,4 +17,7 @@ internal class UnsupportedParameter : IUnsupportedParameter
 
     /// <inheritdoc/>
     public ExpressionType Type => ExpressionType.Other;
+
+    /// <inheritdoc/>
+    required public MethodName MethodName { get; init; }
 }

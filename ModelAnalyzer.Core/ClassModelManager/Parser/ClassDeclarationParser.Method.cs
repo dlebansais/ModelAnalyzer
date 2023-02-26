@@ -448,7 +448,7 @@ internal partial class ClassDeclarationParser
                 if (Entry.Key == ResultName)
                     return Entry.Value;
 
-            ResultLocal = new Local() { Name = ResultName, Type = returnType, Initializer = null, MethodName = methodName };
+            ResultLocal = new Local(ResultName, returnType) { Initializer = null, MethodName = methodName };
         }
         else
             ResultLocal = null;

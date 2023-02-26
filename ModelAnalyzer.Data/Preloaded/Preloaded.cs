@@ -124,11 +124,12 @@ internal static class Preloaded
     /// <param name="preloadedMethod">The preloaded method.</param>
     private static Method CreateMethod(ClassName className, PreloadedMethod preloadedMethod)
     {
+        MethodName MethodName = new MethodName() { Text = preloadedMethod.Name };
         ParameterTable ParameterTable = new();
 
         foreach (PreloadedParameter Item in preloadedMethod.Parameters)
         {
-            Parameter NewParameter = CreateParameter(Item);
+            Parameter NewParameter = CreateParameter(MethodName, Item);
             ParameterTable.AddItem(NewParameter);
         }
 
@@ -148,8 +149,6 @@ internal static class Preloaded
             EnsureList.Add(NewEnsure);
         }
 
-        MethodName MethodName = new MethodName() { Text = preloadedMethod.Name };
-
         ExpressionType ReturnType = ConvertTypeName(preloadedMethod.ReturnTypeName);
         Debug.Assert(ReturnType != ExpressionType.Other);
         Debug.Assert(ReturnType.IsSimple);
@@ -159,10 +158,8 @@ internal static class Preloaded
         if (ReturnType == ExpressionType.Void)
             ResultLocal = null;
         else
-            ResultLocal = new Local()
+            ResultLocal = new Local(new LocalName() { Text = "Result" }, ReturnType)
             {
-                Name = new LocalName() { Text = "Result" },
-                Type = ReturnType,
                 Initializer = null,
                 MethodName = MethodName,
             };
@@ -189,14 +186,12 @@ internal static class Preloaded
     /// <summary>
     /// Creates a parameter from the preloaded value.
     /// </summary>
+    /// <param name="methodName">The preloaded method name.</param>
     /// <param name="preloadedParameter">The preloaded parameter.</param>
-    private static Parameter CreateParameter(PreloadedParameter preloadedParameter)
+    private static Parameter CreateParameter(MethodName methodName, PreloadedParameter preloadedParameter)
     {
-        Parameter NewParameter = new Parameter()
-        {
-            Name = new ParameterName() { Text = preloadedParameter.Name },
-            Type = ConvertTypeName(preloadedParameter.TypeName),
-        };
+        ParameterName ParameterName = new() { Text = preloadedParameter.Name };
+        Parameter NewParameter = new(ParameterName, ConvertTypeName(preloadedParameter.TypeName)) { MethodName = methodName };
 
         return NewParameter;
     }

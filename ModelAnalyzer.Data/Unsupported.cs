@@ -86,9 +86,10 @@ internal record Unsupported : IUnsupported
     /// Adds an unsupported parameter.
     /// </summary>
     /// <param name="location">The parameter location.</param>
-    public void AddUnsupportedParameter(Location location)
+    /// <param name="methodName">The host method name.</param>
+    public void AddUnsupportedParameter(Location location, MethodName methodName)
     {
-        UnsupportedParameter NewItem = new UnsupportedParameter { Location = location };
+        UnsupportedParameter NewItem = new UnsupportedParameter { Location = location, MethodName = methodName };
         InternalParameters.Add(NewItem);
     }
 

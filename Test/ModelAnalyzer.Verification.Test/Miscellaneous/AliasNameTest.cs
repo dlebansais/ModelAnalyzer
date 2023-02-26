@@ -14,7 +14,7 @@ public class AliasNameTest
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestObjectName, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject = new(TestVariable);
 
@@ -28,7 +28,7 @@ public class AliasNameTest
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestObjectName, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject = new(TestVariable);
 
@@ -44,7 +44,7 @@ public class AliasNameTest
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestObjectName, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);
@@ -62,7 +62,7 @@ public class AliasNameTest
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestObjectName, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);
@@ -80,7 +80,7 @@ public class AliasNameTest
     {
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldName TestObjectName = new() { Text = "Test" };
-        Field TestField = new Field() { Name = TestObjectName, Type = ExpressionType.Integer, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestObjectName, ExpressionType.Integer) { Initializer = null, ClassName = ClassName };
         Variable TestVariable = new Variable(TestField.Name, TestField.Type);
         VariableAlias TestObject1 = new(TestVariable);
         VariableAlias TestObject2 = new(TestVariable);

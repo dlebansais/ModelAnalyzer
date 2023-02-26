@@ -635,8 +635,11 @@ internal class ObjectManager
         if (owner is not null)
             ClassName = owner.ClassModel.ClassName;
 
+        MethodName MethodName = new MethodName() { Text = $"{alias}_get" };
         ParameterTable ParameterTable = new();
-        ParameterTable.AddItem(new Parameter() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer });
+        ParameterName ParameterName = new() { Text = "i" };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
+        ParameterTable.AddItem(Parameter);
 
         Dictionary<ExpressionType, ILiteralExpression> ZeroTable = new()
         {
@@ -652,7 +655,7 @@ internal class ObjectManager
 
         Method NewMethod = new()
         {
-            Name = new MethodName() { Text = $"{alias}_get" },
+            Name = MethodName,
             ClassName = ClassName,
             AccessModifier = AccessModifier.Private,
             IsStatic = false,
@@ -690,14 +693,17 @@ internal class ObjectManager
         AliasTable.IncrementAlias(Variable);
         VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
 
+        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
+
         ParameterTable ParameterTable = new();
-        Parameter Parameter = new() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer };
+        ParameterName ParameterName = new() { Text = "i" };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
         ParameterTable.AddItem(Parameter);
 
         VariableValueExpression VariableValue = new() { PathLocation = null!, VariablePath = new List<IVariable>() { Parameter } };
         EqualityExpression Equality = new() { Left = VariableValue, Operator = EqualityOperator.Equal, Right = literalIntegerValue };
 
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, Parameter, Equality, newValueExpression, OldMethod);
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, MethodName, Parameter, Equality, newValueExpression, OldMethod);
     }
 
     public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, IVariable variable, Expression continueCondition, Expression newValueExpression)
@@ -712,14 +718,17 @@ internal class ObjectManager
         AliasTable.IncrementAlias(Variable);
         VariableAlias NewVariableNameAlias = AliasTable.GetAlias(Variable);
 
+        MethodName MethodName = new MethodName() { Text = $"{NewVariableNameAlias}_get" };
+
         ParameterTable ParameterTable = new();
-        Parameter Parameter = new() { Name = new ParameterName() { Text = "i" }, Type = ExpressionType.Integer };
+        ParameterName ParameterName = new() { Text = "i" };
+        Parameter Parameter = new(ParameterName, ExpressionType.Integer) { MethodName = MethodName };
         ParameterTable.AddItem(Parameter);
 
-        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, Parameter, continueCondition, newValueExpression, OldMethod);
+        GenerateModifiedGetter(owner, hostMethod, NewVariableNameAlias, variable.Type, MethodName, Parameter, continueCondition, newValueExpression, OldMethod);
     }
 
-    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
+    public void GenerateModifiedGetter(Instance? owner, Method? hostMethod, VariableAlias alias, ExpressionType variableType, MethodName methodName, Parameter parameter, Expression comparisonExpression, Expression newValueExpression, Method oldMethod)
     {
         ClassName ClassName = null!;
 
@@ -735,7 +744,7 @@ internal class ObjectManager
         ExpressionType ElementType = variableType.ToElementType();
 
         // TODO create an agnostic "variable" type, base of Local, property etc.
-        Local ResultLocal = new() { Name = new LocalName() { Text = Ensure.ResultKeyword }, Initializer = null, Type = ElementType, MethodName = null! };
+        Local ResultLocal = new(new LocalName() { Text = Ensure.ResultKeyword }, ElementType) { Initializer = null, MethodName = null! };
         LocalTable LocalTable = new();
         LocalTable.AddItem(ResultLocal);
 
@@ -755,7 +764,7 @@ internal class ObjectManager
 
         Method NewMethod = new()
         {
-            Name = new MethodName() { Text = $"{alias}_get" },
+            Name = methodName,
             ClassName = ClassName,
             AccessModifier = AccessModifier.Private,
             IsStatic = false,

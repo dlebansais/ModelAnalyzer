@@ -82,7 +82,7 @@ internal partial class ClassDeclarationParser
 
             if (IsFieldSupported)
             {
-                Field NewField = new Field { Name = Name, Type = fieldType, Initializer = Initializer, ClassName = parsingContext.ClassName };
+                Field NewField = new(Name, fieldType) { Initializer = Initializer, ClassName = parsingContext.ClassName };
                 fieldTable.AddItem(NewField);
             }
             else if (!IsErrorReported)

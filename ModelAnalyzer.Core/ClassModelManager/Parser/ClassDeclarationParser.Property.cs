@@ -85,7 +85,7 @@ internal partial class ClassDeclarationParser
 
         if (IsPropertySupported)
         {
-            Property NewProperty = new Property { Name = Name, Type = PropertyType, Initializer = Initializer, ClassName = parsingContext.ClassName };
+            Property NewProperty = new(Name, PropertyType) { Initializer = Initializer, ClassName = parsingContext.ClassName };
             propertyTable.AddItem(NewProperty);
         }
         else if (!IsErrorReported)

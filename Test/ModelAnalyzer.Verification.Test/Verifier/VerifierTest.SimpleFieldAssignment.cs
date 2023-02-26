@@ -132,10 +132,8 @@ public partial class VerifierTest
 
         ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
-        Field TestField = new()
+        Field TestField = new(new FieldName { Text = FieldName }, Zero.GetExpressionType())
         {
-            Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(),
             Initializer = null,
             ClassName = ClassName,
         };

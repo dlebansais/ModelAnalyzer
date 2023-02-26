@@ -244,7 +244,7 @@ internal partial class Verifier : IDisposable
 
         // TODO create an agnostic "variable" type, base of Local, property etc.
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null, MethodName = null! };
+        Local CallResult = new(CallResultName, calledFunction.ReturnType) { Initializer = null, MethodName = null! };
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with { HostMethod = calledFunction, HostBlock = calledFunction.RootBlock, ResultLocal = CallResult };
@@ -319,7 +319,7 @@ internal partial class Verifier : IDisposable
 
         // TODO create an agnostic "variable" type, base of Local, property etc.
         LocalName CallResultName = new LocalName() { Text = CreateTemporaryResultLocal() };
-        Local CallResult = new Local() { Name = CallResultName, Type = calledFunction.ReturnType, Initializer = null, MethodName = null! };
+        Local CallResult = new(CallResultName, calledFunction.ReturnType) { Initializer = null, MethodName = null! };
         CreateVariable(verificationContext, owner: null, calledFunction, CallResult, branch: null, initializerExpr: null);
 
         VerificationContext CallVerificationContext = verificationContext with

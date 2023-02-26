@@ -123,7 +123,7 @@ internal partial class ClassDeclarationParser
             return false;
         }
 
-        Local NewLocal = new Local { Name = Name, Type = localType, Initializer = Initializer, MethodName = HostMethod.Name };
+        Local NewLocal = new(Name, localType) { Initializer = Initializer, MethodName = HostMethod.Name };
         localTable.AddItem(NewLocal);
 
         return true;

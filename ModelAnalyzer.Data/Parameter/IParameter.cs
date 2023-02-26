@@ -5,4 +5,8 @@
 /// </summary>
 public interface IParameter : IVariable
 {
+    /// <summary>
+    /// Gets the parameter host method name.
+    /// </summary>
+    MethodName MethodName { get; }
 }

@@ -6,18 +6,23 @@ using System.Diagnostics;
 /// Represents a class field.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Field : IField, INameable<FieldName>
+internal class Field : CodeVariable, IField, INameable<FieldName>
 {
     /// <summary>
-    /// Gets the field name.
+    /// Initializes a new instance of the <see cref="Field"/> class.
     /// </summary>
-    required public FieldName Name { get; init; }
+    /// <param name="name">The field name.</param>
+    /// <param name="type">The field type.</param>
+    public Field(FieldName name, ExpressionType type)
+        : base(name, type)
+    {
+    }
 
     /// <inheritdoc/>
     IVariableName IVariable.Name { get => Name; }
 
     /// <inheritdoc/>
-    required public ExpressionType Type { get; init; }
+    FieldName INameable<FieldName>.Name { get => (FieldName)Name; }
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }

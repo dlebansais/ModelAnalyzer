@@ -7,15 +7,13 @@ using System.Diagnostics;
 /// Represents a class property.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Property : IProperty, INameable<PropertyName>
+internal class Property : CodeVariable, IProperty, INameable<PropertyName>
 {
     /// <summary>
     /// Gets the Length property of arrays.
     /// </summary>
-    public static Property ArrayLengthProperty { get; } = new Property()
+    public static Property ArrayLengthProperty { get; } = new Property(new PropertyName() { Text = "Length" }, ExpressionType.Integer)
     {
-        Name = new PropertyName() { Text = "Length" },
-        Type = ExpressionType.Integer,
         Initializer = null,
         ClassName = new ClassName()
         {
@@ -25,15 +23,20 @@ internal class Property : IProperty, INameable<PropertyName>
     };
 
     /// <summary>
-    /// Gets the property name.
+    /// Initializes a new instance of the <see cref="Property"/> class.
     /// </summary>
-    required public PropertyName Name { get; init; }
+    /// <param name="name">The property name.</param>
+    /// <param name="type">The property type.</param>
+    public Property(PropertyName name, ExpressionType type)
+        : base(name, type)
+    {
+    }
 
     /// <inheritdoc/>
     IVariableName IVariable.Name { get => Name; }
 
     /// <inheritdoc/>
-    required public ExpressionType Type { get; init; }
+    PropertyName INameable<PropertyName>.Name { get => (PropertyName)Name; }
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }

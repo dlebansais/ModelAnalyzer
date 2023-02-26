@@ -45,7 +45,7 @@ public class NameAndItemTableTest
         ClassName ClassName = ClassName.FromSimpleString("Test");
         FieldTable TestTable = new();
         FieldName TestFieldName = new FieldName() { Text = "*" };
-        Field TestField = new Field() { Name = TestFieldName, Type = ExpressionType.Other, Initializer = null, ClassName = ClassName };
+        Field TestField = new(TestFieldName, ExpressionType.Other) { Initializer = null, ClassName = ClassName };
 
         TestTable.AddItem(TestField);
 
@@ -105,9 +105,10 @@ public class NameAndItemTableTest
     [Category("Core")]
     public void NameAndItemTable_ReadOnlyParameterTable()
     {
+        MethodName MethodName = new() { Text = "Test" };
         ParameterTable TestTable = new();
         ParameterName TestParameterName = new ParameterName() { Text = "*" };
-        Parameter TestParameter = new Parameter() { Name = TestParameterName, Type = ExpressionType.Other };
+        Parameter TestParameter = new Parameter(TestParameterName, ExpressionType.Other) { MethodName = MethodName };
 
         TestTable.AddItem(TestParameter);
 

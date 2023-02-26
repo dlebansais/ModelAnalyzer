@@ -1,6 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,6 +14,9 @@ internal partial class ClassDeclarationParser
     {
         ParameterTable ParameterTable = new();
 
+        Debug.Assert(parsingContext.HostMethod is not null);
+        Method HostMethod = parsingContext.HostMethod!;
+
         foreach (ParameterSyntax Parameter in methodDeclaration.ParameterList.Parameters)
         {
             ParameterName ParameterName = new() { Text = Parameter.Identifier.ValueText };
@@ -22,13 +26,13 @@ internal partial class ClassDeclarationParser
             {
                 if (IsParameterSupported(parsingContext, Parameter, out ExpressionType ParameterType))
                 {
-                    Parameter NewParameter = new Parameter() { Name = ParameterName, Type = ParameterType };
+                    Parameter NewParameter = new(ParameterName, ParameterType) { MethodName = HostMethod.Name };
                     ParameterTable.AddItem(NewParameter);
                 }
                 else if (!parsingContext.IsMethodParsingFirstPassDone)
                 {
                     Location Location = Parameter.GetLocation();
-                    parsingContext.Unsupported.AddUnsupportedParameter(Location);
+                    parsingContext.Unsupported.AddUnsupportedParameter(Location, HostMethod.Name);
                 }
             }
         }

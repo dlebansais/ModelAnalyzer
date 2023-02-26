@@ -93,10 +93,8 @@ public partial class VerifierTest
 
         ClassName ClassName = ClassName.FromSimpleString("Test");
         string FieldName = "X";
-        Field TestField = new()
+        Field TestField = new(new FieldName { Text = FieldName }, Zero.GetExpressionType())
         {
-            Name = new FieldName { Text = FieldName },
-            Type = Zero.GetExpressionType(),
             Initializer = Initializer,
             ClassName = ClassName,
         };
@@ -231,18 +229,14 @@ public partial class VerifierTest
         string FieldName1 = "X";
         string FieldName2 = "Y";
 
-        Field TestField1 = new()
+        Field TestField1 = new(new FieldName { Text = FieldName1 }, Zero1.GetExpressionType())
         {
-            Name = new FieldName { Text = FieldName1 },
-            Type = Zero1.GetExpressionType(),
             Initializer = Initializer,
             ClassName = ClassName,
         };
 
-        Field TestField2 = new()
+        Field TestField2 = new(new FieldName { Text = FieldName2 }, Zero2.GetExpressionType())
         {
-            Name = new FieldName { Text = FieldName2 },
-            Type = Zero2.GetExpressionType(),
             Initializer = Initializer,
             ClassName = ClassName,
         };

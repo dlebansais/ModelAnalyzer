@@ -6,18 +6,23 @@ using System.Diagnostics;
 /// Represents a method local variable.
 /// </summary>
 [DebuggerDisplay("{Name.Text}")]
-internal class Local : ILocal, INameable<LocalName>
+internal class Local : CodeVariable, ILocal, INameable<LocalName>
 {
     /// <summary>
-    /// Gets the local name.
+    /// Initializes a new instance of the <see cref="Local"/> class.
     /// </summary>
-    required public LocalName Name { get; init; }
+    /// <param name="name">The local name.</param>
+    /// <param name="type">The local type.</param>
+    public Local(LocalName name, ExpressionType type)
+        : base(name, type)
+    {
+    }
 
     /// <inheritdoc/>
     IVariableName IVariable.Name { get => Name; }
 
     /// <inheritdoc/>
-    required public ExpressionType Type { get; init; }
+    LocalName INameable<LocalName>.Name { get => (LocalName)Name; }
 
     /// <inheritdoc/>
     required public ILiteralExpression? Initializer { get; init; }
