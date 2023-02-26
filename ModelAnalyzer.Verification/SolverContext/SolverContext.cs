@@ -452,51 +452,6 @@ internal partial class SolverContext : IDisposable
     }
 
     /// <summary>
-    /// Creates a get element expression.
-    /// </summary>
-    /// <param name="arrayExpr">The array.</param>
-    /// <param name="indexExpr">The index.</param>
-    public IExprCapsule CreateGetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr)
-    {
-        ExpressionType ElementType = arrayExpr.ElementType;
-        Dictionary<ExpressionType, Func<IArrayExprCapsule, IExprCapsule>> CreateTable = new()
-        {
-            { ExpressionType.Boolean, (IArrayExprCapsule arrayExpr) => ((BoolExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
-            { ExpressionType.Integer, (IArrayExprCapsule arrayExpr) => ((IntExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
-            { ExpressionType.FloatingPoint, (IArrayExprCapsule arrayExpr) => ((ArithExpr)Context.MkSelect(arrayExpr.Item, indexExpr.Item)).Encapsulate() },
-        };
-
-        Debug.Assert(ElementType.IsSimple);
-        Debug.Assert(CreateTable.ContainsKey(ElementType));
-
-        IExprCapsule Result = CreateTable[ElementType](arrayExpr);
-
-        return Result;
-    }
-
-    /// <summary>
-    /// Creates a set element expression.
-    /// </summary>
-    /// <param name="arrayExpr">The array.</param>
-    /// <param name="indexExpr">The index.</param>
-    /// <param name="valueExpr">The value.</param>
-    /// <param name="arrayStoreExpr">The new array upon return.</param>
-    /// <param name="arraySetterExpr">The new array setter upon return.</param>
-    public void CreateSetElementExpr(IArrayExprCapsule arrayExpr, IIntExprCapsule indexExpr, IExprCapsule valueExpr, out IArrayExprCapsule arrayStoreExpr, out IBoolExprCapsule arraySetterExpr)
-    {
-        ExpressionType ElementType = arrayExpr.ElementType;
-        Debug.Assert(ElementType.IsSimple);
-
-        Symbol s_j = Context.MkSymbol("j");
-        Expr j = Context.MkIntConst(s_j);
-        ArrayExpr StoreExpr = Context.MkLambda(new Sort[] { Context.IntSort }, new Symbol[] { s_j }, Context.MkITE(Context.MkEq(indexExpr.Item, j), valueExpr.Item, arrayExpr.Item[j]));
-        BoolExpr SetterExpr = Context.MkEq(StoreExpr[indexExpr.Item], valueExpr.Item);
-
-        arrayStoreExpr = StoreExpr.Encapsulate(ElementType);
-        arraySetterExpr = SetterExpr.Encapsulate();
-    }
-
-    /// <summary>
     /// Adds boolean expressions to a solver, conditional to a branch of code.
     /// </summary>
     /// <param name="solver">The solver.</param>

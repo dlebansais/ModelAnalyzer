@@ -254,4 +254,36 @@ class Program_Verifier_Integer7
         Assert.That(VerificationResult.IsSuccess, Is.False);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.EnsureError));
     }
+
+    private const string ArraySourceCodeInteger8 = @"
+using System;
+
+class Program_Verifier_Integer8
+{
+    public int Read()
+    {
+        double[] X = new double[10];
+
+        return LengthOf(X);
+    }
+    // Ensure: Result == 10
+
+    public int LengthOf(double[] x)
+    {
+        return x.Length;
+    }
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer8_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger8, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }
