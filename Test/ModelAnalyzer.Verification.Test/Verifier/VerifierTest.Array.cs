@@ -286,4 +286,35 @@ class Program_Verifier_Integer8
         VerificationResult VerificationResult = TestObject.VerificationResult;
         Assert.That(VerificationResult.IsSuccess, Is.True);
     }
+
+    private const string ArraySourceCodeInteger9 = @"
+using System;
+
+class Program_Verifier_Integer9
+{
+    double[] X = new double[1];
+    double[] Y = new double[1];
+
+    public double Read()
+    {
+        X[0] = 1.0;
+        Y[0] = 2.0;
+
+        return X[0] + Y[0];
+    }
+    // Ensure: Result == 3.0
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_Integer9_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ArraySourceCodeInteger9, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }

@@ -106,4 +106,37 @@ class Program_Verifier_Loop3
         Assert.That(VerificationResult.IsSuccess, Is.False);
         Assert.That(VerificationResult.ErrorType, Is.EqualTo(VerificationErrorType.AssumeError));
     }
+
+    private const string ForLoopSourceCode4 = @"
+using System;
+
+class Program_Verifier_Loop4
+{
+    double[] X = new double[10];
+
+    public double[] Read()
+    {
+        for (int i = 0; i < X.Length; i++)
+        {
+            X[i] = i * 1.5;
+        }
+
+        return X;
+    }
+    // TODO Ensure: (Result[2] == 3) && (Result[4] == 6)
+    // TODO Ensure: ∀i Result[i] == i * 1.5
+}
+";
+
+    [Test]
+    [Category("Verification")]
+    public void Verifier_ForLoop4_Success()
+    {
+        Verifier TestObject = Tools.CreateVerifierFromSourceCode(ForLoopSourceCode4, maxDepth: 1, maxDuration: TimeSpan.MaxValue);
+
+        TestObject.Verify();
+
+        VerificationResult VerificationResult = TestObject.VerificationResult;
+        Assert.That(VerificationResult.IsSuccess, Is.True);
+    }
 }
