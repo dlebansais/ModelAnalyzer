@@ -3,9 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using AnalysisLogger;
-using Microsoft.Z3;
+using CodeProverBinding;
 
 /// <summary>
 /// Represents context for Z3 solver.
@@ -15,19 +14,24 @@ internal partial class SolverContext : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="SolverContext"/> class.
     /// </summary>
-    public SolverContext()
+    /// <param name="binder">The binder.</param>
+    public SolverContext(Binder binder)
     {
-        // Need model generation turned on.
-        Context = new Context(new Dictionary<string, string>() { { "model", "true" } });
+        Binder = binder;
 
-        Zero = Context.MkInt(0).Encapsulate();
-        False = Context.MkBool(false).Encapsulate();
-        True = Context.MkBool(true).Encapsulate();
-        Null = Context.MkInt(0).EncapsulateAsRef(ReferenceIndex.Null);
+        Zero = Binder.Zero.Encapsulate();
+        False = Binder.False.Encapsulate();
+        True = Binder.True.Encapsulate();
+        Null = Binder.Null.EncapsulateAsRef(Reference.Null);
         ZeroSet = Zero.ToSingleSet();
         FalseSet = False.ToSingleSet();
         NullSet = Null.ToSingleSet();
     }
+
+    /// <summary>
+    /// Gets the binder.
+    /// </summary>
+    public Binder Binder { get; }
 
     /// <summary>
     /// Gets or sets the logger.
@@ -70,22 +74,12 @@ internal partial class SolverContext : IDisposable
     public IExprSingle<IRefExprCapsule> NullSet { get; }
 
     /// <summary>
-    /// Creates a new solver.
-    /// </summary>
-    public Solver CreateSolver()
-    {
-        Log("*** Creating a new solver");
-
-        return Context.MkSolver();
-    }
-
-    /// <summary>
     /// Creates a boolean variable.
     /// </summary>
     /// <param name="name">The variable name.</param>
     public IBoolExprCapsule CreateBooleanVariable(string name)
     {
-        return Context.MkBoolConst(name).Encapsulate();
+        return Binder.CreateBooleanSymbolExpression(name).Encapsulate();
     }
 
     /// <summary>
@@ -94,7 +88,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="name">The variable name.</param>
     public IIntExprCapsule CreateIntegerVariable(string name)
     {
-        return Context.MkIntConst(name).Encapsulate();
+        return Binder.CreateIntegerSymbolExpression(name).Encapsulate();
     }
 
     /// <summary>
@@ -103,7 +97,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="name">The variable name.</param>
     public IArithExprCapsule CreateFloatingPointVariable(string name)
     {
-        return Context.MkRealConst(name).Encapsulate();
+        return Binder.CreateFloatingPointSymbolExpression(name).Encapsulate();
     }
 
     /// <summary>
@@ -113,7 +107,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="name">The variable name.</param>
     public IObjectRefExprCapsule CreateObjectReferenceVariable(ClassName className, string name)
     {
-        return Context.MkIntConst(name).EncapsulateAsObjectRef(className, ReferenceIndex.Null);
+        return Binder.CreateObjectReferenceSymbolExpression(name).EncapsulateAsObjectRef(className, Reference.Null);
     }
 
     /// <summary>
@@ -125,7 +119,7 @@ internal partial class SolverContext : IDisposable
     {
         Debug.Assert(!elementType.IsArray);
 
-        return Context.MkIntConst(name).EncapsulateAsArrayRef(elementType, ReferenceIndex.Null);
+        return Binder.CreateArrayReferenceSymbolExpression(name).EncapsulateAsArrayRef(elementType, Reference.Null);
     }
 
     /// <summary>
@@ -135,20 +129,20 @@ internal partial class SolverContext : IDisposable
     /// <param name="name">The variable name.</param>
     public IArrayExprCapsule CreateArrayContainerVariable(ExpressionType elementType, string name)
     {
-        Dictionary<ExpressionType, Sort> DomainTable = new()
+        Dictionary<ExpressionType, CodeProverBinding.ISort> DomainTable = new()
         {
-            { ExpressionType.Boolean, Context.BoolSort },
-            { ExpressionType.Integer, Context.IntSort },
-            { ExpressionType.FloatingPoint, Context.RealSort },
+            { ExpressionType.Boolean, CodeProverBinding.Sort.Boolean },
+            { ExpressionType.Integer, CodeProverBinding.Sort.Integer },
+            { ExpressionType.FloatingPoint, CodeProverBinding.Sort.FloatingPoint },
         };
 
         Debug.Assert(!elementType.IsArray);
         Debug.Assert(elementType.IsSimple);
         Debug.Assert(DomainTable.ContainsKey(elementType));
 
-        Sort Domain = DomainTable[elementType];
+        CodeProverBinding.ISort Domain = DomainTable[elementType];
 
-        return Context.MkArrayConst(name, Context.IntSort, Domain).Encapsulate(elementType);
+        return Binder.CreateXxxArraySymbolExpression(name, Domain).Encapsulate(elementType);
     }
 
     /// <summary>
@@ -166,7 +160,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="value">The value.</param>
     public IIntExprCapsule CreateIntegerValue(int value)
     {
-        return value == 0 ? Zero : Context.MkInt(value).Encapsulate();
+        return value == 0 ? Zero : Binder.GetIntegerConstant(value).Encapsulate();
     }
 
     /// <summary>
@@ -175,7 +169,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="value">The value.</param>
     public IArithExprCapsule CreateFloatingPointValue(double value)
     {
-        return value == 0 ? Zero : ((ArithExpr)Context.MkNumeral(value.ToString(CultureInfo.InvariantCulture), Context.MkRealSort())).Encapsulate();
+        return value == 0 ? Zero : Binder.GetFloatingPointConstant(value).Encapsulate();
     }
 
     /// <summary>
@@ -183,10 +177,10 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="className">The class name.</param>
     /// <param name="index">The reference index.</param>
-    public IObjectRefExprCapsule CreateObjectReferenceValue(ClassName className, ReferenceIndex index)
+    public IObjectRefExprCapsule CreateObjectReferenceValue(ClassName className, Reference index)
     {
-        Debug.Assert(index != ReferenceIndex.Null);
-        return Context.MkInt(index.Internal).EncapsulateAsObjectRef(className, index);
+        Debug.Assert(index != Reference.Null);
+        return Binder.GetReferenceConstant(index).EncapsulateAsObjectRef(className, index);
     }
 
     /// <summary>
@@ -194,12 +188,12 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     /// <param name="elementType">The element type.</param>
     /// <param name="index">The reference index.</param>
-    public IArrayRefExprCapsule CreateArrayReferenceValue(ExpressionType elementType, ReferenceIndex index)
+    public IArrayRefExprCapsule CreateArrayReferenceValue(ExpressionType elementType, Reference index)
     {
         Debug.Assert(!elementType.IsArray);
-        Debug.Assert(index != ReferenceIndex.Null);
+        Debug.Assert(index != Reference.Null);
 
-        return Context.MkInt(index.Internal).EncapsulateAsArrayRef(elementType, index);
+        return Binder.GetReferenceConstant(index).EncapsulateAsArrayRef(elementType, index);
     }
 
     /// <summary>
@@ -213,16 +207,16 @@ internal partial class SolverContext : IDisposable
         Debug.Assert(elementType.IsSimple);
         Debug.Assert(arraySize.IsValid);
 
-        Dictionary<ExpressionType, Func<Expr>> DefaultvalueTable = new()
+        Dictionary<ExpressionType, CodeProverBinding.IExpression> DefaultvalueTable = new()
         {
-            { ExpressionType.Boolean, () => Context.MkBool(false) },
-            { ExpressionType.Integer, () => Context.MkInt(0) },
-            { ExpressionType.FloatingPoint, () => Context.MkReal(0) },
+            { ExpressionType.Boolean, Binder.False },
+            { ExpressionType.Integer, Binder.Zero },
+            { ExpressionType.FloatingPoint, Binder.FloatingPointZero },
         };
 
         Debug.Assert(DefaultvalueTable.ContainsKey(elementType));
 
-        return Context.MkConstArray(Context.IntSort, DefaultvalueTable[elementType]()).Encapsulate(elementType);
+        return Binder.GetXxxArrayConstantExpression(DefaultvalueTable[elementType]).Encapsulate(elementType);
     }
 
     /// <summary>
@@ -232,7 +226,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateEqualExpr(IExprCapsule left, IExprCapsule right)
     {
-        return Context.MkEq(left.Item, right.Item).Encapsulate();
+        return Binder.CreateEqualityExpression(left.Item, CodeProverBinding.EqualityOperator.Equal, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -242,7 +236,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateNotEqualExpr(IExprCapsule left, IExprCapsule right)
     {
-        return Context.MkNot(Context.MkEq(left.Item, right.Item)).Encapsulate();
+        return Binder.CreateEqualityExpression(left.Item, CodeProverBinding.EqualityOperator.NotEqual, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -252,7 +246,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IArithExprCapsule CreateAddExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkAdd(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryArithmeticExpression(left.Item, CodeProverBinding.BinaryArithmeticOperator.Add, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -262,7 +256,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IArithExprCapsule CreateSubtractExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkSub(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryArithmeticExpression(left.Item, CodeProverBinding.BinaryArithmeticOperator.Subtract, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -272,7 +266,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IArithExprCapsule CreateMultiplyExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkMul(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryArithmeticExpression(left.Item, CodeProverBinding.BinaryArithmeticOperator.Multiply, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -282,7 +276,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IArithExprCapsule CreateDivideExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkDiv(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryArithmeticExpression(left.Item, CodeProverBinding.BinaryArithmeticOperator.Divide, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -292,7 +286,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IIntExprCapsule CreateRemainderExpr(IIntExprCapsule left, IIntExprCapsule right)
     {
-        return Context.MkMod(left.Item, right.Item).Encapsulate();
+        return ((IIntegerExpression)Binder.CreateBinaryArithmeticExpression(left.Item, CodeProverBinding.BinaryArithmeticOperator.Modulo, right.Item)).Encapsulate();
     }
 
     /// <summary>
@@ -301,7 +295,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="operand">The operand.</param>
     public IArithExprCapsule CreateNegateExpr(IArithExprCapsule operand)
     {
-        return Context.MkUnaryMinus(operand.Item).Encapsulate();
+        return Binder.CreateUnaryArithmeticExpression(CodeProverBinding.UnaryArithmeticOperator.Minus, operand.Item).Encapsulate();
     }
 
     /// <summary>
@@ -311,7 +305,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateOrExpr(IBoolExprCapsule left, IBoolExprCapsule right)
     {
-        return Context.MkOr(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryLogicalExpression(left.Item, CodeProverBinding.BinaryLogicalOperator.Or, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -321,7 +315,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateAndExpr(IBoolExprCapsule left, IBoolExprCapsule right)
     {
-        return Context.MkAnd(left.Item, right.Item).Encapsulate();
+        return Binder.CreateBinaryLogicalExpression(left.Item, CodeProverBinding.BinaryLogicalOperator.And, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -330,7 +324,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="operand">The operand.</param>
     public IBoolExprCapsule CreateNotExpr(IBoolExprCapsule operand)
     {
-        return Context.MkNot(operand.Item).Encapsulate();
+        return Binder.CreateUnaryLogicalExpression(CodeProverBinding.UnaryLogicalOperator.Not, operand.Item).Encapsulate();
     }
 
     /// <summary>
@@ -340,7 +334,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateGreaterThanExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkGt(left.Item, right.Item).Encapsulate();
+        return Binder.CreateComparisonExpression(left.Item, CodeProverBinding.ComparisonOperator.GreaterThan, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -350,7 +344,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateGreaterThanEqualToExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkGe(left.Item, right.Item).Encapsulate();
+        return Binder.CreateComparisonExpression(left.Item, CodeProverBinding.ComparisonOperator.GreaterThanEqualTo, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -360,7 +354,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateLesserThanExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkLt(left.Item, right.Item).Encapsulate();
+        return Binder.CreateComparisonExpression(left.Item, CodeProverBinding.ComparisonOperator.LesserThan, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -370,7 +364,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operand.</param>
     public IBoolExprCapsule CreateLesserThanEqualToExpr(IArithExprCapsule left, IArithExprCapsule right)
     {
-        return Context.MkLe(left.Item, right.Item).Encapsulate();
+        return Binder.CreateComparisonExpression(left.Item, CodeProverBinding.ComparisonOperator.LesserThanEqualTo, right.Item).Encapsulate();
     }
 
     /// <summary>
@@ -384,12 +378,12 @@ internal partial class SolverContext : IDisposable
         int Count = left.OtherExpressions.Count;
 
         List<IBoolExprCapsule> EqualityExprList = new();
-        IBoolExprCapsule EqualityExpr = Context.MkEq(left.MainExpression.Item, right.MainExpression.Item).Encapsulate();
+        IBoolExprCapsule EqualityExpr = Binder.CreateEqualityExpression(left.MainExpression.Item, CodeProverBinding.EqualityOperator.Equal, right.MainExpression.Item).Encapsulate();
         EqualityExprList.Add(EqualityExpr);
 
         for (int i = 0; i < Count; i++)
         {
-            EqualityExpr = Context.MkEq(left.OtherExpressions[i].Item, right.OtherExpressions[i].Item).Encapsulate();
+            EqualityExpr = Binder.CreateEqualityExpression(left.OtherExpressions[i].Item, CodeProverBinding.EqualityOperator.Equal, right.OtherExpressions[i].Item).Encapsulate();
             EqualityExprList.Add(EqualityExpr);
         }
 
@@ -407,7 +401,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="right">The right operands.</param>
     public IExprSingle<IBoolExprCapsule> CreateNotEqualExprSet(IExprSingle<IExprCapsule> left, IExprSingle<IExprCapsule> right)
     {
-        IBoolExprCapsule EqualityExpr = Context.MkNot(Context.MkEq(left.MainExpression.Item, right.MainExpression.Item)).Encapsulate();
+        IBoolExprCapsule EqualityExpr = Binder.CreateEqualityExpression(left.MainExpression.Item, CodeProverBinding.EqualityOperator.NotEqual, right.MainExpression.Item).Encapsulate();
         ExprSingle<IBoolExprCapsule> Result = new(EqualityExpr);
 
         return Result;
@@ -419,7 +413,7 @@ internal partial class SolverContext : IDisposable
     /// <param name="expressionSet">The set of expressions.</param>
     public IExprSingle<IBoolExprCapsule> CreateOppositeExprSet(IExprSingle<IBoolExprCapsule> expressionSet)
     {
-        IBoolExprCapsule NotExpr = Context.MkNot(expressionSet.MainExpression.Item).Encapsulate();
+        IBoolExprCapsule NotExpr = Binder.CreateUnaryLogicalExpression(CodeProverBinding.UnaryLogicalOperator.Not, expressionSet.MainExpression.Item).Encapsulate();
         ExprSingle<IBoolExprCapsule> Result = new(NotExpr);
 
         return Result;
@@ -433,7 +427,7 @@ internal partial class SolverContext : IDisposable
     public IBoolExprCapsule CreateTrueBranchExpr(IBoolExprCapsule? branch, IBoolExprCapsule expression)
     {
         if (branch is not null)
-            return Context.MkAnd(branch.Item, expression.Item).Encapsulate();
+            return Binder.CreateBinaryLogicalExpression(branch.Item, CodeProverBinding.BinaryLogicalOperator.And, expression.Item).Encapsulate();
         else
             return expression;
     }
@@ -446,30 +440,29 @@ internal partial class SolverContext : IDisposable
     public IBoolExprCapsule CreateFalseBranchExpr(IBoolExprCapsule? branch, IBoolExprCapsule expression)
     {
         if (branch is not null)
-            return Context.MkAnd(branch.Item, Context.MkNot(expression.Item)).Encapsulate();
+            return Binder.CreateBinaryLogicalExpression(branch.Item, CodeProverBinding.BinaryLogicalOperator.And, Binder.CreateUnaryLogicalExpression(CodeProverBinding.UnaryLogicalOperator.Not, expression.Item)).Encapsulate();
         else
-            return Context.MkNot(expression.Item).Encapsulate();
+            return Binder.CreateUnaryLogicalExpression(CodeProverBinding.UnaryLogicalOperator.Not, expression.Item).Encapsulate();
     }
 
     /// <summary>
     /// Adds boolean expressions to a solver, conditional to a branch of code.
     /// </summary>
-    /// <param name="solver">The solver.</param>
     /// <param name="branch">The branch.</param>
     /// <param name="boolExpr">The expressions.</param>
-    public void AddToSolver(Solver solver, IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
+    public void AddToSolver(IBoolExprCapsule? branch, IExprSet<IBoolExprCapsule> boolExpr)
     {
         foreach (IBoolExprCapsule Expression in boolExpr.AllExpressions)
         {
-            BoolExpr Expr;
+            IBooleanExpression Expr;
 
             if (branch is not null)
-                Expr = Context.MkImplies(branch.Item, Expression.Item);
+                Expr = Binder.CreateBinaryLogicalExpression(branch.Item, CodeProverBinding.BinaryLogicalOperator.Implies, Expression.Item);
             else
                 Expr = Expression.Item;
 
             Log($"Adding {Expr}");
-            solver.Assert(Expr);
+            Expr.Assert();
         }
     }
 
@@ -479,6 +472,4 @@ internal partial class SolverContext : IDisposable
 
         Logger.Log(message);
     }
-
-    private Context Context;
 }

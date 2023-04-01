@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using CodeProverBinding;
 using Microsoft.CodeAnalysis;
-using Microsoft.Z3;
 
 /// <summary>
 /// Represents an object manager.
@@ -18,8 +18,8 @@ internal class ObjectManager
     public ObjectManager(SolverContext context)
     {
         Context = context;
-        RootInstanceExpr = Context.CreateObjectReferenceValue(ClassName.FromSimpleString("this"), ReferenceIndex.Root);
-        Index = ReferenceIndex.First;
+        RootInstanceExpr = Context.CreateObjectReferenceValue(ClassName.FromSimpleString("this"), CodeProverBinding.Reference.New());
+        Index = CodeProverBinding.Reference.New();
     }
 
     /// <summary>
@@ -31,11 +31,6 @@ internal class ObjectManager
     /// Gets the expressions for the root instance.
     /// </summary>
     public IObjectRefExprCapsule RootInstanceExpr { get; }
-
-    /// <summary>
-    /// Gets the solver.
-    /// </summary>
-    required public Solver Solver { get; init; }
 
     /// <summary>
     /// Gets the class models.
@@ -112,7 +107,7 @@ internal class ObjectManager
         if (initializerExpr is not null)
         {
             IExprSet<IBoolExprCapsule> InitExpr = Context.CreateEqualExprSet(VariableExpr, initializerExpr);
-            Context.AddToSolver(Solver, branch, InitExpr);
+            Context.AddToSolver(branch, InitExpr);
         }
 
         return VariableExpr;
@@ -134,7 +129,7 @@ internal class ObjectManager
         VariableAlias DestinationNameAlias = AliasTable.GetAlias(destination);
         IExprBase<IExprCapsule, IExprCapsule> DestinationExpr = CreateVariableExpr(owner, hostMethod, DestinationNameAlias, destination.Type);
 
-        Context.AddToSolver(Solver, branch, Context.CreateEqualExprSet(DestinationExpr, sourceExpr));
+        Context.AddToSolver(branch, Context.CreateEqualExprSet(DestinationExpr, sourceExpr));
     }
 
     public void BeginBranch(out AliasTable beginAliasTable)
@@ -171,8 +166,8 @@ internal class ObjectManager
             IExprBase<IExprCapsule, IExprCapsule> WhenFalseSourceExpr = CreateVariableExpr(owner, hostMethod, WhenFalseNameAlias, VariableType);
             IExprSet<IBoolExprCapsule> WhenFalseInitExpr = Context.CreateEqualExprSet(DestinationExpr, WhenFalseSourceExpr);
 
-            Context.AddToSolver(Solver, branchTrue, WhenTrueInitExpr);
-            Context.AddToSolver(Solver, branchFalse, WhenFalseInitExpr);
+            Context.AddToSolver(branchTrue, WhenTrueInitExpr);
+            Context.AddToSolver(branchFalse, WhenFalseInitExpr);
         }
     }
 
@@ -187,7 +182,7 @@ internal class ObjectManager
             IExprBase<IExprCapsule, IExprCapsule> InitializerExpr = GetDefaultExpr(VariableType);
             IExprSet<IBoolExprCapsule> InitExpr = Context.CreateEqualExprSet(VariableExpr, InitializerExpr);
 
-            Context.AddToSolver(Solver, branch, InitExpr);
+            Context.AddToSolver(branch, InitExpr);
         }
     }
 
@@ -290,7 +285,7 @@ internal class ObjectManager
     public IExprBase<IRefExprCapsule, IExprCapsule> CreateObjectInitializer(ExpressionType expressionType)
     {
         ClassModel TypeClassModel = TypeToModel(expressionType);
-        IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceValue(TypeClassModel.ClassName, Index.Increment());
+        IObjectRefExprCapsule ReferenceResult = Context.CreateObjectReferenceValue(TypeClassModel.ClassName, Reference.New());
 
         return CreateObjectInitializer(expressionType, ReferenceResult);
     }
@@ -328,7 +323,7 @@ internal class ObjectManager
         Debug.Assert(arraySize.IsKnown);
 
         ExpressionType ElementType = expressionType.ToElementType();
-        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceValue(ElementType, Index.Increment());
+        IArrayRefExprCapsule ReferenceResult = Context.CreateArrayReferenceValue(ElementType, Reference.New());
 
         return CreateArrayInitializer(ElementType, arraySize, ReferenceResult);
     }
@@ -580,7 +575,7 @@ internal class ObjectManager
 
         IBoolExprCapsule ComparisonExpr = Context.CreateGreaterThanEqualToExpr(VaryingIndexSingle.MainExpression, InitIndexSingle.MainExpression);
         IExprSingle<IBoolExprCapsule> InitExpr = ComparisonExpr.ToSingleSet();
-        Context.AddToSolver(Solver, branch, InitExpr);
+        Context.AddToSolver(branch, InitExpr);
 
         return VaryingIndexSingle;
     }
@@ -744,5 +739,5 @@ internal class ObjectManager
         ArrayGetterTable.Add(alias, NewMethod);
     }
 
-    private ReferenceIndex Index;
+    private CodeProverBinding.Reference Index;
 }

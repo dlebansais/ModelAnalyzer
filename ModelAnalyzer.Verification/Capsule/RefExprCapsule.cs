@@ -1,11 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
-using Microsoft.Z3;
-
 internal record RefExprCapsule : IRefExprCapsule
 {
-    required public Expr Item { get; init; }
-    Expr IExprCapsule.Item { get => Item; }
+    required public CodeProverBinding.IExpression Item { get; init; }
+    CodeProverBinding.IExpression IExprCapsule.Item { get => Item; }
 
-    required public ReferenceIndex Index { get; init; }
+    required public CodeProverBinding.Reference Index { get; init; }
 }

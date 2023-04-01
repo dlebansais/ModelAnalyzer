@@ -1,7 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Collections.Generic;
-using Microsoft.Z3;
+using CodeProverBinding;
 
 /// <summary>
 /// Represents the context to use when verifying a class.
@@ -11,7 +11,7 @@ internal record VerificationContext
     /// <summary>
     /// Gets the solver.
     /// </summary>
-    required public Solver Solver { get; init; }
+    required public Binder Binder { get; init; }
 
     /// <summary>
     /// Gets the class models.

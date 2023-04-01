@@ -47,7 +47,7 @@ internal partial class SolverContext : IDisposable
     /// </summary>
     private void DisposeNow()
     {
-        using (Context)
+        using (Binder)
         {
         }
 

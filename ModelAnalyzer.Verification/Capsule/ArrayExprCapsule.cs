@@ -1,11 +1,9 @@
 ﻿namespace ModelAnalyzer;
 
-using Microsoft.Z3;
-
 internal record ArrayExprCapsule : IArrayExprCapsule
 {
-    required public ArrayExpr Item { get; init; }
-    Expr IExprCapsule.Item { get => Item; }
+    required public CodeProverBinding.IExpression Item { get; init; }
+    CodeProverBinding.IExpression IExprCapsule.Item { get => Item; }
 
     required public ExpressionType ElementType { get; init; }
 }

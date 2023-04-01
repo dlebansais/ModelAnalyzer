@@ -1,9 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
-using Microsoft.Z3;
-
 internal interface IArrayRefExprCapsule : IRefExprCapsule
 {
-    new Expr Item { get; }
+    new CodeProverBinding.IExpression Item { get; }
     ExpressionType ElementType { get; }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AnalysisLogger;
-using Microsoft.Z3;
+using CodeProverBinding;
 
 /// <summary>
 /// Represents a code verifier.
@@ -17,7 +17,6 @@ internal partial class Verifier : IDisposable
     /// </summary>
     public Verifier()
     {
-        Context = new();
     }
 
     /// <summary>
@@ -27,7 +26,6 @@ internal partial class Verifier : IDisposable
     {
         VerificationWatch.Restart();
 
-        Context.Logger = Logger;
         Verify(depth: 0);
     }
 
@@ -138,11 +136,13 @@ internal partial class Verifier : IDisposable
 
     private void AnalyzeCallSequence(CallSequence callSequence)
     {
-        using Solver Solver = Context.CreateSolver();
+        using Binder Binder = new Binder(Prover.Z3);
+
+        Context = new(Binder);
+        Context.Logger = Logger;
 
         ObjectManager ObjectManager = new(Context)
         {
-            Solver = Solver,
             ClassModelTable = ClassModelTable,
         };
 
@@ -151,7 +151,7 @@ internal partial class Verifier : IDisposable
 
         VerificationContext VerificationContext = new()
         {
-            Solver = Solver,
+            Binder = Binder,
             ClassModelTable = ClassModelTable,
             ObjectManager = ObjectManager,
             Instance = ThisInstance,
@@ -227,26 +227,27 @@ internal partial class Verifier : IDisposable
                 IExprSingle<IBoolExprCapsule> InvariantExpr = (IExprSingle<IBoolExprCapsule>)NewExpr;
                 IExprSingle<IBoolExprCapsule> InvariantOppositeExpr = Context.CreateOppositeExprSet(InvariantExpr);
 
-                verificationContext.Solver.Push();
+                verificationContext.Binder.SaveProverState(CodeProverBinding.CorrectnessCheckType.NotSatisfiable);
 
                 foreach (IBoolExprCapsule Expression in InvariantOppositeExpr.AllExpressions)
                 {
                     Log($"Adding invariant opposite {Expression.Item}");
-                    verificationContext.Solver.Assert(Expression.Item);
+                    Expression.Item.Assert();
                 }
 
-                if (verificationContext.Solver.Check() == Status.SATISFIABLE)
+                verificationContext.Binder.CheckCorrectness();
+                if (!verificationContext.Binder.IsCorrect)
                 {
                     Log($"Invariant violation for class {ClassName}");
                     VerificationResult = VerificationResult.Default with { ErrorType = VerificationErrorType.InvariantError, ClassName = ClassName, MethodName = string.Empty, LocationId = ((Expression)Invariant.BooleanExpression).LocationId };
 
-                    string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
+                    string ModelString = verificationContext.Binder.SatisfiedModel;
                     Log(ModelString);
 
                     Result = false;
                 }
 
-                verificationContext.Solver.Pop();
+                verificationContext.Binder.RestoreProverState();
             }
             else
                 Result = false;
@@ -381,12 +382,13 @@ internal partial class Verifier : IDisposable
         bool Result = true;
 
         if (!keepNormal)
-            verificationContext.Solver.Push();
+            verificationContext.Binder.SaveProverState(CorrectnessCheckType.Satisfiable);
 
         Log($"Adding {AssertionType} {assertionExpr.MainExpression.Item}");
-        verificationContext.Solver.Assert(assertionExpr.MainExpression.Item);
+        assertionExpr.MainExpression.Item.Assert();
 
-        if (verificationContext.Solver.Check() != Status.SATISFIABLE)
+        verificationContext.Binder.CheckCorrectness();
+        if (!verificationContext.Binder.IsCorrect)
         {
             Log($"Inconsistent {AssertionType} state for class {ClassName}");
 
@@ -406,7 +408,7 @@ internal partial class Verifier : IDisposable
         }
 
         if (!keepNormal)
-            verificationContext.Solver.Pop();
+            verificationContext.Binder.RestoreProverState();
 
         return Result;
     }
@@ -418,12 +420,13 @@ internal partial class Verifier : IDisposable
         bool Result = true;
         IExprSingle<IBoolExprCapsule> AssertionOppositeExpr = Context.CreateOppositeExprSet(assertionExpr);
 
-        verificationContext.Solver.Push();
+        verificationContext.Binder.SaveProverState(CorrectnessCheckType.NotSatisfiable);
 
         Log($"Adding {AssertionType} opposite {AssertionOppositeExpr.MainExpression.Item}");
-        verificationContext.Solver.Assert(AssertionOppositeExpr.MainExpression.Item);
+        AssertionOppositeExpr.MainExpression.Item.Assert();
 
-        if (verificationContext.Solver.Check() == Status.SATISFIABLE)
+        verificationContext.Binder.CheckCorrectness();
+        if (!verificationContext.Binder.IsCorrect)
         {
             Log($"Violation of {AssertionType} for class {ClassName}");
 
@@ -439,13 +442,13 @@ internal partial class Verifier : IDisposable
                 ErrorText = errorText,
             };
 
-            string ModelString = TextBuilder.Normalized(verificationContext.Solver.Model.ToString());
+            string ModelString = verificationContext.Binder.SatisfiedModel;
             Log(ModelString);
 
             Result = false;
         }
 
-        verificationContext.Solver.Pop();
+        verificationContext.Binder.RestoreProverState();
 
         return Result;
     }
@@ -527,6 +530,6 @@ internal partial class Verifier : IDisposable
         Logger.Log(message);
     }
 
-    private SolverContext Context;
+    private SolverContext Context = null!;
     private Stopwatch VerificationWatch = new Stopwatch();
 }

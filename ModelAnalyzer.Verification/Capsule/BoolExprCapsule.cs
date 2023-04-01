@@ -1,9 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
-using Microsoft.Z3;
-
 internal record BoolExprCapsule : IBoolExprCapsule, ISimpleExprCapsule
 {
-    required public BoolExpr Item { get; init; }
-    Expr IExprCapsule.Item { get => Item; }
+    required public CodeProverBinding.IBooleanExpression Item { get; init; }
+    CodeProverBinding.IExpression IExprCapsule.Item { get => Item; }
 }

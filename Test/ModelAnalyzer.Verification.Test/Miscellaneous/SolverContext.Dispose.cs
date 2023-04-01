@@ -1,5 +1,6 @@
 ﻿namespace Miscellaneous.Test;
 
+using CodeProverBinding;
 using ModelAnalyzer;
 using NUnit.Framework;
 
@@ -12,7 +13,7 @@ public partial class SolverContextTest
     [Category("Verification")]
     public void SolverContextTest_Dispose()
     {
-        using (SolverContextExtended TestObject = new SolverContextExtended())
+        using (SolverContextExtended TestObject = new SolverContextExtended(new Binder(Prover.Default)))
         {
         }
     }
@@ -21,7 +22,7 @@ public partial class SolverContextTest
     [Category("Verification")]
     public void SolverContextTest_DoubleDispose()
     {
-        using (SolverContextExtended TestObject = new SolverContextExtended())
+        using (SolverContextExtended TestObject = new SolverContextExtended(new Binder(Prover.Default)))
         {
             TestObject.Dispose();
         }
@@ -31,7 +32,7 @@ public partial class SolverContextTest
     [Category("Verification")]
     public void SolverContextTest_FakeFinalize()
     {
-        using (SolverContextExtended TestObject = new SolverContextExtended())
+        using (SolverContextExtended TestObject = new SolverContextExtended(new Binder(Prover.Default)))
         {
             TestObject.FakeFinalize();
         }

@@ -1,49 +1,48 @@
 ﻿namespace ModelAnalyzer;
 
 using System.Diagnostics;
-using Microsoft.Z3;
 
 internal static class Encapsulation
 {
-    public static IBoolExprCapsule Encapsulate(this BoolExpr expr)
+    public static IBoolExprCapsule Encapsulate(this CodeProverBinding.IBooleanExpression expr)
     {
         return new BoolExprCapsule() { Item = expr };
     }
 
-    public static IIntExprCapsule Encapsulate(this IntExpr expr)
+    public static IIntExprCapsule Encapsulate(this CodeProverBinding.IIntegerExpression expr)
     {
         return new IntExprCapsule() { Item = expr };
     }
 
-    public static IArithExprCapsule Encapsulate(this ArithExpr expr)
+    public static IArithExprCapsule Encapsulate(this CodeProverBinding.IArithmeticExpression expr)
     {
         switch (expr)
         {
-            case IntExpr Int:
+            case CodeProverBinding.IIntegerExpression Int:
                 return new IntExprCapsule() { Item = Int };
             default:
                 return new ArithExprCapsule() { Item = expr };
         }
     }
 
-    public static IRefExprCapsule EncapsulateAsRef(this IntExpr expr, ReferenceIndex index)
+    public static IRefExprCapsule EncapsulateAsRef(this CodeProverBinding.IReferenceExpression expr, CodeProverBinding.Reference index)
     {
         return new RefExprCapsule() { Item = expr, Index = index };
     }
 
-    public static IObjectRefExprCapsule EncapsulateAsObjectRef(this IntExpr expr, ClassName className, ReferenceIndex index)
+    public static IObjectRefExprCapsule EncapsulateAsObjectRef(this CodeProverBinding.IReferenceExpression expr, ClassName className, CodeProverBinding.Reference index)
     {
         return new ObjectRefExprCapsule() { Item = expr, ClassName = className, Index = index };
     }
 
-    public static IArrayRefExprCapsule EncapsulateAsArrayRef(this IntExpr expr, ExpressionType elementType, ReferenceIndex index)
+    public static IArrayRefExprCapsule EncapsulateAsArrayRef(this CodeProverBinding.IReferenceExpression expr, ExpressionType elementType, CodeProverBinding.Reference index)
     {
         Debug.Assert(!elementType.IsArray);
 
         return new ArrayRefExprCapsule() { Item = expr, ElementType = elementType, Index = index };
     }
 
-    public static IArrayExprCapsule Encapsulate(this ArrayExpr expr, ExpressionType elementType)
+    public static IArrayExprCapsule Encapsulate(this CodeProverBinding.IXxxArrayExpression expr, ExpressionType elementType)
     {
         return new ArrayExprCapsule() { Item = expr, ElementType = elementType };
     }

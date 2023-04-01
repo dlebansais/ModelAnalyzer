@@ -1,6 +1,8 @@
 ﻿namespace ModelAnalyzer;
 
+using CodeProverBinding;
+
 internal interface IRefExprCapsule : IExprCapsule
 {
-    ReferenceIndex Index { get; }
+    Reference Index { get; }
 }

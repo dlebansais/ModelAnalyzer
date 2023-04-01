@@ -1,9 +1,7 @@
 ﻿namespace ModelAnalyzer;
 
-using Microsoft.Z3;
-
 internal record ArithExprCapsule : IArithExprCapsule, ISimpleExprCapsule
 {
-    required public ArithExpr Item { get; init; }
-    Expr IExprCapsule.Item { get => Item; }
+    required public CodeProverBinding.IArithmeticExpression Item { get; init; }
+    CodeProverBinding.IExpression IExprCapsule.Item { get => Item; }
 }
